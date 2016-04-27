@@ -1,0 +1,7 @@
+#include "./Defines/poke_types.h"
+#include "./Defines/abilities.h"
+#include "./Defines/moves.h"
+#include "./Defines/get_attr.h"
+#include "./Defines/items.h"
+#include "./Defines/item_effects.h"
+#include "./Defines/pokes.h"
