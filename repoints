@@ -1,0 +1,12 @@
+#########################
+# ability names repoint #
+#########################
+ability_names_table 080001C0
+ability_names_table 0814F0D4
+ability_names_table 0814F854
+ability_names_table 081C3028
+################################
+# ability descriptions repoint #
+################################
+ability_desc_table 080001C4
+ability_desc_table 081C3078
