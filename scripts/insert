@@ -95,6 +95,14 @@ def hook(rom, space, hook_at, register=0):
         space += 0x08000001
         data += (space.to_bytes(4, 'little'))
         rom.write(bytes(data))
+
+def repoint(rom, space, repoint_at):
+
+        rom.seek(repoint_at)
+        
+        space += 0x08000000
+        data = (space.to_bytes(4, 'little'))
+        rom.write(bytes(data))
         
 shutil.copyfile(args.input, args.output)
 with open(args.output, 'rb+') as rom:
@@ -120,7 +128,22 @@ with open(args.output, 'rb+') as rom:
                                 continue
 
                         hook(rom, code, offset, int(register))
-                                
+
+        # Read repoints from a file 
+        with open('repoints', 'r') as repointlist:
+                for line in repointlist:
+                        if line.strip().startswith('#'): continue
+                        
+                        symbol, address = line.split()
+                        offset = int(address, 16) - 0x08000000
+                        try:
+                                code = table[symbol]
+                        except KeyError:
+                                print('Symbol missing:', symbol)
+                                continue
+
+                        repoint(rom, code, offset)
+                        
         if args.debug:
                 width = max(map(len, table.keys())) + 1
                 for key in sorted(table.keys()):
