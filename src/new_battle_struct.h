@@ -40,6 +40,7 @@ struct bank_affecting{
     u8 sky_drop_attacker : 1;
     u8 sky_drop_target : 1;
     u8 gem_boost : 1;
+    u8 me_first : 1;
 
     u8 autonomize_uses;
     u8 slowstart_duration;
@@ -73,6 +74,7 @@ struct side_affecting{
     u8 sea_of_fire_duration;
     u8 swamp_duration;
     u8 rainbow_duration;
+    u8 echo_voice_counter;
 };
 
 struct field_affecting{
@@ -126,5 +128,6 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
 u8 get_item_effect(u8 bank, u8 check_negating_effects);
 u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro);
 s8 get_move_position(u8 bank, u16 move);
+u8 weather_abilities_effect();
 
 #endif /* NEW_STRUCT */
