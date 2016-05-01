@@ -90,4 +90,3 @@ truant_hook = 0x08042EDE|1;
 /*Expandable tables*/
 battle_strings_table = 0x085CC270;
 evolution_table = 0x0832531C;
-move_table = 0x0831C898;
