@@ -210,30 +210,6 @@ struct status_3{
 
 extern struct status_3 status3[4];
 
-struct move_info{
-    u8 script_id;
-    u8 base_power;
-    u8 type;
-    u8 accuracy;
-    u8 pp;
-    u8 effect_chance;
-    u8 target;
-    s8 priority;
-    u8 makes_contact : 1;//1
-    u8 affected_by_protect : 1;//2
-    u8 affected_by_snatch : 1;//4
-    u8 affected_by_magic_coat : 1;//8
-    u8 affected_by_mirrormove :1;//x10
-    u8 affected_by_kingsrock :1;//x20
-    u8 raised_crit_ratio :1;//x40
-    u8 unused_bit : 1;//x80
-    u8 padd1;
-    u8 split;
-    u8 second_type;
-};
-
-extern struct move_info move_table[621];
-
 struct disable_struct{
     u8 field1 [3];
     u16 disabled_move;
