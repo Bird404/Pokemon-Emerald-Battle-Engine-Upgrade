@@ -507,6 +507,8 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
     else
         last_used_ability = battle_participants[bank].ability_id;
 
+    u8 bank_side = is_bank_from_opponent_side(bank);
+
     switch (switch_id)
     {
     case 0: //switch-in abilities
@@ -1070,7 +1072,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             break;
     case 4: //move end turn abilities
         {
-            u8 contact = move_table[curr_move].makes_contact;
+            u8 contact = move_table[curr_move].move_flags.flags.makes_contact;
             if (has_ability_effect(bank, 0, 1) && !(move_outcome.not_affected || move_outcome.failed || move_outcome.missed) && battle_participants[bank_attacker].current_hp && (special_statuses[bank_target].moveturn_losthp_physical || special_statuses[bank_target].moveturn_losthp_special || last_used_ability == ABILITY_DEFIANT || last_used_ability ==  ABILITY_COMPETITIVE))
             {
                 void* bs_seteffect = (void*) 0x082DB67C;
@@ -1328,7 +1330,126 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         {
             break;
         }
-
+    case 12: //check opposing field for ability
+    {
+        for (u8 i = 0; i < no_of_all_banks; i++)
+        {
+            if (is_bank_from_opponent_side(i) != bank_side && battle_participants[i].ability_id == ability_to_check)
+            {
+                last_used_ability = ability_to_check;
+                effect = i + 1;
+                break;
+            }
+        }
+        break;
+    }
+    case 13: //check bank field for ability
+    {
+        for (u8 i = 0; i < no_of_all_banks; i++)
+        {
+            if (is_bank_from_opponent_side(i) == bank_side && battle_participants[i].ability_id == ability_to_check)
+            {
+                last_used_ability = ability_to_check;
+                effect = i + 1;
+                break;
+            }
+        }
+        break;
+    }
+    case 14: //check field affecting; mud, water sport and whole field for ability
+        {
+            for (u8 i = 0; i < no_of_all_banks; i++)
+            {
+                if ((status3[i].mud_sport && special_cases_argument == 0xFD) || (status3[i].watersport && special_cases_argument == 0xFE))
+                {
+                    effect = i + 1;
+                    break;
+                }
+                else if (battle_participants[i].ability_id == ability_to_check && special_cases_argument == 0xFF)
+                {
+                    effect = i + 1;
+                    last_used_ability = ability_to_check;
+                    break;
+                }
+            }
+            break;
+        }
+    case 15: //check field except the bank
+        {
+            for (u8 i = 0; i < no_of_all_banks; i++)
+            {
+                if (battle_participants[i].ability_id == ability_to_check && i != bank)
+                {
+                    effect = i + 1;
+                    last_used_ability = ability_to_check;
+                    break;
+                }
+            }
+            break;
+        }
+    case 16: //count instances of ability in the opponent field
+        {
+            for (u8 i = 0; i < no_of_all_banks; i++)
+            {
+                if (is_bank_from_opponent_side(i) != bank_side && battle_participants[i].ability_id == ability_to_check)
+                {
+                    effect++;
+                    last_used_ability = ability_to_check;
+                }
+            }
+            break;
+        }
+    case 17: //count instances of ability in the banks field
+        {
+            for (u8 i = 0; i < no_of_all_banks; i++)
+            {
+                if (is_bank_from_opponent_side(i) == bank_side && battle_participants[i].ability_id == ability_to_check)
+                {
+                    effect++;
+                    last_used_ability = ability_to_check;
+                }
+            }
+            break;
+        }
+    case 18: //count instances of ability except bank
+        {
+            for (u8 i = 0; i < no_of_all_banks; i++)
+            {
+                if ( i != bank_side && battle_participants[i].ability_id == ability_to_check)
+                {
+                    effect++;
+                    last_used_ability = ability_to_check;
+                }
+            }
+            break;
+        }
+    case 19: //check whole field for ability with a hp check
+        {
+            for (u8 i = 0; i < no_of_all_banks; i ++)
+            {
+                if (battle_participants[i].ability_id == ability_to_check && battle_participants[i].current_hp)
+                {
+                    effect = i + 1;
+                    last_used_ability = ability_to_check;
+                    break;
+                }
+            }
+            break;
+        }
+    case 20: //check ally
+        {
+            u8 ally = bank ^ 2;
+            for (u8 i = 0; i < no_of_all_banks; i ++)
+            {
+                if (battle_participants[i].ability_id == ability_to_check && i == ally)
+                {
+                    effect = i + 1;
+                    last_used_ability = ability_to_check;
+                    break;
+                }
+            }
+            break;
+        }
     }
     if (effect && last_used_ability != 0xFF && switch_id < 0xB)
         record_usage_of_ability(bank, last_used_ability);
