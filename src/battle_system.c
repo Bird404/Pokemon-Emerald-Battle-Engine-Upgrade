@@ -5,6 +5,7 @@
 #include "vanilla_functions.h"
 #include "battlescripts.h"
 #include "new_battle_struct.h"
+#include "move_table.h"
 
 u8 get_item_effect(u8 bank, u8 check_negating_effects)
 {
