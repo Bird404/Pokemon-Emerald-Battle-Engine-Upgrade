@@ -62,6 +62,19 @@ struct battle_participant {
 
 extern struct battle_participant battle_participants[4];
 
+struct evolution_sub{
+    u16 method;
+    u16 paramter;
+    u16 poke;
+    u16 padding;
+};
+
+struct evolution{
+    struct evolution_sub evos[5];
+};
+
+extern struct evolution evolution_table[700];
+
 struct in_battle_weather{
     u32 rain : 1;
     u32 downpour : 1;
