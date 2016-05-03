@@ -36,6 +36,9 @@ bank_partner_def = 0x0202420E;
 turn_order = 0x0202407E;
 battle_flags = 0x02022FEC;
 battle_communication_struct = 0x02024332;
+animation_bank_attacker = 0x02038436; 
+animation_bank_target = 0x02038437;
+move_anim_cursor = 0x020383F0;
 
 current_move = 0x020241EA;
 last_used_move = 0x020241EC;
@@ -86,6 +89,7 @@ display_string_in_battle = 0x0814E6F0|1;
 prepare_status_animation = 0x08033FBC|1;
 mark_buffer_bank_for_execution = 0x0803F800|1;
 truant_hook = 0x08042EDE|1;
+__aeabi_idiv = 0x082E7B68|1;
 
 /*Expandable tables*/
 battle_strings_table = 0x085CC270;
