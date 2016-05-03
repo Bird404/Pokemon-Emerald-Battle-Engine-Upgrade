@@ -1,18 +1,12 @@
-#########################
-# ability names repoint #
-#########################
+### ability names repoint
 ability_names_table 080001C0
 ability_names_table 0814F0D4
 ability_names_table 0814F854
 ability_names_table 081C3028
-################################
-# ability descriptions repoint #
-################################
+### ability descriptions repoint
 ability_desc_table 080001C4
 ability_desc_table 081C3078
-######################
-# move names repoint #
-######################
+### move names repoint
 move_names_table 08000148
 move_names_table 08059B14
 move_names_table 08079B54
@@ -69,14 +63,10 @@ move_names_table 081B976C
 move_names_table 081C3BEC
 move_names_table 081C3FCC
 move_names_table 081C4050
-#############################
-# move descriptions repoint #
-#############################
+### move descriptions repoint
 move_desc_table 081C3EFC
 move_desc_table 081D2AC8
-#####################
-# move data repoint #
-#####################
+### move data repoint
 move_table 080001cc
 move_table 08033ce8
 move_table 0803a3f0
@@ -209,11 +199,25 @@ move_table 081c4058
 move_table 081c4464
 move_table 081c453c
 move_table 081d2a2c
-#######################
-# move pp ref repoint #
-#######################
-move_pp_ref 08038850
-move_pp_ref 080389f8
-move_pp_ref 08069188
-move_pp_ref 08069230
-move_pp_ref 0806b82c
+### move pp reference repoint
+move_table 08038850 4
+move_table 080389f8 4
+move_table 08069188 4
+move_table 08069230 4
+move_table 0806b82c 4
+### image type chart
+img_type_chart 0861CFBC
+### image type icons position
+type_icon_img_pos 0861CFCC
+### image type chart pallet
+img_type_chart_pallet 081C439C
+### aux type names table repoint
+aux_type_name_table_1 082F032C
+aux_type_name_table_2 0856EFD8
+aux_type_name_table_2 0856EFE0
+### new type names
+type_names 080166F4
+type_names 08016730
+type_names 08059C24
+type_names 0814F740
+type_names 081D2A30
