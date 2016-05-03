@@ -213,6 +213,7 @@ type_icon_img_pos 0861CFCC
 img_type_chart_pallet 081C439C
 ### aux type names table repoint
 aux_type_name_table_1 082F032C
+aux_type_name_table_2 080C21C8                     
 aux_type_name_table_2 0856EFD8
 aux_type_name_table_2 0856EFE0
 ### new type names
