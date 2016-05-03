@@ -27,6 +27,7 @@ u8 does_protect_affect_move(u16 move);
 u8 itemid_to_berryid(u16 itemID);
 u16 species_to_national_dex(u16 species);
 u16 get_height_or_weight(u16 national_dex_index, u8 which_one);
+u8 get_bank_turn_order(u8 bank);
 
 u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);
