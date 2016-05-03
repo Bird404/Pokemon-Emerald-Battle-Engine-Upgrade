@@ -42,7 +42,7 @@ def get_text_section():
         
         # Find text section
         text = filter(lambda x: x.strip().endswith('.text'), lines)
-        section = list(text)[0]
+        section = (list(text))[0]
         
         # Get the offset
         offset = int(section.split(' ')[0], 16)
@@ -62,7 +62,7 @@ def symbols(subtract=0):
                 if (len(parts) < 3):
                         continue
                         
-                if (parts[1].lower() != 't'):
+                if (parts[1].lower() not in {'t','d'}):
                         continue
                         
                 offset = int(parts[0], 16)
@@ -96,13 +96,23 @@ def hook(rom, space, hook_at, register=0):
         data += (space.to_bytes(4, 'little'))
         rom.write(bytes(data))
 
-def repoint(rom, space, repoint_at):
+def repoint(rom, space, repoint_at, slidefactor=0):
 
         rom.seek(repoint_at)
         
-        space += 0x08000000
+        space += (0x08000000+slidefactor)
         data = (space.to_bytes(4, 'little'))
         rom.write(bytes(data))
+
+def bytereplace(rom, offset, data):
+
+        ar=offset
+        words=data.split()
+        for i in range(0,len(words)):
+                rom.seek(ar)
+                intbyte=int(words[i],16)
+                rom.write(bytes(intbyte.to_bytes(1, 'big')))
+                ar += 1
         
 shutil.copyfile(args.input, args.output)
 with open(args.output, 'rb+') as rom:
@@ -133,7 +143,6 @@ with open(args.output, 'rb+') as rom:
         with open('repoints', 'r') as repointlist:
                 for line in repointlist:
                         if line.strip().startswith('#'): continue
-                        
                         symbol, address = line.split()
                         offset = int(address, 16) - 0x08000000
                         try:
@@ -143,6 +152,28 @@ with open(args.output, 'rb+') as rom:
                                 continue
 
                         repoint(rom, code, offset)
+
+        # Read routine repoints from a file 
+        with open('routinepointers', 'r') as pointerlist:
+                for line in pointerlist:
+                        if line.strip().startswith('#'): continue
+                        
+                        symbol, address = line.split()
+                        offset = int(address, 16) - 0x08000000
+                        try:
+                                code = table[symbol]
+                        except KeyError:
+                                print('Symbol missing:', symbol)
+                                continue
+
+                        repoint(rom, code, offset, 1)
+
+        # Insert byte changes
+        with open('bytereplacement', 'r') as replacelist:
+                for line in replacelist:
+                        if line.strip().startswith('#'): continue
+                        offset = int(line[:8],16) - 0x08000000
+                        bytereplace(rom, offset, line[9:])
                         
         if args.debug:
                 width = max(map(len, table.keys())) + 1
