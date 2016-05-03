@@ -33,6 +33,18 @@ struct stat_fractions{
 
 struct stat_fractions stat_buffs[] = { {2, 8}, {2, 7}, {2, 6}, {2, 5}, {2, 4}, {2, 3}, {2, 2}, {3, 2}, {4, 2}, {5, 2}, {6, 2}, {7, 2}, {8, 2} };;;;;;;;;;;;;;
 
+u8 can_evolve(u16 poke_species)
+{
+    for (u8 i = 0; i < 5; i++)
+    {
+        if (evolution_table[poke_species].evos[i].method != 0 && evolution_table[poke_species].evos[i].method < 0xFA)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 u32 percent_boost(u32 number, u16 percent)
 {
     return __udivsi3(number * (100 + percent), 100);
@@ -513,6 +525,12 @@ u16 apply_base_power_modifiers(u16 move, u8 atk_bank, u8 def_bank, u16 base_powe
                 modifier = chain_modifier(modifier, 0x14CD);
             }
             break;
+        case ABILITY_TOUGH_CLAWS:
+            if (move_table[move].move_flags.flags.makes_contact)
+            {
+                modifier = chain_modifier(modifier, 0x14CD);
+            }
+            break;
         }
     }
     if (has_ability_effect(def_bank, 0, 1))
@@ -868,7 +886,7 @@ u16 get_attack_stat(u16 move, u8 atk_bank, u8 def_bank)
     if (battle_weather.flags.harsh_sun || battle_weather.flags.permament_sun || battle_weather.flags.sun)
     {
         u8 flower_gift_bank = ability_battle_effects(13, atk_bank, ABILITY_FLOWER_GIFT, 0, 0);
-        if (flower_gift_bank)
+        if (flower_gift_bank && move_split == MOVE_PHYSICAL)
         {
             flower_gift_bank--;
             if (new_battlestruct.ptr->bank_affecting[flower_gift_bank].sunshine_form)
@@ -878,13 +896,217 @@ u16 get_attack_stat(u16 move, u8 atk_bank, u8 def_bank)
         }
     }
 
+    switch (get_item_effect(atk_bank, 1))
+    {
+    case ITEM_EFFECT_THICKCLUB:
+        if (move_split == MOVE_PHYSICAL && (battle_participants[atk_bank].poke_species == POKE_MAROWAK || battle_participants[atk_bank].poke_species == POKE_CUBONE))
+        {
+            modifier = chain_modifier(modifier, 0x2000);
+        }
+        break;
+    case ITEM_EFFECT_DEEPSEATOOTH:
+        if (move_split == MOVE_SPECIAL && (battle_participants[atk_bank].poke_species == POKE_CLAMPERL))
+        {
+            modifier = chain_modifier(modifier, 0x2000);
+        }
+        break;
+    case ITEM_EFFECT_LIGHTBALL:
+        if (battle_participants[atk_bank].poke_species == POKE_PIKACHU)
+        {
+            modifier = chain_modifier(modifier, 0x2000);
+        }
+        break;
+    case ITEM_EFFECT_SOULDEW:
+        if (move_split == MOVE_SPECIAL && (battle_participants[atk_bank].poke_species == POKE_LATIAS || battle_participants[atk_bank].poke_species == POKE_LATIOS))
+        {
+            modifier = chain_modifier(modifier, 0x1800);
+        }
+        break;
+    case ITEM_EFFECT_CHOICEBAND:
+        if (move_split == MOVE_PHYSICAL)
+        {
+            modifier = chain_modifier(modifier, 0x1800);
+        }
+        break;
+    case ITEM_EFFECT_CHOICESPECS:
+        if (move_split == MOVE_SPECIAL)
+        {
+            modifier = chain_modifier(modifier, 0x1800);
+        }
+        break;
+    }
+
     return apply_modifier(modifier, attack_stat);
+}
+
+u16 get_def_stat(u16 move, u8 atk_bank, u8 def_bank)
+{
+    u8 chosen_def; //0 = def, 1 = sp.def
+    u8 move_split = move_table[move].split;
+    if (move_split == MOVE_PHYSICAL || move == MOVE_PSYSTRIKE || move == MOVE_PSYSHOCK || move == MOVE_SECRET_SWORD)
+        chosen_def = 0;
+    else
+        chosen_def = 1;
+
+    if (new_battlestruct.ptr->field_affecting.wonder_room)
+        chosen_def ^= 1;
+
+    u16 def_stat;
+    u8 def_boost;
+
+    if (chosen_def) // sp.def
+    {
+        def_stat = battle_participants[def_bank].sp_def;
+        def_boost = battle_participants[def_bank].sp_def_buff;
+    }
+    else //def
+    {
+        def_stat = battle_participants[def_bank].def;
+        def_boost = battle_participants[def_bank].def_buff;
+    }
+
+    if (has_ability_effect(atk_bank, 0, 1) && battle_participants[atk_bank].ability_id == ABILITY_UNAWARE)
+        def_boost = 6;
+    else if ((move == MOVE_CHIP_AWAY || move == MOVE_SACRED_SWORD) && def_boost > 6)
+        def_boost = 6;
+    else if (crit_loc == 2 && def_boost > 6)
+        def_boost = 6;
+
+    def_stat = __udivsi3(def_stat * stat_buffs[def_boost].dividend, stat_buffs[def_boost].divisor);
+
+    u16 modifier = 0x1000;
+
+    if (has_ability_effect(def_bank, 1, 1) && battle_participants[def_bank].ability_id == ABILITY_MARVEL_SCALE && battle_participants[def_bank].status.int_status)
+    {
+        modifier = chain_modifier(modifier, 0x1800);
+    }
+
+    if (move_split == MOVE_SPECIAL)
+    {
+        u8 flowergift_bank = ability_battle_effects(13, def_bank, ABILITY_FLOWER_GIFT, 0, 0);
+        if (flowergift_bank)
+        {
+            if (has_ability_effect(flowergift_bank - 1, 1, 1))
+                modifier = chain_modifier(modifier, 0x1800);
+        }
+    }
+
+    switch (get_item_effect(def_bank, 1))
+    {
+    case ITEM_EFFECT_DEEPSEASCALE:
+        if (move_split == MOVE_SPECIAL && battle_participants[def_bank].poke_species == POKE_CLAMPERL)
+        {
+            modifier = chain_modifier(modifier, 0x1800);
+        }
+        break;
+    case ITEM_EFFECT_SOULDEW:
+        if (move_split == MOVE_SPECIAL && (battle_participants[def_bank].poke_species == POKE_LATIAS || battle_participants[def_bank].poke_species == POKE_LATIOS))
+        {
+            modifier = chain_modifier(modifier, 0x1800);
+        }
+        break;
+    case ITEM_EFFECT_ASSAULTVEST:
+        if (chosen_def == 1)
+        {
+            modifier = chain_modifier(modifier, 0x1800);
+        }
+        break;
+    case ITEM_EFFECT_EVIOLITE:
+        if (can_evolve(battle_participants[def_bank].poke_species))
+        {
+            modifier = chain_modifier(modifier, 0x1800);
+        }
+        break;
+    case ITEM_EFFECT_METALPOWDER:
+        if (battle_participants[def_bank].poke_species == POKE_DITTO && move_split == MOVE_PHYSICAL && !(battle_participants[def_bank].status2 && 0x200000))
+        {
+            modifier = chain_modifier(modifier, 0x2000);
+        }
+        break;
+    }
+
+    return apply_modifier(modifier, def_stat);
+}
+
+extern u8 is_of_type(u8 bank, u8 type);
+extern u32 apply_type_effectiveness(u32 damage, u8 move_type, u8 target_bank, u8 atk_bank);
+u16 dual_type_moves [] = {MOVE_FLYING_PRESS, 0xFFFF};
+
+u32 type_effectiveness_calc(u16 move, u8 atk_bank, u8 def_bank, u32 damage)
+{
+    u8 move_type = move_table[move].type;
+    for (u8 i = 0; dual_type_moves[i]!= 0xFFFF; i++)
+    {
+        if (move == dual_type_moves[i])
+        {
+            damage = apply_type_effectiveness(damage, move_type, def_bank, atk_bank);
+            break;
+        }
+    }
+    return apply_type_effectiveness(damage, move_type, def_bank, atk_bank);
 }
 
 void damage_calc(u16 move, u8 atk_bank, u8 def_bank)
 {
     u16 base_power = apply_base_power_modifiers(move, atk_bank, def_bank, get_base_power(move, atk_bank, def_bank));
-    damage_loc = base_power;
+    u16 atk_stat = get_attack_stat(move, atk_bank, def_bank);
+    u16 def_stat = get_def_stat(move, atk_bank, def_bank);
+    u32 damage = ((((2 * battle_participants[atk_bank].level) / 5 + 2) * base_power * atk_stat) / def_stat) / 50 + 2;
+
+    //apply multi target modifier
+    if (move_table[move].target == move_target_both || move_table[move].target == move_target_foes_and_ally)
+    {
+        damage = apply_modifier(0xC00, damage);
+    }
+    //weather modifier
+    u8 move_type = move_table[move].type;
+    if (weather_abilities_effect())
+    {
+        if (battle_weather.flags.downpour || battle_weather.flags.rain || battle_weather.flags.permament_rain || battle_weather.flags.heavy_rain)
+        {
+            if (move_type == TYPE_FIRE)
+                damage = apply_modifier(0x800, damage);
+            else if (move_type == TYPE_WATER)
+                damage = apply_modifier(0x1800, damage);
+        }
+        else if (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)
+        {
+            if (move_type == TYPE_FIRE)
+                damage = apply_modifier(0x1800, damage);
+            else if (move_type == TYPE_WATER)
+                damage = apply_modifier(0x800, damage);
+        }
+
+    }
+    //crit modifier
+    if (crit_loc == 2)
+    {
+        damage = apply_modifier(0x1800, damage);
+    }
+    //rand modifier
+    damage = (damage * (100 - (__umodsi3(rng(), 14) + 1))) / 100;
+
+    u16 final_modifier = 0x1000;
+    //stab modifier
+    if (is_of_type(atk_bank, move_type) && move != MOVE_STRUGGLE)
+    {
+        damage = apply_modifier(0x1800, damage);
+        if (has_ability_effect(atk_bank, 0, 1) && battle_participants[atk_bank].ability_id == ABILITY_ADAPTABILITY)
+            final_modifier = 0x2000;
+    }
+    //type effectiveness
+    damage = type_effectiveness_calc(move, atk_bank, def_bank, damage);
+    //burn
+    if (battle_participants[atk_bank].status.flags.burn && move_table[move].split == MOVE_PHYSICAL && move != MOVE_FACADE && !(has_ability_effect(atk_bank, 0, 1) && battle_participants[atk_bank].ability_id == ABILITY_GUTS))
+    {
+        damage >>= 1;
+    }
+    //at least one check
+    if (damage < 1)
+        damage = 1;
+    //final modifiers
+
+    damage_loc = damage;
 }
 
 void damage_calc_cmd_05()
