@@ -1,6 +1,13 @@
 #ifndef MOVE_IDS_H
 #define MOVE_IDS_H
 
+#define move_target_selected 0
+#define move_target_depends 1
+#define move_target_random 4
+#define move_target_both 8
+#define move_target_user 0x10
+#define move_target_foes_and_ally 0x20
+#define move_target_opponent_field 0x40
 
 #define MOVE_ABSORB 0x47
 #define MOVE_ACID 0x33
