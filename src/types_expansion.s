@@ -253,6 +253,7 @@ aux_type_name_table_1:
 .align 2
 aux_type_name_table_2:
 .word PointerForTypeNamesSomething
+.word PointerForTypeNamesSomething+0x10
 .word PointerForTypeNamesSomething
 .word Normal_NewTypeNames
 .word PointerForTypeNamesSomething
