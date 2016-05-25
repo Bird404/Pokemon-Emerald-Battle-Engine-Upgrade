@@ -1029,7 +1029,7 @@ move_desc_table:
 .word NOTHING_description
 .word NOTHING_description
 .word NOTHING_description
-.word 0xFFFFFFFF
+.word NOTHING_description
 
 .align 2
 ROOST_description:

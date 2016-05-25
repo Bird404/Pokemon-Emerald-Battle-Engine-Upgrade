@@ -81,7 +81,6 @@ ability_names_table:
 .byte W_, h_, i_, t_, e_, Space, S_, m_, o_, k_, e_, Termin, Space
 .byte P_, u_, r_, e_, Space, P_, o_, w_, e_, r_, Termin, Space, Space
 .byte S_, h_, e_, l_, l_, Space, A_, r_, m_, o_, r_, Termin, Space
-.byte C_, a_, c_, o_, p_, h_, o_, n_, y_, Termin, Space, Space, Space
 .byte A_, i_, r_, Space, L_, o_, c_, k_, Termin, Space, Space, Space, Space
 .byte T_, a_, n_, g_, l_, e_, d_, Space, F_, e_, e_, t_, Termin
 .byte M_, o_, t_, o_, r_, Space, D_, r_, i_, v_, e_, Termin, Space
@@ -198,6 +197,7 @@ ability_names_table:
 .byte P_, r_, i_, m_, Space, S_, e_, a_, Termin, Space, Space, Space, Space
 .byte D_, r_, i_, e_, d_, Space, L_, a_, n_, d_, Termin, Space, Space
 .byte D_, e_, l_, t_, a_, Space, S_, t_, r_, e_, a_, m_, Termin
+.byte Dash, Dash, Dash, Dash, Dash, Dash, Dash, Termin, Space, Space, Space, Space, Space
 .byte Dash, Dash, Dash, Dash, Dash, Dash, Dash, Termin, Space, Space, Space, Space, Space
 .byte Dash, Dash, Dash, Dash, Dash, Dash, Dash, Termin, Space, Space, Space, Space, Space
 .byte Dash, Dash, Dash, Dash, Dash, Dash, Dash, Termin, Space, Space, Space, Space, Space
