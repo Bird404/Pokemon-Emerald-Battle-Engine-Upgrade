@@ -159,136 +159,43 @@ void copy_status_condition_text(u8 bank)
     return;
 }
 
-struct type_effectiveness{
-    u8 attacking_type;
-    u8 defending_type;
-    u8 effect;
-} type_effectiveness_table[] = {
-    {TYPE_NORMAL, TYPE_ROCK, 5},
-    {TYPE_NORMAL, TYPE_STEEL, 5},
-    {TYPE_NORMAL, TYPE_GHOST, 0},
-    {TYPE_FIRE, TYPE_FIRE, 5},
-    {TYPE_FIRE, TYPE_WATER, 5},
-    {TYPE_FIRE, TYPE_GRASS, 20},
-    {TYPE_FIRE, TYPE_ICE, 20},
-    {TYPE_FIRE, TYPE_BUG, 20},
-    {TYPE_FIRE, TYPE_ROCK, 5},
-    {TYPE_FIRE, TYPE_DRAGON, 5},
-    {TYPE_FIRE, TYPE_STEEL, 20},
-    {TYPE_WATER, TYPE_FIRE, 20},
-    {TYPE_WATER, TYPE_WATER, 5},
-    {TYPE_WATER, TYPE_GRASS, 5},
-    {TYPE_WATER, TYPE_GROUND, 20},
-    {TYPE_WATER, TYPE_ROCK, 20},
-    {TYPE_WATER, TYPE_DRAGON, 5},
-    {TYPE_ELECTRIC, TYPE_WATER, 20},
-    {TYPE_ELECTRIC, TYPE_ELECTRIC, 5},
-    {TYPE_ELECTRIC, TYPE_GRASS, 5},
-    {TYPE_ELECTRIC, TYPE_GROUND, 0},
-    {TYPE_ELECTRIC, TYPE_FLYING, 20},
-    {TYPE_ELECTRIC, TYPE_DRAGON, 5},
-    {TYPE_GRASS, TYPE_FIRE, 5},
-    {TYPE_GRASS, TYPE_WATER, 20},
-    {TYPE_GRASS, TYPE_GRASS, 5},
-    {TYPE_GRASS, TYPE_POISON, 5},
-    {TYPE_GRASS, TYPE_GROUND, 20},
-    {TYPE_GRASS, TYPE_FLYING, 5},
-    {TYPE_GRASS, TYPE_BUG, 5},
-    {TYPE_GRASS, TYPE_ROCK, 20},
-    {TYPE_GRASS, TYPE_DRAGON, 5},
-    {TYPE_GRASS, TYPE_STEEL, 5},
-    {TYPE_ICE, TYPE_WATER, 5},
-    {TYPE_ICE, TYPE_GRASS, 20},
-    {TYPE_ICE, TYPE_ICE, 5},
-    {TYPE_ICE, TYPE_GROUND, 20},
-    {TYPE_ICE, TYPE_FLYING, 20},
-    {TYPE_ICE, TYPE_DRAGON, 20},
-    {TYPE_ICE, TYPE_STEEL, 5},
-    {TYPE_ICE, TYPE_FIRE, 5},
-    {TYPE_FIGHTING, TYPE_NORMAL, 20},
-    {TYPE_FIGHTING, TYPE_ICE, 20},
-    {TYPE_FIGHTING, TYPE_POISON, 5},
-    {TYPE_FIGHTING, TYPE_FLYING, 5},
-    {TYPE_FIGHTING, TYPE_PSYCHIC, 5},
-    {TYPE_FIGHTING, TYPE_BUG, 5},
-    {TYPE_FIGHTING, TYPE_ROCK, 20},
-    {TYPE_FIGHTING, TYPE_DARK, 20},
-    {TYPE_FIGHTING, TYPE_STEEL, 20},
-    {TYPE_FIGHTING, TYPE_GHOST, 0},
-    {TYPE_POISON, TYPE_GRASS, 20},
-    {TYPE_POISON, TYPE_POISON, 5},
-    {TYPE_POISON, TYPE_GROUND, 5},
-    {TYPE_POISON, TYPE_ROCK, 5},
-    {TYPE_POISON, TYPE_GHOST, 5},
-    {TYPE_POISON, TYPE_STEEL, 0},
-    {TYPE_GROUND, TYPE_FIRE, 20},
-    {TYPE_GROUND, TYPE_ELECTRIC, 20},
-    {TYPE_GROUND, TYPE_GRASS, 5},
-    {TYPE_GROUND, TYPE_POISON, 20},
-    {TYPE_GROUND, TYPE_FLYING, 0},
-    {TYPE_GROUND, TYPE_BUG, 5},
-    {TYPE_GROUND, TYPE_ROCK, 20},
-    {TYPE_GROUND, TYPE_STEEL, 20},
-    {TYPE_FLYING, TYPE_ELECTRIC, 5},
-    {TYPE_FLYING, TYPE_GRASS, 20},
-    {TYPE_FLYING, TYPE_FIGHTING, 20},
-    {TYPE_FLYING, TYPE_BUG, 20},
-    {TYPE_FLYING, TYPE_ROCK, 5},
-    {TYPE_FLYING, TYPE_STEEL, 5},
-    {TYPE_PSYCHIC, TYPE_FIGHTING, 20},
-    {TYPE_PSYCHIC, TYPE_POISON, 20},
-    {TYPE_PSYCHIC, TYPE_PSYCHIC, 5},
-    {TYPE_PSYCHIC, TYPE_DARK, 0},
-    {TYPE_PSYCHIC, TYPE_STEEL, 5},
-    {TYPE_BUG, TYPE_FIRE, 5},
-    {TYPE_BUG, TYPE_GRASS, 20},
-    {TYPE_BUG, TYPE_FIGHTING, 5},
-    {TYPE_BUG, TYPE_POISON, 5},
-    {TYPE_BUG, TYPE_FLYING, 5},
-    {TYPE_BUG, TYPE_PSYCHIC, 20},
-    {TYPE_BUG, TYPE_GHOST, 5},
-    {TYPE_BUG, TYPE_DARK, 20},
-    {TYPE_BUG, TYPE_STEEL, 5},
-    {TYPE_ROCK, TYPE_FIRE, 20},
-    {TYPE_ROCK, TYPE_ICE, 20},
-    {TYPE_ROCK, TYPE_FIGHTING, 5},
-    {TYPE_ROCK, TYPE_GROUND, 5},
-    {TYPE_ROCK, TYPE_FLYING, 20},
-    {TYPE_ROCK, TYPE_BUG, 20},
-    {TYPE_ROCK, TYPE_STEEL, 5},
-    {TYPE_GHOST, TYPE_NORMAL, 0},
-    {TYPE_GHOST, TYPE_PSYCHIC, 20},
-    {TYPE_GHOST, TYPE_DARK, 0},
-    {TYPE_GHOST, TYPE_GHOST, 20},
-    {TYPE_DRAGON, TYPE_DRAGON, 20},
-    {TYPE_DRAGON, TYPE_STEEL, 5},
-    {TYPE_DARK, TYPE_FIGHTING, 5},
-    {TYPE_DARK, TYPE_PSYCHIC, 20},
-    {TYPE_DARK, TYPE_GHOST, 20},
-    {TYPE_DARK, TYPE_DARK, 5},
-    {TYPE_STEEL, TYPE_FIRE, 5},
-    {TYPE_STEEL, TYPE_WATER, 5},
-    {TYPE_STEEL, TYPE_ELECTRIC, 5},
-    {TYPE_STEEL, TYPE_ICE, 20},
-    {TYPE_STEEL, TYPE_ROCK, 20},
-    {TYPE_STEEL, TYPE_STEEL, 5}, //now fairy type
-    {TYPE_STEEL, TYPE_FAIRY, 20},
-    {TYPE_POISON, TYPE_FAIRY, 20},
-    {TYPE_BUG, TYPE_FAIRY, 5},
-    {TYPE_DARK, TYPE_FAIRY, 5},
-    {TYPE_FIGHTING, TYPE_FAIRY, 5},
-    {TYPE_DRAGON, TYPE_FAIRY, 0},
-    {TYPE_FAIRY, TYPE_DRAGON, 20},
-    {TYPE_FAIRY, TYPE_POISON, 5},
-    {TYPE_FAIRY, TYPE_STEEL, 5},
-    {TYPE_FAIRY, TYPE_FIRE, 5},
-    {TYPE_FAIRY, TYPE_DARK, 20},
-    {TYPE_FAIRY, TYPE_FIGHTING, 20},
-    {0xFF, 0xFF, 0xFF}
+u8 type_effectiveness_table[TYPE_FAIRY-0x4][TYPE_FAIRY-0x4] = {
+    {10,10,10,10,10,05,10,00,10,05,10,10,10,10,10,10,10,10,10}, //normal
+    {20,10,05,05,10,20,05,00,10,20,10,10,10,10,05,20,10,20,05}, //fight
+    {10,20,10,10,10,05,20,10,10,05,10,10,20,05,10,10,10,10,10}, //flying
+    {10,10,10,05,05,05,10,05,10,00,10,10,20,10,10,10,10,10,20}, //poison
+    {10,10,00,20,10,20,05,10,10,20,20,10,05,20,10,10,10,10,10}, //ground
+    {10,05,20,10,05,10,20,10,10,05,20,10,10,10,10,20,10,10,10}, //rock
+    {10,05,05,05,10,10,10,05,10,05,05,10,20,10,20,10,10,20,05}, //bug
+    {00,10,10,10,10,10,10,20,10,10,10,10,10,10,20,10,10,05,10}, //ghost
+    {10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}, //egg
+    {10,10,10,10,10,20,10,10,10,05,05,05,10,05,10,20,10,10,20}, //steel
+    {10,10,10,10,10,05,20,10,10,20,05,05,20,10,10,20,05,10,10}, //fire
+    {10,10,10,10,20,20,10,10,10,10,20,05,05,10,10,10,05,10,10}, //water
+    {10,10,05,05,20,20,05,10,10,05,05,20,05,10,10,10,05,10,10}, //grass
+    {10,10,20,10,00,10,10,10,10,10,10,20,05,05,10,10,05,10,10}, //electric
+    {10,20,10,20,10,10,10,10,10,05,10,10,10,10,05,10,10,00,10}, //psychic
+    {10,10,20,10,20,10,10,10,10,05,05,05,20,10,10,05,20,10,10}, //ice
+    {10,10,10,10,10,10,10,10,10,05,10,10,10,10,10,10,20,10,00}, //dragon
+    {10,05,10,10,10,10,10,20,10,10,10,10,10,10,20,10,10,05,05}, //dark
+    {10,20,10,05,10,10,10,10,10,05,05,10,10,10,10,10,20,20,10}  //fairy
 };
 
-u32 damage_type_effectiveness_update (u8 attacking_type, u8 defending_type, u8 effect, u8 atk_bank, u8 def_bank, u32 damage)
+u32 damage_type_effectiveness_update (u8 attacking_type, u8 defending_type, u8 atk_bank, u8 def_bank, u32 damage)
 {
+    u8 effect,atype=attacking_type,dtype=defending_type;
+
+    if(atype==TYPE_EGG || dtype==TYPE_EGG)
+        return damage;
+
+    if(atype>=TYPE_FAIRY)
+        atype=atype-5;
+
+    if(dtype>=TYPE_FAIRY)
+        dtype=dtype-5;
+
+    effect=type_effectiveness_table[atype][dtype];
+
     if (new_battlestruct.ptr->various.inverse_battle)
     {
         if (effect == 20)
@@ -362,14 +269,9 @@ u32 apply_type_effectiveness(u32 damage, u8 move_type, u8 target_bank, u8 atk_ba
     if (defender_type3 == defender_type1 || defender_type3 == defender_type2)
         defender_type3 = TYPE_EGG;
 
-    for (u8 i = 0; type_effectiveness_table[i].attacking_type != 0xFF; i++)
-    {
-        if (move_type == type_effectiveness_table[i].attacking_type && (defender_type1 == type_effectiveness_table[i].defending_type || defender_type2 == type_effectiveness_table[i].defending_type || defender_type3 == type_effectiveness_table[i].defending_type))
-        {
-            damage = damage_type_effectiveness_update(type_effectiveness_table[i].attacking_type, type_effectiveness_table[i].defending_type, type_effectiveness_table[i].effect, atk_bank, target_bank, damage);
-        }
-    }
-
+    damage = damage_type_effectiveness_update(move_type, defender_type1, atk_bank, target_bank, damage);
+    damage = damage_type_effectiveness_update(move_type, defender_type2, atk_bank, target_bank, damage);
+    damage = damage_type_effectiveness_update(move_type, defender_type3, atk_bank, target_bank, damage);
     return damage;
 }
 
@@ -487,7 +389,7 @@ u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro)
 {
     if (gastro && new_battlestruct.ptr->bank_affecting[bank].gastro_acided)
         return false;
-    else if (mold_breaker && new_battlestruct.ptr->bank_affecting[bank].affected_by_moldbreaker)
+    else if (mold_breaker)
         return false;
     return true;
 }
@@ -508,33 +410,50 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         last_used_ability = battle_participants[bank].ability_id;
 
     u8 bank_side = is_bank_from_opponent_side(bank);
+    u8 entry_message=false;
+    void* entry_msg_scrpt_ptr;
 
     switch (switch_id)
     {
     case 0: //switch-in abilities
+
         switch (last_used_ability)
         {
-            void* moldbreaker_ptr;
         case ABILITY_MOLD_BREAKER:
-            moldbreaker_ptr = &moldbreaker_message_bs;
-            goto MOLD_BREAKER_EFFECT;
+            entry_msg_scrpt_ptr = &moldbreaker_message_bs;
+            entry_message=true;
+            break;
         case ABILITY_TURBOBLAZE:
-            moldbreaker_ptr = &turboblaze_bs;
-            goto MOLD_BREAKER_EFFECT;
+            entry_msg_scrpt_ptr = &turboblaze_bs;
+            entry_message=true;
+            break;
         case ABILITY_TERAVOLT:
-            moldbreaker_ptr = &terravolt_bs;
-        MOLD_BREAKER_EFFECT:
-            if (!new_battlestruct.ptr->bank_affecting[bank].moldbreaked)
-            {
-                new_battlestruct.ptr->bank_affecting[bank].moldbreaked = 1;
-                effect = true;
-                battle_scripting.active_bank = bank;
-                execute_battle_script(&moldbreaker_ptr);
-            }
+            entry_msg_scrpt_ptr = &terravolt_bs;
+            entry_message=true;
+            break;
+        case ABILITY_PRESSURE:
+            entry_msg_scrpt_ptr = &pressure_bs;
+            entry_message=true;
+            break;
+        case ABILITY_UNNERVE:
+            entry_msg_scrpt_ptr = &unnerve_bs;
+            entry_message=true;
+            break;
+        case ABILITY_AURA_BREAK:
+            entry_msg_scrpt_ptr = &aurabreak_bs;
+            entry_message=true;
+            break;
+        case ABILITY_FAIRY_AURA:
+            entry_msg_scrpt_ptr = &fairyaura_bs;
+            entry_message=true;
+            break;
+        case ABILITY_DARK_AURA:
+            entry_msg_scrpt_ptr = &darkaura_bs;
+            entry_message=true;
             break;
         case ABILITY_DOWNLOAD:
             {
-                if (new_battlestruct.ptr->bank_affecting[bank].downloaded)
+                if (status3[bank].switchin_ability_lock)
                     break;
                 u16 def_sum = 0;
                 u16 spdef_sum = 0;
@@ -548,31 +467,20 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                         spdef_sum += battle_participants[i].sp_def;
                     }
                 }
-                if (def_sum > spdef_sum)
+                if ((def_sum == spdef_sum && two_options_rand(0, 1)) || (spdef_sum < def_sum))
                 {
-                    goto ATK_BOOST;
-                }
-                else if (spdef_sum > def_sum)
-                {
-                    goto SPATK_BOOST;
+                    battle_participants[bank].sp_atk_buff++;
+                    script_ptr = &downloadspatk_bs;
                 }
                 else
                 {
-                    if (two_options_rand(0, 1))
-                        goto SPATK_BOOST;
-                }
-                ATK_BOOST:
                     battle_participants[bank].atk_buff++;
                     script_ptr = &downloadatk_bs;
-                    goto FINISH;
-                SPATK_BOOST:
-                    battle_participants[bank].sp_atk_buff++;
-                    script_ptr = &downloadspatk_bs;
-                FINISH:
+                }
                     effect = 1;
                     battle_scripting.active_bank = bank;
                     execute_battle_script(script_ptr);
-                    new_battlestruct.ptr->bank_affecting[bank].downloaded = 1;
+                    status3[bank].switchin_ability_lock = 1;
                     break;
             }
         case ABILITY_DROUGHT:
@@ -663,17 +571,21 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             }
             break;
         case ABILITY_FRISK:
-            if (!new_battlestruct.ptr->bank_affecting[bank].frisked_pokes)
+            if (!status3[bank].switchin_ability_lock)
             {
-                new_battlestruct.ptr->bank_affecting[bank].frisked_pokes = 1;
+
+                effect = true;
+
+                status3[bank].switchin_ability_lock = 1;
+
             }
             break;
         case ABILITY_FOREWARN:
-            if (!(new_battlestruct.ptr->bank_affecting[bank].forewarned))
+            if (!(status3[bank].switchin_ability_lock))
             {
                 effect = true;
                 battle_scripting.active_bank = bank;
-                new_battlestruct.ptr->bank_affecting[bank].forewarned = 1;;
+                status3[bank].switchin_ability_lock = 1;;
                 void* bs_forewarm = &forewarn_bs;
                 execute_battle_script(bs_forewarm);
                 battle_text_buff1[0] = 0xFD;
@@ -685,12 +597,12 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             }
             break;
         case ABILITY_ANTICIPATION:
-            if (!(new_battlestruct.ptr->bank_affecting[bank].anticipationed))
+            if (!(status3[bank].switchin_ability_lock))
             {
                 if (anticipation_shudder(bank))
                 {
                     effect = true;
-                    new_battlestruct.ptr->bank_affecting[bank].anticipationed = 1;
+                    status3[bank].switchin_ability_lock = 1;
                     battle_scripting.active_bank = bank;
                     void* bs_anticipation = &anticipation_bs;
                     execute_battle_script(bs_anticipation);
@@ -698,9 +610,8 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             }
             break;
         case ABILITY_IMPOSTER:
-            if (battle_participants[(bank ^ 1)].current_hp && (bank ^ 1) < no_of_all_banks && !(new_battlestruct.ptr->bank_affecting[bank].impostered) && !(battle_participants[(bank ^1)].status2 & 0x200000))
+            if (battle_participants[(bank ^ 1)].current_hp && (bank ^ 1) < no_of_all_banks && !(battle_participants[bank].status2 & 0x200000) && !(battle_participants[(bank ^1)].status2 & 0x200000))
             {
-                new_battlestruct.ptr->bank_affecting[bank].impostered = 1;
                 effect = true;
                 void* ptr_transform_bs = &transform_bs;
                 execute_battle_script(ptr_transform_bs);
@@ -712,17 +623,52 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             }
             break;
         case ABILITY_INTIMIDATE:
-            if (!special_statuses[bank].intimidated_a_poke)
+            if (!status3[bank].switchin_ability_lock)
             {
-                status3[bank].intimidated_a_poke = 1;
-                special_statuses[bank].intimidated_a_poke = 1;
+                void* bs_intimidate = (void*) 0x082DB4B8;
+                execute_battle_script(bs_intimidate);
+                battle_stuff_ptr.ptr->intimidate_user=bank;
+                status3[bank].switchin_ability_lock=1;
+                effect=true;
             }
             break;
         case ABILITY_TRACE:
-            if (!special_statuses[bank].traced)
-            {
-                status3[bank].traced = 1;
-                special_statuses[bank].traced = 1;
+            if (!status3[bank].switchin_ability_lock)
+            {   status3[bank].switchin_ability_lock=1;
+                active_bank=bank^1;
+                u16 hp1=battle_participants[active_bank].current_hp;
+                if (battle_flags&1)
+                {
+                    u16 hp2=battle_participants[active_bank^2].current_hp;
+                    if(hp1==0 && hp2==0)
+                        break;
+                    if(hp1==0 || (hp2!=0 && two_options_rand(0,1)))
+                        active_bank=active_bank^2;
+                }
+                else if (hp1==0)
+                        break;
+                last_used_ability=battle_participants[active_bank].ability_id;
+                if (!last_used_ability)
+                    break;
+                if (last_used_ability!=ABILITY_TRACE) //If trace copies another switch-in ability. This fragment enables to activate that ability immediately after tracing.
+                {   status3[bank].switchin_ability_lock=0;
+                    battle_stuff_ptr.ptr->switch_in_ability_bank_counter--;
+                }
+                void* bs_trace = (void*) 0x082DB452;
+                execute_battle_script(bs_trace);
+                battle_participants[bank].ability_id=last_used_ability;
+                battle_scripting.active_bank = bank;
+                battle_stuff_ptr.ptr->intimidate_user=bank;
+                battle_text_buff1[0]=0xFD;
+                battle_text_buff1[1]=0x4;
+                battle_text_buff1[2]=active_bank;
+                battle_text_buff1[3]=battle_team_id_by_side[active_bank];
+                battle_text_buff1[4]=0xFF;
+                battle_text_buff2[0]=0xFD;
+                battle_text_buff2[1]=0x9;
+                battle_text_buff2[2]=last_used_ability;
+                battle_text_buff2[3]=0xFF;
+                effect=true;
             }
             break;
         case ABILITY_AIR_LOCK:
@@ -765,10 +711,10 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             prepare_castform_switch(effect, bank);
             break;
         case ABILITY_SLOW_START:
-            if (!new_battlestruct.ptr->bank_affecting[bank].slowstarted)
+            if (!status3[bank].switchin_ability_lock)
             {
                 new_battlestruct.ptr->bank_affecting[bank].slowstart_duration = 5;
-                new_battlestruct.ptr->bank_affecting[bank].slowstarted = 1;
+                status3[bank].switchin_ability_lock = 1;
                 effect = true;
                 battle_scripting.active_bank = bank;
                 void* bs_slowstart = &slowstart_bs;
@@ -777,6 +723,13 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             }
             break;
         }
+        if (entry_message && !status3[bank].switchin_ability_lock)
+            {
+                status3[bank].switchin_ability_lock = 1;
+                effect = true;
+                battle_scripting.active_bank = bank;
+                execute_battle_script(entry_msg_scrpt_ptr);
+            }
         break;
     case 1: //end turn abilities
         if (!(battle_participants[bank].current_hp && has_ability_effect(bank, 0, 1)))
@@ -912,6 +865,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 break;
             case ABILITY_TRUANT:
                 {
+
                     disable_structs[bank].truant_counter = truant_hook(disable_structs[bank].truant_counter);
                     break;
                 }

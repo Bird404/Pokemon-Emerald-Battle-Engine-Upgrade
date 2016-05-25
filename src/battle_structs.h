@@ -158,17 +158,24 @@ struct b_scripting{
 extern struct b_scripting battle_scripting;
 
 struct battle_stuff{
-    u8 field0[19];
-    u8 dynamic_move_type;
-    u8 field_14[54];
-    u8 money_multiplier;
-    u8 field_4B[9];
-    u8 field_54;
-    u8 field_55[42];
-    u8 castform_switch_form;
-    u8 chosen_move_position[4];
-    u8 field_84[52];
-    u16 used_held_items[4];
+    u8 field0[19]; //0x0-0x12
+    u8 dynamic_move_type; //0x13
+    u8 field_14[54]; //0x14-0x49
+    u8 money_multiplier; //0x4A
+    u8 field_4B; //0x4B
+    u8 switch_in_ability_bank_counter; //0x4C
+    u8 field_4D[7]; //0x4D-0x53
+    u8 field_54; //0x54
+    u8 field_55[42]; //0x55-0x7E
+    u8 castform_switch_form; //0x7F
+    u8 chosen_move_position[4]; //0x80
+    u8 field_84[52]; //0x84-0xB7
+    u16 used_held_items[4]; //0xB8-0xBF
+    u8 field_C0[24]; //0xC0-0xD7
+    u8 intimidate_user; //0xD8
+    u8 switch_in_item_bank_counter; //0xD9
+    u8 field_DA[200]; //0xDA-0x1A1
+    u8 battle_load_weather_from_map_flag; //0x1A2
 };
 
 struct battle_stuff_ptr{
@@ -198,8 +205,7 @@ struct special_status{
 extern struct special_status special_statuses[4];
 
 struct status_3{
-    u32 bit0 : 1; //1
-    u32 bit2 : 1; //2
+    u32 leech_seed_hp_receiver : 2; // 2 bits
     u32 leech_seed : 1; //4
     u32 always_hits_unkown : 1; //x8
     u32 always_hits : 1; //x10
@@ -217,8 +223,7 @@ struct status_3{
     u32 mud_sport : 1; //x10 000
     u32 watersport : 1; //x20 000
     u32 underwater : 1; //x40 000
-    u32 intimidated_a_poke : 1;
-    u32 traced : 1;
+    u32 switchin_ability_lock : 1;
 };
 
 extern struct status_3 status3[4];

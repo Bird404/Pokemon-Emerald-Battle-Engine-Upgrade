@@ -25,17 +25,9 @@ struct bank_affecting{
     u32 focus_sashed_or_banded : 1;
     u32 sheerforce_bonus : 1;
     u32 eaten_berry : 1;
-    u32 slowstarted : 1;
-    u32 frisked_pokes : 1;
-    u32 forewarned : 1;
-    u32 anticipationed : 1;
-    u32 impostered : 1;
     u32 sunshine_form : 1;
     u32 cherrim_transformed : 1;
-    u32 moldbreaked : 1;
     u32 gastro_acided : 1;
-    u32 affected_by_moldbreaker : 1;
-    u32 downloaded : 1;
     u8 lowered_stats : 1;
     u8 sky_drop_attacker : 1;
     u8 sky_drop_target : 1;
