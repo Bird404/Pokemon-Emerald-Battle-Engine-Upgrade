@@ -49,8 +49,10 @@ u32 two_options_rand(u32 option1, u32 option2)
 
 u8 weather_abilities_effect() //to do
 {
-    u8 effect = 1;
-    return effect;
+    if (ability_battle_effects(19, 0, ABILITY_AIR_LOCK, 0, 0) || ability_battle_effects(19, 0, ABILITY_CLOUD_NINE, 0, 0))
+        return false;
+    else
+        return true;
 }
 
 u32 get_1_16_of_max_hp(u8 bank)
@@ -397,7 +399,11 @@ u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro)
 u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special_cases_argument, u16 move)
 {
     u8 effect = false;
-    u16 curr_move = current_move;
+    u16 curr_move;
+    if (move)
+        curr_move = move;
+    else
+        curr_move = current_move;
     u8 move_type;
     if (battle_stuff_ptr.ptr->dynamic_move_type)
         move_type = battle_stuff_ptr.ptr->dynamic_move_type & 0x3F;
