@@ -548,7 +548,7 @@ u16 apply_base_power_modifiers(u16 move, u8 atk_bank, u8 def_bank, u16 base_powe
         }
     }
 
-    if ((ability_battle_effects(19, 0, ABILITY_DARK_AURA, 0, 0) && move_type == TYPE_DARK) || ability_battle_effects(19, 0, ABILITY_FAIRY_AURA, 0, 0) && move_type == TYPE_FAIRY)
+    if ((ability_battle_effects(19, 0, ABILITY_DARK_AURA, 0, 0) && move_type == TYPE_DARK) || (ability_battle_effects(19, 0, ABILITY_FAIRY_AURA, 0, 0) && move_type == TYPE_FAIRY))
     {
         if (ability_battle_effects(19, 0, ABILITY_AURA_BREAK, 0, 0))
         {
