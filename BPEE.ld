@@ -38,6 +38,7 @@ battle_flags = 0x02022FEC;
 battle_communication_struct = 0x02024332;
 animation_bank_attacker = 0x02038436; 
 animation_bank_target = 0x02038437;
+previously_used_move = 0x02024240;
 move_anim_cursor = 0x020383F0;
 
 current_move = 0x020241EA;
