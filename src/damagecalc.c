@@ -24,7 +24,7 @@ struct fling{
     u8 move_effect;
 };
 
-struct fling fling_table[] = { {133, 10, 0}, {134, 10, 0}, {135, 10, 0}, {136, 10, 0}, {137, 10, 0}, {138, 10, 0}, {139, 10, 0}, {140, 10, 0}, {141, 10, 0}, {142, 10, 0}, {143, 10, 0}, {144, 10, 0}, {145, 10, 0}, {146, 10, 0}, {147, 10, 0}, {148, 10, 0}, {149, 10, 0}, {150, 10, 0}, {151, 10, 0}, {152, 10, 0}, {153, 10, 0}, {154, 10, 0}, {155, 10, 0}, {156, 10, 0}, {157, 10, 0}, {158, 10, 0}, {159, 10, 0}, {160, 10, 0}, {161, 10, 0}, {162, 10, 0}, {163, 10, 0}, {164, 10, 0}, {165, 10, 0}, {166, 10, 0}, {167, 10, 0}, {168, 10, 0}, {169, 10, 0}, {170, 10, 0}, {171, 10, 0}, {172, 10, 0}, {173, 10, 0}, {174, 10, 0}, {175, 10, 0}, {220, 10, 0}, {221, 10, 0}, {254, 10, 0}, {255, 10, 0}, {256, 10, 0}, {257, 10, 0}, {258, 10, 0}, {0xFFFF, 0, 0} }; // Still doing this
+struct fling fling_table[] = { {0xFFFF, 0, 0} };;
 
 struct stat_fractions{
     u8 dividend;
@@ -113,6 +113,8 @@ u16 get_poke_weight(u8 bank)
 
     return poke_weight;
 }
+
+extern u8 is_of_type(u8 bank, u8 type);
 
 u8 count_stat_increases(u8 bank, u8 eva_acc)
 {
@@ -531,8 +533,33 @@ u16 apply_base_power_modifiers(u16 move, u8 atk_bank, u8 def_bank, u16 base_powe
                 modifier = chain_modifier(modifier, 0x14CD);
             }
             break;
+        case ABILITY_STRONG_JAW:
+            if (find_move_in_table(move, &biting_moves_table[0]))
+            {
+                modifier = chain_modifier(modifier, 0x1800);
+            }
+            break;
+        case ABILITY_MEGA_LAUNCHER:
+            if (find_move_in_table(move, &megalauncher_moves_table[0]))
+            {
+                modifier = chain_modifier(modifier, 0x1800);
+            }
+            break;
         }
     }
+
+    if ((ability_battle_effects(19, 0, ABILITY_DARK_AURA, 0, 0) && move_type == TYPE_DARK) || ability_battle_effects(19, 0, ABILITY_FAIRY_AURA, 0, 0) && move_type == TYPE_FAIRY)
+    {
+        if (ability_battle_effects(19, 0, ABILITY_AURA_BREAK, 0, 0))
+        {
+            modifier = chain_modifier(modifier, 0xC00);
+        }
+        else
+        {
+            modifier = chain_modifier(modifier, 0x1547);
+        }
+    }
+
     if (has_ability_effect(def_bank, 0, 1))
     {
         switch (battle_participants[def_bank].ability_id)
@@ -976,19 +1003,31 @@ u16 get_def_stat(u16 move, u8 atk_bank, u8 def_bank)
 
     u16 modifier = 0x1000;
 
-    if (has_ability_effect(def_bank, 1, 1) && battle_participants[def_bank].ability_id == ABILITY_MARVEL_SCALE && battle_participants[def_bank].status.int_status)
-    {
-        modifier = chain_modifier(modifier, 0x1800);
-    }
-
     if (move_split == MOVE_SPECIAL)
     {
+        if ((battle_weather.flags.sandstorm || battle_weather.flags.permament_sandstorm) && is_of_type(def_bank, TYPE_ROCK) && weather_abilities_effect())
+        {
+            modifier = chain_modifier(modifier, 0x1800);
+        }
         u8 flowergift_bank = ability_battle_effects(13, def_bank, ABILITY_FLOWER_GIFT, 0, 0);
         if (flowergift_bank)
         {
             if (has_ability_effect(flowergift_bank - 1, 1, 1))
                 modifier = chain_modifier(modifier, 0x1800);
         }
+    }
+
+    if (has_ability_effect(def_bank, 1, 1) && battle_participants[def_bank].ability_id == ABILITY_MARVEL_SCALE && battle_participants[def_bank].status.int_status && chosen_def == 0)
+    {
+        modifier = chain_modifier(modifier, 0x1800);
+    }
+    else if (has_ability_effect(def_bank, 1, 1) && battle_participants[def_bank].ability_id == ABILITY_FUR_COAT && chosen_def == 0)
+    {
+        modifier = chain_modifier(modifier, 0x2000);
+    }
+    else if (has_ability_effect(def_bank, 1, 1) && battle_participants[def_bank].ability_id == ABILITY_GRASS_PELT && new_battlestruct.ptr->field_affecting.grassy_terrain && chosen_def == 0)
+    {
+        modifier = chain_modifier(modifier, 0x1800);
     }
 
     switch (get_item_effect(def_bank, 1))
@@ -1028,7 +1067,6 @@ u16 get_def_stat(u16 move, u8 atk_bank, u8 def_bank)
     return apply_modifier(modifier, def_stat);
 }
 
-extern u8 is_of_type(u8 bank, u8 type);
 extern u32 apply_type_effectiveness(u32 damage, u8 move_type, u8 target_bank, u8 atk_bank);
 u16 dual_type_moves [] = {MOVE_FLYING_PRESS, 0xFFFF};
 
@@ -1105,6 +1143,71 @@ void damage_calc(u16 move, u8 atk_bank, u8 def_bank)
     if (damage < 1)
         damage = 1;
     //final modifiers
+    u8 move_split = move_table[move].split;
+    if ((side_affecting_halfword[def_bank & 1].reflect_on && move_split == MOVE_PHYSICAL) ||(side_affecting_halfword[def_bank & 1].light_screen_on && move_split == MOVE_SPECIAL))
+    {
+        if (crit_loc != 2 && !(has_ability_effect(atk_bank, 0, 1) && battle_participants[atk_bank].ability_id == ABILITY_INFILTRATOR))
+        {
+            if (count_alive_pokes_on_side(2) == 2)
+                final_modifier = chain_modifier(final_modifier, 0xA8F);
+            else
+                final_modifier = chain_modifier(final_modifier, 0x800);
+        }
+    }
+    u8 atk_ability = battle_participants[atk_bank].ability_id;
+    u8 def_ability = battle_participants[def_bank].ability_id;
+    if (def_ability == ABILITY_MULTISCALE && has_ability_effect(def_bank, 1, 1))
+    {
+        final_modifier = chain_modifier(final_modifier, 0x800);
+    }
+    if (atk_ability == ABILITY_TINTED_LENS && move_outcome.not_very_effective && has_ability_effect(atk_bank, 0, 1))
+    {
+        final_modifier = chain_modifier(final_modifier, 0x2000);
+    }
+    if (ability_battle_effects(20, def_bank, ABILITY_FRIEND_GUARD, 0, 0))
+    {
+        if (has_ability_effect(def_bank, 1, 1))
+            final_modifier = chain_modifier(final_modifier, 0xC00);
+    }
+    if (atk_ability == ABILITY_SNIPER && crit_loc == 2 && has_ability_effect(atk_bank, 0, 1))
+    {
+        final_modifier = chain_modifier(final_modifier, 0x1800);
+    }
+    if ((def_ability == ABILITY_FILTER || def_ability == ABILITY_SOLID_ROCK) && move_outcome.super_effective && has_ability_effect(def_bank, 1, 1))
+    {
+        final_modifier = chain_modifier(final_modifier, 0xC00);
+    }
+    if (get_item_effect(atk_bank, 1) == ITEM_EFFECT_METRONOME)
+    {
+        if (new_battlestruct.ptr->bank_affecting[atk_bank].same_move_used > 4)
+            final_modifier = chain_modifier(final_modifier, 0x2000);
+        else
+            final_modifier = chain_modifier(final_modifier, 0x1000 + new_battlestruct.ptr->bank_affecting[atk_bank].same_move_used * 0x333);
+    }
+    else if (get_item_effect(atk_bank, 1) == ITEM_EFFECT_EXPERTBELT && move_outcome.super_effective)
+    {
+        final_modifier = chain_modifier(final_modifier, 0x1333);
+    }
+    else if (get_item_effect(atk_bank, 1) == ITEM_EFFECT_LIFEORB)
+    {
+        final_modifier = chain_modifier(final_modifier, 0x14CC);
+    }
+
+
+    if ((move == MOVE_STEAMROLLER || move == MOVE_STOMP) && status3[def_bank].minimized)
+    {
+        final_modifier = chain_modifier(final_modifier, 0x2000);
+    }
+    else if (move == MOVE_EARTHQUAKE && status3[def_bank].underground)
+    {
+        final_modifier = chain_modifier(final_modifier, 0x2000);
+    }
+    else if (move == MOVE_SURF && status3[def_bank].underwater)
+    {
+        final_modifier = chain_modifier(final_modifier, 0x2000);
+    }
+
+    damage = apply_modifier(final_modifier, damage);
 
     damage_loc = damage;
 }
