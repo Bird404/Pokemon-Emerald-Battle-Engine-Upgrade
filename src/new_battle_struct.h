@@ -42,6 +42,7 @@ struct bank_affecting{
     u8 magnet_rise_duration;
     u8 killer_bank;
     u8 bank_that_lowered_stats;
+    u8 same_move_used;
 };
 
 struct side_affecting{
