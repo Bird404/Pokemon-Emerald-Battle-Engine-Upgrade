@@ -26,6 +26,7 @@ battle_resources_ptr = 0x020244A8;
 multihit_counter = 0x02024212;
 bits_table = 0x0832A328;
 chosen_move_by_banks = 0x02024274;
+battle_team_id_by_side = 0x202406E;
 
 damage_modulate_by_type_effectivity = 0x08046F60|1;
 
@@ -92,6 +93,7 @@ mark_buffer_bank_for_execution = 0x0803F800|1;
 truant_hook = 0x08042EDE|1;
 __aeabi_idiv = 0x082E7B68|1; /*unsigned?*/
 __aeabi_uidiv = 0x082E7540|1; /*signed?*/
+b_std_message = 0x0803F964|1;
 
 /*Expandable tables*/
 battle_strings_table = 0x085CC270;
