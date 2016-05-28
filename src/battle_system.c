@@ -47,7 +47,7 @@ u32 two_options_rand(u32 option1, u32 option2)
     return option2;
 }
 
-u8 weather_abilities_effect() //to do
+u8 weather_abilities_effect()
 {
     if (ability_battle_effects(19, 0, ABILITY_AIR_LOCK, 0, 0) || ability_battle_effects(19, 0, ABILITY_CLOUD_NINE, 0, 0))
         return false;
@@ -389,9 +389,11 @@ u8 prepare_castform_switch(u8 effect, u8 bank)
 
 u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro)
 {
+    u8 attacker_ability=battle_participants[bank_attacker].ability_id;
     if (gastro && new_battlestruct.ptr->bank_affecting[bank].gastro_acided)
         return false;
-    else if (mold_breaker)
+    else if (mold_breaker && has_ability_effect(bank_attacker,0,1) &&
+            (attacker_ability==ABILITY_MOLD_BREAKER || attacker_ability==ABILITY_TERAVOLT || attacker_ability==ABILITY_TURBOBLAZE))
         return false;
     return true;
 }
@@ -581,7 +583,8 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             {
 
                 effect = true;
-
+                battle_stuff_ptr.ptr->intimidate_user=bank;
+                execute_battle_script(frisk_bs);
                 status3[bank].switchin_ability_lock = 1;
 
             }
