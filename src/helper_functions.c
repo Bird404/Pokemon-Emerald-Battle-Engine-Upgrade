@@ -39,10 +39,12 @@ u8 unnerve_text[] = {};
 u8 aurabreak_text[] = {0xFD, 0xF, 0, r_, e_, v_, e_, r_, s_, e_, d_, 0, a_, l_, l_, 0, o_, t_, h_, e_, r_, 0xFE, P_, o_, k_, Poke_e, m_, o_, n_, Apos, s_, 0, a_, u_, r_, a_, s_, Exclam, 0xFF};
 u8 fairyaura_text[] = {BuffCharac, 0xF, Space, i_, s_, Space, r_, a_, d_, i_, a_, t_, i_, n_, g_, JumpLine, a_, Space, F_, a_, i_, r_, y_, Space, A_, u_, r_, a_, Exclam, Termin};
 u8 darkaura_text[] = {BuffCharac, 0xF, Space, i_, s_, Space, r_, a_, d_, i_, a_, t_, i_, n_, g_, JumpLine, a_, Space, D_, a_, r_, k_, Space, A_, u_, r_, a_, Exclam, Termin};
+u8 frisk_text[] = {BuffCharac, 0x13, Space, f_, r_, i_, s_, k_, e_, d_, Space, BuffCharac, 0x10, JumpLine, a_, n_, d_, Space,
+                   f_, o_, u_, n_, d_, Space, i_, t_, s_, Space, BuffCharac, 0x16, Exclam, Termin};
 
 void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activation_text, &heavyrain_activation_text, &mysticalaircurrent_activation_text, &forewarn_text, &slowstart_text, &anticipation_text, &dryskin_damage_text, &solarpower_text, &harvest_text, &healer_text, &pickup_text, &moldbreaker_text, &turboblaze_text, &terravolt_text, &downloadatk_text,
 &downloadspatk_text, &sapsipperboost_text, &sapsipperimmunity_text, &motorboost_text, &motorimmunity_text,
-&aftermath_text, &pickpocket_text, &mummy_text, &target_ability, &cursedbody_text, &drastically_text, &pressure_text, &unnerve_text, &aurabreak_text, &fairyaura_text, &darkaura_text};
+&aftermath_text, &pickpocket_text, &mummy_text, &target_ability, &cursedbody_text, &drastically_text, &pressure_text, &unnerve_text, &aurabreak_text, &fairyaura_text, &darkaura_text, &frisk_text};
 
 void battle_string_loader(u16 string_id)
 {
@@ -116,8 +118,23 @@ void changestatvar2()
     return;
 }
 
+void frisk_target_item()
+{   u16 curr_item=battle_participants[bank_target].held_item;
+    if (curr_item)
+    {
+        last_used_item=curr_item;
+        b_std_message(0x19D,battle_scripting.active_bank);
+        // to add item effect usage history
+        battle_communication_struct.is_message_displayed=1;
+    }
+    else
+        battle_communication_struct.is_message_displayed=0;
+
+    return;
+}
+
 void* callasm_table[] = {&call_ability_effects, &apply_burn_animation, &change_attacker_item, &try_to_lower_def, &try_to_raise_spd,
-&changestatvar1, &changestatvar2};
+&changestatvar1, &changestatvar2, &frisk_target_item};
 
 void callasm_cmd()
 {
