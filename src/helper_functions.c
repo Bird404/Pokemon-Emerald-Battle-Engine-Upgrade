@@ -139,8 +139,9 @@ void* callasm_table[] = {&call_ability_effects, &apply_burn_animation, &change_a
 void callasm_cmd()
 {
     void (*command) (void);
-    u8 command_id = read_byte(battlescripts_curr_instruction + 1);
-    battlescripts_curr_instruction += 2;
-    command = callasm_table[command_id];
+    u8 command_id_ls = read_byte(battlescripts_curr_instruction + 1);
+    u8 command_id_ms = read_byte(battlescripts_curr_instruction + 2);
+    battlescripts_curr_instruction += 3;
+    command = callasm_table[(command_id_ms>>8)+command_id_ls;
     command();
 }
