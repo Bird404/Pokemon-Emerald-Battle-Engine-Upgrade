@@ -38,7 +38,7 @@ table2['NumberOfAbilities']=256
 
 with open(args.romfile, 'rb+') as rom:
         #Get ability name pointer
-        wflag=0;
+        wflag=0
         with open(args.oldini, 'r') as oldlines:
                 fout=open(args.newini, 'w')
                 for line in oldlines:
@@ -49,8 +49,8 @@ with open(args.romfile, 'rb+') as rom:
                                 for key in table2.keys():
                                         if line.strip().startswith(str(key)):
                                                 line=str(key)+'='+str(table2[key])+'\n'
-                                if line.strip().startswith('[BPEE]'):
-                                        wflag=1
-                                if line.strip().startswith('[AXVF]'):
-                                        wflag=0
+                        if line.strip().startswith('[BPEE]'):
+                                wflag=1
+                        if line.strip().startswith('[AXVF]'):
+                                wflag=0
                         fout.write(line)
