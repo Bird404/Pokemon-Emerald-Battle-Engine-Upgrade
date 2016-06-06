@@ -5,6 +5,7 @@
 #include "./Defines/items.h"
 #include "./Defines/item_effects.h"
 #include "./Defines/pokes.h"
+#include "./Defines/flavours.h"
 
 
 #define Space 0x00
