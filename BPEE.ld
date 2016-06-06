@@ -91,6 +91,7 @@ display_string_in_battle = 0x0814E6F0|1;
 prepare_status_animation = 0x08033FBC|1;
 mark_buffer_bank_for_execution = 0x0803F800|1;
 truant_hook = 0x08042EDE|1;
+call_bc_move_exec = 0x08044458|1;
 __aeabi_idiv = 0x082E7B68|1; /*unsigned?*/
 __aeabi_uidiv = 0x082E7540|1; /*signed?*/
 b_std_message = 0x0803F964|1;
