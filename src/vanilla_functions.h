@@ -21,6 +21,7 @@ void* strcpy_xFF_terminated_0(void* destination, void* text_to_copy);
 void prepare_setattributes_in_battle(u8 buffer, u8 data_request, u8 unkown, u8 data_to_add, void* ptr_to_attribute);
 void battlescript_push();
 void battlescript_custom_push(void* ptr_to_push);
+void call_bc_move_exec(void* bs_ptr);
 u8 gender_from_pid(u16 species, u32 PID);
 u8 get_battle_side(u8 bank);
 u8 does_protect_affect_move(u16 move);
