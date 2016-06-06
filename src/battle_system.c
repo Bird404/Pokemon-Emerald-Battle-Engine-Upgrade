@@ -130,7 +130,7 @@ u8 should_cherrim_change(u8 bank)
     return effect;
 }
 
-void copy_status_condition_text(u8 bank)
+void copy_status_condition_text(u8 bank, u8 confusion)
 {
     u32* status_flag;
     if (battle_participants[bank].status.flags.sleep)
@@ -152,6 +152,10 @@ void copy_status_condition_text(u8 bank)
     else if (battle_participants[bank].status.flags.burn)
     {
         status_flag = &burn_status_flag;
+    }
+    else if (confusion && battle_participants[bank].status2 & 7)
+    {
+        status_flag = (void*)0x0831BC98;
     }
     else
     {
@@ -808,7 +812,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                         if (__umodsi3(rng(), 100) + 1 <= 30)
                         {
                             effect = true;
-                            copy_status_condition_text(friendly_bank);
+                            copy_status_condition_text(friendly_bank, 0);
                             execute_battle_script(&healer_bs);
                             battle_scripting.active_bank = friendly_bank;
                             active_bank = friendly_bank;
@@ -830,7 +834,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     if (battle_participants[bank].status.int_status)
                         {
                             effect = true;
-                            copy_status_condition_text(bank);
+                            copy_status_condition_text(bank, 0);
                             void* bs_shedskin = (void*) 0x082DB484;
                             execute_battle_script(bs_shedskin);
                             active_bank = bank;
@@ -1271,7 +1275,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     }
                     break;
                     STATUS_UPDATE:
-                        copy_status_condition_text(i);
+                        copy_status_condition_text(i, 0);
                         battle_participants[i].status.int_status = 0;
                         effect = true;
                         battlescript_push();
