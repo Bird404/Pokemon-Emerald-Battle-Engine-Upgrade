@@ -787,7 +787,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                         if (__umodsi3(rng(), 100) + 1 <= 30)
                         {   battle_participants[friendly_bank].status2 &= 0xF7FFFFFF;
                             effect = true;
-                            copy_status_condition_text(friendly_bank);
+                            copy_status_condition_text(friendly_bank,0);
                             execute_battle_script(&healer_bs);
                             battle_scripting.active_bank = friendly_bank;
                             active_bank = friendly_bank;
@@ -895,7 +895,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         {
             battle_participants[bank].status2 &= 0xF7FFFFFF;
             effect = true;
-            copy_status_condition_text(bank);
+            copy_status_condition_text(bank,0);
             script_ptr = (void*) 0x082DB484;
             execute_battle_script(script_ptr);
             active_bank = bank;
@@ -1263,7 +1263,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 }
                 if (common_effect==1)
                 {
-                    copy_status_condition_text(i);
+                    copy_status_condition_text(i,0);
                     battle_participants[i].status.int_status = 0;
                     effect=true;
                     battlescript_push();
@@ -1414,4 +1414,227 @@ void call_ability_effects()
 {
     ability_battle_effects(0, new_battlestruct.ptr->various.active_bank, 0, 0, 0);
     return;
+}
+
+u8 white_herb_effect(u8 bank)
+{
+    u8 effect = false;
+    for (u8 i = 0; i < 7; i++)
+    {
+        if (*(&battle_participants[bank].atk_buff + i) < 6)
+        {
+            effect = 5;
+            battle_scripting.active_bank = bank;
+            active_bank = bank;
+            bank_attacker = bank;
+            call_bc_move_exec((void*) 0x082DB7AE);
+        }
+    }
+    return effect;
+}
+
+u8 get_all_item_quality(u8 bank)
+{
+    if (battle_participants[bank].held_item == ITEM_ENIGMABERRY)
+        return enigma_berry_battle[bank].quality;
+    else
+        return get_item_quality(battle_participants[bank].held_item);
+}
+
+u8 item_battle_effects(u8 switchid, u8 bank, u8 hp_negator)
+{
+    u8 item_effect = get_item_effect(bank, 1);
+    u8 effect = false;
+    u8 eaten_berry = false;
+    u8 quality = get_all_item_quality(bank);
+    switch (switchid)
+    {
+    case 0: //switch in items
+        switch (item_effect)
+        {
+        case ITEM_EFFECT_AMULETCOIN:
+            if (!is_bank_from_opponent_side(bank))
+            {
+                battle_stuff_ptr.ptr->money_multiplier = 2;
+                effect = true;
+            }
+            break;
+        case ITEM_EFFECT_WHITEHERB:
+            effect = white_herb_effect(bank);
+            break;
+        }
+        break;
+    case 1: //battle end turn
+        switch (item_effect)
+        {
+            u8 flavour;
+        case ITEM_EFFECT_LEFTOVERS:
+            if (battle_participants[bank].current_hp <= (battle_participants[bank].max_hp >> 1) && !hp_negator)
+            {
+                effect = 4;
+                damage_loc = quality * -1;
+                call_bc_move_exec((void*)0x082DB7C4);
+                eaten_berry = 1;
+            }
+            break;
+        case ITEM_EFFECT_CHERIBERRY:
+            if (battle_participants[bank].status.flags.paralysis)
+            {
+                effect = 1;
+                battle_participants[bank].status.flags.paralysis = 0;
+                call_bc_move_exec((void*)0x082DB706);
+                eaten_berry = 1;
+            }
+            break;
+        case ITEM_EFFECT_CHESTOBERRY:
+            if (battle_participants[bank].status.flags.sleep)
+            {
+                effect = 1;
+                battle_participants[bank].status.flags.sleep = 0;
+                call_bc_move_exec((void*)0x082DB766);
+                eaten_berry = 1;
+            }
+            break;
+        case ITEM_EFFECT_PECHABERRY:
+            if (battle_participants[bank].status.flags.poison || battle_participants[bank].status.flags.toxic_poison)
+            {
+                effect = 1;
+                battle_participants[bank].status.flags.poison = 0;
+                battle_participants[bank].status.flags.toxic_poison = 0;
+                call_bc_move_exec((void*)0x082DB71E);
+                eaten_berry = 1;
+            }
+            break;
+        case ITEM_EFFECT_RAWSTBERRY:
+            if (battle_participants[bank].status.flags.burn)
+            {
+                effect = 1;
+                battle_participants[bank].status.flags.burn = 0;
+                call_bc_move_exec((void*)0x082DB736);
+                eaten_berry = 1;
+            }
+            break;
+        case ITEM_EFFECT_ASPEARBERRY:
+            if (battle_participants[bank].status.flags.freeze)
+            {
+                effect = 1;
+                battle_participants[bank].status.flags.freeze = 0;
+                call_bc_move_exec((void*)0x082DB74E);
+                eaten_berry = 1;
+            }
+            break;
+        case ITEM_EFFECT_LEPPABERRY:
+            if (!hp_negator)
+            {
+                for (u8 i = 0; i < 4; i++)
+                {
+                    if (battle_participants[bank].moves[i] && battle_participants[bank].current_pp[i] == 0)
+                    {
+                        effect = 3;
+                        eaten_berry = 1;
+                        break;
+                    }
+                }
+            }
+            break;
+        case ITEM_EFFECT_PERSIMBERRY:
+            if (battle_participants[bank].status2 & 7)
+            {
+                battle_participants[bank].status2 = battle_participants[bank].status2 & (0 - 8);
+                effect = 2;
+                call_bc_move_exec((void*)0x82DB77E);
+                eaten_berry = 1;
+            }
+            break;
+        case ITEM_EFFECT_LUMBERRY:
+            if (battle_participants[bank].status.int_status || battle_participants[bank].status2 & 7)
+            {
+                copy_status_condition_text(bank, 1);
+                battle_participants[bank].status2 = battle_participants[bank].status2 & (0 - 8);
+                battle_participants[bank].status.int_status = 0;
+                eaten_berry = 1;
+                effect = 1;
+                call_bc_move_exec((void*)0x082DB794);
+            }
+            break;
+        case ITEM_EFFECT_FIGYBERRY:
+            flavour = SPICY_PREFERENCE;
+            goto HEAL_CONFUSE;
+        case ITEM_EFFECT_WIKIBERRY:
+            flavour = DRY_PREFERENCE;
+            goto HEAL_CONFUSE;
+        case ITEM_EFFECT_MAGOBERRY:
+            flavour = SWEET_PREFERENCE;
+            goto HEAL_CONFUSE;
+        case ITEM_EFFECT_AGUAVBERRY:
+            flavour = BITTER_PREFERENCE;
+            goto HEAL_CONFUSE;
+        case ITEM_EFFECT_IAPAPABERRY:
+            flavour = SOUR_PREFERENCE;
+        HEAL_CONFUSE:
+            if (battle_participants[bank].current_hp <= (battle_participants[bank].max_hp >> 1) && !hp_negator)
+            {
+                s32 damage = (battle_participants[bank].max_hp / quality);
+                if (damage == 0)
+                    damage = 1;
+                damage_loc = damage * -1;
+                effect = 4;
+                eaten_berry = 1;
+                if (get_poke_flavour_relation(battle_participants[bank].pid, flavour) == FLAVOUR_DISLIKED)
+                {
+                    call_bc_move_exec((void*)0x082DB824);
+                }
+                else
+                {
+                    call_bc_move_exec((void*)0x082DB7C4);
+                }
+                battle_text_buff1[0] = 0xFD;
+                battle_text_buff1[1] = 8;
+                battle_text_buff1[2] = 1;
+                battle_text_buff1[3] = 0xFF;
+            }
+            break;
+        case ITEM_EFFECT_ORANBERRY:
+            flavour = 0;
+            goto STAT_RAISE;
+        case ITEM_EFFECT_GANLONBERRY:
+            flavour = 1;
+            goto STAT_RAISE;
+        case ITEM_EFFECT_SALACBERRY:
+            flavour = 2;
+            goto STAT_RAISE;
+        case ITEM_EFFECT_PETAYABERRY:
+            flavour = 3;
+            goto STAT_RAISE;
+        case ITEM_EFFECT_APICOTBERRY:
+            flavour = 4;
+        STAT_RAISE:
+            if (battle_participants[bank].max_hp / quality >= battle_participants[bank].current_hp && !hp_negator)
+            {
+                if (*(&battle_participants[bank].atk_buff + flavour) != 0xC)
+                {
+                    effect = 5;
+                    eaten_berry = 1;
+                    call_bc_move_exec((void*)0x82DB84E);
+                    battle_text_buff1[0] = 0xFD;
+                    battle_text_buff1[1] = 0x5;
+                    battle_text_buff1[2] = flavour + 1;
+                    battle_text_buff1[3] = 0xFF;
+                    bank_partner_def = bank;
+                    battle_scripting.stat_changer = 0x11 + flavour;
+                    battle_scripting.field10 = 0xF + flavour;
+                    battle_scripting.field11 = hp_negator;
+                }
+            }
+            break;
+
+
+        }
+
+    }
+    if (eaten_berry)
+    {
+        new_battlestruct.ptr->bank_affecting[bank].eaten_berry = 1;
+    }
+    return effect;
 }
