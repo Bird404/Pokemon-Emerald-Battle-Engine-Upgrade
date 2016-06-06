@@ -94,6 +94,7 @@ truant_hook = 0x08042EDE|1;
 __aeabi_idiv = 0x082E7B68|1; /*unsigned?*/
 __aeabi_uidiv = 0x082E7540|1; /*signed?*/
 b_std_message = 0x0803F964|1;
+get_poke_flavour_relation = 0x0806E880|1;
 
 /*Expandable tables*/
 battle_strings_table = 0x085CC270;
