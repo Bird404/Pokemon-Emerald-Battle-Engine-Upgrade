@@ -3,9 +3,18 @@
 #include "battle_locations.h"
 #include "battle_structs.h"
 #include "vanilla_functions.h"
-#include "battlescripts.h"
 #include "new_battle_struct.h"
-#include "move_table.h"
+
+#define MOVE_PHYSICAL 0
+#define MOVE_SPECIAL 1
+#define MOVE_STATUS 2
+
+extern struct move_info move_table[1024];
+extern u16 reckless_moves_table[];
+extern u16 ironfist_moves_table[];
+extern u16 sheerforce_moves_table[];
+extern u16 biting_moves_table[];
+extern u16 megalauncher_moves_table[];
 
 #define MOVE_PHYSICAL 0
 #define MOVE_SPECIAL 1
