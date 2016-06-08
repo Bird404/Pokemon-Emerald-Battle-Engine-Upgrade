@@ -3,9 +3,8 @@
 #include "battle_locations.h"
 #include "battle_structs.h"
 #include "vanilla_functions.h"
-#include "battlescripts.h"
+#include "static_resources.h"
 #include "new_battle_struct.h"
-#include "move_table.h"
 
 u8 get_item_effect(u8 bank, u8 check_negating_effects)
 {
@@ -825,7 +824,13 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     }
                 }
                 break;
-            case ABILITY_BAD_DREAMS: //to do
+            case ABILITY_BAD_DREAMS:
+            {
+                effect = true;
+                battle_stuff_ptr.ptr->intimidate_user=bank;
+                execute_battle_script(bad_dreams_bs);
+            }
+            break;
                 break;
             case ABILITY_SPEED_BOOST:
                 if (battle_participants[bank].spd_buff != 0xC && disable_structs[bank].is_first_turn != 2)
@@ -948,6 +953,8 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             {
                 if (protect_structs[bank_attacker].flag2_notfirststrike)
                     adder = 1;
+                u8 stat=0;
+
                 switch (last_used_ability)
                 {
                 case ABILITY_WATER_ABSORB:
@@ -969,55 +976,67 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                         battlescripts_curr_instruction = script_ptr;
                     }
                     break;
+                case ABILITY_LIGHTNING_ROD:
+                    if (move_type == TYPE_ELECTRIC)
+                    {
+                        common_effect=2;
+                        stat=4;
+                    }
+                    break;
+                case ABILITY_STORM_DRAIN:
+                    if (move_type == TYPE_WATER)
+                    {
+                        common_effect=2;
+                        stat=4;
+                    }
+                    break;
                 case ABILITY_SAP_SIPPER:
                     if (move_type == TYPE_GRASS)
                     {
-                        if (battle_participants[bank].atk_buff != 0xC)
-                        {
-                            script_ptr = &sapsipperboost_bs;
-                            battle_participants[bank].atk_buff++;
-                        }
-                        else
-                        {
-                            script_ptr = &sapsipperimmunity_bs;
-                        }
-                        script_ptr += adder;
-                        effect = 1;
-                        battlescripts_curr_instruction = script_ptr;
+                        common_effect=2;
+                        stat=1;
                     }
                     break;
                 case ABILITY_MOTOR_DRIVE:
                     if (move_type == TYPE_ELECTRIC)
                     {
-                        if (battle_participants[bank].spd_buff != 0xC)
-                        {
-                            script_ptr = &motordriveboost_bs;
-                            battle_participants[bank].spd_buff++;
-                        }
-                        else
-                        {
-                            script_ptr = &motordriveimmunity_bs;
-                        }
-                        script_ptr += adder;
-                        effect = 1;
-                        battlescripts_curr_instruction = script_ptr;
+                        common_effect=2;
+                        stat=3;
                     }
                     break;
                 }
-            }
-            if(common_effect)
-            {
-                if (battle_participants[bank].max_hp == battle_participants[bank].current_hp)
-                    script_ptr = (void*) 0x082DB591;
-                else
+                if(common_effect==1)
                 {
-                    script_ptr = (void*) 0x082DB56E;
-                    damage_loc = get_1_4_of_max_hp(bank) * (-1);
+                    if (battle_participants[bank].max_hp == battle_participants[bank].current_hp)
+                        script_ptr = (void*) 0x082DB591;
+                    else
+                    {
+                        script_ptr = (void*) 0x082DB56E;
+                        damage_loc = get_1_4_of_max_hp(bank) * (-1);
+                    }
+                    script_ptr += adder;
+                    battlescripts_curr_instruction = script_ptr;
+                    effect = true;
                 }
-                script_ptr += adder;
-                battlescripts_curr_instruction = script_ptr;
-                effect = true;
+                else if(common_effect==2)
+                {
+                        u8* stat_ptr = &battle_participants[bank].hp_buff;
+                        stat_ptr += stat;
+
+                        if((*stat_ptr)!=0xC)
+                        {
+                            battle_scripting.stat_changer=0x20+stat;
+                            *stat_ptr +=1 ;
+                            script_ptr = &absorb_ability_boost_bs;
+                        }
+                        else
+                            script_ptr = &absorb_ability_immune_bs;
+                        script_ptr += adder;
+                        effect = 1;
+                        battlescripts_curr_instruction = script_ptr;
+                }
             }
+
             break;
     case 4: //move end turn abilities
         {
