@@ -223,7 +223,6 @@ struct status_3{
     u32 mud_sport : 1; //x10 000
     u32 watersport : 1; //x20 000
     u32 underwater : 1; //x40 000
-    u32 switchin_ability_lock : 1;
 };
 
 extern struct status_3 status3[4];
@@ -336,4 +335,36 @@ struct side_affecting_hword{
 
 extern struct side_affecting_hword side_affecting_halfword[2];
 
+struct prop_flags{
+    u8 makes_contact : 1;//1
+    u8 affected_by_protect : 1;//2
+    u8 affected_by_snatch : 1;//4
+    u8 affected_by_magic_coat : 1;//8
+    u8 affected_by_mirrormove :1;//x10
+    u8 affected_by_kingsrock :1;//x20
+    u8 raised_crit_ratio :1;//x40
+    u8 unused_bit : 1;//x80
+};
+
+union move_flags{
+    u8 int_flag;
+    struct prop_flags flags;
+};
+
+struct move_info{
+    u8 script_id;
+    u8 base_power;
+    u8 type;
+    u8 accuracy;
+    u8 pp;
+    u8 effect_chance;
+    u8 target;
+    s8 priority;
+    union move_flags move_flags;
+    u8 padd1;
+    u8 split;
+    u8 second_type;
+};
+
+//extern struct move_info move_info;
 #endif /* B_STRUCTS */
