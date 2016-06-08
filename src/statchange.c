@@ -3,7 +3,6 @@
 #include "battle_locations.h"
 #include "battle_structs.h"
 #include "vanilla_functions.h"
-#include "battlescripts.h"
 #include "new_battle_struct.h"
 
 #define STAT_ATTACK 1
