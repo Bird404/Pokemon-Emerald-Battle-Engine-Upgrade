@@ -41,6 +41,7 @@ animation_bank_attacker = 0x02038436;
 animation_bank_target = 0x02038437;
 previously_used_move = 0x02024240;
 move_anim_cursor = 0x020383F0;
+another_active_bank = 0x0202420F;
 
 current_move = 0x020241EA;
 last_used_move = 0x020241EC;
@@ -96,6 +97,9 @@ __aeabi_idiv = 0x082E7B68|1; /*unsigned?*/
 __aeabi_uidiv = 0x082E7540|1; /*signed?*/
 b_std_message = 0x0803F964|1;
 get_poke_flavour_relation = 0x0806E880|1;
+jump_if_cannot_switch_atk4F = 0x0804CBB0|1;
+battlescript_pop = 0x0803FB24|1;
+set_move_effect = 0x08048760|1;
 
 /*Expandable tables*/
 battle_strings_table = 0x085CC270;
