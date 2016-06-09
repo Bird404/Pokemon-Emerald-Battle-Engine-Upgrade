@@ -238,7 +238,7 @@ u32 damage_type_effectiveness_update (u8 attacking_type, u8 defending_type, u8 a
         {
             effect = 10;
         }
-        else if ((defending_type == TYPE_FLYING && effect == 0) || battle_participants[def_bank].ability_id == ABILITY_LEVITATE || (get_item_effect(def_bank, true) == ITEM_EFFECT_AIRBALLOON && !new_battlestruct.ptr->bank_affecting[def_bank].popped_air_balloon) || new_battlestruct.ptr->bank_affecting[def_bank].magnet_rise || new_battlestruct.ptr->bank_affecting[def_bank].telekinesis)
+        else if ((defending_type == TYPE_FLYING && effect == 0) || battle_participants[def_bank].ability_id == ABILITY_LEVITATE || (get_item_effect(def_bank, true) == ITEM_EFFECT_AIRBALLOON) || new_battlestruct.ptr->bank_affecting[def_bank].magnet_rise || new_battlestruct.ptr->bank_affecting[def_bank].telekinesis)
         {
             if (new_battlestruct.ptr->bank_affecting[def_bank].smacked_down)
             {
