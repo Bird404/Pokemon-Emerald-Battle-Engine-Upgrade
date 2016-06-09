@@ -4,35 +4,36 @@
 #include "types.h"
 
 struct bank_affecting{
-    u32 embargo : 1;
-    u32 electrify : 1;
-    u32 telekinesis: 1;
-    u32 magnet_rise : 1;
-    u32 heal_block : 1;
-    u32 aqua_ring : 1;
-    u32 powder : 1;
-    u32 smacked_down : 1;
-    u32 quashed : 1;
-    u32 just_switched_in : 1;
-    u32 taken_damage : 1;
-    u32 ally_fainted_last_turn : 1;
-    u32 miracle_eyed : 1;
-    u32 spiky_shield : 1;
-    u32 kings_shield : 1;
-    u32 popped_air_balloon : 1;
-    u32 sturdied : 1;
-    u32 life_orbed : 1;
-    u32 focus_sashed_or_banded : 1;
-    u32 sheerforce_bonus : 1;
-    u32 eaten_berry : 1;
-    u32 sunshine_form : 1;
-    u32 cherrim_transformed : 1;
-    u32 gastro_acided : 1;
+    u8 embargo : 1;
+    u8 electrify : 1;
+    u8 telekinesis: 1;
+    u8 magnet_rise : 1;
+    u8 heal_block : 1;
+    u8 aqua_ring : 1;
+    u8 powder : 1;
+    u8 smacked_down : 1;
+    u8 quashed : 1;
+    u8 just_switched_in : 1;
+    u8 taken_damage : 1;
+    u8 ally_fainted_last_turn : 1;
+    u8 miracle_eyed : 1;
+    u8 spiky_shield : 1;
+    u8 kings_shield : 1;
+    u8 sturdied : 1;
+    u8 life_orbed : 1;
+    u8 focus_sashed_or_banded : 1;
+    u8 sheerforce_bonus : 1;
+    u8 eaten_berry : 1;
+    u8 sunshine_form : 1;
+    u8 cherrim_transformed : 1;
+    u8 gastro_acided : 1;
     u8 lowered_stats : 1;
     u8 sky_drop_attacker : 1;
     u8 sky_drop_target : 1;
     u8 gem_boost : 1;
     u8 me_first : 1;
+    u8 weakness2 : 1;
+    u8 ate_bonus : 1;
 
     u8 autonomize_uses;
     u8 slowstart_duration;
@@ -40,6 +41,7 @@ struct bank_affecting{
     u8 aegislash_form; //0 = not aegi, 1 = defensive, 2 = attacking
     u8 telekinesis_duration;
     u8 magnet_rise_duration;
+    u8 healblock_duration;
     u8 killer_bank;
     u8 bank_that_lowered_stats;
     u8 same_move_used;
