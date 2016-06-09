@@ -169,9 +169,13 @@ struct battle_stuff{
     u8 field_55[42]; //0x55-0x7E
     u8 castform_switch_form; //0x7F
     u8 chosen_move_position[4]; //0x80
-    u8 field_84[52]; //0x84-0xB7
+    u8 field_84[46]; //0x84-0xB1
+    u8 synchronize_effect_chooser; //0xB2
+    u8 field_B3[5];
     u16 used_held_items[4]; //0xB8-0xBF
-    u8 field_C0[24]; //0xC0-0xD7
+    u8 field_C0[8]; //0xC0-0xC7
+    u16 choiced_move[4]; //0xC8-0xCF (checked in cmd49)
+    u16 changed_held_items[4]; //0xD0-0xD8 (later written to battlestruct in cmd49)
     u8 intimidate_user; //0xD8
     u8 switch_in_item_bank_counter; //0xD9
     u8 field_DA[200]; //0xDA-0x1A1
@@ -193,9 +197,8 @@ struct special_status{
     u8 flag20 : 1;
     u8 flag40 : 1;
     u8 focus_banded : 1;
-    u16 field1;
-    u8 field3;
-    u32 shellbell_related_butnotsurewhatitis;
+    u8 field1[3];
+    u32 moveturn_losthp;
     u32 moveturn_losthp_physical;
     u32 moveturn_losthp_special;
     u8 moveturn_physical_bank;
