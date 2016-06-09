@@ -50,11 +50,20 @@ u8 got_burned_text[] = {BuffCharac, 15, Space, g_, o_, t_, Space, b_, u_, r_, n_
 u8 got_badlypoisoned_text[] = {BuffCharac, 15, Space, g_, o_, t_, Space, b_, a_, d_, l_, y_, 0xFE, p_, o_, i_, s_, o_, n_, e_, d_, Exclam, 0xFF};
 u8 airballoon_text[] = {BuffCharac, 18, Space, i_, s_, Space, f_, l_, o_, a_, t_, i_, n_, g_, Exclam, 0xFF};
 u8 bad_dreams_text[] = {BuffCharac, 0x10, Space, i_, s_, Space, t_, o_, r_, m_, e_, n_, t_, e_, d_, Space, b_, y_, JumpLine, b_, a_, d_, Space, d_, r_, e_, a_, m_, s_, Exclam, Termin};
+u8 hurtbyitem_text[] = {BuffCharac, 15, Space, i_,s_, Space, h_, u_, r_, t_, Space, b_, y_, Space, BuffCharac, 22, Exclam,0xFF};
+u8 got_burned_text[] = {BuffCharac, 15, Space, g_, o_, t_, Space, b_, u_, r_, n_, e_, d_, Exclam, 0xFF};
+u8 got_badlypoisoned_text[] = {BuffCharac, 15, Space, g_, o_, t_, Space, b_, a_, d_, l_, y_, 0xFE, p_, o_, i_, s_, o_, n_, e_, d_, Exclam, 0xFF};
+u8 airballoon_text[] = {BuffCharac, 18, Space, i_, s_, Space, f_, l_, o_, a_, t_, i_, n_, g_, Exclam, 0xFF};
+u8 item_text[] = {BuffCharac, 16, Apos, Space, BuffCharac, 22, Exclam, 0xFF};
+u8 rockyhelmet_text[] = {BuffCharac, 15, Space, i_, s_, Space, h_, u_, r_, t_, Space, b_, y_, JumpLine, BuffCharac, 16, Apos, Space, BuffCharac, 22, Exclam, 0xFF};
+u8 popped_text[] = {BuffCharac, 16, Apos, Space, BuffCharac, 22, Space, p_, o_, p_, p_, e_, d_, Exclam, 0xFF};
+u8 fellinlove_text[] = {BuffCharac, 15, Space, f_,e_,l_,l_, Space, i_, n_, Space, l_, o_, v_, e_, JumpLine, w_, i_, t_, h_, Space, BuffCharac, 16, Exclam, 0xFF};
+u8 healblockend_text[] = {H_, e_, a_, l_, Space, B_, l_, o_, c_, k_, Space, f_, o_, r_, BuffCharac, 18, JumpLine, h_, a_, s_, Space, e_, n_, d_, e_, d_, Exclam, 0xFF};
 
 void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activation_text, &heavyrain_activation_text, &mysticalaircurrent_activation_text, &forewarn_text, &slowstart_text, &anticipation_text, &dryskin_damage_text, &solarpower_text, &harvest_text, &healer_text, &pickup_text, &moldbreaker_text, &turboblaze_text, &terravolt_text, &downloadatk_text,
 &downloadspatk_text, &absorbabilityboost_text , &absorbabilityimmune_text, &userteam_text/*0x190*/, &foeteam_text/*0x191*/,
 &aftermath_text, &pickpocket_text, &mummy_text, &target_ability, &cursedbody_text, &drastically_text, &pressure_text, &unnerve_text, &aurabreak_text, &fairyaura_text, &darkaura_text, &frisk_text, //0x19D
-&hurtbyitem_text, &got_burned_text, &got_badlypoisoned_text, &airballoon_text, &bad_dreams_text};
+&hurtbyitem_text, &got_burned_text, &got_badlypoisoned_text, &airballoon_text, &bad_dreams_text, &item_text, &rockyhelmet_text, &popped_text, &fellinlove_text, &healblockend_text};
 
 void battle_string_loader(u16 string_id)
 {
@@ -182,8 +191,55 @@ void bad_dreams_damage_calc()
     damage_loc=get_1_8_of_max_hp(bank_target);
 }
 
+void weaknesspolicy()
+{
+    if (battle_participants[battle_scripting.active_bank].sp_atk_buff != 0xC)
+    {
+        battlescript_push();
+        battlescripts_curr_instruction = &weaknesspolicyspattack;
+    }
+    if (battle_participants[battle_scripting.active_bank].atk_buff != 0xC)
+    {
+        battlescript_push();
+        battlescripts_curr_instruction = &weaknesspolicyattack;
+    }
+    return;
+}
+
+void mentalherb()
+{
+    u8 bank = battle_scripting.active_bank;
+    if (disable_structs[bank].disable_timer)
+    {
+        disable_structs[bank].disable_timer = 0;
+        disable_structs[bank].disabled_move = 0;
+        battlescript_push();
+        battlescripts_curr_instruction = &disable_end_bs;
+    }
+    if (disable_structs[bank].encore_timer)
+    {
+        disable_structs[bank].encore_timer = 0;
+        disable_structs[bank].encored_move = 0;
+        battlescript_push();
+        battlescripts_curr_instruction = &encore_end_bs;
+    }
+    if (disable_structs[bank].taunt_timer)
+    {
+        disable_structs[bank].taunt_timer = 0;
+        battlescript_push();
+    }
+    if (new_battlestruct.ptr->bank_affecting[bank].heal_block)
+    {
+        new_battlestruct.ptr->bank_affecting[bank].heal_block = 0;
+        new_battlestruct.ptr->bank_affecting[bank].healblock_duration = 0;
+        battlescript_push();
+        battlescripts_curr_instruction = &healblock_end_bs;
+    }
+    return;
+}
+
 void* callasm_table[] = {&call_ability_effects, &apply_burn_animation, &change_attacker_item, &try_to_lower_def, &try_to_raise_spd,
-&changestatvar1, &changestatvar2, &frisk_target_item, &set_stat_msg_buffer, &set_type_msg_buffer, &set_team_msg_buffer, &bad_dreams_damage_calc};
+&changestatvar1, &changestatvar2, &frisk_target_item, &set_stat_msg_buffer, &set_type_msg_buffer, &set_team_msg_buffer, &bad_dreams_damage_calc, &weaknesspolicy, &mentalherb};
 
 void callasm_cmd()
 {
