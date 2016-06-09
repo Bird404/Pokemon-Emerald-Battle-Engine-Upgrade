@@ -193,7 +193,9 @@ struct special_status{
     u8 flag20 : 1;
     u8 flag40 : 1;
     u8 focus_banded : 1;
-    u8 field1[7];
+    u16 field1;
+    u8 field3;
+    u32 shellbell_related_butnotsurewhatitis;
     u32 moveturn_losthp_physical;
     u32 moveturn_losthp_special;
     u8 moveturn_physical_bank;
