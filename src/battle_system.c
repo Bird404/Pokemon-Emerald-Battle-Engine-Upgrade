@@ -977,8 +977,9 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     }
                     break;
                 case ABILITY_LIGHTNING_ROD:
-                    if (move_type == TYPE_ELECTRIC)
+                    if (move_type == TYPE_ELECTRIC && (!is_of_type(bank,TYPE_GROUND) || get_item_effect(bank,1)==ITEM_EFFECT_RINGTARGET))
                     {
+
                         common_effect=2;
                         stat=4;
                     }
@@ -1020,29 +1021,29 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 }
                 else if(common_effect==2)
                 {
-                        u8* stat_ptr = &battle_participants[bank].hp_buff;
-                        stat_ptr += stat;
+                    u8* stat_ptr = &battle_participants[bank].hp_buff;
+                    stat_ptr += stat;
 
-                        if((*stat_ptr)!=0xC)
-                        {
-                            battle_scripting.stat_changer=0x20+stat;
-                            *stat_ptr +=1 ;
-                            script_ptr = &absorb_ability_boost_bs;
-                        }
-                        else
-                            script_ptr = &absorb_ability_immune_bs;
-                        script_ptr += adder;
-                        effect = 1;
-                        battlescripts_curr_instruction = script_ptr;
+                    if((*stat_ptr)!=0xC)
+                    {
+                        battle_scripting.stat_changer=0x20+stat;
+                        *stat_ptr +=1 ;
+                        script_ptr = &absorb_ability_boost_bs;
+                    }
+                    else
+                        script_ptr = &absorb_ability_immune_bs;
+                    script_ptr += adder;
+                    effect = true;
+                    battlescripts_curr_instruction = script_ptr;
                 }
             }
 
             break;
     case 4: //move end turn abilities
         {
-            if (has_ability_effect(bank, 0, 1) && !(move_outcome.not_affected || move_outcome.failed || move_outcome.missed) && battle_participants[bank_attacker].current_hp && (special_statuses[bank_target].moveturn_losthp_physical || special_statuses[bank_target].moveturn_losthp_special || last_used_ability == ABILITY_DEFIANT || last_used_ability ==  ABILITY_COMPETITIVE))
+            if (has_ability_effect(bank, 0, 1) && !(move_outcome.not_affected || move_outcome.failed || move_outcome.missed)
+                && battle_participants[bank_attacker].current_hp && (special_statuses[bank_target].moveturn_losthp))
             {
-                u8* stat_pointer;
                 switch (last_used_ability)
                 {
                 case ABILITY_STATIC:
@@ -1080,18 +1081,29 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                         battlescripts_curr_instruction = &aftermath_bs;
                     }
                     break;
-                case ABILITY_PICKPOCKET: //magician will need to be hooked at atk49 move end turn, the function that calls this case
-                    if (battle_participants[bank_attacker].held_item && contact && (!battle_participants[bank].held_item) && (!new_battlestruct.ptr->bank_affecting[bank_attacker].sheerforce_bonus) && (multihit_counter == 1 || multihit_counter == 0) && battle_participants[bank_attacker].ability_id != ABILITY_SUCTION_CUPS)
+                case ABILITY_PICKPOCKET:
+                    if (!contact || battle_participants[bank].held_item
+                        || (new_battlestruct.ptr->bank_affecting[bank_attacker].sheerforce_bonus)
+                        || (multihit_counter != 1 && multihit_counter != 0)
+                        || (battle_participants[bank_attacker].ability_id == ABILITY_STICKY_HOLD
+                            && has_ability_effect(bank_attacker,0,1)))
+                        break;
+                    u16 *user_held_item=&battle_participants[bank_attacker].held_item;
+                    if((*user_held_item)!=0 && (*user_held_item)!=0xAF)
                     {
-                        last_used_item = battle_participants[bank_attacker].held_item;
-                        battle_participants[bank].held_item = battle_participants[bank_attacker].held_item;
-                        battle_participants[bank_attacker].held_item = 0;
+                        last_used_item = *user_held_item;
+                        battle_stuff_ptr.ptr->choiced_move[bank_attacker]=0;
+                        battle_participants[bank].held_item = last_used_item;
+                        *user_held_item = 0;
                         battlescript_push();
                         battlescripts_curr_instruction = &pickpocket_bs;
                         effect = true;
                         active_bank = bank;
-                        prepare_setattributes_in_battle(0, 2, 0, 4, &battle_participants[bank].held_item);
-                        mark_buffer_bank_for_execution(bank);
+                        prepare_setattributes_in_battle(0, 2, 0, 2, &battle_participants[active_bank].held_item);
+                        mark_buffer_bank_for_execution(active_bank);
+                        active_bank = bank_attacker;
+                        prepare_setattributes_in_battle(0, 2, 0, 2, &battle_participants[active_bank].held_item);
+                        mark_buffer_bank_for_execution(active_bank);
                     }
                     break;
                 case ABILITY_MUMMY:
@@ -1193,7 +1205,8 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                         }
                     }
                     break;
-                case ABILITY_DEFIANT:
+            // to be shifted to printfromtable command
+             /*   case ABILITY_DEFIANT:
                     battle_scripting.stat_changer = 0x21;
                     stat_pointer = &battle_participants[bank].atk_buff;
                     goto STAT_CHANGE;
@@ -1216,21 +1229,20 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                             }
                         }
                     }
-                    break;
-
-
+                    break;*/
                 }
+                if (common_effect && contact && percent_chance(30))
+                {
+                    battle_communication_struct.move_effect = move_effect;
+                    battlescript_push();
+                    script_ptr = (void*) 0x082DB67C;
+                    battlescripts_curr_instruction = script_ptr;
+                    hitmarker |= HITMAKRER_IGNORE_SAFEGUARD;
+                    effect = true;
+                }
+                break;
             }
-            if (common_effect && contact && percent_chance(30))
-            {
-                battle_communication_struct.move_effect = move_effect;
-                battlescript_push();
-                script_ptr = (void*) 0x082DB67C;
-                battlescripts_curr_instruction = script_ptr;
-                hitmarker |= HITMAKRER_IGNORE_SAFEGUARD;
-                effect = true;
-            }
-            break;
+
         }
     case 5: //status immunities
         for (u8 i = 0; i < no_of_all_banks; i++)
@@ -1302,11 +1314,74 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         {
             break;
         }
+    case 7: //target's synchronize
+        adder=0x40;
+    case 8: //user's synchronize after static etc.
+        if(battle_participants[bank].ability_id==ABILITY_SYNCHRONIZE && has_ability_effect(bank,0,1) && hitmarker&0x4000)
+        {
+            effect=true;
+            hitmarker &= 0xFFFFBFFF;
+            battle_stuff_ptr.ptr->synchronize_effect_chooser &= 0x3F;
+            battle_communication_struct.move_effect=adder+battle_stuff_ptr.ptr->synchronize_effect_chooser;
+            battle_scripting.active_bank=bank;
+            battlescript_push();
+            battlescripts_curr_instruction=(void *)(0x82DB67F);
+            hitmarker |= 0x2000;
+        }
+        break;
+    case 10:
+        if (has_ability_effect(bank, 0, 1) && !(move_outcome.not_affected || move_outcome.failed || move_outcome.missed)
+                && battle_participants[bank_attacker].current_hp && (special_statuses[bank_target].moveturn_losthp))
+        {
+            switch(last_used_ability)
+            {
+                case ABILITY_MAGICIAN:
+                    if (battle_participants[bank].held_item || current_move==MOVE_DOOM_DESIRE || current_move==MOVE_FUTURE_SIGHT
+                        || (battle_participants[bank_target].ability_id == ABILITY_STICKY_HOLD && has_ability_effect(bank_target,0,1)))
+                        break;
+                    u16 *target_held_item=&battle_participants[bank_target].held_item;
+                    if((*target_held_item)!=0 && (*target_held_item)!=0xAF)
+                    {
+                        last_used_item = *target_held_item;
+                        battle_stuff_ptr.ptr->choiced_move[bank_target]=0;
+                        battle_participants[bank].held_item = last_used_item;
+                        *target_held_item = 0;
+                        battlescript_push();
+                        battlescripts_curr_instruction = (void *)(0x82DB422); // to add flavour text
+                        effect = true;
+                        active_bank = bank;
+                        prepare_setattributes_in_battle(0, 2, 0, 2, &battle_participants[active_bank].held_item);
+                        mark_buffer_bank_for_execution(active_bank);
+                        active_bank = bank_target;
+                        prepare_setattributes_in_battle(0, 2, 0, 2, &battle_participants[active_bank].held_item);
+                        mark_buffer_bank_for_execution(active_bank);
+                    }
+                    break;
+                case ABILITY_POISON_TOUCH:
+                    if(contact && percent_chance(30))
+                    {
+                        battle_communication_struct.move_effect=2;
+                        battlescript_push();
+                        battlescripts_curr_instruction = (void *) 0x082DB67F;
+                    }
+                    break;
+                case ABILITY_STENCH:
+                    if(contact && percent_chance(10) && get_item_effect(bank,1)!=ITEM_EFFECT_KINGSROCK)
+                    {
+                        battle_communication_struct.move_effect=8;
+                        battlescript_push();
+                        battlescripts_curr_instruction = (void *) 0x082DB67F;
+                    }
+                    break;
+            }
+        }
+        break;
     case 12: //check opposing field for ability
     {
         for (u8 i = 0; i < no_of_all_banks; i++)
         {
-            if (is_bank_from_opponent_side(i) != bank_side && battle_participants[i].ability_id == ability_to_check)
+            if (is_bank_from_opponent_side(i) != bank_side && battle_participants[i].ability_id == ability_to_check
+                && has_ability_effect(i,special_cases_argument,1))
             {
                 last_used_ability = ability_to_check;
                 effect = i + 1;
@@ -2004,17 +2079,17 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 }
                 break;
             case ITEM_EFFECT_SHELLBELL:
-                if (special_statuses[bank_target].shellbell_related_butnotsurewhatitis && special_statuses[bank_target].shellbell_related_butnotsurewhatitis != 0xFF && bank_target != bank_attacker && battle_participants[bank_target].current_hp != battle_participants[bank_target].max_hp)
+                if (special_statuses[bank_target].moveturn_losthp && special_statuses[bank_target].moveturn_losthp != 0xFF && bank_target != bank_attacker && battle_participants[bank_target].current_hp != battle_participants[bank_target].max_hp)
                 {
                     effect = 1;
                     another_active_bank = bank_attacker;
                     bank = bank_attacker;
                     battle_scripting.active_bank = bank_attacker;
-                    u32 damage = __udivsi3(special_statuses[bank_target].shellbell_related_butnotsurewhatitis, quality);
+                    u32 damage = __udivsi3(special_statuses[bank_target].moveturn_losthp, quality);
                     if (damage == 0)
                         damage = 1;
                     damage_loc = damage * -1;
-                    special_statuses[bank_target].shellbell_related_butnotsurewhatitis = 0;
+                    special_statuses[bank_target].moveturn_losthp = 0;
                     battlescript_push();
                     battlescripts_curr_instruction = (void*)0x82DB7F7;
                 }
@@ -2038,3 +2113,4 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
     }
     return effect;
 }
+
