@@ -20,6 +20,7 @@ u8 get_item_pocket_id(u16 itemID);
 void* strcpy_xFF_terminated_0(void* destination, void* text_to_copy);
 void prepare_setattributes_in_battle(u8 buffer, u8 data_request, u8 unkown, u8 data_to_add, void* ptr_to_attribute);
 void battlescript_push();
+void battlescript_pop();
 void battlescript_custom_push(void* ptr_to_push);
 void call_bc_move_exec(void* bs_ptr);
 void b_std_message(u16 stringID, u8 bank);
@@ -32,6 +33,8 @@ u16 get_height_or_weight(u16 national_dex_index, u8 which_one);
 u8 get_bank_turn_order(u8 bank);
 u8 count_alive_pokes_on_side(u8 side);
 s8 get_poke_flavour_relation(u32 pid, u8 flavour);
+void jump_if_cannot_switch_atk4F();
+void set_move_effect(u8 a1, u8 a2);
 
 u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);
