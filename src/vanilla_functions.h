@@ -35,6 +35,9 @@ u8 count_alive_pokes_on_side(u8 side);
 s8 get_poke_flavour_relation(u32 pid, u8 flavour);
 void jump_if_cannot_switch_atk4F();
 void set_move_effect(u8 a1, u8 a2);
+u8 accuracy_helper_function(u16 move);
+void jump_if_move_has_no_effect(u8 howmuchtoadd, u16 move);
+void check_wonderguard_levitate_damage();
 
 u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);
