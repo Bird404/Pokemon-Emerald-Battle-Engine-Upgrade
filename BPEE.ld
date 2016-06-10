@@ -3,7 +3,7 @@ last_used_item = 0x02024208;
 hitmarker = 0x02024280;
 battle_participants = 0x02024084;
 side_affecting_halfword = 0x0202428E;
-new_battlestruct = 0x02029788;
+new_battlestruct = 0x02024218;
 abilities_by_banks = 0x0203ABA4;
 battle_weather = 0x020243CC;
 enigma_berry_battle = 0x02024404;
@@ -103,6 +103,8 @@ set_move_effect = 0x08048760|1;
 read_hword = 0x080B1268|1;
 accuracy_helper_function = 0x08046518|1;
 check_wonderguard_levitate_damage = 0x080472A8|1;
+malloc_and_clear = 0x08000B4C|1;
+free = 0x08000B60|1;
 
 /*Expandable tables*/
 battle_strings_table = 0x085CC270;
