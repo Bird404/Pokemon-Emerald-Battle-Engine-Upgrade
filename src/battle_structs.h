@@ -372,4 +372,13 @@ struct move_info{
 };
 
 //extern struct move_info move_info;
+
+struct fraction_buff2{
+    u8 numerator;
+    u8 denumenator;
+    u16 padding;
+};
+
+extern struct fraction_buff2 fraction_stat_buffs2[0xC];
+
 #endif /* B_STRUCTS */
