@@ -409,7 +409,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
 {
     u8 effect = false;
     u16 curr_move;
-    if (move)
+    if (move > 0 && move < 622)
         curr_move = move;
     else
         curr_move = current_move;
