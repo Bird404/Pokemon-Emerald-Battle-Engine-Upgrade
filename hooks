@@ -7,3 +7,5 @@ graphic_triple_statchange	0804B99C	0
 item_battle_effects	080444DC	3
 itemtarget	0804BF3C	3
 accuracyhelper	080465DA	0
+alloc_new_struct_hook 08056F3E 2
+free_new_struct_hook 08057044 2
