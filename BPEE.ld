@@ -100,6 +100,9 @@ get_poke_flavour_relation = 0x0806E880|1;
 jump_if_cannot_switch_atk4F = 0x0804CBB0|1;
 battlescript_pop = 0x0803FB24|1;
 set_move_effect = 0x08048760|1;
+read_hword = 0x080B1268|1;
+accuracy_helper_function = 0x08046518|1;
+check_wonderguard_levitate_damage = 0x080472A8|1;
 
 /*Expandable tables*/
 battle_strings_table = 0x085CC270;
