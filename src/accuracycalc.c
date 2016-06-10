@@ -81,6 +81,17 @@ void accuracy_calc()
             }
             if (get_item_effect(bank_target, 1) == ITEM_EFFECT_BRIGHTPOWDER)
                 accuracy = percent_lose(accuracy, 10);
+            switch (get_item_effect(bank_attacker, 1))
+            {
+            case ITEM_EFFECT_WIDELENS:
+                accuracy = percent_boost(accuracy, 10);
+                break;
+            case ITEM_EFFECT_ZOOMLENS:
+                if (get_bank_turn_order(bank_target) < get_bank_turn_order(bank_attacker))
+                    accuracy = percent_boost(accuracy, 20);
+                break;
+            }    
+            
             if (__umodsi3(rng(), 100) + 1 > accuracy)
             {
                 move_outcome.missed = 1;
