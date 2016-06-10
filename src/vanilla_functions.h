@@ -12,6 +12,8 @@ u8 castform_switch(u8 bank);
 u8 is_bank_from_opponent_side(u8 bank);
 void* display_string_in_battle(void*);
 u8 read_byte(void*);
+s16 read_hword(void*);
+u32 read_word(void*);
 u16 rng();
 void damage_modulate_by_type_effectivity(u8 effect);
 void prepare_status_animation(u8 buffer, u8 unkown, u32 status);
