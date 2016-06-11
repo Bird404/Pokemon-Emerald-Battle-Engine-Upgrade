@@ -105,6 +105,7 @@ accuracy_helper_function = 0x08046518|1;
 check_wonderguard_levitate_damage = 0x080472A8|1;
 malloc_and_clear = 0x08000B4C|1;
 free = 0x08000B60|1;
+record_usage_of_item = 0x08131148|1;
 
 /*Expandable tables*/
 battle_strings_table = 0x085CC270;
