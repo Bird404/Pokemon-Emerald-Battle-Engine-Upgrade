@@ -810,7 +810,8 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 {
                     for (u8 i = 0; i < no_of_all_banks; i++)
                     {
-                        if (new_battlestruct.ptr->various.recently_used_item == battle_stuff_ptr.ptr->used_held_items[i])
+                        if (i!=bank && battle_stuff_ptr.ptr->used_held_items[i]
+                            && new_battlestruct.ptr->various.recently_used_item == battle_stuff_ptr.ptr->used_held_items[i])
                         {
                             effect = true;
                             battle_stuff_ptr.ptr->used_held_items[i] = 0;
@@ -1169,6 +1170,24 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                         battle_scripting.stat_changer = 0x11;
                     }
                     break;
+                case ABILITY_STEADFAST:
+                    if (battle_participants[bank].spd_buff != 0xC && battle_participants[bank].status2&0x8)
+                    {
+                        effect = true;
+                        battlescript_push();
+                        battlescripts_curr_instruction = &rattled_bs;
+                        battle_scripting.stat_changer = 0x13;
+                    }
+                    break;
+                case ABILITY_ANGER_POINT:
+                    if (crit_loc==2)
+                    {
+                        effect = true;
+                        battlescript_push();
+                        battlescripts_curr_instruction = &angerpoint_bs;
+                        battle_participants[bank].atk_buff=0xC;
+                    }
+                    break;
                 case ABILITY_COLOR_CHANGE:
                     if (curr_move != MOVE_STRUGGLE && (!new_battlestruct.ptr->bank_affecting[bank_attacker].sheerforce_bonus) && (!is_of_type(bank, move_type)) && (multihit_counter == 1 || multihit_counter == 0))
                     {
@@ -1497,7 +1516,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             }
             break;
         }
-    }    
+    }
 
     if (effect && last_used_ability != 0xFF && switch_id < 0xB)
         record_usage_of_ability(bank, last_used_ability);
