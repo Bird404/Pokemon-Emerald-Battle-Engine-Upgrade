@@ -9,3 +9,4 @@ itemtarget	0804BF3C	3
 accuracyhelper	080465DA	0
 alloc_new_struct_hook 08056F3E 2
 free_new_struct_hook 08057044 2
+magicbounce 080461E8	0
