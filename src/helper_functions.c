@@ -144,7 +144,7 @@ void frisk_target_item()
     {
         last_used_item=curr_item;
         b_std_message(0x19D,battle_scripting.active_bank);
-        // to add item effect usage history
+        record_usage_of_item(bank, get_item_effect(bank_target, 0));
         battle_communication_struct.is_message_displayed=1;
     }
     else
