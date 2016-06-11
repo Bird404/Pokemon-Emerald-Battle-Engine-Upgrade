@@ -1180,7 +1180,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     }
                     break;
                 case ABILITY_ANGER_POINT:
-                    if (crit_loc==2)
+                    if (crit_loc==2 && battle_participants[bank].atk_buff != 0xC)
                     {
                         effect = true;
                         battlescript_push();
