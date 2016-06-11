@@ -40,6 +40,7 @@ void set_move_effect(u8 a1, u8 a2);
 u8 accuracy_helper_function(u16 move);
 void jump_if_move_has_no_effect(u8 howmuchtoadd, u16 move);
 void check_wonderguard_levitate_damage();
+void record_usage_of_item(u8 bank, u8 item_effect);
 
 u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);
