@@ -1575,6 +1575,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 effect = 1;
                 active_bank = bank;
                 call_bc_move_exec(&airballon_bs);
+                record_usage_of_item(bank, ITEM_EFFECT_AIRBALLOON);
             }
         }
         break;
@@ -1807,6 +1808,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 effect = 4;
                 damage_loc = battle_participants[bank].max_hp >> 3;
                 call_bc_move_exec(&itemhurt_bs);
+                record_usage_of_item(bank, get_item_effect(bank, 0));
             }
             break;
         case ITEM_EFFECT_BLACKSLUDGE:
@@ -1825,7 +1827,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                     damage = battle_participants[bank].max_hp - battle_participants[bank].current_hp;
                 damage_loc = damage * -1;
                 call_bc_move_exec((void*)0x082DB7F1);
-                //record usage of item;
+                record_usage_of_item(bank, get_item_effect(bank, 0));
             }
             break;
         case ITEM_EFFECT_FLAMEORB:
@@ -1836,6 +1838,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                     effect = 1;
                     battle_participants[bank].status.flags.burn = 1;
                     call_bc_move_exec(&flameorb_bs);
+                    record_usage_of_item(bank, ITEM_EFFECT_FLAMEORB);
                 }
             }
             break;
@@ -1847,6 +1850,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                     effect = 1;
                     battle_participants[bank].status.flags.toxic_poison = 1;
                     call_bc_move_exec(&toxicorb_bs);
+                    record_usage_of_item(bank, ITEM_EFFECT_TOXICORB);
                 }
             }
             break;
@@ -1903,6 +1907,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                     damage_loc = 1;
                 effect = 7;
                 call_bc_move_exec(&rockyhelmet_bs);
+                record_usage_of_item(bank, ITEM_EFFECT_ROCKYHELMET);
             }
             break;
         case ITEM_EFFECT_AIRBALLOON:
@@ -2091,6 +2096,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                     special_statuses[bank_target].moveturn_losthp = 0;
                     battlescript_push();
                     battlescripts_curr_instruction = (void*)0x82DB7F7;
+                    record_usage_of_item(bank, ITEM_EFFECT_SHELLBELL);
                 }
                 break;
             }
