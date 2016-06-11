@@ -6,9 +6,9 @@
 itemtarget:
 	ldr r0, =(bank_target)
 	ldrb r1, [r0]
-	str r0, [sp]
-	mov r0, #4
 	mov r2, #0
+	str r2, [sp]
+	mov r0, #4
 	mov r3, #0
 	bl ability_battle_effects
 	ldr r0, =(bank_target)
