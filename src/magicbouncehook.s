@@ -18,7 +18,7 @@ magicbounce:
 	add r0, #0x20
 	ldrb r0, [r0]
 	cmp r0, #0x9C
-	beq return
+	bne return
 	ldr r2, =(move_table)
 	ldr r0, =(current_move)
 	ldrh r1, [r0]
