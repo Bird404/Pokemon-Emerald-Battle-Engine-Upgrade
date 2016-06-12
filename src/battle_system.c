@@ -1075,7 +1075,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     }
                     break;
                 case ABILITY_AFTERMATH:
-                    if (battle_participants[bank].current_hp == 0 && contact) //checkdamp
+                    if (battle_participants[bank].current_hp == 0 && contact && !(ability_battle_effects(0x13, 0, ABILITY_DAMP, 0, 0)) && !(has_ability_effect(bank_attacker, 0, 1) && battle_participants[bank_attacker].ability_id == ABILITY_MAGIC_GUARD)) 
                     {
                         damage_loc = get_1_4_of_max_hp(bank_attacker);
                         effect = true;
@@ -1143,7 +1143,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     break;
                 case ABILITY_ROUGH_SKIN:
                 case ABILITY_IRON_BARBS:
-                    if (contact)
+                    if (contact && !(has_ability_effect(bank_attacker, 0, 1) && battle_participants[bank_attacker].ability_id == ABILITY_MAGIC_GUARD))
                     {
                         damage_loc = get_1_8_of_max_hp(bank_attacker);
                         effect = true;
@@ -1823,7 +1823,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             break;
         case ITEM_EFFECT_STICKYBARB:
             STICKYBARB:
-            if (battle_participants[bank].current_hp && !move_turn)
+            if (battle_participants[bank].current_hp && !move_turn && !(has_ability_effect(bank, 0, 1) && battle_participants[bank].ability_id == ABILITY_MAGIC_GUARD))
             {
                 effect = 4;
                 damage_loc = battle_participants[bank].max_hp >> 3;
