@@ -4,3 +4,4 @@ Routine_Icon_Moves 081C1328
 Routine_Icon_Moves 081C17A0
 accuracy_calc 0831BD14
 critcalc_cmd4 0831BD20
+final_damagecalc_cmd7 0831BD2C
