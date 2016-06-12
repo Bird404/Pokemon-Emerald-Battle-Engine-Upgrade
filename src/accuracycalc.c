@@ -31,16 +31,17 @@ void accuracy_calc()
             if (battle_participants[bank_target].ability_id == ABILITY_UNAWARE && has_ability_effect(bank_target, 1, 1))
                 accuracy_buff = 6;
             u8 move_accuracy = move_table[current_move].accuracy;
+            if (has_ability_effect(bank_target, 1, 1) && battle_participants[bank_target].ability_id == ABILITY_WONDER_SKIN && move_accuracy > 50)
+                move_accuracy = 50;
+            else if ((current_move == MOVE_THUNDER || current_move == MOVE_HURRICANE) && weather_abilities_effect() && (battle_weather.flags.sun || battle_weather.flags.harsh_sun || battle_weather.flags.permament_sun))
+                move_accuracy = 50;
+
             s8 buff = accuracy_buff + 6 - evs_buff;
             if (buff < 0)
                 buff = 0;
             else if (buff > 0xC)
                 buff = 0xC;
-
-            if ((current_move == MOVE_THUNDER || current_move == MOVE_HURRICANE) && weather_abilities_effect() && (battle_weather.flags.sun || battle_weather.flags.harsh_sun || battle_weather.flags.permament_sun))
-            {
-                move_accuracy = 50;
-            }
+                
             u32 accuracy = __udivsi3(move_accuracy * fraction_stat_buffs2[buff].numerator, fraction_stat_buffs2[buff].denumenator);
             if (has_ability_effect(bank_attacker, 0, 1))
             {
