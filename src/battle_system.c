@@ -635,7 +635,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             {
                 active_bank=bank^1;
                 u16 hp1=battle_participants[active_bank].current_hp;
-                if (battle_flags&1)
+                if (battle_flags.double_battle)
                 {
                     u16 hp2=battle_participants[active_bank^2].current_hp;
                     if(hp1==0 && hp2==0)
