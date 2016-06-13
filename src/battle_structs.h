@@ -238,7 +238,7 @@ struct disable_struct{
     u16 encored_move;
     u8 protect_endure_effect;
     u8 stockpile_counter;
-    u8 fieldA;
+    u8 substitute_hp;
     u8 disable_timer;
     u8 fieldC;
     u8 fieldD;
@@ -330,6 +330,7 @@ u32 hitmarker;
 #define HITMARKER_IGNORE_ON_AIR 0x10000
 #define HITMERKER_IGNORE_UNDERGROUND 0x20000
 #define HITMARKER_IGNORE_UNDERWATER 0x40000
+#define HITMARKER_IGNORE_SUBSTITUTE 0x100
 
 struct side_affecting_hword{
     u16 reflect_on : 1;
