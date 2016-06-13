@@ -202,15 +202,13 @@ u16 get_speed(u8 bank)
     }
     //paralysis
     if (battle_participants[bank].status.flags.paralysis)
-    {
         speed >>= 1;
-    }
     //tailwind
     if (new_battlestruct.ptr->side_affecting[is_bank_from_opponent_side(bank)].tailwind)
-    {
-        speed *= 2;
-    }
-
+        speed <<= 1;
+    //unburden
+    if (status3[bank].unburden)
+        speed <<=1;
     speed = __udivsi3(speed * stat_buffs[battle_participants[bank].spd_buff].dividend, stat_buffs[battle_participants[bank].spd_buff].divisor);
 
     return speed;
@@ -460,10 +458,9 @@ u8 find_move_in_table(u16 move, u16 table_ptr[])
     return false;
 }
 
-u16 apply_base_power_modifiers(u16 move, u8 atk_bank, u8 def_bank, u16 base_power)
+u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u16 base_power)
 {
     u16 modifier = 0x1000;
-    u8 move_type = move_table[move].type;
     u8 move_split = move_table[move].split;
     u16 quality_atk_modifier = percent_to_modifier(get_item_quality(battle_participants[atk_bank].held_item));
     if (has_ability_effect(atk_bank, 0, 1))
@@ -569,7 +566,7 @@ u16 apply_base_power_modifiers(u16 move, u8 atk_bank, u8 def_bank, u16 base_powe
         }
     }
 
-    if (has_ability_effect(def_bank, 0, 1))
+    if (has_ability_effect(def_bank, 1, 1))
     {
         switch (battle_participants[def_bank].ability_id)
         {
@@ -793,7 +790,7 @@ u16 apply_base_power_modifiers(u16 move, u8 atk_bank, u8 def_bank, u16 base_powe
     return apply_modifier(modifier, base_power);
 }
 
-u16 get_attack_stat(u16 move, u8 atk_bank, u8 def_bank)
+u16 get_attack_stat(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
 {
     u8 move_split = move_table[move].split;
     u8 stat_bank;
@@ -829,11 +826,10 @@ u16 get_attack_stat(u16 move, u8 atk_bank, u8 def_bank)
 
     attack_stat = __udivsi3(attack_stat * stat_buffs[attack_boost].dividend, stat_buffs[attack_boost].divisor);
 
-    //final modifiactions
+    //final modifications
     u16 modifier = 0x1000;
     if (has_ability_effect(atk_bank, 0, 1))
     {
-        u8 move_type = move_table[move].type;
         u8 pinch_abilities;
         if (battle_participants[atk_bank].current_hp >= __udivsi3(battle_participants[atk_bank].max_hp, 3))
             pinch_abilities = false;
@@ -1076,27 +1072,15 @@ u16 get_def_stat(u16 move, u8 atk_bank, u8 def_bank)
     return apply_modifier(modifier, def_stat);
 }
 
-extern u32 apply_type_effectiveness(u32 damage, u8 move_type, u8 target_bank, u8 atk_bank);
-u16 dual_type_moves [] = {MOVE_FLYING_PRESS, 0xFFFF};
+u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8 effects_handling_and_recording);
 
-u32 type_effectiveness_calc(u16 move, u8 atk_bank, u8 def_bank, u32 damage)
+void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
 {
-    u8 move_type = move_table[move].type;
-    for (u8 i = 0; dual_type_moves[i]!= 0xFFFF; i++)
-    {
-        if (move == dual_type_moves[i])
-        {
-            damage = apply_type_effectiveness(damage, move_type, def_bank, atk_bank);
-            break;
-        }
-    }
-    return apply_type_effectiveness(damage, move_type, def_bank, atk_bank);
-}
-
-void damage_calc(u16 move, u8 atk_bank, u8 def_bank)
-{
-    u16 base_power = apply_base_power_modifiers(move, atk_bank, def_bank, get_base_power(move, atk_bank, def_bank));
-    u16 atk_stat = get_attack_stat(move, atk_bank, def_bank);
+    u16 chained_effectiveness=type_effectiveness_calc(move, move_type, atk_bank,def_bank,1);
+    if (chained_effectiveness==0) // avoid wastage of time in case of non effective moves
+        return;
+    u16 base_power = apply_base_power_modifiers(move, move_type, atk_bank, def_bank, get_base_power(move, atk_bank, def_bank));
+    u16 atk_stat = get_attack_stat(move, move_type, atk_bank, def_bank);
     u16 def_stat = get_def_stat(move, atk_bank, def_bank);
     u32 damage = ((((2 * battle_participants[atk_bank].level) / 5 + 2) * base_power * atk_stat) / def_stat) / 50 + 2;
 
@@ -1106,7 +1090,6 @@ void damage_calc(u16 move, u8 atk_bank, u8 def_bank)
         damage = apply_modifier(0xC00, damage);
     }
     //weather modifier
-    u8 move_type = move_table[move].type;
     if (weather_abilities_effect())
     {
         if (battle_weather.flags.downpour || battle_weather.flags.rain || battle_weather.flags.permament_rain || battle_weather.flags.heavy_rain)
@@ -1123,7 +1106,6 @@ void damage_calc(u16 move, u8 atk_bank, u8 def_bank)
             else if (move_type == TYPE_WATER)
                 damage = apply_modifier(0x800, damage);
         }
-
     }
     //crit modifier
     if (crit_loc == 2)
@@ -1142,7 +1124,8 @@ void damage_calc(u16 move, u8 atk_bank, u8 def_bank)
             final_modifier = 0x2000;
     }
     //type effectiveness
-    damage = type_effectiveness_calc(move, atk_bank, def_bank, damage);
+    damage=(damage*chained_effectiveness)>>6;
+
     //burn
     if (battle_participants[atk_bank].status.flags.burn && move_table[move].split == MOVE_PHYSICAL && move != MOVE_FACADE && !(has_ability_effect(atk_bank, 0, 1) && battle_participants[atk_bank].ability_id == ABILITY_GUTS))
     {
@@ -1173,9 +1156,10 @@ void damage_calc(u16 move, u8 atk_bank, u8 def_bank)
     {
         final_modifier = chain_modifier(final_modifier, 0x2000);
     }
-    if (ability_battle_effects(20, def_bank, ABILITY_FRIEND_GUARD, 0, 0))
+    if (ability_battle_effects(20, def_bank, ABILITY_FRIEND_GUARD, 0, 1))
     {
-        if (has_ability_effect(def_bank, 1, 1))
+        if((atk_ability != ABILITY_MOLD_BREAKER && atk_ability != ABILITY_TERAVOLT &&
+            atk_ability != ABILITY_TURBOBLAZE) || !has_ability_effect(atk_bank,0,1))
             final_modifier = chain_modifier(final_modifier, 0xC00);
     }
     if (atk_ability == ABILITY_SNIPER && crit_loc == 2 && has_ability_effect(atk_bank, 0, 1))
@@ -1221,9 +1205,12 @@ void damage_calc(u16 move, u8 atk_bank, u8 def_bank)
     damage_loc = damage;
 }
 
+u8 get_move_type();
+
 void damage_calc_cmd_05()
 {
-    damage_calc(current_move, bank_attacker, bank_target);
+    u8 move_type=get_move_type();
+    damage_calc(current_move, move_type, bank_attacker, bank_target);
     battlescripts_curr_instruction++;
     return;
 }
