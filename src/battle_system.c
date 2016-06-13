@@ -6,6 +6,14 @@
 #include "static_resources.h"
 #include "new_battle_struct.h"
 
+u8 get_move_type()
+{
+    u8 move_type=battle_stuff_ptr.ptr->dynamic_move_type&0x3F;
+    if (!move_type)
+        move_type = move_table[current_move].type;
+    return move_type;
+}
+
 u8 get_item_effect(u8 bank, u8 check_negating_effects)
 {
     if (check_negating_effects)
@@ -187,12 +195,44 @@ u8 type_effectiveness_table[TYPE_FAIRY-0x4][TYPE_FAIRY-0x4] = {
     {10,20,10,05,10,10,10,10,10,05,05,10,10,10,10,10,20,20,10}  //fairy
 };
 
-u32 damage_type_effectiveness_update (u8 attacking_type, u8 defending_type, u8 atk_bank, u8 def_bank, u32 damage)
+u16 get_airborne_state(u8 bank, u8 mode)
+{
+    // return 0 grounded due to gravity
+    // return 1 grounded due to iron ball or smack down
+    // return 2 for not grounded nor airborne
+    // return 3 airborne due to flying type or telekinesis
+    // return 4 airborne due to levitate
+    // mode 1 for damage calc && 0 for hazards etc.
+    if (new_battlestruct.ptr->field_affecting.gravity)
+        return 0;
+    if (get_item_effect(bank, true) == ITEM_EFFECT_IRONBALL
+        || new_battlestruct.ptr->bank_affecting[bank].smacked_down)
+        return 1;
+    if (battle_participants[bank].ability_id == ABILITY_LEVITATE && has_ability_effect(bank,mode,1))
+        return 4;
+    if ((mode==0 && is_of_type(bank,TYPE_FLYING)) || get_item_effect(bank, true) == ITEM_EFFECT_AIRBALLOON ||
+        new_battlestruct.ptr->bank_affecting[bank].magnet_rise || new_battlestruct.ptr->bank_affecting[bank].telekinesis)
+        return 3;
+    return 2;
+}
+
+void handle_type_immune_ability(u8 def_bank, u8 string_chooser, u8 ability)
+{
+    move_outcome.missed=1;
+    move_outcome.failed=1;
+    move_outcome.not_affected=1;
+    last_used_ability=ability;
+    called_move_inflicted_pbs[def_bank]=0;
+    calling_move_inflicted_pbs[def_bank]=0;
+    record_usage_of_ability(def_bank,ability);
+    battle_communication_struct.field6=string_chooser;
+}
+
+u16 damage_type_effectiveness_update(u8 attacking_type, u8 defending_type, u8 atk_bank, u8 def_bank, u16 chained_effect, u8 airstatus)
 {
     u8 effect,atype=attacking_type,dtype=defending_type;
-
-    if(atype==TYPE_EGG || dtype==TYPE_EGG)
-        return damage;
+    if(!chained_effect || atype==TYPE_EGG || dtype==TYPE_EGG)
+        return chained_effect;
 
     if(atype>=TYPE_FAIRY)
         atype=atype-5;
@@ -234,51 +274,87 @@ u32 damage_type_effectiveness_update (u8 attacking_type, u8 defending_type, u8 a
     }
     else if (attacking_type == TYPE_GROUND)
     {
-        if ((new_battlestruct.ptr->field_affecting.gravity || get_item_effect(def_bank, true) == ITEM_EFFECT_IRONBALL) && effect == 0)
-        {
+        if((effect == 0 && airstatus<2) || current_move==MOVE_THOUSAND_ARROWS) // grounded pokemon
             effect = 10;
-        }
-        else if ((defending_type == TYPE_FLYING && effect == 0) || battle_participants[def_bank].ability_id == ABILITY_LEVITATE || (get_item_effect(def_bank, true) == ITEM_EFFECT_AIRBALLOON) || new_battlestruct.ptr->bank_affecting[def_bank].magnet_rise || new_battlestruct.ptr->bank_affecting[def_bank].telekinesis)
-        {
-            if (new_battlestruct.ptr->bank_affecting[def_bank].smacked_down)
-            {
-                effect = 10;
-            }
-            else
-            {
-                effect = 10;
-            }
-        }
+        else if(airstatus>2)
+            effect = 0;
     }
     else if (current_move == MOVE_FREEZEDRY && defending_type == TYPE_WATER)
     {
         effect = 20;
     }
-
-    damage_loc = damage;
-    damage_modulate_by_type_effectivity(effect);
-    damage = damage_loc;
-
-    return damage;
+    switch(effect)
+    {
+        case 0:
+            chained_effect = 0;
+            break;
+        case 5:
+            chained_effect = chained_effect>>1;
+            break;
+        case 20:
+            chained_effect = chained_effect<<1;
+            break;
+    }
+    return chained_effect;
 }
 
-u32 apply_type_effectiveness(u32 damage, u8 move_type, u8 target_bank, u8 atk_bank)
+u16 apply_type_effectiveness(u16 chained_effect, u8 move_type, u8 target_bank, u8 atk_bank, u8 airstatus)
 {
     u8 defender_type1 = battle_participants[target_bank].type1;
     u8 defender_type2 = battle_participants[target_bank].type2;
     u8 defender_type3 = new_battlestruct.ptr->bank_affecting[target_bank].type3;
-
     //set different types
-
     if (defender_type2 == defender_type1)
         defender_type2 = TYPE_EGG;
     if (defender_type3 == defender_type1 || defender_type3 == defender_type2)
         defender_type3 = TYPE_EGG;
+    chained_effect = damage_type_effectiveness_update(move_type, defender_type1, atk_bank, target_bank, chained_effect, airstatus);
+    chained_effect = damage_type_effectiveness_update(move_type, defender_type2, atk_bank, target_bank, chained_effect, airstatus);
+    chained_effect = damage_type_effectiveness_update(move_type, defender_type3, atk_bank, target_bank, chained_effect, airstatus);
 
-    damage = damage_type_effectiveness_update(move_type, defender_type1, atk_bank, target_bank, damage);
-    damage = damage_type_effectiveness_update(move_type, defender_type2, atk_bank, target_bank, damage);
-    damage = damage_type_effectiveness_update(move_type, defender_type3, atk_bank, target_bank, damage);
-    return damage;
+    return chained_effect;
+}
+
+u16 dual_type_moves[]={MOVE_FLYING_PRESS,0xFFFF};
+
+u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8 effects_handling_and_recording)
+{
+    u8 airstatus = 2;
+    if(effects_handling_and_recording)
+        airstatus = get_airborne_state(def_bank,1);
+    u8 chained_effect = 64;
+    for (u8 i = 0; dual_type_moves[i]!= 0xFFFF; i++)
+    {
+        if (move == dual_type_moves[i])
+        {
+            chained_effect = apply_type_effectiveness(chained_effect, move_table[move].second_type,
+                                                      def_bank, atk_bank, airstatus);
+            break;
+        }
+    }
+    chained_effect = apply_type_effectiveness(chained_effect, move_type, def_bank, atk_bank, airstatus);
+    if(chained_effect>64)
+        move_outcome.super_effective=1;
+    else if (chained_effect==0)
+        move_outcome.not_affected=1;
+    else if (chained_effect<64)
+        move_outcome.not_very_effective=1;
+    if(effects_handling_and_recording)
+    {
+        if(!move_outcome.super_effective && has_ability_effect(def_bank,1,1) &&
+            battle_participants[def_bank].ability_id==ABILITY_WONDER_GUARD)
+        {
+            chained_effect = 0;
+            handle_type_immune_ability(def_bank,3,ABILITY_WONDER_GUARD);
+        }
+        else if(airstatus==4 && (move_table[move].type==TYPE_GROUND || move_table[move].second_type==TYPE_GROUND))
+        {
+            chained_effect = 0;
+            handle_type_immune_ability(def_bank,4,ABILITY_LEVITATE);
+        }
+        // add orring of protect structure
+    }
+    return chained_effect;
 }
 
 u16 get_forewarn_move(u8 bank)
@@ -364,9 +440,10 @@ u8 anticipation_shudder(u8 bank)
                     {
                         u16 move_now = current_move;
                         current_move = battle_participants[i2].moves[i];
-                        u32 damage = apply_type_effectiveness(1, move_table[battle_participants[i2].moves[i]].type, bank, i2);
+                        u16 damage = type_effectiveness_calc(battle_participants[i2].moves[i],
+                                    move_table[battle_participants[i2].moves[i]].type,bank,i2,0);
                         current_move = move_now;
-                        if (damage > 1)
+                        if (damage > 64)
                         {
                             shudder = true;
                             break;
@@ -1075,7 +1152,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     }
                     break;
                 case ABILITY_AFTERMATH:
-                    if (battle_participants[bank].current_hp == 0 && contact && !(ability_battle_effects(0x13, 0, ABILITY_DAMP, 0, 0)) && !(has_ability_effect(bank_attacker, 0, 1) && battle_participants[bank_attacker].ability_id == ABILITY_MAGIC_GUARD)) 
+                    if (battle_participants[bank].current_hp == 0 && contact && !(ability_battle_effects(0x13, 0, ABILITY_DAMP, 0, 0)) && !(has_ability_effect(bank_attacker, 0, 1) && battle_participants[bank_attacker].ability_id == ABILITY_MAGIC_GUARD))
                     {
                         damage_loc = get_1_4_of_max_hp(bank_attacker);
                         effect = true;
