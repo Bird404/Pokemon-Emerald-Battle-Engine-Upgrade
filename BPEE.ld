@@ -27,6 +27,8 @@ multihit_counter = 0x02024212;
 bits_table = 0x0832A328;
 chosen_move_by_banks = 0x02024274;
 battle_team_id_by_side = 0x202406E;
+calling_move_inflicted_pbs = 0x2024250;
+called_move_inflicted_pbs = 0x2024258;
 
 damage_modulate_by_type_effectivity = 0x08046F60|1;
 
