@@ -52,6 +52,8 @@ effect_chooser = 0x02024335;
 stat_changer = 0x202448E;
 no_of_all_banks = 0x0202406C;
 special_statuses = 0x0202437C;
+side_timers = 0x02024294;
+hit_flags_for_banks = 0x02024210;
 
 poison_status_flag = 0x0831BC70;
 sleep_status_flag = 0x0831BC78;
