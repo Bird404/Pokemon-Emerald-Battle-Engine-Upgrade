@@ -195,7 +195,7 @@ u8 type_effectiveness_table[TYPE_FAIRY-0x4][TYPE_FAIRY-0x4] = {
     {10,20,10,05,10,10,10,10,10,05,05,10,10,10,10,10,20,20,10}  //fairy
 };
 
-u16 get_airborne_state(u8 bank, u8 mode)
+u16 get_airborne_state(u8 bank, u8 mode, u8 check_levitate)
 {
     // return 0 grounded due to gravity
     // return 1 grounded due to iron ball or smack down
@@ -208,7 +208,7 @@ u16 get_airborne_state(u8 bank, u8 mode)
     if (get_item_effect(bank, true) == ITEM_EFFECT_IRONBALL
         || new_battlestruct.ptr->bank_affecting[bank].smacked_down)
         return 1;
-    if (battle_participants[bank].ability_id == ABILITY_LEVITATE && has_ability_effect(bank,mode,1))
+    if (check_levitate && battle_participants[bank].ability_id == ABILITY_LEVITATE && has_ability_effect(bank,mode,1))
         return 4;
     if ((mode==0 && is_of_type(bank,TYPE_FLYING)) || get_item_effect(bank, true) == ITEM_EFFECT_AIRBALLOON ||
         new_battlestruct.ptr->bank_affecting[bank].magnet_rise || new_battlestruct.ptr->bank_affecting[bank].telekinesis)
@@ -274,7 +274,7 @@ u16 damage_type_effectiveness_update(u8 attacking_type, u8 defending_type, u8 at
     }
     else if (attacking_type == TYPE_GROUND)
     {
-        if((effect == 0 && airstatus<2) || current_move==MOVE_THOUSAND_ARROWS) // grounded pokemon
+        if(effect == 0 && (airstatus<2 || current_move==MOVE_THOUSAND_ARROWS)) // grounded pokemon
             effect = 10;
         else if(airstatus>2)
             effect = 0;
@@ -319,9 +319,7 @@ u16 dual_type_moves[]={MOVE_FLYING_PRESS,0xFFFF};
 
 u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8 effects_handling_and_recording)
 {
-    u8 airstatus = 2;
-    if(effects_handling_and_recording)
-        airstatus = get_airborne_state(def_bank,1);
+    u8 airstatus = get_airborne_state(def_bank,1,effects_handling_and_recording);
     u8 chained_effect = 64;
     for (u8 i = 0; dual_type_moves[i]!= 0xFFFF; i++)
     {
@@ -347,9 +345,8 @@ u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8
             chained_effect = 0;
             handle_type_immune_ability(def_bank,3,ABILITY_WONDER_GUARD);
         }
-        else if(airstatus==4 && (move_table[move].type==TYPE_GROUND || move_table[move].second_type==TYPE_GROUND))
+        else if(airstatus==4 && chained_effect==0)
         {
-            chained_effect = 0;
             handle_type_immune_ability(def_bank,4,ABILITY_LEVITATE);
         }
         // add orring of protect structure
