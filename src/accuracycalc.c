@@ -13,6 +13,34 @@ u32 percent_lose(u32 number, u16 percent);
 #define MOVE_SPECIAL 1
 #define MOVE_STATUS 2
 
+u8 accuracy_helper_replacement(u16 move)
+{
+    u8 done_status = 0;
+    if (((status3[bank_target].always_hits || status3[bank_target].always_hits_unkown) && disable_structs[bank_target].always_hits_bank == bank_attacker)
+        || (has_ability_effect(bank_attacker, 0, 1) && battle_participants[bank_attacker].ability_id == ABILITY_NO_GUARD) || (has_ability_effect(bank_target, 1, 1) && battle_participants[bank_target].ability_id == ABILITY_NO_GUARD)
+        || (current_move == MOVE_TOXIC && is_of_type(bank_attacker, TYPE_POISON))) //lock-on/mind reader checked, then no guard and finally always hiting toxic on poison types
+    {
+        jump_if_move_has_no_effect(7, move);
+        done_status = 1;
+    }
+    else if (((status3[bank_target].on_air || new_battlestruct.ptr->bank_affecting[bank_target].sky_drop_attacker || new_battlestruct.ptr->bank_affecting[bank_target].sky_drop_target) && !(hitmarker & HITMARKER_IGNORE_ON_AIR))
+             || (status3[bank_target].underground && !(hitmarker & HITMERKER_IGNORE_UNDERGROUND))
+             || (status3[bank_target].underwater && !(hitmarker & HITMARKER_IGNORE_UNDERWATER)))
+    {
+        move_outcome.missed = 1;
+        jump_if_move_has_no_effect(7, move);
+        done_status = 1;
+    }
+    else if ((weather_abilities_effect() && (battle_weather.flags.heavy_rain || battle_weather.flags.downpour || battle_weather.flags.rain || battle_weather.flags.permament_rain) && (current_move == MOVE_THUNDER || current_move == MOVE_HURRICANE))
+             || (move_table[current_move].script_id == 0x11 /*swift, etc.*/ || move_table[current_move].script_id == 0x4E /*vital throw*/))
+    {
+        jump_if_move_has_no_effect(7, move);
+        done_status = 1;
+    }
+    hitmarker &= 0xFFF8FFFF; //clearing all above hitmarer flags
+    return done_status;
+}
+
 void accuracy_calc()
 {
     u32 jump_loc = read_word(battlescripts_curr_instruction + 1);
@@ -20,7 +48,7 @@ void accuracy_calc()
 
     if ((arg + 2) > 1)
     {
-        if (!does_protect_affect_move(current_move) && !accuracy_helper_function(current_move))
+        if (!does_protect_affect_move(current_move) && !accuracy_helper_replacement(current_move))
         {
             u8 evs_buff = battle_participants[bank_target].evasion_buff;
             if (current_move == MOVE_SACRED_SWORD || current_move == MOVE_CHIP_AWAY || (battle_participants[bank_attacker].ability_id == ABILITY_UNAWARE && has_ability_effect(bank_attacker, 0, 1)))
@@ -41,7 +69,7 @@ void accuracy_calc()
                 buff = 0;
             else if (buff > 0xC)
                 buff = 0xC;
-                
+
             u32 accuracy = __udivsi3(move_accuracy * fraction_stat_buffs2[buff].numerator, fraction_stat_buffs2[buff].denumenator);
             if (has_ability_effect(bank_attacker, 0, 1))
             {
@@ -91,12 +119,12 @@ void accuracy_calc()
                 if (get_bank_turn_order(bank_target) < get_bank_turn_order(bank_attacker))
                     accuracy = percent_boost(accuracy, 20);
                 break;
-            }    
-            
+            }
+
             if (__umodsi3(rng(), 100) + 1 > accuracy)
             {
                 move_outcome.missed = 1;
-                if (battle_flags & 1)
+                if (battle_flags.double_battle)
                 {
                     if (move_table[current_move].target == 0x8 || move_table[current_move].target == 0x20)
                     {
@@ -135,3 +163,4 @@ void accuracy_calc()
     }
     return;
 }
+
