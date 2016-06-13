@@ -327,6 +327,9 @@ extern struct move_outcome move_outcome;
 //temp
 u32 hitmarker;
 #define HITMAKRER_IGNORE_SAFEGUARD 0x2000
+#define HITMARKER_IGNORE_ON_AIR 0x10000
+#define HITMERKER_IGNORE_UNDERGROUND 0x20000
+#define HITMARKER_IGNORE_UNDERWATER 0x40000
 
 struct side_affecting_hword{
     u16 reflect_on : 1;
@@ -380,5 +383,39 @@ struct fraction_buff2{
 };
 
 extern struct fraction_buff2 fraction_stat_buffs2[0xC];
+
+struct side_timer{
+    u8 reflect_timer;
+    u8 reflect_bank;
+    u8 lightscreen_timer;
+    u8 lightscreen_bank;
+    u8 mist_timer;
+    u8 mist_bank;
+    u8 safeguard_timer;
+    u8 safeguard_bank;
+    u8 followme_timer;
+    u8 followme_target;
+    u8 spikes_amount;
+    u8 fieldB;
+};
+
+extern struct side_timer side_timers[2];
+
+struct battle_flags{
+    u32 double_battle : 1; //1
+    u32 link : 1; //2
+    u32 wild : 1; //4
+    u32 trainer : 1; //8
+    u32 save_birch : 1; //0x10
+    u32 flagx20 : 1; //0x20
+    u32 flagx40 : 1; //0x40
+    u32 safari : 1; //0x80
+    u32 flagx100 : 1; //0x100
+    u32 wally : 1; //0x200
+    u32 roaming : 1; //0x400
+    //more to come if needed
+};
+
+extern struct battle_flags battle_flags;
 
 #endif /* B_STRUCTS */
