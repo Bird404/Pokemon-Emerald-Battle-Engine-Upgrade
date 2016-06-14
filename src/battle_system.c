@@ -2061,6 +2061,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             break;
 
         }
+        break;
     case 3: //move turn
         for (u8 i = 0; i < no_of_all_banks; i++)
         {
