@@ -34,6 +34,7 @@ struct bank_affecting{
     u8 me_first : 1;
     u8 weakness2 : 1;
     u8 ate_bonus : 1;
+    u8 entry_message : 1;
 
     u8 autonomize_uses;
     u8 slowstart_duration;
@@ -49,9 +50,12 @@ struct bank_affecting{
 
 struct side_affecting{
     u16 sticky_web : 1;
+    u16 sticky_web_done : 1;
     u16 toxic_spikes_psn : 1;
     u16 toxic_spikes_badpsn : 1;
+    u16 toxic_spikes_done : 1;
     u16 stealthrock : 1;
+    u16 stealthrock_done : 1;
     u16 lucky_chant : 1;
     u16 tailwind : 1;
     u16 wide_guard : 1;
