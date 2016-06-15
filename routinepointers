@@ -2,6 +2,9 @@
 Routine_Icon_Moves 081C0F88
 Routine_Icon_Moves 081C1328
 Routine_Icon_Moves 081C17A0
+### battle command rewrites
 accuracy_calc 0831BD14
 critcalc_cmd4 0831BD20
+damage_calc_cmd_05 0831BD24
 final_damagecalc_cmd7 0831BD2C
+callasm_cmd 0831BF1C
