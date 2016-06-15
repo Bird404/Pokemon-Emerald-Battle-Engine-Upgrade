@@ -8,3 +8,13 @@ critcalc_cmd4 0831BD20
 damage_calc_cmd_05 0831BD24
 final_damagecalc_cmd7 0831BD2C
 callasm_cmd 0831BF1C
+atk7D_set_rain 0831BF04
+atk7E_set_reflect 0831BF08
+atk7F_set_leech_seed 0831BF0C
+atk8D_multihit_move_loop_counter 0831BF44
+atk92_set_lightscreen 0831BF58
+atk95_set_sandstorm 0831BF64
+atk96_weather_damage 0831BF68
+atkBB_set_sunny 0831BFFC
+atkC8_set_hail 0831C030
+atkE2_switchout_abilities 0831C098
