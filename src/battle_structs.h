@@ -230,7 +230,6 @@ struct status_3{
     u32 underwater : 1; //x40 000
     u32 unburden : 1; //x80 000 (previously intimidate)
     u32 phantomforce : 1; //x100 000
-    u32 powertrick : 1; //x200 000
 };
 
 extern struct status_3 status3[4];
