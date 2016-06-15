@@ -166,7 +166,11 @@ struct battle_stuff{
     u8 switch_in_ability_bank_counter; //0x4C
     u8 field_4D[7]; //0x4D-0x53
     u8 field_54; //0x54
-    u8 field_55[42]; //0x55-0x7E
+    u8 field_55; //0x55
+    u8 field_56; //0x56
+    u8 field_57; //0x57
+    u8 field_58[4];
+    u8 field_5C[35];
     u8 castform_switch_form; //0x7F
     u8 chosen_move_position[4]; //0x80
     u8 field_84[46]; //0x84-0xB1
@@ -357,6 +361,7 @@ struct side_affecting_hword{
     u16 safeguard_on : 1;
     u16 unkown2 : 2;
     u16 mist_on : 1;
+    u16 spikes_damage_done : 1;
 };
 
 extern struct side_affecting_hword side_affecting_halfword[2];
