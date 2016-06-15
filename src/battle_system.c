@@ -6,11 +6,17 @@
 #include "static_resources.h"
 #include "new_battle_struct.h"
 
-u8 get_move_type()
+u8 get_attacking_move_type()
 {
-    u8 move_type=battle_stuff_ptr.ptr->dynamic_move_type&0x3F;
-    if (!move_type)
-        move_type = move_table[current_move].type;
+    u8 move_type;
+    if(has_ability_effect(bank_attacker,0,1) && battle_participants[bank_attacker].ability_id==ABILITY_NORMALIZE)
+        move_type=0;
+    else
+    {
+        move_type=battle_stuff_ptr.ptr->dynamic_move_type&0x3F;
+        if (!move_type)
+            move_type = move_table[current_move].type;
+    }
     return move_type;
 }
 
@@ -276,7 +282,7 @@ u16 damage_type_effectiveness_update(u8 attacking_type, u8 defending_type, u8 at
     {
         if(effect == 0 && (airstatus<2 || current_move==MOVE_THOUSAND_ARROWS)) // grounded pokemon
             effect = 10;
-        else if(airstatus>2)
+        else if(airstatus>2 && current_move!=MOVE_THOUSAND_ARROWS)
             effect = 0;
     }
     else if (current_move == MOVE_FREEZEDRY && defending_type == TYPE_WATER)
@@ -346,10 +352,9 @@ u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8
             handle_type_immune_ability(def_bank,3,ABILITY_WONDER_GUARD);
         }
         else if(airstatus==4 && chained_effect==0)
-        {
             handle_type_immune_ability(def_bank,4,ABILITY_LEVITATE);
-        }
-        // add orring of protect structure
+        if(move_outcome.not_affected)
+            protect_structs[atk_bank].flag1_noteffective=1;
     }
     return chained_effect;
 }
