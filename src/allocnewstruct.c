@@ -1,6 +1,8 @@
 #include "types.h"
 #include "battle_structs.h"
 #include "new_battle_struct.h"
+#include "battle_locations.h"
+#include "defines.h"
 
 u32 malloc_and_clear(u16 size);
 
@@ -11,6 +13,10 @@ void alloc_new_struct()
     *ptr=malloc_and_clear(0x2A4);
     ptr=(u32 *)(&new_battlestruct);
     *ptr=malloc_and_clear(sizeof(struct new_battle_struct));
+    for (u8 i = 0; i < no_of_all_banks; i++)
+    {
+        new_battlestruct.ptr->bank_affecting[i].type3 = TYPE_EGG;
+    }
 }
 
 void free(u32 address);
