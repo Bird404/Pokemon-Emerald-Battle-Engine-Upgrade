@@ -229,6 +229,8 @@ struct status_3{
     u32 watersport : 1; //x20 000
     u32 underwater : 1; //x40 000
     u32 unburden : 1; //x80 000 (previously intimidate)
+    u32 phantomforce : 1; //x100 000
+    u32 powertrick : 1; //x200 000
 };
 
 extern struct status_3 status3[4];
@@ -260,18 +262,33 @@ struct disable_struct{
 extern struct disable_struct disable_structs[4];
 
 struct protect_struct{
-    u8 flag1_protect : 1;
-    u8 flag1_endure : 1;
-    u8 flag1_onlystruggle : 1;
-    u8 flag1_helpinghand : 1;
-    u8 flag1_bouncemove : 1;
-    u8 flag1_stealmove : 1;
-    u8 field1;
+    u8 flag0_protect : 1;
+    u8 flag0_endure : 1;
+    u8 flag0_onlystruggle : 1;
+    u8 flag0_helpinghand : 1;
+    u8 flag0_bouncemove : 1;
+    u8 flag0_stealmove : 1;
+    u8 flag0_unknown: 1;
+    u8 flag0_prlz_immobility: 1;
+    u8 flag1_confusion_self_damage: 1;
+    u8 flag1_noteffective: 1;
+    u8 flag1_chargingturn: 1; //dive, dig etc.
+    u8 flag1_smokeballflee: 1;
+    u8 flag1_runaway_flee: 1;
+    u8 flag1_used_imprisoned_move: 1;
+    u8 flag1_love_immobility: 1;
+    u8 flag1_used_disabled_move: 1;
+    u8 flag2_used_taunted_move: 1;
+    u8 flag2_unknown: 1;
+    u8 flag2_flinch_immobility : 1;
     u8 flag2_notfirststrike : 1;
+    u8 flag2_free: 4;
     u8 field3;
     u32 physical_damage;
     u32 special_damage;
-    u32 fieldC;
+    u8 counter_target;
+    u8 mirrorcoat_target;
+    u16 fieldE;
 };
 
 extern struct protect_struct protect_structs[4];
