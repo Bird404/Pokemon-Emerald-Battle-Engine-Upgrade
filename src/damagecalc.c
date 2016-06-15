@@ -806,7 +806,7 @@ u16 get_attack_stat(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
     u8 attack_boost;
     if (move_split == MOVE_PHYSICAL)
     {
-        if(status3[atk_bank].powertrick && stat_bank==atk_bank)
+        if(new_battlestruct.ptr->bank_affecting[atk_bank].powertrick && stat_bank==atk_bank)
             attack_stat = battle_participants[stat_bank].def;
         else
             attack_stat = battle_participants[stat_bank].atk;
@@ -996,7 +996,7 @@ u16 get_def_stat(u16 move, u8 atk_bank, u8 def_bank)
     }
     else //def
     {
-        if(status3[def_bank].powertrick)
+        if(new_battlestruct.ptr->bank_affecting[def_bank].powertrick)
             def_stat = battle_participants[def_bank].atk;
         else
             def_stat = battle_participants[def_bank].def;
