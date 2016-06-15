@@ -767,7 +767,7 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
         break;
     }
 
-    if (protect_structs[atk_bank].flag1_helpinghand)
+    if (protect_structs[atk_bank].flag0_helpinghand)
     {
         modifier = chain_modifier(modifier, 0x1800);
     }
@@ -806,7 +806,10 @@ u16 get_attack_stat(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
     u8 attack_boost;
     if (move_split == MOVE_PHYSICAL)
     {
-        attack_stat = battle_participants[stat_bank].atk;
+        if(status3[atk_bank].powertrick && stat_bank==atk_bank)
+            attack_stat = battle_participants[stat_bank].def;
+        else
+            attack_stat = battle_participants[stat_bank].atk;
         attack_boost = battle_participants[stat_bank].atk_buff;
     }
     else
@@ -993,7 +996,10 @@ u16 get_def_stat(u16 move, u8 atk_bank, u8 def_bank)
     }
     else //def
     {
-        def_stat = battle_participants[def_bank].def;
+        if(status3[def_bank].powertrick)
+            def_stat = battle_participants[def_bank].atk;
+        else
+            def_stat = battle_participants[def_bank].def;
         def_boost = battle_participants[def_bank].def_buff;
     }
 
@@ -1205,11 +1211,11 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
     damage_loc = damage;
 }
 
-u8 get_move_type();
+u8 get_attacking_move_type();
 
 void damage_calc_cmd_05()
 {
-    u8 move_type=get_move_type();
+    u8 move_type=get_attacking_move_type();
     damage_calc(current_move, move_type, bank_attacker, bank_target);
     battlescripts_curr_instruction++;
     return;
