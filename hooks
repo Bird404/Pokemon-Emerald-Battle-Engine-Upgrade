@@ -1,5 +1,4 @@
 display_custom_text	0814E6C0	1
-callasm_cmd	08050640	0
 truant_end_turn	08042EDE	1
 change_stats	08050A1C	6
 battlestringhook	0814F6B6	0
