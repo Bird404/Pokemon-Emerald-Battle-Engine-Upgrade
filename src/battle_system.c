@@ -1648,6 +1648,19 @@ u8 mental_herb_effect(u8 bank)
     return effect;
 }
 
+u8 can_poison(u8 bank, u8 self_inflicted)
+{
+    if (battle_participants[bank].status.int_status)
+        return 0;
+    if (is_of_type(bank, TYPE_POISON) || is_of_type(bank, TYPE_STEEL))
+        return 0;
+    if ((has_ability_effect(bank, 0, 1) && (battle_participants[bank].ability_id == ABILITY_IMMUNITY || (battle_participants[bank].ability_id == ABILITY_LEAF_GUARD && (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)))))
+        return 0;
+    if (side_affecting_halfword[is_bank_from_opponent_side(bank)].safeguard_on && !self_inflicted)
+        return 0;
+    return 1;
+}
+
 u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
 {
     u8 item_effect = get_item_effect(bank, 1);
@@ -1943,15 +1956,12 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             }
             break;
         case ITEM_EFFECT_TOXICORB:
-            if (battle_participants[bank].status.int_status == 0 && !is_of_type(bank, TYPE_POISON) && !is_of_type(bank, TYPE_STEEL) && !move_turn)
+            if (!move_turn && can_poison(bank, 1))
             {
-                if (!(has_ability_effect(bank, 0, 1) && (battle_participants[bank].ability_id == ABILITY_IMMUNITY || (battle_participants[bank].ability_id == ABILITY_LEAF_GUARD && (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)))))
-                {
-                    effect = 1;
-                    battle_participants[bank].status.flags.toxic_poison = 1;
-                    call_bc_move_exec(&toxicorb_bs);
-                    record_usage_of_item(bank, ITEM_EFFECT_TOXICORB);
-                }
+                effect = 1;
+                battle_participants[bank].status.flags.toxic_poison = 1;
+                call_bc_move_exec(&toxicorb_bs);
+                record_usage_of_item(bank, ITEM_EFFECT_TOXICORB);
             }
             break;
         }
