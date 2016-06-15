@@ -793,8 +793,9 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             }
             break;
         }
-        if (common_effect)
+        if (common_effect && !new_battlestruct.ptr->bank_affecting[bank].entry_message)
         {
+            new_battlestruct.ptr->bank_affecting[bank].entry_message = 1;
             effect = true;
             battle_scripting.active_bank = bank;
             execute_battle_script(script_ptr);
