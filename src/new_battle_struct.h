@@ -35,6 +35,7 @@ struct bank_affecting{
     u8 weakness2 : 1;
     u8 ate_bonus : 1;
     u8 entry_message : 1;
+    u8 powertrick : 1;
 
     u8 autonomize_uses;
     u8 slowstart_duration;
