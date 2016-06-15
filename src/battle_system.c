@@ -1661,6 +1661,16 @@ u8 can_poison(u8 bank, u8 self_inflicted)
     return 1;
 }
 
+u8 hp_condition(u8 bank, u8 percent) //1 = 50 %, 2 = 25 %
+{
+    struct battle_participant* ptr_to_struct = &battle_participants[bank];
+    if (ptr_to_struct->ability_id == ABILITY_GLUTTONY && has_ability_effect(bank, 0, 1))
+        percent = 1;
+    if (ptr_to_struct->current_hp <= (ptr_to_struct->max_hp >> percent))
+        return 1;
+    return 0;
+}
+
 u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
 {
     u8 item_effect = get_item_effect(bank, 1);
@@ -1697,7 +1707,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
         {
             u8 flavour;
         case ITEM_EFFECT_ORANBERRY:
-            if (battle_participants[bank].current_hp <= (battle_participants[bank].max_hp >> 1) && !move_turn)
+            if (hp_condition(bank, 1) && !move_turn)
             {
                 effect = 4;
                 if (quality > battle_participants[bank].max_hp - battle_participants[bank].current_hp)
@@ -1708,7 +1718,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             }
             break;
         case ITEM_EFFECT_SITRUSBERRY:
-            if (battle_participants[bank].current_hp <= (battle_participants[bank].max_hp >> 1) && !move_turn)
+            if (hp_condition(bank, 1) && !move_turn)
             {
                 effect = 4;
                 s32 damage = battle_participants[bank].max_hp >> 2;
@@ -1814,7 +1824,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
         case ITEM_EFFECT_IAPAPABERRY:
             flavour = SOUR_PREFERENCE;
         HEAL_CONFUSE:
-            if (battle_participants[bank].current_hp <= (battle_participants[bank].max_hp >> 1) && !move_turn)
+            if (hp_condition(bank, 1) && !move_turn)
             {
                 s32 damage = (battle_participants[bank].max_hp / quality);
                 if (damage == 0)
@@ -1853,7 +1863,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
         case ITEM_EFFECT_APICOTBERRY:
             flavour = 4;
         STAT_RAISE:
-            if (battle_participants[bank].max_hp / quality >= battle_participants[bank].current_hp && !move_turn)
+            if (hp_condition(bank, 2) && !move_turn)
             {
                 if (*(&battle_participants[bank].atk_buff + flavour) != 0xC)
                 {
@@ -1872,7 +1882,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             }
             break;
         case ITEM_EFFECT_LANSATBERRY:
-            if (battle_participants[bank].max_hp / quality >= battle_participants[bank].current_hp && !move_turn)
+            if (hp_condition(bank, 2) && !move_turn)
             {
                 if (!(battle_participants[bank].status2 & 0x100000))
                 {
@@ -1884,7 +1894,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             }
             break;
         case ITEM_EFFECT_STARFBERRY:
-            if (battle_participants[bank].max_hp / quality >= battle_participants[bank].current_hp && !move_turn)
+            if (hp_condition(bank, 2) && !move_turn)
             {
                 u8 doable = 0;
                 for (u8 i = 0; i < 5; i++)
