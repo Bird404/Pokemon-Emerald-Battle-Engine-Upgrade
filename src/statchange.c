@@ -61,8 +61,8 @@ u8 change_stats(struct stat stat_change, u8 stat, struct failbank bank, void* ba
     battle_text_buff1[1] = 5;
     battle_text_buff1[2] = stat;
     battle_text_buff1[3] = 0xFF;
-
-    if (has_ability_effect(active_bank, 0, 1))
+    u8 has_ability=has_ability_effect(active_bank, !bank.attacker, 1);
+    if (has_ability)
     {
         if (battle_participants[active_bank].ability_id == ABILITY_CONTRARY)
         {
@@ -107,7 +107,7 @@ u8 change_stats(struct stat stat_change, u8 stat, struct failbank bank, void* ba
             battlescripts_curr_instruction = (void*) 0x082D9F1C;
             return 1;
         }
-        else if ((battle_participants[active_bank].ability_id == ABILITY_WHITE_SMOKE || battle_participants[active_bank].ability_id == ABILITY_CLEAR_BODY) && current_move != MOVE_CURSE && bank.cannotfail == 0)
+        else if (has_ability && (battle_participants[active_bank].ability_id == ABILITY_WHITE_SMOKE || battle_participants[active_bank].ability_id == ABILITY_CLEAR_BODY) && current_move != MOVE_CURSE && bank.cannotfail == 0)
         {
             if (special_statuses[active_bank].statloweringflag)
             {
@@ -120,7 +120,7 @@ u8 change_stats(struct stat stat_change, u8 stat, struct failbank bank, void* ba
             }
             return 1;
         }
-        else if (battle_participants[active_bank].ability_id == ABILITY_KEEN_EYE && stat == STAT_ACCURACY && bank.cannotfail == 0)
+        else if (has_ability && battle_participants[active_bank].ability_id == ABILITY_KEEN_EYE && stat == STAT_ACCURACY && bank.cannotfail == 0)
         {
             if (!bank.failsth)
             {
@@ -132,7 +132,7 @@ u8 change_stats(struct stat stat_change, u8 stat, struct failbank bank, void* ba
             }
             return 1;
         }
-        else if (battle_participants[active_bank].ability_id == ABILITY_HYPER_CUTTER && stat == STAT_ATTACK && bank.cannotfail == 0)
+        else if (has_ability && battle_participants[active_bank].ability_id == ABILITY_HYPER_CUTTER && stat == STAT_ATTACK && bank.cannotfail == 0)
         {
             if (!bank.failsth)
             {
@@ -144,7 +144,7 @@ u8 change_stats(struct stat stat_change, u8 stat, struct failbank bank, void* ba
             }
             return 1;
         }
-        else if (battle_participants[active_bank].ability_id == ABILITY_BIG_PECKS && stat == STAT_DEFENCE && bank.cannotfail == 0)
+        else if (has_ability && battle_participants[active_bank].ability_id == ABILITY_BIG_PECKS && stat == STAT_DEFENCE && bank.cannotfail == 0)
         {
             if (!bank.failsth)
             {
@@ -156,7 +156,7 @@ u8 change_stats(struct stat stat_change, u8 stat, struct failbank bank, void* ba
             }
             return 1;
         }
-        else if (battle_participants[active_bank].ability_id == ABILITY_SHIELD_DUST && bank.failsth == 0)
+        else if (has_ability && battle_participants[active_bank].ability_id == ABILITY_SHIELD_DUST && bank.failsth == 0)
         {
             return 1;
         }
