@@ -17,7 +17,7 @@ u8 accuracy_helper_replacement(u16 move)
 {
     u8 done_status = 0;
     if (((status3[bank_target].always_hits || status3[bank_target].always_hits_unkown) && disable_structs[bank_target].always_hits_bank == bank_attacker)
-        || (has_ability_effect(bank_attacker, 0, 1) && battle_participants[bank_attacker].ability_id == ABILITY_NO_GUARD) || (has_ability_effect(bank_target, 1, 1) && battle_participants[bank_target].ability_id == ABILITY_NO_GUARD)
+        || (has_ability_effect(bank_attacker, 0, 1) && battle_participants[bank_attacker].ability_id == ABILITY_NO_GUARD) || (has_ability_effect(bank_target, 0, 1) && battle_participants[bank_target].ability_id == ABILITY_NO_GUARD)
         || (current_move == MOVE_TOXIC && is_of_type(bank_attacker, TYPE_POISON))
         || (new_battlestruct.ptr->bank_affecting[bank_target].telekinesis && move_table[current_move].script_id != 38)) //lock-on/mind reader checked, then no guard, always hiting toxic on poison types, then always hitting telekinesis except OHKO moves
     {
@@ -26,7 +26,8 @@ u8 accuracy_helper_replacement(u16 move)
     }
     else if (((status3[bank_target].on_air || new_battlestruct.ptr->bank_affecting[bank_target].sky_drop_attacker || new_battlestruct.ptr->bank_affecting[bank_target].sky_drop_target) && !(hitmarker & HITMARKER_IGNORE_ON_AIR))
              || (status3[bank_target].underground && !(hitmarker & HITMERKER_IGNORE_UNDERGROUND))
-             || (status3[bank_target].underwater && !(hitmarker & HITMARKER_IGNORE_UNDERWATER)))
+             || (status3[bank_target].underwater && !(hitmarker & HITMARKER_IGNORE_UNDERWATER))
+             || status3[bank_target].phantomforce)
     {
         move_outcome.missed = 1;
         jump_if_move_has_no_effect(7, move);
@@ -56,7 +57,8 @@ void accuracy_calc()
                 evs_buff -= 2;
             if (current_move == MOVE_SACRED_SWORD || current_move == MOVE_CHIP_AWAY || (battle_participants[bank_attacker].ability_id == ABILITY_UNAWARE && has_ability_effect(bank_attacker, 0, 1)))
                 evs_buff = 6;
-            else if (evs_buff > 6 && (battle_participants[bank_target].status2 & 0x20000000 || new_battlestruct.ptr->bank_affecting[bank_target].miracle_eyed))
+            else if (evs_buff > 6 && (battle_participants[bank_target].status2 & 0x20000000 || new_battlestruct.ptr->bank_affecting[bank_target].miracle_eyed
+                                      || (battle_participants[bank_attacker].ability_id == ABILITY_KEEN_EYE && has_ability_effect(bank_attacker, 0, 1))))
                 evs_buff = 6;
             u8 accuracy_buff = battle_participants[bank_attacker].acc_buff;
             if (weather_abilities_effect() && (battle_weather.flags.fog || battle_weather.flags.permament_fog))
