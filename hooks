@@ -10,3 +10,4 @@ free_new_struct_hook 08057044 2
 magicbounce 080461E8	0
 cleanstructhook	0803A700	0
 hazards_hook	0804DAFC	0
+get_first_to_strike	0803CF10	3
