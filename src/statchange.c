@@ -15,19 +15,16 @@
 
 void ability_affects_stat_reduction(u8 bank, void* battlescript_to_set, void* battlescript_to_push, u8 ability_record)
 {
-    if (battlescript_to_push)
+    if (battlescript_to_push && battlescript_to_set)
     {
         battlescript_custom_push(battlescript_to_push);
-    }
-    battle_scripting.active_bank = bank;
-    if (battlescript_to_set)
-    {
         battlescripts_curr_instruction = battlescript_to_set;
-    }
-    if (ability_record)
-    {
-        last_used_ability = battle_participants[bank].ability_id;
-        record_usage_of_ability(bank, last_used_ability);
+        battle_scripting.active_bank = bank;
+        if (ability_record)
+        {
+            last_used_ability = battle_participants[bank].ability_id;
+            record_usage_of_ability(bank, last_used_ability);
+        }
     }
     return;
 }
