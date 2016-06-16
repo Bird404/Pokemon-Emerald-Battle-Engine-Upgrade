@@ -232,8 +232,9 @@ struct status_3{
     u32 mud_sport : 1; //x10 000
     u32 watersport : 1; //x20 000
     u32 underwater : 1; //x40 000
-    u32 unburden : 1; //x80 000 (previously intimidate)
-    u32 phantomforce : 1; //x100 000
+    u32 switchinlock : 1; //x80 000
+    u32 unburden : 1; //x100 000 (previously trace)
+    u32 phantomforce : 1; //x200 000
 };
 
 extern struct status_3 status3[4];
