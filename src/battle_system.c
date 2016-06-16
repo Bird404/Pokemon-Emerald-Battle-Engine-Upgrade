@@ -274,7 +274,7 @@ u16 damage_type_effectiveness_update(u8 attacking_type, u8 defending_type, u8 at
     {
         effect = 10;
     }
-    else if (battle_weather.flags.air_current && defending_type == TYPE_FLYING && effect == 20)
+    else if (battle_weather.flags.air_current && defending_type == TYPE_FLYING && effect == 20 && weather_abilities_effect())
     {
         effect = 10;
     }
