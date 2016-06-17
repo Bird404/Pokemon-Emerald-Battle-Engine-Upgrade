@@ -828,7 +828,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             case ABILITY_RAIN_DISH:
                 if (weather_abilities_effect() && (battle_weather.flags.downpour || battle_weather.flags.rain || battle_weather.flags.permament_rain || battle_weather.flags.heavy_rain))
                 {
-                    if (battle_participants[bank].current_hp < battle_participants[bank].max_hp)
+                    if (battle_participants[bank].current_hp < battle_participants[bank].max_hp && !new_battlestruct.ptr->bank_affecting[bank].heal_block)
                     {
                         script_ptr = (void*) 0x082DB45C;
                         execute_battle_script(script_ptr);
@@ -842,7 +842,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 {
                     if (battle_weather.flags.downpour || battle_weather.flags.rain || battle_weather.flags.permament_rain || battle_weather.flags.heavy_rain)
                     {
-                        if (battle_participants[bank].current_hp < battle_participants[bank].max_hp)
+                        if (battle_participants[bank].current_hp < battle_participants[bank].max_hp && !new_battlestruct.ptr->bank_affecting[bank].heal_block)
                         {
                             script_ptr = (void*) 0x082DB45C;
                             execute_battle_script(script_ptr);
@@ -1107,7 +1107,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 }
                 if(common_effect==1)
                 {
-                    if (battle_participants[bank].max_hp == battle_participants[bank].current_hp)
+                    if (battle_participants[bank].max_hp == battle_participants[bank].current_hp || new_battlestruct.ptr->bank_affecting[bank].heal_block)
                         script_ptr = (void*) 0x082DB591;
                     else
                     {
@@ -1725,7 +1725,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
         {
             u8 flavour;
         case ITEM_EFFECT_ORANBERRY:
-            if (hp_condition(bank, 1) && !move_turn)
+            if (hp_condition(bank, 1) && !move_turn && !new_battlestruct.ptr->bank_affecting[bank_target].heal_block)
             {
                 effect = 4;
                 if (quality > battle_participants[bank].max_hp - battle_participants[bank].current_hp)
@@ -1736,7 +1736,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             }
             break;
         case ITEM_EFFECT_SITRUSBERRY:
-            if (hp_condition(bank, 1) && !move_turn)
+            if (hp_condition(bank, 1) && !move_turn && !new_battlestruct.ptr->bank_affecting[bank_target].heal_block)
             {
                 effect = 4;
                 s32 damage = battle_participants[bank].max_hp >> 2;
@@ -1842,7 +1842,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
         case ITEM_EFFECT_IAPAPABERRY:
             flavour = SOUR_PREFERENCE;
         HEAL_CONFUSE:
-            if (hp_condition(bank, 1) && !move_turn)
+            if (hp_condition(bank, 1) && !move_turn && !new_battlestruct.ptr->bank_affecting[bank_target].heal_block)
             {
                 s32 damage = (battle_participants[bank].max_hp / quality);
                 if (damage == 0)
@@ -1958,7 +1958,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 goto STICKYBARB;
             }
         case ITEM_EFFECT_LEFTOVERS:
-            if (battle_participants[bank].max_hp != battle_participants[bank].current_hp && !move_turn)
+            if (battle_participants[bank].max_hp != battle_participants[bank].current_hp && !move_turn && !new_battlestruct.ptr->bank_affecting[bank_target].heal_block)
             {
                 effect = 4;
                 s32 damage = battle_participants[bank].max_hp >> 4;
@@ -2222,7 +2222,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 }
                 break;
             case ITEM_EFFECT_SHELLBELL:
-                if (special_statuses[bank_target].moveturn_losthp && special_statuses[bank_target].moveturn_losthp != 0xFF && bank_target != bank_attacker && battle_participants[bank_target].current_hp != battle_participants[bank_target].max_hp)
+                if (special_statuses[bank_target].moveturn_losthp && special_statuses[bank_target].moveturn_losthp != 0xFF && bank_target != bank_attacker && battle_participants[bank_target].current_hp != battle_participants[bank_target].max_hp && !new_battlestruct.ptr->bank_affecting[bank_target].heal_block)
                 {
                     effect = 1;
                     another_active_bank = bank_attacker;
