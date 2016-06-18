@@ -1068,7 +1068,7 @@ u16 get_def_stat(u16 move, u8 atk_bank, u8 def_bank)
         }
         break;
     case ITEM_EFFECT_METALPOWDER:
-        if (battle_participants[def_bank].poke_species == POKE_DITTO && move_split == MOVE_PHYSICAL && !(battle_participants[def_bank].status2 && 0x200000))
+        if (battle_participants[def_bank].poke_species == POKE_DITTO && move_split == MOVE_PHYSICAL && !(battle_participants[def_bank].status2.transformed))
         {
             modifier = chain_modifier(modifier, 0x2000);
         }
