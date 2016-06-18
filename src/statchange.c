@@ -13,6 +13,8 @@
 #define STAT_ACCURACY 6
 #define STAT_EVASION 7
 
+u8 is_of_type(u8 bank, u8 type);
+
 void ability_affects_stat_reduction(u8 bank, void* battlescript_to_set, void* battlescript_to_push, u8 ability_record)
 {
     if (battlescript_to_push && battlescript_to_set)
@@ -117,7 +119,21 @@ u8 change_stats(struct stat stat_change, u8 stat, struct failbank bank, void* ba
             }
             return 1;
         }
-        else if (has_ability && battle_participants[active_bank].ability_id == ABILITY_KEEN_EYE && stat == STAT_ACCURACY && bank.cannotfail == 0)
+        if (current_move != MOVE_CURSE && bank.cannotfail == 0 && is_of_type(active_bank, TYPE_GRASS))
+        {
+            u8 flower = ability_battle_effects(13, active_bank, ABILITY_FLOWER_VEIL, 1, 0);
+            if (flower)
+            {
+                if (special_statuses[active_bank].statloweringflag && battlescript_if_fails)
+                    battlescripts_curr_instruction = battlescript_if_fails;
+                else
+                {
+                    ability_affects_stat_reduction(flower - 1, (void*) 0x082DB5C7, battlescript_if_fails, 1);
+                    special_statuses[active_bank].statloweringflag = 1;
+                }
+            }
+        }
+        if (has_ability && battle_participants[active_bank].ability_id == ABILITY_KEEN_EYE && stat == STAT_ACCURACY && bank.cannotfail == 0)
         {
             if (!bank.failsth)
             {
