@@ -11,7 +11,7 @@ u8 find_move_in_table(u16 move, u16 table_ptr[]);
 
 u8 affected_by_substitute(u8 substitute_bank)
 {
-    if (battle_participants[substitute_bank].status2 & 0x1000000)
+    if (battle_participants[substitute_bank].status2.substitute)
     {
         if (!(hitmarker & HITMARKER_IGNORE_SUBSTITUTE || disable_structs[substitute_bank].substitute_hp
               || (has_ability_effect(bank_attacker, 0, 1) && battle_participants[bank_attacker].ability_id == ABILITY_INFILTRATOR && bank_attacker != substitute_bank)
