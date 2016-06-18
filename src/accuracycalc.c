@@ -57,7 +57,7 @@ void accuracy_calc()
                 evs_buff -= 2;
             if (current_move == MOVE_SACRED_SWORD || current_move == MOVE_CHIP_AWAY || (battle_participants[bank_attacker].ability_id == ABILITY_UNAWARE && has_ability_effect(bank_attacker, 0, 1)))
                 evs_buff = 6;
-            else if (evs_buff > 6 && (battle_participants[bank_target].status2 & 0x20000000 || new_battlestruct.ptr->bank_affecting[bank_target].miracle_eyed
+            else if (evs_buff > 6 && (battle_participants[bank_target].status2.foresight || new_battlestruct.ptr->bank_affecting[bank_target].miracle_eyed
                                       || (battle_participants[bank_attacker].ability_id == ABILITY_KEEN_EYE && has_ability_effect(bank_attacker, 0, 1))))
                 evs_buff = 6;
             u8 accuracy_buff = battle_participants[bank_attacker].acc_buff;
@@ -110,7 +110,7 @@ void accuracy_calc()
                         accuracy = percent_lose(accuracy, 25);
                     break;
                 case ABILITY_TANGLED_FEET:
-                    if (battle_participants[bank_target].status2 & 7)
+                    if (battle_participants[bank_target].status2.confusion)
                         accuracy = percent_lose(accuracy, 20);
                     break;
                 }
