@@ -1497,7 +1497,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
     {
         for (u8 i = 0; i < no_of_all_banks; i++)
         {
-            if (is_bank_from_opponent_side(i) != bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, 0, 1))
+            if (is_bank_from_opponent_side(i) != bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument, 1))
             {
                 last_used_ability = ability_to_check;
                 effect = i + 1;
@@ -1510,7 +1510,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
     {
         for (u8 i = 0; i < no_of_all_banks; i++)
         {
-            if (is_bank_from_opponent_side(i) == bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, 0, 1))
+            if (is_bank_from_opponent_side(i) == bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument, 1))
             {
                 last_used_ability = ability_to_check;
                 effect = i + 1;
@@ -1528,7 +1528,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     effect = i + 1;
                     break;
                 }
-                else if (battle_participants[i].ability_id == ability_to_check && special_cases_argument == 0xFF && has_ability_effect(i, 0, 1))
+                else if (battle_participants[i].ability_id == ability_to_check && special_cases_argument == 0xFF && has_ability_effect(i, special_cases_argument, 1))
                 {
                     effect = i + 1;
                     last_used_ability = ability_to_check;
@@ -1541,7 +1541,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         {
             for (u8 i = 0; i < no_of_all_banks; i++)
             {
-                if (battle_participants[i].ability_id == ability_to_check && i != bank && has_ability_effect(i, 0, 1))
+                if (battle_participants[i].ability_id == ability_to_check && i != bank && has_ability_effect(i, special_cases_argument, 1))
                 {
                     effect = i + 1;
                     last_used_ability = ability_to_check;
@@ -1554,7 +1554,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         {
             for (u8 i = 0; i < no_of_all_banks; i++)
             {
-                if (is_bank_from_opponent_side(i) != bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, 0, 1))
+                if (is_bank_from_opponent_side(i) != bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument, 1))
                 {
                     effect++;
                     last_used_ability = ability_to_check;
@@ -1566,7 +1566,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         {
             for (u8 i = 0; i < no_of_all_banks; i++)
             {
-                if (is_bank_from_opponent_side(i) == bank_side && battle_participants[i].ability_id == ability_to_check)
+                if (is_bank_from_opponent_side(i) == bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument, 1))
                 {
                     effect++;
                     last_used_ability = ability_to_check;
@@ -1578,7 +1578,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         {
             for (u8 i = 0; i < no_of_all_banks; i++)
             {
-                if ( i != bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, 0, 1))
+                if ( i != bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument, 1))
                 {
                     effect++;
                     last_used_ability = ability_to_check;
@@ -1590,7 +1590,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         {
             for (u8 i = 0; i < no_of_all_banks; i ++)
             {
-                if (battle_participants[i].ability_id == ability_to_check && battle_participants[i].current_hp && has_ability_effect(i, 0, 1))
+                if (battle_participants[i].ability_id == ability_to_check && battle_participants[i].current_hp && has_ability_effect(i, special_cases_argument, 1))
                 {
                     effect = i + 1;
                     last_used_ability = ability_to_check;
@@ -1604,7 +1604,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             u8 ally = bank ^ 2;
             for (u8 i = 0; i < no_of_all_banks; i ++)
             {
-                if (battle_participants[i].ability_id == ability_to_check && i == ally && has_ability_effect(i, 0, 1))
+                if (battle_participants[i].ability_id == ability_to_check && i == ally && has_ability_effect(i, special_cases_argument, 1))
                 {
                     effect = i + 1;
                     last_used_ability = ability_to_check;
