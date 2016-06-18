@@ -1224,7 +1224,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     }
                     break;
                 case ABILITY_CURSED_BODY:
-                    if (!disable_structs[bank_attacker].disabled_move && percent_chance(30))
+                    if (!disable_structs[bank_attacker].disabled_move && percent_chance(30) && !ability_battle_effects(12, bank_attacker, ABILITY_AROMA_VEIL, 1, 0))
                     {
                         disable_structs[bank_attacker].disabled_move = curr_move;
                         disable_structs[bank_attacker].disable_timer = 3;
@@ -1309,7 +1309,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     }
                     break;
                 case ABILITY_CUTE_CHARM:
-                    if (battle_participants[bank_attacker].ability_id != ABILITY_OBLIVIOUS && percent_chance(100) && contact)
+                    if (battle_participants[bank_attacker].ability_id != ABILITY_OBLIVIOUS && percent_chance(100) && contact && !ability_battle_effects(12, bank_attacker, ABILITY_AROMA_VEIL, 1, 0))
                     {
                         u8 target_gender = gender_from_pid(battle_participants[bank].poke_species, battle_participants[bank].pid);
                         u8 attacker_gender = gender_from_pid(battle_participants[bank_attacker].poke_species, battle_participants[bank_attacker].pid);
