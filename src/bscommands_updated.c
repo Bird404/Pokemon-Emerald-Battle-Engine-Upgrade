@@ -357,7 +357,7 @@ u8 entry_hazards_hook()
     if (effect)
     {
        new_battlestruct.ptr->various.var1 = active_bank;
-       battle_participants[active_bank].status2 &= 0xFDFFFFFF; //clear destiny bond flag
+       battle_participants[active_bank].status2.destinny_bond = 0;
        hitmarker &= 0xFFFFFFBF; //same as above
     }
     return effect;
