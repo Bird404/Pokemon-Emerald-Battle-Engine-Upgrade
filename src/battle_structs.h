@@ -24,6 +24,32 @@ union main_status{
 #define STATUS_PARALYSIS 0x40
 #define STATUS_TOXIC_POISON 0x80
 
+struct flags2{
+    u32 confusion : 3; //0x1 | 0x2 | 0x4
+    u32 flinched : 1; //0x8
+    u32 uproar : 3; //0x10 | 0x20 | 0x40
+    u32 flag_x80 : 1; //0x80
+    u32 flag_x100 : 1; //0x100
+    u32 flag_x200 : 1; //0x200
+    u32 flag_x400 : 1; //0x400
+    u32 flag_x800 : 1; //0x800
+    u32 multiple_turn_move : 1; //0x1000
+    u32 trapped_in_wrap : 3; //0x2000 | 0x4000 | 0x8000
+    u32 in_love : 4; //each bit for bank 0x10 000 | 0x20 000 | 0x40 0000 | 0x80 000
+    u32 focus_energy : 1; //0x100 000
+    u32 transformed : 1; //0x200 000
+    u32 recharge : 1; //0x400 000
+    u32 raged : 1; //0x800 000
+    u32 substitute : 1;// 0x1 000 000
+    u32 destinny_bond : 1; //0x2 000 000
+    u32 cant_escape : 1; //0x4 000 000
+    u32 nightmare : 1; //0x8 000 000
+    u32 cursed : 1; //0x10 000 000
+    u32 foresight : 1; //0x20 000 000
+    u32 defense_curled : 1; //0x40 000 000
+    u32 tormented : 1; //0x80 000 000
+};
+
 struct battle_participant {
     u16 poke_species;
     u16 atk;
@@ -56,7 +82,7 @@ struct battle_participant {
     u32 padd2;
     u32 pid;
     union main_status status;
-    u32 status2;
+    struct flags2 status2;
     u32 otid;
 };
 
@@ -441,5 +467,18 @@ struct battle_flags{
 };
 
 extern struct battle_flags battle_flags;
+
+struct battle_state{
+    u8 flag1 : 1;
+    u8 flag2 : 1;
+    u8 flag4 : 1;
+    u8 flag8 : 1;
+    u8 flag10 : 1;
+    u8 flag20 : 1;
+    u8 flag40 : 1;
+    u8 flag80 : 1;
+};
+
+extern struct battle_state battle_state_flags;
 
 #endif /* B_STRUCTS */
