@@ -163,6 +163,10 @@ u16 get_speed(u8 bank)
     case ITEM_EFFECT_CHOICESCARF:
         speed = percent_boost(speed, 50);
         break;
+     case ITEM_EFFECT_QUICKPOWDER:
+        if (battle_participants[bank].poke_species == POKE_DITTO && battle_participants[bank].status2.transformed == 0)
+            speed <<= 1;
+        break;
     }
     //take abilities into account
     if (has_ability_effect(bank, 0, 1))
