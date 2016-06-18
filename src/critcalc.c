@@ -21,7 +21,7 @@ void critcalc_cmd4()
         {
             if (!(new_battlestruct.ptr->side_affecting[is_bank_from_opponent_side(bank_target)].lucky_chant || status3[bank_target].unkown_no_crit))
             {
-                if (battle_participants[bank_attacker].status2 & 0x100000)
+                if (battle_participants[bank_attacker].status2.focus_energy)
                     crit_chance += 2;
                 if (move_table[current_move].move_flags.flags.raised_crit_ratio)
                     crit_chance++;
