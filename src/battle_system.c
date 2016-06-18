@@ -167,7 +167,7 @@ void copy_status_condition_text(u8 bank, u8 confusion)
     {
         status_flag = &burn_status_flag;
     }
-    else if (confusion && battle_participants[bank].status2 & 7)
+    else if (confusion && battle_participants[bank].status2.confusion))
     {
         status_flag = (void*)0x0831BC98;
     }
@@ -260,7 +260,7 @@ u16 damage_type_effectiveness_update(u8 attacking_type, u8 defending_type, u8 at
         }
     }
 
-    if ((((attacking_type == TYPE_NORMAL || attacking_type == TYPE_FIGHTING) && defending_type == TYPE_GHOST && ((battle_participants[def_bank].status2 & 0x20000000))) || battle_participants[atk_bank].ability_id == ABILITY_SCRAPPY) && effect == 0)
+    if ((((attacking_type == TYPE_NORMAL || attacking_type == TYPE_FIGHTING) && defending_type == TYPE_GHOST && ((battle_participants[def_bank].status2.foresight))) || battle_participants[atk_bank].ability_id == ABILITY_SCRAPPY) && effect == 0)
     {
         effect = 10;
     }
@@ -700,8 +700,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             }
             break;
         case ABILITY_IMPOSTER:
-            if (battle_participants[(bank ^ 1)].current_hp && (bank ^ 1) < no_of_all_banks &&
-                !(battle_participants[bank].status2 & 0x200000) && !(battle_participants[(bank ^1)].status2 & 0x200000))
+            if (battle_participants[(bank ^ 1)].current_hp && (bank ^ 1) < no_of_all_banks && !(battle_participants[bank].status2.transformed) && !(battle_participants[(bank ^1)].status2.transformed))
             {
                 effect = true;
                 execute_battle_script(&transform_bs);
@@ -882,7 +881,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     if (friendly_bank < no_of_all_banks && battle_participants[friendly_bank].status.int_status & battle_participants[friendly_bank].current_hp)
                     {
                         if (__umodsi3(rng(), 100) + 1 <= 30)
-                        {   battle_participants[friendly_bank].status2 &= 0xF7FFFFFF;
+                        {   battle_participants[friendly_bank].status2.nightmare = 0;
                             effect = true;
                             copy_status_condition_text(friendly_bank,0);
                             execute_battle_script(&healer_bs);
@@ -997,7 +996,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             }
        if (common_effect && battle_participants[bank].status.int_status)
         {
-            battle_participants[bank].status2 &= 0xF7FFFFFF;
+            battle_participants[bank].status2.nightmare = 0;
             effect = true;
             copy_status_condition_text(bank,0);
             script_ptr = (void*) 0x082DB484;
@@ -1036,7 +1035,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 {
                     effect = true;
                     battlescripts_curr_instruction = (void*) 0x082DB61F;
-                    if (battle_participants[bank_attacker].status2 & 0x1000)
+                    if (battle_participants[bank_attacker].status2.multiple_turn_move)
                     {
                         hitmarker |= 0x800;
                     }
@@ -1269,7 +1268,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     }
                     break;
                 case ABILITY_STEADFAST:
-                    if (battle_participants[bank].spd_buff != 0xC && battle_participants[bank].status2&0x8)
+                    if (battle_participants[bank].spd_buff != 0xC && battle_participants[bank].status2.flinched)
                     {
                         effect = true;
                         battlescript_push();
@@ -1314,10 +1313,10 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     {
                         u8 target_gender = gender_from_pid(battle_participants[bank].poke_species, battle_participants[bank].pid);
                         u8 attacker_gender = gender_from_pid(battle_participants[bank_attacker].poke_species, battle_participants[bank_attacker].pid);
-                        if (target_gender != attacker_gender && target_gender != 0xFF && attacker_gender != 0xFF && !(battle_participants[bank_attacker].status2 & 0xF0000))
+                        if (target_gender != attacker_gender && target_gender != 0xFF && attacker_gender != 0xFF && !(battle_participants[bank_attacker].status2.in_love))
                         {
                             effect = true;
-                            battle_participants[bank_attacker].status2 |= bits_table[bank] << 0x10;
+                            battle_participants[bank_attacker].status2.in_love |= bits_table[bank];
                             battlescript_push();
                             battlescripts_curr_instruction = (void*) 0x082DB66F;
                         }
@@ -1390,21 +1389,21 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     if (battle_participants[i].status.flags.sleep)
                     {
                         common_effect=1;
-                        battle_participants[i].status2 &= 0xF7FFFFFF; //remove nightmare
+                        battle_participants[i].status2.nightmare = 0;
                     }
                     break;
                 case ABILITY_OBLIVIOUS:
-                    if (battle_participants[i].status2 & 0xF0000)
+                    if (battle_participants[i].status2.in_love)
                     {
-                        battle_participants[i].status2 ^= 0xF0000;
+                        battle_participants[i].status2.in_love = 0;
                         strcpy_xFF_terminated_0(&battle_text_buff1, (void*) 0x0831BCA0);
                         effect = true;
                     }
                     break;
                 case ABILITY_OWN_TEMPO:
-                    if (battle_participants[i].status2 & 7)
+                    if (battle_participants[i].status2.confusion)
                     {
-                        battle_participants[i].status2 ^= 7;
+                        battle_participants[i].status2.confusion = 0;
                         strcpy_xFF_terminated_0(&battle_text_buff1, (void*) 0x0831BC98);
                         effect = true;
                     }
@@ -1655,7 +1654,7 @@ u8 get_all_item_quality(u8 bank)
 u8 mental_herb_effect(u8 bank)
 {
     u8 effect = false;
-    if (disable_structs[bank].disable_timer || disable_structs[bank].encore_timer || disable_structs[bank].taunt_timer || battle_participants[bank].status2 & 0x80000000 || battle_participants[bank].status2 & 0xF0000 || new_battlestruct.ptr->bank_affecting[bank].heal_block)
+    if (disable_structs[bank].disable_timer || disable_structs[bank].encore_timer || disable_structs[bank].taunt_timer || battle_participants[bank].status2.tormented || battle_participants[bank].status2.in_love || new_battlestruct.ptr->bank_affecting[bank].heal_block)
     {
         effect = 2;
         call_bc_move_exec(&mentalherb_bs);
@@ -1808,19 +1807,19 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             }
             break;
         case ITEM_EFFECT_PERSIMBERRY:
-            if (battle_participants[bank].status2 & 7)
+            if (battle_participants[bank].status2.confusion)
             {
-                battle_participants[bank].status2 = battle_participants[bank].status2 & (0 - 8);
+                battle_participants[bank].status2.confusion = 0;
                 effect = 2;
                 call_bc_move_exec((void*)0x82DB77E);
                 eaten_berry = 1;
             }
             break;
         case ITEM_EFFECT_LUMBERRY:
-            if (battle_participants[bank].status.int_status || battle_participants[bank].status2 & 7)
+            if (battle_participants[bank].status.int_status || battle_participants[bank].status2.confusion)
             {
                 copy_status_condition_text(bank, 1);
-                battle_participants[bank].status2 = battle_participants[bank].status2 & (0 - 8);
+                battle_participants[bank].status2.confusion = 0;
                 battle_participants[bank].status.int_status = 0;
                 eaten_berry = 1;
                 effect = 1;
@@ -1902,9 +1901,9 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
         case ITEM_EFFECT_LANSATBERRY:
             if (hp_condition(bank, 2) && !move_turn)
             {
-                if (!(battle_participants[bank].status2 & 0x100000))
+                if (!(battle_participants[bank].status2.focus_energy))
                 {
-                    battle_participants[bank].status2 ^= 0x100000;
+                    battle_participants[bank].status2.focus_energy = 1;
                     effect = 2;
                     call_bc_move_exec((void*)0x82DB869);
                     eaten_berry = 1;
@@ -2038,7 +2037,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             }
             break;
         case ITEM_EFFECT_ROCKYHELMET:
-            if (move_table[current_move].move_flags.flags.makes_contact && (special_statuses[bank].moveturn_losthp_physical || special_statuses[bank].moveturn_losthp_special) && !(battle_participants[bank_attacker].status2 & 0x1000000) && battle_participants[bank_attacker].current_hp)
+            if (move_table[current_move].move_flags.flags.makes_contact && (special_statuses[bank].moveturn_losthp_physical || special_statuses[bank].moveturn_losthp_special) && !(battle_participants[bank_attacker].status2.substitute) && battle_participants[bank_attacker].current_hp)
             {
                 damage_loc = __udivsi3(battle_participants[bank_attacker].max_hp, 6);
                 if (damage_loc == 0)
@@ -2056,11 +2055,11 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             }
             break;
         case ITEM_EFFECT_DESTINYKNOT:
-            if (battle_participants[bank].status2 & (bits_table[bank_attacker] << 0x10) && battle_participants[bank].current_hp && !(has_ability_effect(bank_attacker, 0, 1) && battle_participants[bank_attacker].ability_id == ABILITY_OBLIVIOUS))
+            if (battle_participants[bank].status2.in_love) && battle_participants[bank].current_hp && !(has_ability_effect(bank_attacker, 0, 1) && battle_participants[bank_attacker].ability_id == ABILITY_OBLIVIOUS))
             {
-                if (!(battle_participants[bank_attacker].status2 & (bits_table[bank] << 0x10)))
+                if (!(battle_participants[bank_attacker].status2.in_love & bits_table[bank]))
                 {
-                    battle_participants[bank_attacker].status2 |= bits_table[bank] << 0x10;
+                    battle_participants[bank_attacker].status2.in_love |= bits_table[bank];
                     effect = 9;
                     call_bc_move_exec(&destinyknot_bs);
                 }
@@ -2165,9 +2164,9 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 }
                 break;
             case ITEM_EFFECT_PERSIMBERRY:
-                if (battle_participants[bank].status2 & 7)
+                if (battle_participants[bank].status2.confusion)
                 {
-                    battle_participants[bank].status2 = battle_participants[bank].status2 & (0 - 8);
+                    battle_participants[bank].status2.confusion = 0;
                     effect = 2;
                     battlescript_push();
                     battlescripts_curr_instruction = (void*) 0x82DB784;
@@ -2175,10 +2174,10 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 }
                 break;
             case ITEM_EFFECT_LUMBERRY:
-                if (battle_participants[bank].status.int_status || battle_participants[bank].status2 & 7)
+                if (battle_participants[bank].status.int_status || battle_participants[bank].status2.confusion)
                 {
                     copy_status_condition_text(bank, 1);
-                    battle_participants[bank].status2 = battle_participants[bank].status2 & (0 - 8);
+                    battle_participants[bank].status2.confusion = 0;
                     battle_participants[bank].status.int_status = 0;
                     eaten_berry = 1;
                     effect = 1;
