@@ -31,20 +31,15 @@ u8 get_first_to_strike(u8 bank1, u8 bank2, u8 ignore_priority)
 {
     u16 speed1 = get_speed(bank1);
     u16 speed2 = get_speed(bank2);
-    s8 priority1;
-    s8 priority2;
+    s8 priority1 = 0;
+    s8 priority2 = 0;
     u8 faster_bank;
 
     if (new_battlestruct.ptr->bank_affecting[bank1].quashed)
-        faster_bank = bank2;
+        return 1;
     else if (new_battlestruct.ptr->bank_affecting[bank2].quashed)
-        faster_bank = bank1;
-    else if (ignore_priority)
-    {
-        priority1 = 0;
-        priority2 = 0;
-    }
-    else
+        return 0;
+    else if (!ignore_priority)
     {
         u8 move1 = battle_participants[bank1].moves[battle_stuff_ptr.ptr->chosen_move_position[bank1]];
         u8 move2 = battle_participants[bank2].moves[battle_stuff_ptr.ptr->chosen_move_position[bank2]];
