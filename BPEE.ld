@@ -56,6 +56,11 @@ no_of_all_banks = 0x0202406C;
 special_statuses = 0x0202437C;
 side_timers = 0x02024294;
 hit_flags_for_banks = 0x02024210;
+battle_outcome = 0x0202433A;
+battle_state_flags = 0x02024083;
+current_move_position = 0x020241E8;
+sth_with_moves1 = 0x02024250;
+sth_with_moves2 = 0x02024258;
 
 poison_status_flag = 0x0831BC70;
 sleep_status_flag = 0x0831BC78;
@@ -110,6 +115,13 @@ check_wonderguard_levitate_damage = 0x080472A8|1;
 malloc_and_clear = 0x08000B4C|1;
 free = 0x08000B60|1;
 record_usage_of_item = 0x08131148|1;
+pressure_pp_lose =  0x0803F480|1;
+is_poke_disobedient = 0x08045CBC|1;
+check_if_twoturns_move = 0x08052F48|1;
+uproar_wakeup_check = 0x08050650|1;
+reset_several_turns_stuff = 0x0803F8A0|1;
+check_if_imprisioned = 0x08040130|1;
+get_bank_in_love = 0x0806F8A8|1;
 
 attack_iteration_cleanup = 0x804AF30|1;
 prepare_pokemon_battle_sprite_manipulation_buffer = 0x08034414|1;
