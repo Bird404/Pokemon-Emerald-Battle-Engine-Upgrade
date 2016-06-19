@@ -36,6 +36,9 @@ struct bank_affecting{
     u8 ate_bonus : 1;
     u8 entry_message : 1;
     u8 powertrick : 1;
+    u8 kingsshield_damage : 1;
+    u8 spikyshield_damage : 1;
+    u8 item_used : 1;
 
     u8 autonomize_uses;
     u8 slowstart_duration;
@@ -68,6 +71,9 @@ struct side_affecting{
     u16 swamp_spd_halving : 1;
     u16 sea_of_fire : 1;
     u16 rainbow : 1;
+    u16 mat_block : 1;
+    u16 lunardance : 1;
+    u16 lunardance_done : 1;
 
     u8 lucky_chant_duration;
     u8 tailwind_duration;
