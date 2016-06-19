@@ -426,7 +426,7 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
                 base_power = 200;
             break;
         case MOVE_PAYBACK:
-            if (get_bank_turn_order(def_bank) < turn_order)
+            if (get_bank_turn_order(def_bank) < turn_order[atk_bank])
             {
                 base_power *= 2;
             }
@@ -532,7 +532,7 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
                 break;
             }
         case ABILITY_ANALYTIC:
-            if (get_bank_turn_order(def_bank) < turn_order && move != MOVE_FUTURE_SIGHT && move != MOVE_DOOM_DESIRE)
+            if (get_bank_turn_order(def_bank) < turn_order[atk_bank] && move != MOVE_FUTURE_SIGHT && move != MOVE_DOOM_DESIRE)
             {
                 modifier = chain_modifier(modifier, 0x14CD);
             }
