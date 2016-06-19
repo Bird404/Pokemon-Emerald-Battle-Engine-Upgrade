@@ -111,6 +111,10 @@ malloc_and_clear = 0x08000B4C|1;
 free = 0x08000B60|1;
 record_usage_of_item = 0x08131148|1;
 
+attack_iteration_cleanup = 0x804AF30|1;
+prepare_pokemon_battle_sprite_manipulation_buffer = 0x08034414|1;
+check_failure_due_to_status = 0x803F90C|1;
+
 /*Expandable tables*/
 battle_strings_table = 0x085CC270;
 evolution_table = 0x0832531C;
