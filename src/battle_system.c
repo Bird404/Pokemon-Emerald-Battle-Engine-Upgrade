@@ -1139,7 +1139,6 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             break;
     case 4: //move end turn abilities
         {
-            new_battlestruct.ptr->various.magicbounce = 0;
             if (has_ability_effect(bank, 0, 1) && !(move_outcome.not_affected || move_outcome.failed || move_outcome.missed)
                 && battle_participants[bank_attacker].current_hp && (special_statuses[bank_target].moveturn_losthp))
             {
@@ -2248,6 +2247,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
     {
         last_used_item = battle_participants[bank].held_item;
         new_battlestruct.ptr->various.recently_used_item = battle_participants[bank].held_item;
+        new_battlestruct.ptr->bank_affecting[bank].item_used = 1;
     }
     if (effect == 1)
     {
