@@ -12,6 +12,8 @@ extern void *encore_end_bs;
 extern void *disable_end_bs;
 extern void *weaknesspolicyspattack;
 extern void *weaknesspolicyattack;
+extern void *taunt_end_bs;
+extern void *tormentend_bs;
 
 u8 sample_text[] = {0xDD, 0xFF};
 u8 snowwarning_text[] = {0xFD, 0x13, 0xB4, 0xE7, 0, 0xFD, 0x1A, 0xFE, 0xEB, 0xDC, 0xDD, 0xE4, 0xE4, 0xD9, 0xD8, 0x00, 0xE9, 0xE4, 0x00, 0xD5, 0x00, 0xDC, 0xD5, 0xDD, 0xE0, 0xE7, 0xE8, 0xE3, 0xE6, 0xE1, 0xAB, 0xFF};
@@ -66,12 +68,25 @@ u8 stealhrock_text[] = {P_, o_, i_, n_, t_, e_, d_, Space, s_, t_, o_, n_, e_, s
 u8 stickyweb_text[] = {BuffCharac, 16, Space, w_, a_, s_, Space, c_, a_, u_, g_, h_, t_, Space, i_, n_, Space, a_, Space, S_, t_, i_, c_, k_, y_, Space, W_, e_, b_, Exclam, 0xFF};
 u8 gotpoisoned_text[] = {BuffCharac, 16, Space, g_, o_, t_, Space, p_, o_, i_, s_, o_, n_, e_, d_, Exclam, 0xFF};
 u8 absorbed_spikes_text[] = {T_, o_, x_, i_, c_, Space, S_, p_, i_, k_, e_, s_, Space, h_, a_, v_, e_, Space, b_, e_, e_, n_, JumpLine, a_, b_, s_, o_, r_, b_, e_, d_, Space, b_, y_, Space, BuffCharac, 16, Exclam, 0xFF};
+/*0x1AE*/ u8 lost_some_hp_text[] = {BuffCharac, 15, Space, l_, o_, s_, t_, Space, s_, o_, m_, e_, Space, o_, f_, Space, i_, t_, s_, Space, H_, P_, Exclam, 0xFF};
+/*0x1AF*/ u8 tauntended_text[] = {BuffCharac, 18, Space, i_, s_, Space, n_, o_, Space, l_, o_, n_, g_, e_, r_, Space, T_, a_, u_, n_, t_, e_, d_, Exclam, 0xFF};
+/*0x1B0*/ u8 tormentended_text[] = {BuffCharac, 18, Space, i_, s_, Space, n_, o_, Space, l_, o_, n_, g_, e_, r_, Space, T_, o_, r_, m_, e_, n_, e_, d_, Exclam, 0xFF};
+/*0x1B1*/ u8 healblockprevents_text[] = {H_, e_, a_, l_, Space, B_, l_, o_, c_, k_, Space, p_, r_, e_, v_, e_, n_, t_, s_, JumpLine, u_, s_, a_, g_, e_, Space, o_, f_, Space, BuffCharac, 0, Exclam, 0xFF};
+/*0x1B2*/ u8 gravityprevents_text[] = {G_, r_, a_, v_, i_, t_, y_, Space, p_, r_, e_, v_, e_, n_, t_, s_, JumpLine, u_, s_, a_, g_, e_, Space, o_, f_, Space, BuffCharac, 0, Exclam, 0xFF};
+/*0x1B3*/ u8 embargoprevents_text[] = {C_, a_, n_, Apos, t_, Space, u_, s_, e_, Space, BuffCharac, 0, Space, u_, n_, d_, e_, r_, JumpLine, t_, h_, e_, Space, e_, f_, f_, e_, c_, t_, s_, Space, o_, f_, Space, E_, m_, b_, a_, r_, g_, o_, Exclam, 0xFF};
+/*0x1B4*/ u8 aromaveilprevents_text[] = {BuffCharac, 23, Space, p_, r_, e_, v_, e_, n_, t_, s_, BuffCharac, 16, f_, r_, o_, m_, BuffCharac, 0, Exclam, 0xFF};
+/*0x1B5*/ u8 spikyshield_damage[] = {BuffCharac, 16, Apos, Space, S_, p_, i_, k_, y_, Space, S_, h_, i_, e_, l_, d_, JumpLine, h_, u_, r_, t_, s_, Space, BuffCharac, 15, Exclam, 0xFF};
+/*0x1B6*/ u8 symbiosispassing_text[] = {BuffCharac, 16, Space, p_, a_, s_, s_, e_, d_, Space, i_, t_, s_, JumpLine, i_, t_, e_, m_, Space, t_, o_, Space, BuffCharac, 19, Exclam, 0xFF};
+/*0x1B7*/ u8 restored_hp_text[] = {BuffCharac, 16, Space, r_, e_, s_, t_, o_, r_, e_, d_, Space, i_, t_, s_, Space, H_, P_, Exclam, 0xFF};
+/*0x1B8*/ u8 replacement_healed_text[] = {T_, h_, e_, Space, r_, e_, p_, l_, a_, c_, e_, m_, e_, n_, t_, Space, w_, a_, s_, Space, f_, u_, l_, l_, y_, Space, h_, e_, a_, l_, e_, d_, Exclam, 0xFF};
 
 void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activation_text, &heavyrain_activation_text, &mysticalaircurrent_activation_text, &forewarn_text, &slowstart_text, &anticipation_text, &dryskin_damage_text, &solarpower_text, &harvest_text, &healer_text, &pickup_text, &moldbreaker_text, &turboblaze_text, &terravolt_text, &downloadatk_text,
 &downloadspatk_text, &absorbabilityboost_text , &absorbabilityimmune_text, &userteam_text/*0x190*/, &foeteam_text/*0x191*/,
 &aftermath_text, &pickpocket_text, &mummy_text, &target_ability, &cursedbody_text, &drastically_text, &pressure_text, &unnerve_text, &aurabreak_text, &fairyaura_text, &darkaura_text, &frisk_text, //0x19D
 &hurtbyitem_text, &got_burned_text, &got_badlypoisoned_text, &airballoon_text, &bad_dreams_text, &item_text, &rockyhelmet_text, &popped_text, &fellinlove_text, &healblockend_text, &magicbounce_text,
-&angerpoint_text, &stealhrock_text, &stickyweb_text, &gotpoisoned_text, &absorbed_spikes_text};
+&angerpoint_text, &stealhrock_text, &stickyweb_text, &gotpoisoned_text, &absorbed_spikes_text, &lost_some_hp_text, &tauntended_text, &tormentended_text,
+&healblockprevents_text, &gravityprevents_text, &embargoprevents_text, &aromaveilprevents_text, &spikyshield_damage, &symbiosispassing_text,
+&restored_hp_text, &replacement_healed_text};
 
 void battle_string_loader(u16 string_id)
 {
@@ -235,6 +250,7 @@ void mentalherb()
     {
         disable_structs[bank].taunt_timer = 0;
         battlescript_push();
+        battlescripts_curr_instruction = &taunt_end_bs;
     }
     if (new_battlestruct.ptr->bank_affecting[bank].heal_block)
     {
@@ -246,9 +262,8 @@ void mentalherb()
     return;
 }
 
-void magicbounceloop()
+void placeholder0x14()
 {
-    new_battlestruct.ptr->various.magicbounce = 1;
     return;
 }
 
@@ -266,8 +281,8 @@ void hazards_bank_return()
 }
 
 void* callasm_table[] = {&call_ability_effects, &apply_burn_animation, &change_attacker_item, &try_to_lower_def, &try_to_raise_spd,
-&changestatvar1, &changestatvar2, &frisk_target_item, &set_stat_msg_buffer, &set_type_msg_buffer, &set_team_msg_buffer, &bad_dreams_damage_calc, 
-&weaknesspolicy, &mentalherb, &magicbounceloop, &hazards_bank_switcher, &hazards_bank_return};
+&changestatvar1, &changestatvar2, &frisk_target_item, &set_stat_msg_buffer, &set_type_msg_buffer, &set_team_msg_buffer, &bad_dreams_damage_calc,
+&weaknesspolicy, &mentalherb, &placeholder0x14, &hazards_bank_switcher, &hazards_bank_return};
 
 void callasm_cmd()
 {
