@@ -7,6 +7,8 @@
 #include "new_battle_struct.h"
 #include <string.h>
 
+u8 check_ability(u8 bank, u8 ability);
+
 void atk7D_set_rain()
 {
     battlescripts_curr_instruction++;
