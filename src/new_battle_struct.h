@@ -115,6 +115,7 @@ struct various{
     u16 recently_used_item;
     u8 inverse_battle : 1;
     u8 magicbounce : 1; 
+    u8 stormdrain : 1;
 };
 
 struct new_battle_struct{
