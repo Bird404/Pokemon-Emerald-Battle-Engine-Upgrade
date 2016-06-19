@@ -42,6 +42,13 @@ void jump_if_move_has_no_effect(u8 howmuchtoadd, u16 move);
 void check_wonderguard_levitate_damage();
 void record_usage_of_item(u8 bank, u8 item_effect);
 u8 get_battle_bank(u8 bank_getter);
+void pressure_pp_lose(u8 bank_atk, u8 bank_def, u16 move);
+u8 is_poke_disobedient();
+u8 uproar_wakeup_check(u8 bank);
+void reset_several_turns_stuff(u8 bank);
+u8 check_if_imprisioned(u8 bank, u16 move);
+u8 get_bank_in_love(u8 arg);
+u8 check_if_twoturns_move(u16 move);
 
 u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);
