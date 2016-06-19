@@ -167,7 +167,7 @@ void copy_status_condition_text(u8 bank, u8 confusion)
     {
         status_flag = &burn_status_flag;
     }
-    else if (confusion && battle_participants[bank].status2.confusion))
+    else if (confusion && battle_participants[bank].status2.confusion)
     {
         status_flag = (void*)0x0831BC98;
     }
@@ -2055,7 +2055,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             }
             break;
         case ITEM_EFFECT_DESTINYKNOT:
-            if (battle_participants[bank].status2.in_love) && battle_participants[bank].current_hp && !(has_ability_effect(bank_attacker, 0, 1) && battle_participants[bank_attacker].ability_id == ABILITY_OBLIVIOUS))
+            if (battle_participants[bank].status2.in_love && battle_participants[bank].current_hp && !(has_ability_effect(bank_attacker, 0, 1) && battle_participants[bank_attacker].ability_id == ABILITY_OBLIVIOUS))
             {
                 if (!(battle_participants[bank_attacker].status2.in_love & bits_table[bank]))
                 {
