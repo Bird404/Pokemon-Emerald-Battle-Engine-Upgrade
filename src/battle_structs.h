@@ -210,6 +210,11 @@ struct battle_stuff{
     u8 switch_in_item_bank_counter; //0xD9
     u8 field_DA[200]; //0xDA-0x1A1
     u8 battle_load_weather_from_map_flag; //0x1A2
+    u8 atk_canceller_state_tracker; //0x1A3
+    u8 field_1A4[240]; //0x1A4-0x293
+    u8 switchout_index[4]; //0x294-0x297
+    u8 field_298[11];
+    u8 field_2A3;
 };
 
 struct battle_stuff_ptr{
@@ -379,6 +384,8 @@ u32 hitmarker;
 #define HITMERKER_IGNORE_UNDERGROUND 0x20000
 #define HITMARKER_IGNORE_UNDERWATER 0x40000
 #define HITMARKER_IGNORE_SUBSTITUTE 0x100
+#define HITMARKER_NO_ANIMATIONS 0x80
+#define HITMARKER_NO_ATTACKSTRING 0x200
 
 struct side_affecting_hword{
     u16 reflect_on : 1;
