@@ -6,7 +6,16 @@
 #include "./Defines/item_effects.h"
 #include "./Defines/pokes.h"
 #include "./Defines/flavours.h"
+#include "battle_structs.h"
+#include "battle_locations.h"
 
+#define MOVE_WORKED !(move_outcome.failed || move_outcome.missed || move_outcome.not_affected)
+#define TARGET_TURN_DAMAGED (special_statuses[bank_target].moveturn_losthp_physical || special_statuses[bank_attacker].moveturn_losthp_special)
+#define DAMAGING_MOVE move_table[current_move].base_power
+#define CHOICE_ITEM (ITEM_EFFECT_CHOICEBAND || ITEM_EFFECT_CHOICESCARF || ITEM_EFFECT_CHOICESPECS)
+
+#define REQUEST_HELDITEM_BATTLE 0x2
+#define REQUEST_STATUS_BATTLE 0x28
 
 #define Space 0x00
 #define JumpLine 0xFE
