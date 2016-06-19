@@ -1194,6 +1194,7 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
     else if (get_item_effect(atk_bank, 1) == ITEM_EFFECT_LIFEORB)
     {
         final_modifier = chain_modifier(final_modifier, 0x14CC);
+        new_battlestruct.ptr->bank_affecting[atk_bank].life_orbed = 1;
     }
 
 
