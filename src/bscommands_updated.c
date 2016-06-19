@@ -233,7 +233,7 @@ void atkE2_switchout_abilities()
 
 void atk8D_multihit_move_loop_counter()
 {
-    if (read_byte(battlescripts_curr_instruction + 1) == 0)
+    if (read_byte(battlescripts_curr_instruction + 1) != 0)
         multihit_counter = 0;
     else
     {
