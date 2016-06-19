@@ -17,13 +17,29 @@ u8 check_ability(u8 bank, u8 ability)
     return 0;
 }
 
+s8 get_priority(u16 move, u8 bank)
+{
+    s8 priority = move_table[move].priority;
+    if (check_ability(bank, ABILITY_GALE_WINGS) && move_table[move].type == TYPE_FLYING)
+        priority++;
+    else if (check_ability(bank, ABILITY_PRANKSTER) && move_table[move].split == 2)
+        priority++;
+    return priority;
+}
+
 u8 get_first_to_strike(u8 bank1, u8 bank2, u8 ignore_priority)
 {
     u16 speed1 = get_speed(bank1);
     u16 speed2 = get_speed(bank2);
     s8 priority1;
     s8 priority2;
-    if (ignore_priority)
+    u8 faster_bank;
+
+    if (new_battlestruct.ptr->bank_affecting[bank1].quashed)
+        faster_bank = bank2;
+    else if (new_battlestruct.ptr->bank_affecting[bank2].quashed)
+        faster_bank = bank1;
+    else if (ignore_priority)
     {
         priority1 = 0;
         priority2 = 0;
@@ -32,18 +48,9 @@ u8 get_first_to_strike(u8 bank1, u8 bank2, u8 ignore_priority)
     {
         u8 move1 = battle_participants[bank1].moves[battle_stuff_ptr.ptr->chosen_move_position[bank1]];
         u8 move2 = battle_participants[bank2].moves[battle_stuff_ptr.ptr->chosen_move_position[bank2]];
-        priority1 = move_table[move1].priority;
-        priority2 = move_table[move2].priority;
-        if (check_ability(bank1, ABILITY_GALE_WINGS) && move_table[move1].type == TYPE_FLYING)
-            priority1++;
-        else if (check_ability(bank1, ABILITY_PRANKSTER) && move_table[move1].split == 2)
-            priority1++;
-        if (check_ability(bank2, ABILITY_GALE_WINGS) && move_table[move2].type == TYPE_FLYING)
-            priority1++;
-        else if (check_ability(bank2, ABILITY_PRANKSTER) && move_table[move2].split == 2)
-            priority1++;
+        priority1 = get_priority(move1, bank1);
+        priority2 = get_priority(move2, bank2);
     }
-    u8 faster_bank;
     if (priority1 > priority2)
         faster_bank = bank1;
     else if (priority2 > priority1)
@@ -102,5 +109,8 @@ u8 get_first_to_strike(u8 bank1, u8 bank2, u8 ignore_priority)
             }
         }
     }
-    return faster_bank;
+    if (faster_bank == bank1)
+        return 0;
+    else
+        return 1;
 }
