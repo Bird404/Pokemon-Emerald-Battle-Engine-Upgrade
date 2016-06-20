@@ -392,7 +392,6 @@ void switchin_newstruct_update()
         ptr_to_struct->powertrick = previous_struct.powertrick;
         ptr_to_struct->gastro_acided = previous_struct.gastro_acided;
         ptr_to_struct->heal_block = previous_struct.heal_block;
-        ptr_to_struct->healblock_duration = previous_struct.healblock_duration;
     }
     struct side_affecting* side_ptr = &new_battlestruct.ptr->side_affecting[is_bank_from_opponent_side(active_bank)];
     side_ptr->stealthrock_done = 0;
