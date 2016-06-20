@@ -940,7 +940,7 @@ u8 check_if_cannot_attack()
                 battle_text_buff1[4] = 0xFF;
             }
         }
-        state_tracker++;
+        *state_tracker += 1;
         if (*state_tracker >= 17 && effect == 0)
             break;
     }
