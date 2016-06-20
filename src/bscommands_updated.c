@@ -275,6 +275,7 @@ void atk7F_set_leech_seed()
         status3[bank_target].leech_seed = 1;
         battle_communication_struct.multistring_chooser = 0;
     }
+    battlescripts_curr_instruction++;
     return;
 }
 
