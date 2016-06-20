@@ -255,7 +255,6 @@ void mentalherb()
     if (new_battlestruct.ptr->bank_affecting[bank].heal_block)
     {
         new_battlestruct.ptr->bank_affecting[bank].heal_block = 0;
-        new_battlestruct.ptr->bank_affecting[bank].healblock_duration = 0;
         battlescript_push();
         battlescripts_curr_instruction = &healblock_end_bs;
     }
