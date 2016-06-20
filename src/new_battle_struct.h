@@ -4,11 +4,11 @@
 #include "types.h"
 
 struct bank_affecting{
-    u8 embargo : 1;
+    u8 embargo : 3;
     u8 electrify : 1;
-    u8 telekinesis: 1;
-    u8 magnet_rise : 1;
-    u8 heal_block : 1;
+    u8 telekinesis: 3;
+    u8 magnet_rise : 3;
+    u8 heal_block : 3;
     u8 aqua_ring : 1;
     u8 powder : 1;
     u8 smacked_down : 1;
@@ -19,9 +19,7 @@ struct bank_affecting{
     u8 miracle_eyed : 1;
     u8 spiky_shield : 1;
     u8 kings_shield : 1;
-    u8 sturdied : 1;
     u8 life_orbed : 1;
-    u8 focus_sashed_or_banded : 1;
     u8 sheerforce_bonus : 1;
     u8 eaten_berry : 1;
     u8 sunshine_form : 1;
@@ -39,83 +37,64 @@ struct bank_affecting{
     u8 kingsshield_damage : 1;
     u8 spikyshield_damage : 1;
     u8 item_used : 1;
-
+    u8 slowstart_duration : 3;
+    u8 aegislash_form : 2; //0 = not aegi, 1 = defensive, 2 = attacking
+    u8 killer_bank : 2;
+    u8 bank_that_lowered_stats : 2;
+    u8 same_move_used : 3;
+    u8 wrap_bank : 2;
     u8 autonomize_uses;
-    u8 slowstart_duration;
     u8 type3;
-    u8 aegislash_form; //0 = not aegi, 1 = defensive, 2 = attacking
-    u8 telekinesis_duration;
-    u8 magnet_rise_duration;
-    u8 healblock_duration;
-    u8 killer_bank;
-    u8 bank_that_lowered_stats;
-    u8 same_move_used;
 };
 
 struct side_affecting{
-    u16 sticky_web : 1;
-    u16 sticky_web_done : 1;
-    u16 toxic_spikes_psn : 1;
-    u16 toxic_spikes_badpsn : 1;
-    u16 toxic_spikes_done : 1;
-    u16 stealthrock : 1;
-    u16 stealthrock_done : 1;
-    u16 lucky_chant : 1;
-    u16 tailwind : 1;
-    u16 wide_guard : 1;
-    u16 quick_guard : 1;
-    u16 crafty_shield : 1;
-    u16 combo_waterpledge : 1;
-    u16 combo_firepledge : 1;
-    u16 combo_grasspledge : 1;
-    u16 swamp_spd_halving : 1;
-    u16 sea_of_fire : 1;
-    u16 rainbow : 1;
-    u16 mat_block : 1;
-    u16 lunardance : 1;
-    u16 lunardance_done : 1;
-
-    u8 lucky_chant_duration;
-    u8 tailwind_duration;
-    u8 sea_of_fire_duration;
-    u8 swamp_duration;
-    u8 rainbow_duration;
-    u8 echo_voice_counter;
+    u8 sticky_web : 1;
+    u8 sticky_web_done : 1;
+    u8 toxic_spikes_psn : 1;
+    u8 toxic_spikes_badpsn : 1;
+    u8 toxic_spikes_done : 1;
+    u8 stealthrock : 1;
+    u8 stealthrock_done : 1;
+    u8 lucky_chant : 3;
+    u8 tailwind : 3;
+    u8 wide_guard : 1;
+    u8 quick_guard : 1;
+    u8 crafty_shield : 1;
+    u8 combo_waterpledge : 1;
+    u8 combo_firepledge : 1;
+    u8 combo_grasspledge : 1;
+    u8 swamp_spd_halving : 3;
+    u8 sea_of_fire : 3;
+    u8 rainbow : 3;
+    u8 mat_block : 1;
+    u8 lunardance : 1;
+    u8 lunardance_done : 1;
+    u8 echo_voice_counter : 3;
 };
 
 struct field_affecting{
-    u32 trick_room : 1;
-    u32 wonder_room : 1;
-    u32 magic_room : 1;
-    u32 grassy_terrain : 1;
-    u32 electic_terrain : 1;
-    u32 misty_terrain : 1;
-    u32 ion_deluge : 1;
-    u32 gravity : 1;
-    u32 round_chosen : 1;
-    u32 fairy_lock : 1;
-
-    u8 trick_room_duration;
-    u8 wonder_room_duration;
-    u8 magic_room_duration;
-    u8 grassy_terrain_duration;
-    u8 electric_terrain_duration;
-    u8 misty_terrain_duration;
-    u8 ion_deluge_duration;
-    u8 gravity_duration;
+    u8 trick_room : 3;
+    u8 wonder_room : 3;
+    u8 magic_room : 3;
+    u8 grassy_terrain : 3;
+    u8 electic_terrain : 3;
+    u8 misty_terrain : 3;
+    u8 ion_deluge : 3;
+    u8 gravity : 3;
+    u8 round_chosen : 1;
+    u8 fairy_lock : 1;
 };
 
 struct various{
     u8 eaten_berry_player : 6;
     u8 eaten_berry_opponent : 6;
-    u8 active_bank;
-    u8 frisking_bank;
+    u8 active_bank : 2;
+    u8 inverse_battle : 1;
+    u8 magicbounce : 1;
+    u8 stormdrain : 1;
     u16 var1;
     u16 var2;
     u16 recently_used_item;
-    u8 inverse_battle : 1;
-    u8 magicbounce : 1; 
-    u8 stormdrain : 1;
 };
 
 struct new_battle_struct{
