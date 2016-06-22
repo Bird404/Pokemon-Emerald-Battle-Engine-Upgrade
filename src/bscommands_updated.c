@@ -1062,8 +1062,8 @@ void atk00_move_canceller()
         battle_communication_struct.field6 = 1;
         move_outcome.missed = 1;
         reset_several_turns_stuff(bank_attacker);
-        sth_with_moves1[bank_target] = 0;
-        sth_with_moves2[bank_target] = 0;
+        move_hit_with_pbs[bank_target]=0;
+        move_type_hit_with_pbs[bank_target]=0;
     }
 
     battlescripts_curr_instruction++;
