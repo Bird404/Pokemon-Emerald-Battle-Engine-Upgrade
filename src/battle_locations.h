@@ -31,12 +31,10 @@ u16 battle_team_id_by_side[4];
 u16 previously_used_move[4];
 u8 another_active_bank;
 u8 hit_flags_for_banks;
-u16 calling_move_inflicted_pbs[4];
-u16 called_move_inflicted_pbs[4];
 u8 battle_outcome;
 u8 current_move_position;
-u16 sth_with_moves1[4];
-u16 sth_with_moves2[4];
+u16 move_hit_with_pbs[4];
+u16 move_type_hit_with_pbs[4];
 
 u32 poison_status_flag;
 u32 sleep_status_flag;
