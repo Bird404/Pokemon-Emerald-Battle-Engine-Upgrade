@@ -228,8 +228,8 @@ void handle_type_immune_ability(u8 def_bank, u8 string_chooser, u8 ability)
     move_outcome.failed=1;
     move_outcome.not_affected=1;
     last_used_ability=ability;
-    called_move_inflicted_pbs[def_bank]=0;
-    calling_move_inflicted_pbs[def_bank]=0;
+    move_hit_with_pbs[def_bank]=0;
+    move_type_hit_with_pbs[def_bank]=0;
     record_usage_of_ability(def_bank,ability);
     battle_communication_struct.field6=string_chooser;
 }
