@@ -226,7 +226,7 @@ extern struct battle_stuff_ptr battle_stuff_ptr;
 struct special_status{
     u8 statloweringflag : 1;
     u8 lightning_rod_redirected : 1;
-    u8 flag4: 1;
+    u8 restored_bank_sprite: 1;
     u8 intimidated_a_poke : 1;
     u8 traced : 1;
     u8 flag20 : 1;
