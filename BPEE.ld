@@ -27,10 +27,6 @@ multihit_counter = 0x02024212;
 bits_table = 0x0832A328;
 chosen_move_by_banks = 0x02024274;
 battle_team_id_by_side = 0x202406E;
-calling_move_inflicted_pbs = 0x2024250;
-called_move_inflicted_pbs = 0x2024258;
-
-damage_modulate_by_type_effectivity = 0x08046F60|1;
 
 bank_attacker = 0x0202420B;
 bank_target = 0x0202420C;
@@ -59,8 +55,8 @@ hit_flags_for_banks = 0x02024210;
 battle_outcome = 0x0202433A;
 battle_state_flags = 0x02024083;
 current_move_position = 0x020241E8;
-sth_with_moves1 = 0x02024250;
-sth_with_moves2 = 0x02024258;
+move_hit_with_pbs = 0x2024250;
+move_type_hit_with_pbs = 0x2024258;
 
 poison_status_flag = 0x0831BC70;
 sleep_status_flag = 0x0831BC78;
