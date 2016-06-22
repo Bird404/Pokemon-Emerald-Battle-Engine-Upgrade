@@ -49,6 +49,10 @@ void reset_several_turns_stuff(u8 bank);
 u8 check_if_imprisioned(u8 bank, u16 move);
 u8 get_bank_in_love(u8 arg);
 u8 check_if_twoturns_move(u16 move);
+void attack_iteration_cleanup();
+void prepare_pokemon_battle_sprite_manipulation_buffer(u8 unknown, u8 unknown2);
+u8 check_failure_due_to_status(u8 bank);
+
 
 u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);
