@@ -849,17 +849,16 @@ u8 check_if_cannot_attack()
                     battlescript_push();
                     battlescripts_curr_instruction = (void*) 0x82DB300; //snapped out of confusion
                 }
-                else if (percent_chance(50)) //hits itself
-                {
-                    battlescript_push();
-                    battlescripts_curr_instruction = (void*) 0x82DB2BD;
-                    battle_communication_struct.multistring_chooser = 1;
-                }
-                else //manages to hit the target
+               else if (percent_chance(50)) //manages to hit the target
                 {
                     battlescript_push();
                     battlescripts_curr_instruction = (void*) 0x82DB2BD;
                     battle_communication_struct.multistring_chooser = 0;
+                }
+                else //hits itself
+                {
+                    battlescripts_curr_instruction = (void*) 0x82DB2BD;
+                    battle_communication_struct.multistring_chooser = 1;
                     bank_target = bank_attacker;
                     damage_calc(MOVE_POUND, TYPE_EGG, bank_attacker, bank_attacker);
                     protect_structs[bank_attacker].flag1_confusion_self_damage = 1;
