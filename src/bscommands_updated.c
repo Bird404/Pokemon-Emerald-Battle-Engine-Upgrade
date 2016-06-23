@@ -163,7 +163,7 @@ void atk96_weather_damage()
     s32 damage = 0;
     u8 ability = battle_participants[bank_attacker].ability_id;
     u8 ability_effect = has_ability_effect(bank_attacker, 0, 1);
-    if (weather_abilities_effect() && !(get_item_effect(bank_attacker, 1) == ITEM_EFFECT_SAFETYGOOGLES) && !(ability_effect && ability == ABILITY_MAGIC_GUARD) &&!(hit_flags_for_banks & bits_table[bank_attacker]))
+    if (weather_abilities_effect() && !(get_item_effect(bank_attacker, 1) == ITEM_EFFECT_SAFETYGOOGLES) && !(ability_effect && ability == ABILITY_MAGIC_GUARD) &&!(absent_bank_flags & bits_table[bank_attacker]))
     {
         if (battle_weather.flags.sandstorm || battle_weather.flags.permament_sandstorm)
         {
@@ -411,14 +411,17 @@ u8 not_magicguard(u8 bank)
     return 1;
 }
 
+#define INC_END_EVENTS battle_scripting.cmd49_state_tracker++;
+#define case_max 26
+
 void atk49_move_end_turn()
 {
     u8 effect = 0;
-    //u16 last_move;
-    //if (last_used_move == 0xFFFF)
-      //  last_move = 0;
-    //else
-      //  last_move = last_used_move;
+    u16 last_move;
+    if (last_used_move == 0xFFFF)
+        last_move = 0;
+    else
+        last_move = last_used_move;
     u8 arg1 = read_byte(battlescripts_curr_instruction + 1);
     u8 arg2 = read_byte(battlescripts_curr_instruction + 2);
     u8 attacker_item = get_item_effect(bank_attacker, 1);
@@ -429,23 +432,7 @@ void atk49_move_end_turn()
     {
         switch (battle_scripting.cmd49_state_tracker)
         {
-        case 0: //life orb damage, I think it should go first
-            if (attacker_struct->current_hp && new_battlestruct.ptr->bank_affecting[bank_attacker].life_orbed && !new_battlestruct.ptr->bank_affecting[bank_attacker].sheerforce_bonus && not_magicguard(bank_attacker))
-            {
-                u32 damage = __udivsi3(attacker_struct->max_hp, 10);
-                if (damage == 0)
-                    damage = 1;
-                damage_loc = damage;
-                battlescript_push();
-                battlescripts_curr_instruction = &lifeorb_damage;
-                record_usage_of_item(bank_attacker, ITEM_EFFECT_LIFEORB);
-                effect = 1;
-            }
-            battle_scripting.cmd49_state_tracker++;
-            new_battlestruct.ptr->bank_affecting[bank_attacker].life_orbed = 0;
-            new_battlestruct.ptr->bank_affecting[bank_attacker].sheerforce_bonus = 0;
-            break;
-        case 1: //spiky shield recoil
+        case 0: //spiky shield recoil
             if (new_battlestruct.ptr->bank_affecting[bank_attacker].spikyshield_damage && attacker_struct->current_hp && not_magicguard(bank_attacker))
             {
                 effect = 1;
@@ -454,10 +441,7 @@ void atk49_move_end_turn()
                 battlescripts_curr_instruction = &spikyshield_dam_bs;
                 new_battlestruct.ptr->bank_affecting[bank_attacker].spikyshield_damage = 0;
                 move_outcome.missed = 0;
-            }
-            battle_scripting.cmd49_state_tracker++;
-            break;
-        case 2: //kings shield attak stat loss
+            }  // king shield recoil
             if (new_battlestruct.ptr->bank_affecting[bank_attacker].kingsshield_damage && attacker_struct->atk_buff != 0)
             {
                 new_battlestruct.ptr->bank_affecting[bank_attacker].kingsshield_damage = 0;
@@ -467,9 +451,9 @@ void atk49_move_end_turn()
                 battlescripts_curr_instruction = &statloss_bs;
                 effect = 1;
             }
-            battle_scripting.cmd49_state_tracker++;
+            INC_END_EVENTS
             break;
-        case 3: //rage checker
+        case 1: //rage checker
             if (target_struct->current_hp && target_struct->status2.raged && bank_target != bank_attacker &&
                 is_bank_from_opponent_side(bank_target) != is_bank_from_opponent_side(bank_attacker) && MOVE_WORKED && TARGET_TURN_DAMAGED &&
                 DAMAGING_MOVE && target_struct->atk_buff != 0xC)
@@ -479,10 +463,11 @@ void atk49_move_end_turn()
                 battlescripts_curr_instruction = (void*) 0x082DAE0D; //rage is building
                 effect = 1;
             }
-            battle_scripting.cmd49_state_tracker++;
+            INC_END_EVENTS
             break;
-        case 4: //defrosting via fire type move
-            if (target_struct->current_hp && target_struct->status.flags.freeze && TARGET_TURN_DAMAGED && MOVE_WORKED && current_move_type == TYPE_FIRE)
+        case 3: //defrosting via fire type move
+            if (target_struct->current_hp && target_struct->status.flags.freeze && TARGET_TURN_DAMAGED && MOVE_WORKED
+                && (current_move==MOVE_SCALD || current_move_type == TYPE_FIRE))
             {
                 target_struct->status.flags.freeze = 0;
                 active_bank = bank_target;
@@ -492,88 +477,112 @@ void atk49_move_end_turn()
                 prepare_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &target_struct->status);
                 mark_buffer_bank_for_execution(active_bank);
             }
-            battle_scripting.cmd49_state_tracker++;
+            INC_END_EVENTS
             break;
-        case 5: //target's synchronize
+        case 4: // user ability activation on strike
+            if(ability_battle_effects(10,bank_attacker,0,0,0))
+                effect=1;
+            INC_END_EVENTS
+            break;
+        case 5: // user items activation on strike (setting life orb bit or accumulating shell bell hp
+            if(item_battle_effects(4,bank_attacker,0))
+                effect=1;
+            INC_END_EVENTS
+            break;
+        case 6: //target's synchronize activation
             if (ability_battle_effects(7, bank_target, 0, 0, 0))
                 effect = 1;
-            battle_scripting.cmd49_state_tracker++;
+            INC_END_EVENTS
             break;
-        case 6: //contact abilities
+        case 7: //target's ability activation on strike
             if (ability_battle_effects(4, bank_target, 0, 0, 0))
                 effect = 1;
-            battle_scripting.cmd49_state_tracker++;
+            INC_END_EVENTS
             break;
-        case 7: //target's items
+        case 8: //target's items activation on strike
             if (item_battle_effects(2, bank_target, 0))
                 effect = 1;
-            battle_scripting.cmd49_state_tracker++;
+            INC_END_EVENTS
             break;
-        case 8: //status immunnities
+        case 9: //attacker synchronize activation
+            if (ability_battle_effects(8, bank_attacker, 0, 0, 0))
+                effect = 1;
+            INC_END_EVENTS
+            break;
+      /*  case 8: //status immunnities
             if (ability_battle_effects(5, 0, 0, 0, 0))
             {
                 effect = 1;
                 break;
             }
-            battle_scripting.cmd49_state_tracker++;
-            break;
-        case 9: //attacker synchronize
-            if (ability_battle_effects(8, bank_attacker, 0, 0, 0))
-                effect = 1;
-            battle_scripting.cmd49_state_tracker++;
-            break;
-        case 10: //choice move update
-            {
-                u16* choice_move = &battle_stuff_ptr.ptr->choiced_move[bank_attacker];
-                if (attacker_item == CHOICE_ITEM && last_used_move != MOVE_STRUGGLE &&hitmarker & 0x2000000 && (*choice_move == 0 || *choice_move == 0xFFFF))
-                {
-                    if ((last_used_move == MOVE_BATON_PASS || last_used_move == MOVE_VOLT_SWITCH || last_used_move == MOVE_UTURN) && move_outcome.failed)
-                    {
-                        break;
-                    }
-                    last_used_move = *choice_move;
-                }
-                if (get_move_position(bank_attacker, *choice_move) == -1)
-                    *choice_move = 0;
-                battle_scripting.cmd49_state_tracker++;
-                break;
-            }
-        case 11: //held items
-            {
-                for (u8 i = 0; i < no_of_all_banks; i++)
-                {
-                    if (battle_stuff_ptr.ptr->changed_held_items[i])
-                        battle_participants[i].held_item = 0;
-                }
+            INC_END_EVENTS
+            break; */
 
-                battle_scripting.cmd49_state_tracker++;
-                break;
-            }
-        case 12: //no idea what it is
-            if (status3[bank_attacker].underground || status3[bank_attacker].underwater || status3[bank_attacker].on_air || new_battlestruct.ptr->bank_affecting[bank_attacker].sky_drop_attacker || new_battlestruct.ptr->bank_affecting[bank_attacker].sky_drop_target)
+        case 10: //choice move update
+        {
+            u16* choice_move = &battle_stuff_ptr.ptr->choiced_move[bank_attacker];
+            if (attacker_item == CHOICE_ITEM && last_used_move != MOVE_STRUGGLE && (hitmarker & HITMARKER_OBEYS) &&
+                 (*choice_move == 0 || *choice_move == 0xFFFF))
             {
-                if (!(hitmarker & HITMARKER_NO_ANIMATIONS))
+                if ((last_used_move == MOVE_BATON_PASS || last_used_move == MOVE_VOLT_SWITCH || last_used_move == MOVE_UTURN) && move_outcome.failed)
                 {
-                    active_bank = bank_attacker;
-                    //function
-                    mark_buffer_bank_for_execution(active_bank);
+                    INC_END_EVENTS
+                    break;
                 }
+                last_used_move = *choice_move;
             }
-            battle_scripting.cmd49_state_tracker++;
+            if (get_move_position(bank_attacker, *choice_move) == -1)
+                *choice_move = 0;
+            INC_END_EVENTS
             break;
-        case 13: //to do
-            battle_scripting.cmd49_state_tracker++;
+        }
+        case 11: //held items
+            for (u8 i = 0; i < no_of_all_banks; i++)
+            {
+                if (battle_stuff_ptr.ptr->changed_held_items[i])
+                    battle_participants[i].held_item = 0;
+            }
+            INC_END_EVENTS
             break;
-        case 14: //to do
-            battle_scripting.cmd49_state_tracker++;
+        case 12: //hide user sprite in a semi invulnerable stat
+            if(SEMI_INVULNERABLE(bank_attacker) && (hitmarker & 80))
+            {
+                active_bank=bank_attacker;
+                prepare_pokemon_battle_sprite_manipulation_buffer(0,1);
+                mark_buffer_bank_for_execution(active_bank);
+            }
+            INC_END_EVENTS
+            break;
+        case 13: //refresh/restore user sprite in second turn of dive
+            if(!MOVE_WORKED || !SEMI_INVULNERABLE(bank_attacker) || check_failure_due_to_status(bank_attacker))
+            {
+                active_bank=bank_attacker;
+                prepare_pokemon_battle_sprite_manipulation_buffer(0,0);
+                mark_buffer_bank_for_execution(active_bank);
+                status3[bank_attacker].underground=0;
+                status3[bank_attacker].underwater=0;
+                status3[bank_attacker].on_air=0;
+                status3[bank_attacker].phantomforce=0;
+                special_statuses[bank_attacker].restored_bank_sprite=1;
+            }
+            INC_END_EVENTS
+            break;
+        case 14: //refresh/restore defender's sprite
+            if(!special_statuses[bank_target].restored_bank_sprite && (bank_target<no_of_all_banks) &&
+               !(SEMI_INVULNERABLE(bank_target)))
+            {
+                active_bank=bank_target;
+                prepare_pokemon_battle_sprite_manipulation_buffer(0,0);
+                mark_buffer_bank_for_execution(active_bank);
+                status3[bank_target].underground=0;
+                status3[bank_target].underwater=0;
+                status3[bank_target].on_air=0;
+                status3[bank_target].phantomforce=0;
+            }
+            INC_END_EVENTS
             break;
         case 15: //item move end turn
-            if (item_battle_effects(3, 0, 0))
-            {
-                effect = 1;
-                break;
-            }
-            battle_scripting.cmd49_state_tracker++;
+            INC_END_EVENTS
             break;
         case 16: //cheek pouch and berry adder
             {
@@ -600,10 +609,10 @@ void atk49_move_end_turn()
                     }
                 }
                 if (effect == 0)
-                    battle_scripting.cmd49_state_tracker++;
+                    INC_END_EVENTS
             }
             break;
-        case 17:
+        case 17: // clear substitute bits
             {
                 for (u8 i = 0; i < no_of_all_banks; i++)
                 {
@@ -612,15 +621,60 @@ void atk49_move_end_turn()
                         battle_participants[i].status2.substitute = 0;
                     }
                 }
-                battle_scripting.cmd49_state_tracker++;
+                INC_END_EVENTS
             }
             break;
-        case 18: //magic bounce and coat eraser; aviods endless loops if magic bounce meets magic bounce or magic coat
+        case 18: //magic bounce and coat eraser; avoids endless loops if magic bounce meets magic bounce or magic coat
             new_battlestruct.ptr->various.magicbounce = 0;
-            battle_scripting.cmd49_state_tracker++;
+            INC_END_EVENTS
             break;
-        case 19: //symbiosis item passing
+        case 19: //setup buffer for conversion, sketch etc.
+            if(hitmarker & HITMARKER_PURSUIT_TRAP)
             {
+                active_bank=bank_attacker;
+                bank_attacker=bank_target;
+                bank_target=active_bank;
+                hitmarker &= 0xFFFFEFFF;
+            }
+            if(hitmarker & HITMARKER_NO_ATTACKSTRING2) //used by sketch
+                previously_used_move[bank_attacker]=last_used_move;
+            if (!(absent_bank_flags & bits_table[bank_attacker] & battle_stuff_ptr.ptr->absent_bank_flags_prev_turn) && last_move!=MOVE_BATON_PASS)
+            {
+                if((hitmarker & HITMARKER_OBEYS))
+                {
+                    current_move_used[bank_attacker]=current_move;
+                    calling_move_used[bank_attacker]=last_used_move;
+                }
+                else
+                {
+                    current_move_used[bank_attacker]=0xFFFF;
+                    calling_move_used[bank_attacker]=0xFFFF;
+                }
+                if(!(hitmarker & HITMARKER_FAINTED(bank_target)))
+                    attacked_by[bank_target]=bank_attacker;
+                if((hitmarker & HITMARKER_OBEYS) && MOVE_WORKED)
+                {
+                    move_hit_with_pbs[bank_target]=current_move;
+                    move_type_hit_with_pbs[bank_target]=current_move_type;
+                }
+                else
+                    move_hit_with_pbs[bank_target]=0xFFFF;
+            }
+            INC_END_EVENTS
+            break;
+
+        case 20: //setup mirror_move_buffers
+            if (!(absent_bank_flags & bits_table[bank_attacker] & battle_stuff_ptr.ptr->absent_bank_flags_prev_turn) &&
+                move_table[current_move].move_flags.flags.affected_by_mirrormove && (hitmarker & HITMARKER_OBEYS) &&
+                bank_attacker!=bank_target && !(hitmarker&HITMARKER_FAINTED(bank_target)) && MOVE_WORKED)
+                {
+                    battle_stuff_ptr.ptr->mirror_moves_pbs[bank_target]=last_used_move;
+                    battle_stuff_ptr.ptr->mirror_move_set_pbs[bank_target].moves_per_target[bank_attacker]=last_used_move;
+                }
+            INC_END_EVENTS
+            break;
+        //case 19: //symbiosis item passing . (To be shifted to remove item command
+           /* {
                 for (u8 i = 0; i < no_of_all_banks; i++)
                 {
                     if (new_battlestruct.ptr->bank_affecting[i].item_used)
@@ -647,13 +701,74 @@ void atk49_move_end_turn()
                 }
                 if (effect == 0)
                     battle_scripting.cmd49_state_tracker++;
+            } */
+          //  break;
+
+
+        case 21: //dual target moves
+            if(!(hitmarker&HITMARKER_IMMOBILE_DUE_TO_STATUS) && move_table[current_move].target==move_target_both && battle_flags.double_battle &&
+               !protect_structs[bank_attacker].flag0_onlystruggle && !(hitmarker&HITMARKER_NO_ATTACKSTRING)
+               && battle_participants[bank_target^2].current_hp)
+            {
+                bank_target=bank_target^2;
+                hitmarker|=HITMARKER_NO_ATTACKSTRING;
+                attack_iteration_cleanup();
+                battle_scripting.cmd49_state_tracker=0;
+                u32 next_loc=(0x82D86A8+(move_table[current_move].script_id<<2)); //soon to be changed
+                battlescripts_curr_instruction=(void *)(*(u32 *)next_loc);
+                battlescript_push();
+                battlescripts_curr_instruction=(void *)(0x82DB87D);
+                effect=1;
+                break;
             }
+            INC_END_EVENTS
             break;
-        case 20:
+
+        case 22: //triple target moves
+            if(!(hitmarker&HITMARKER_IMMOBILE_DUE_TO_STATUS) && move_table[current_move].target==move_target_foes_and_ally &&
+                battle_flags.double_battle &&!protect_structs[bank_attacker].flag0_onlystruggle)
+            {
+                u8 next_target=bank_target+1;
+                while(next_target<no_of_all_banks && ((absent_bank_flags & bits_table[next_target]) || next_target==bank_attacker))
+                    next_target++;
+                if(next_target<no_of_all_banks)
+                {
+                    hitmarker|=HITMARKER_NO_ATTACKSTRING;
+                    attack_iteration_cleanup();
+                    battle_scripting.cmd49_state_tracker=0;
+                    u32 next_loc=(0x82D86A8+(move_table[current_move].script_id<<2)); //soon to be changed
+                    battlescripts_curr_instruction=(void *)(*(u32 *)next_loc);
+                    battlescript_push();
+                    battlescripts_curr_instruction=(void *)(0x82DB87D);
+                    effect=1;
+                    break;
+                }
+            }
+            INC_END_EVENTS
+            break;
+        case 23: //life orb damage, I think it should go first
+            if (attacker_struct->current_hp && new_battlestruct.ptr->bank_affecting[bank_attacker].life_orbed && !new_battlestruct.ptr->bank_affecting[bank_attacker].sheerforce_bonus && not_magicguard(bank_attacker))
+            {
+                u32 damage = __udivsi3(attacker_struct->max_hp, 10);
+                if (damage == 0)
+                    damage = 1;
+                damage_loc = damage;
+                battlescript_push();
+                battlescripts_curr_instruction = &lifeorb_damage;
+                record_usage_of_item(bank_attacker, ITEM_EFFECT_LIFEORB);
+                effect = 1;
+            }
             battle_scripting.cmd49_state_tracker++;
+            new_battlestruct.ptr->bank_affecting[bank_attacker].life_orbed = 0;
+            new_battlestruct.ptr->bank_affecting[bank_attacker].sheerforce_bonus = 0;
+            break;
+
+        //put life orb damage and shell bell hp restored here and pickpocket
+        default:
+            INC_END_EVENTS
             break;
         }
-        #define case_max 20
+
         if (arg1 == 1 && effect == 0)
             battle_scripting.cmd49_state_tracker = case_max;
         else if (arg1 == 2 && arg2 == battle_scripting.cmd49_state_tracker)
@@ -661,6 +776,7 @@ void atk49_move_end_turn()
         if (battle_scripting.cmd49_state_tracker == case_max)
             break;
     }
+
     if (battle_scripting.cmd49_state_tracker == case_max && effect == 0)
         battlescripts_curr_instruction += 3;
     return;
@@ -997,12 +1113,12 @@ void atk00_move_canceller()
         return;
     }
     hitmarker &= 0xFF7FFFFF;
-    if ((hitmarker & 0x2000000) == 0) // and no bide
+    if ((hitmarker & HITMARKER_OBEYS) == 0) // and no bide
     {
         u8 disobedient = is_poke_disobedient();
         if (disobedient == 2)
         {
-            hitmarker |= 0x2000000;
+            hitmarker |= HITMARKER_OBEYS;
             return;
         }
         else if (disobedient)
@@ -1011,6 +1127,7 @@ void atk00_move_canceller()
             return;
         }
     }
+    hitmarker |= HITMARKER_OBEYS;
     if (protect_structs[bank_target].flag0_bouncemove && move_table[current_move].move_flags.flags.affected_by_magic_coat && new_battlestruct.ptr->various.magicbounce == 0) //magic coat check
     {
         protect_structs[bank_target].flag0_bouncemove = 0;
@@ -1061,8 +1178,8 @@ void atk00_move_canceller()
         battle_communication_struct.field6 = 1;
         move_outcome.missed = 1;
         reset_several_turns_stuff(bank_attacker);
-        move_hit_with_pbs[bank_target]=0;
-        move_type_hit_with_pbs[bank_target]=0;
+        move_hit_with_pbs[bank_target] = 0;
+        move_type_hit_with_pbs[bank_target] = 0;
     }
 
     battlescripts_curr_instruction++;
