@@ -13,7 +13,7 @@ void alloc_new_struct()
     *ptr=malloc_and_clear(0x2A4);
     ptr=(u32 *)(&new_battlestruct);
     *ptr=malloc_and_clear(sizeof(struct new_battle_struct));
-    for (u8 i = 0; i < no_of_all_banks; i++)
+    for (u8 i = 0; i < 4; i++)
     {
         new_battlestruct.ptr->bank_affecting[i].type3 = TYPE_EGG;
     }
