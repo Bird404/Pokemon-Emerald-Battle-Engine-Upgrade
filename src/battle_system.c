@@ -20,7 +20,7 @@ u8 get_attacking_move_type()
     return move_type;
 }
 
-u8 get_item_effect(u8 bank, u8 check_negating_effects)
+u8 get_item_effect(u8 bank, u8 check_negating_effects)ai
 {
     if (check_negating_effects)
     {
@@ -204,7 +204,7 @@ u8 type_effectiveness_table[TYPE_FAIRY-0x4][TYPE_FAIRY-0x4] = {
 u16 get_airborne_state(u8 bank, u8 mode, u8 check_levitate)
 {
     // return 0 grounded due to gravity
-    // return 1 grounded due to iron ball or smack down
+    // return 1 grounded due to iron ball or smack down or ingrain
     // return 2 for not grounded nor airborne
     // return 3 airborne due to flying type or telekinesis
     // return 4 airborne due to levitate
@@ -212,7 +212,8 @@ u16 get_airborne_state(u8 bank, u8 mode, u8 check_levitate)
     if (new_battlestruct.ptr->field_affecting.gravity)
         return 0;
     if (get_item_effect(bank, true) == ITEM_EFFECT_IRONBALL
-        || new_battlestruct.ptr->bank_affecting[bank].smacked_down)
+        || new_battlestruct.ptr->bank_affecting[bank].smacked_down
+        || status3[bank].rooted)
         return 1;
     if (check_levitate && battle_participants[bank].ability_id == ABILITY_LEVITATE && has_ability_effect(bank,mode,1))
         return 4;
