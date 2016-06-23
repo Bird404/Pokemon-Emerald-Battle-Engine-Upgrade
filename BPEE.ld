@@ -37,9 +37,15 @@ battle_flags = 0x02022FEC;
 battle_communication_struct = 0x02024332;
 animation_bank_attacker = 0x02038436; 
 animation_bank_target = 0x02038437;
-previously_used_move = 0x02024240;
 move_anim_cursor = 0x020383F0;
 another_active_bank = 0x0202420F;
+
+previously_used_move = 0x02024240;
+attacked_by = 0x2024270;
+move_hit_with_pbs = 0x2024250;
+move_type_hit_with_pbs = 0x2024258;
+current_move_used = 0x2024260;
+calling_move_used = 0x2024248;
 
 current_move = 0x020241EA;
 last_used_move = 0x020241EC;
@@ -51,12 +57,10 @@ stat_changer = 0x202448E;
 no_of_all_banks = 0x0202406C;
 special_statuses = 0x0202437C;
 side_timers = 0x02024294;
-hit_flags_for_banks = 0x02024210;
+absent_bank_flags = 0x02024210;
 battle_outcome = 0x0202433A;
 battle_state_flags = 0x02024083;
 current_move_position = 0x020241E8;
-move_hit_with_pbs = 0x2024250;
-move_type_hit_with_pbs = 0x2024258;
 
 poison_status_flag = 0x0831BC70;
 sleep_status_flag = 0x0831BC78;
