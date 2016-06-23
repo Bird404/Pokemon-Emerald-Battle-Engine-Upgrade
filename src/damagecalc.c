@@ -15,6 +15,7 @@ extern u16 ironfist_moves_table[];
 extern u16 sheerforce_moves_table[];
 extern u16 biting_moves_table[];
 extern u16 megalauncher_moves_table[];
+u8 get_airborne_state(u8 bank, u8 mode, u8 check_levitate);
 
 #define MOVE_PHYSICAL 0
 #define MOVE_SPECIAL 1
@@ -769,6 +770,14 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
             modifier = chain_modifier(modifier, 0x800);
         }
         break;
+    case MOVE_EARTHQUAKE:
+    case MOVE_MAGNITUDE:
+    case MOVE_BULLDOZE:
+        if (new_battlestruct.ptr->field_affecting.grassy_terrain && get_airborne_state(def_bank, 1, 1) <= 1)
+        {
+            modifier = chain_modifier(modifier, 0x800);
+        }
+        break;
     }
 
     if (protect_structs[atk_bank].flag0_helpinghand)
@@ -787,6 +796,18 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
     }
 
     if (new_battlestruct.ptr->bank_affecting[atk_bank].me_first)
+    {
+        modifier = chain_modifier(modifier, 0x1800);
+    }
+    if (new_battlestruct.ptr->field_affecting.grassy_terrain && get_airborne_state(atk_bank, 0, 1) <= 1 && move_type == TYPE_GRASS)
+    {
+        modifier = chain_modifier(modifier, 0x1800);
+    }
+    if (new_battlestruct.ptr->field_affecting.misty_terrain && get_airborne_state(def_bank, 1, 1) >= 1 && move_type == TYPE_DRAGON)
+    {
+        modifier = chain_modifier(modifier, 0x800);
+    }
+    if (new_battlestruct.ptr->field_affecting.electic_terrain && get_airborne_state(atk_bank, 0, 1) >= 1 && move_type == TYPE_ELECTRIC)
     {
         modifier = chain_modifier(modifier, 0x1800);
     }
