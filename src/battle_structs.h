@@ -183,6 +183,13 @@ struct b_scripting{
 
 extern struct b_scripting battle_scripting;
 
+struct mirror_move_set_per_bank
+{
+    u16 moves_per_target[4];
+};
+
+extern struct mirror_move_set_per_bank mirror_move_set_pbs;
+
 struct battle_stuff{
     u8 field0[19]; //0x0-0x12
     u8 dynamic_move_type; //0x13
@@ -199,7 +206,11 @@ struct battle_stuff{
     u8 field_5C[35];
     u8 castform_switch_form; //0x7F
     u8 chosen_move_position[4]; //0x80
-    u8 field_84[46]; //0x84-0xB1
+    u8 field_84[13]; //0x84-0x90
+    u8 absent_bank_flags_prev_turn; //0x91
+    u8 field_92[6]; //0x92-0x97
+    u16 mirror_moves_pbs[8]; //0x98-0x9F
+    u8 field_A0[18]; //0xA0-0xB1
     u8 synchronize_effect_chooser; //0xB2
     u8 field_B3[5];
     u16 used_held_items[4]; //0xB8-0xBF
@@ -208,7 +219,9 @@ struct battle_stuff{
     u16 changed_held_items[4]; //0xD0-0xD8 (later written to battlestruct in cmd49)
     u8 intimidate_user; //0xD8
     u8 switch_in_item_bank_counter; //0xD9
-    u8 field_DA[200]; //0xDA-0x1A1
+    u8 field_DA[6]; //0xDA-0xDF
+    struct mirror_move_set_per_bank mirror_move_set_pbs[4]; //0xE0-0xFF
+    u8 field_100[162]; //0x100-0x1A1
     u8 battle_load_weather_from_map_flag; //0x1A2
     u8 atk_canceller_state_tracker; //0x1A3
     u8 field_1A4[240]; //0x1A4-0x293
@@ -383,9 +396,14 @@ u32 hitmarker;
 #define HITMARKER_IGNORE_ON_AIR 0x10000
 #define HITMERKER_IGNORE_UNDERGROUND 0x20000
 #define HITMARKER_IGNORE_UNDERWATER 0x40000
+#define HITMARKER_IMMOBILE_DUE_TO_STATUS 0x80000
+#define HITMARKER_OBEYS 0x2000000
 #define HITMARKER_IGNORE_SUBSTITUTE 0x100
 #define HITMARKER_NO_ANIMATIONS 0x80
-#define HITMARKER_NO_ATTACKSTRING 0x200
+#define HITMARKER_PURSUIT_TRAP 0x1000
+#define HITMARKER_NO_ATTACKSTRING 0x200 //used in dual foe and user defrosting moves
+#define HITMARKER_NO_ATTACKSTRING2 0x400
+#define HITMARKER_FAINTED(bank) (bits_table[bank]>>0x1C)
 
 struct side_affecting_hword{
     u16 reflect_on : 1;
