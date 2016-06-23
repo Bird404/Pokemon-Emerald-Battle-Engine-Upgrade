@@ -20,7 +20,7 @@ u8 get_attacking_move_type()
     return move_type;
 }
 
-u8 get_item_effect(u8 bank, u8 check_negating_effects)ai
+u8 get_item_effect(u8 bank, u8 check_negating_effects)
 {
     if (check_negating_effects)
     {
@@ -318,7 +318,6 @@ u16 apply_type_effectiveness(u16 chained_effect, u8 move_type, u8 target_bank, u
     chained_effect = damage_type_effectiveness_update(move_type, defender_type1, atk_bank, target_bank, chained_effect, airstatus);
     chained_effect = damage_type_effectiveness_update(move_type, defender_type2, atk_bank, target_bank, chained_effect, airstatus);
     chained_effect = damage_type_effectiveness_update(move_type, defender_type3, atk_bank, target_bank, chained_effect, airstatus);
-
     return chained_effect;
 }
 
@@ -1477,17 +1476,21 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 case ABILITY_POISON_TOUCH:
                     if(contact && percent_chance(30))
                     {
+                        hitmarker|=HITMAKRER_IGNORE_SAFEGUARD;
                         battle_communication_struct.move_effect=2;
                         battlescript_push();
                         battlescripts_curr_instruction = (void *) 0x082DB67F;
+                        effect=true;
                     }
                     break;
                 case ABILITY_STENCH:
-                    if(contact && percent_chance(10) && get_item_effect(bank,1)!=ITEM_EFFECT_KINGSROCK)
+                    if(contact && percent_chance(10) && get_item_effect(bank,1)!=ITEM_EFFECT_KINGSROCK) //not working
                     {
+                        hitmarker|=HITMAKRER_IGNORE_SAFEGUARD;
                         battle_communication_struct.move_effect=8;
                         battlescript_push();
                         battlescripts_curr_instruction = (void *) 0x082DB67F;
+                        effect=true;
                     }
                     break;
             }
