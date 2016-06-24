@@ -7,7 +7,7 @@
 #include "new_battle_struct.h"
 
 u8 check_ability(u8 bank, u8 ability);
-u8 change_stats(s8 arg1, s8 arg2, s8 arg3, void* battlescript_if_fails);
+u8 change_stats(s8 arg1, s8 arg2, s8 arg3, void* battlescript_if_fails);h
 
 u8 get_attacking_move_type()
 {
@@ -2490,7 +2490,7 @@ u8 battle_turn_move_effects()
     while (*bank < no_of_all_banks)
     {
         active_bank = bank_attacker = turn_order[*bank];
-        if (hit_flags_for_banks & bits_table[active_bank])
+        if (absent_bank_flags & bits_table[active_bank])
         {
             *bank +=1;
         }
@@ -2815,12 +2815,12 @@ u8 update_turn_counters()
     bank_target = 0;
     for (; bank_attacker < no_of_all_banks; bank_attacker++)
     {
-        if (!(hit_flags_for_banks & bits_table[bank_attacker]))
+        if (!(absent_bank_flags & bits_table[bank_attacker]))
             break;
     }
     for (; bank_target < no_of_all_banks; bank_target++)
     {
-        if (!(hit_flags_for_banks & bits_table[bank_target]))
+        if (!(absent_bank_flags & bits_table[bank_target]))
             break;
     }
     u8* statetracker = &battle_stuff_ptr.ptr->end_turn_statetracker2;
