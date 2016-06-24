@@ -229,7 +229,12 @@ struct battle_stuff{
     u16 changed_held_items[4]; //0xD0-0xD8 (later written to battlestruct in cmd49)
     u8 intimidate_user; //0xD8
     u8 switch_in_item_bank_counter; //0xD9
-    u8 field_DA[6]; //0xDA-0xDF
+    u8 field_DA; //0xDA
+    u8 field_DB; //0xDB
+    u8 field_DC; //0xDC
+    u8 field_DD; //0xDD
+    u8 field_DE; //0xDE
+    u8 field_DF; //0xDF
     struct mirror_move_set_per_bank mirror_move_set_pbs[4]; //0xE0-0xFF
     u8 field_100[162]; //0x100-0x1A1
     u8 battle_load_weather_from_map_flag; //0x1A2
