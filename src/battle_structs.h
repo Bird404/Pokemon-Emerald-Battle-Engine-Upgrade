@@ -191,9 +191,18 @@ struct mirror_move_set_per_bank
 extern struct mirror_move_set_per_bank mirror_move_set_pbs;
 
 struct battle_stuff{
-    u8 field0[19]; //0x0-0x12
+    u8 end_turn_statetracker1; //0x0
+    u8 end_turn_checked_bank; //0x1
+    u8 field_2; //0x2
+    u8 end_turn_statetracker2; //0x3
+    u16 trapped_move[4]; //0x4 - 0xB
+    u8 sth_with_targeting[4]; //0xC - 0xF
+    u8 field_10; //0x10
+    u8 field_11; //0x11
+    u8 field_12; //0x12
     u8 dynamic_move_type; //0x13
-    u8 field_14[54]; //0x14-0x49
+    u8 trapper;//0x14
+    u8 field_15[53]; //0x15-0x49
     u8 money_multiplier; //0x4A
     u8 field_4B; //0x4B
     u8 switch_in_ability_bank_counter; //0x4C
@@ -304,7 +313,9 @@ struct disable_struct{
     u8 is_first_turn;
     u8 field17;
     s8 truant_counter;
-    u8 field19[3];
+    u8 recharge_counter;
+    u8 field1A;
+    u8 field1B;
 };
 
 extern struct disable_struct disable_structs[4];
@@ -505,5 +516,29 @@ struct battle_state{
 };
 
 extern struct battle_state battle_state_flags;
+
+struct pokemon{
+	u32 PID;
+	u32 OTID;
+	char name[10];
+	u16 language;
+	u8 OT_name[7];
+	u8 markings;
+	u16 checksum;
+	u16 padding_maybe;
+	u8 data[48];
+	u32 ailment;
+	u8 level;
+	u8 pokerus;
+	u16 current_hp;
+	u16 total_hp;
+	u16 attack;
+	u16 defense;
+	u16 speed;
+	u16 sp_attack;
+	u16 sp_defense;
+};
+
+extern struct pokemon party_opponent[6];
 
 #endif /* B_STRUCTS */
