@@ -61,12 +61,19 @@ absent_bank_flags = 0x02024210;
 battle_outcome = 0x0202433A;
 battle_state_flags = 0x02024083;
 current_move_position = 0x020241E8;
+locked_move = 0x02024268;
+payday_money = 0x0202432E;
+current_move_turn = 0x02024082;
+party_opponent = 0x02024744;
+hp_dealt = 0x020241F4;
 
 poison_status_flag = 0x0831BC70;
 sleep_status_flag = 0x0831BC78;
 paralysis_status_flag = 0x0831BC80;
 burn_status_flag = 0x0831BC88;
 freeze_status_flag = 0x0831BC90;
+status_flags_for_move_effects = 0x0831C134;
+battlescripts_for_moveeffects = 0x0831C224;
 
 prepare_setattributes_in_battle = 0x08033900|1;
 strcpy_xFF_terminated_0 = 0x08008BA0|1;
@@ -122,6 +129,8 @@ uproar_wakeup_check = 0x08050650|1;
 reset_several_turns_stuff = 0x0803F8A0|1;
 check_if_imprisioned = 0x08040130|1;
 get_bank_in_love = 0x0806F8A8|1;
+sub_803CEDC = 0x803CEDC|1;
+get_attributes = 0x0806A518|1;
 
 attack_iteration_cleanup = 0x804AF30|1;
 prepare_pokemon_battle_sprite_manipulation_buffer = 0x08034414|1;
