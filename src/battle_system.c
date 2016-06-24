@@ -6,6 +6,9 @@
 #include "static_resources.h"
 #include "new_battle_struct.h"
 
+u8 check_ability(u8 bank, u8 ability);
+u8 change_stats(s8 arg1, s8 arg2, s8 arg3, void* battlescript_if_fails);
+
 u8 get_attacking_move_type()
 {
     u8 move_type;
