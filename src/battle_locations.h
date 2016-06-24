@@ -38,6 +38,11 @@ u8 battle_outcome;
 u8 current_move_position;
 u16 move_hit_with_pbs[4];
 u16 move_type_hit_with_pbs[4];
+u16 locked_move[4];
+u16 payday_money;
+u32 status_flags_for_move_effects[0x3F];
+void* battlescripts_for_moveeffects[0x3F];
+u32 hp_dealt;
 
 u32 poison_status_flag;
 u32 sleep_status_flag;
