@@ -896,7 +896,7 @@ u8 check_if_cannot_attack()
             if (attacker_struct->status2.recharge)
             {
                 attacker_struct->status2.recharge = 0;
-                disable_structs[bank_attacker].field19[0] = 0;
+                disable_structs[bank_attacker].recharge_counter = 0;
                 battlescripts_curr_instruction = (void*) 0x82D9462;
                 effect = 3;
             }
