@@ -36,6 +36,7 @@ u8 another_active_bank;
 u8 absent_bank_flags;
 u8 battle_outcome;
 u8 current_move_position;
+u8 current_move_turn;
 u16 move_hit_with_pbs[4];
 u16 move_type_hit_with_pbs[4];
 u16 locked_move[4];
