@@ -8,6 +8,20 @@
 #include <string.h>
 
 u8 check_ability(u8 bank, u8 ability);
+u16 get_1_4_of_max_hp(u8 bank);
+u16 get_1_8_of_max_hp(u8 bank);
+u32 percent_lose(u32 number, u16 percent);
+u32 percent_boost(u32 number, u16 percent);
+u8 is_of_type(u8 bank, u8 type);
+u16 get_airborne_state(u8 bank, u8 mode, u8 check_levitate);
+u16 apply_type_effectiveness(u16 chained_effect, u8 move_type, u8 target_bank, u8 atk_bank, u8 airstatus);
+u8 cant_poison(u8 bank, u8 self_inflicted);
+u8 get_attacking_move_type();
+u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn);
+u8 percent_chance(u8 percent);
+void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank);
+u8 find_move_in_table(u16 move, u16 table_ptr[]);
+u8 protect_affects(u16 move, u8 set);
 
 void atk7D_set_rain()
 {
@@ -155,8 +169,6 @@ void atk92_set_lightscreen()
     return;
 }
 
-u8 is_of_type(u8 bank, u8 type);
-
 void atk96_weather_damage()
 {
     battlescripts_curr_instruction++;
@@ -279,11 +291,6 @@ void atk7F_set_leech_seed()
     return;
 }
 
-u16 get_airborne_state(u8 bank, u8 mode, u8 check_levitate);
-u16 apply_type_effectiveness(u16 chained_effect, u8 move_type, u8 target_bank, u8 atk_bank, u8 airstatus);
-u16 get_1_8_of_max_hp(u8 bank);
-u8 can_poison(u8 bank, u8 self_inflicted);
-
 u8 entry_hazards_hook()
 {
     u8 effect = 0;
@@ -356,7 +363,7 @@ u8 entry_hazards_hook()
             battlescript_push();
             battlescripts_curr_instruction = &toxicpikes_absorbed;
         }
-        else if (can_poison(active_bank, 0))
+        else if (!cant_poison(active_bank, 0))
         {
             if (ptr_to_struct->toxic_spikes_badpsn)
                 battle_participants[active_bank].status.flags.toxic_poison = 1;
@@ -400,9 +407,6 @@ void switchin_newstruct_update()
     side_ptr->lunardance_done = 0;
     return;
 }
-
-u8 get_attacking_move_type();
-u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn);
 
 u8 not_magicguard(u8 bank)
 {
@@ -782,8 +786,6 @@ void atk49_move_end_turn()
     return;
 }
 
-u8 percent_chance(u8 percent);
-
 u8 move_thaws_user(u16 move)
 {
     if (move == MOVE_FLAME_WHEEL || move == MOVE_SACRED_FIRE || move == MOVE_SCALD|| move == MOVE_FLARE_BLITZ || move == MOVE_FUSION_FLARE || move == MOVE_STEAM_ERUPTION)
@@ -813,8 +815,6 @@ u8 embargo_forbidden_move(u16 move)
         return 1;
     return 0;
 }
-
-void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank);
 
 u8 check_if_cannot_attack()
 {
@@ -1035,6 +1035,26 @@ u8 check_if_cannot_attack()
                 battle_communication_struct.multistring_chooser = 1;
             }
             break;
+        case 18://powder
+            if (new_battlestruct.ptr->bank_affecting[bank_attacker].powder && get_attacking_move_type() == TYPE_FIRE)
+            {
+                effect = 1;
+                damage_loc = get_1_4_of_max_hp(bank_attacker);
+                battlescripts_curr_instruction = &powder_bs;
+            }
+            break;
+        case 19: //weather prevents move usage
+            if (battle_weather.flags.heavy_rain && get_attacking_move_type() == TYPE_FIRE)
+            {
+                effect = 1;
+                battlescripts_curr_instruction = &heavyrain_prevents_bs;
+            }
+            else if (battle_weather.flags.harsh_sun && get_attacking_move_type() == TYPE_WATER)
+            {
+                effect = 1;
+                battlescripts_curr_instruction = &harshsun_prevents_bs;
+            }
+            break;
         }
         if (effect == 2)
         {
@@ -1056,13 +1076,11 @@ u8 check_if_cannot_attack()
             }
         }
         *state_tracker += 1;
-        if (*state_tracker >= 17 && effect == 0)
+        if (*state_tracker >= 19 && effect == 0)
             break;
     }
     return effect;
 }
-
-u8 find_move_in_table(u16 move, u16 table_ptr[]);
 
 u8 immune_to_powder_moves(u8 def_bank, u16 move)
 {
@@ -1083,8 +1101,6 @@ u8 immune_to_powder_moves(u8 def_bank, u16 move)
     }
     return immune;
 }
-
-u8 protect_affects(u16 move, u8 set);
 
 void atk00_move_canceller()
 {
@@ -1182,6 +1198,25 @@ void atk00_move_canceller()
         move_type_hit_with_pbs[bank_target] = 0;
     }
 
+    battlescripts_curr_instruction++;
+    return;
+}
+
+void atk88_drain_damage()
+{
+    u32 damage = 0;
+    if (!(new_battlestruct.ptr->bank_affecting[bank_attacker].heal_block && healblock_forbidden_moves(current_move, 0)))
+    {
+        if (current_move == MOVE_DRAINING_KISS || current_move == MOVE_OBLIVION_WING)
+            damage = percent_lose(hp_dealt, 25);
+        else
+            damage = hp_dealt >> 1;
+        if (get_item_effect(bank_attacker, 1) == ITEM_EFFECT_BIGROOT)
+            damage = percent_boost(damage, 30);
+        if (damage == 0)
+            damage = 1;
+    }
+    damage_loc = damage * -1;
     battlescripts_curr_instruction++;
     return;
 }
