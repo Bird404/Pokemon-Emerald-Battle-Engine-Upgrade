@@ -7,6 +7,7 @@
 
 extern struct move_info move_table[1024];
 extern void *changetargetstat_bs;
+extern void *changeattackerstat_bs;
 extern void *healblock_end_bs;
 extern void *encore_end_bs;
 extern void *disable_end_bs;
@@ -14,6 +15,10 @@ extern void *weaknesspolicyspattack;
 extern void *weaknesspolicyattack;
 extern void *taunt_end_bs;
 extern void *tormentend_bs;
+extern void *grassyheal;
+u8 check_ability(u8 bank, u8 ability);
+u8 get_airborne_state(u8 bank, u8 mode, u8 check_levitate);
+u16 get_1_16_of_max_hp(u8 bank);
 
 u8 sample_text[] = {0xDD, 0xFF};
 u8 snowwarning_text[] = {0xFD, 0x13, 0xB4, 0xE7, 0, 0xFD, 0x1A, 0xFE, 0xEB, 0xDC, 0xDD, 0xE4, 0xE4, 0xD9, 0xD8, 0x00, 0xE9, 0xE4, 0x00, 0xD5, 0x00, 0xDC, 0xD5, 0xDD, 0xE0, 0xE7, 0xE8, 0xE3, 0xE6, 0xE1, 0xAB, 0xFF};
@@ -79,6 +84,22 @@ u8 absorbed_spikes_text[] = {T_, o_, x_, i_, c_, Space, S_, p_, i_, k_, e_, s_, 
 /*0x1B6*/ u8 symbiosispassing_text[] = {BuffCharac, 16, Space, p_, a_, s_, s_, e_, d_, Space, i_, t_, s_, JumpLine, i_, t_, e_, m_, Space, t_, o_, Space, BuffCharac, 19, Exclam, 0xFF};
 /*0x1B7*/ u8 restored_hp_text[] = {BuffCharac, 16, Space, r_, e_, s_, t_, o_, r_, e_, d_, Space, i_, t_, s_, Space, H_, P_, Exclam, 0xFF};
 /*0x1B8*/ u8 replacement_healed_text[] = {T_, h_, e_, Space, r_, e_, p_, l_, a_, c_, e_, m_, e_, n_, t_, Space, w_, a_, s_, Space, f_, u_, l_, l_, y_, Space, h_, e_, a_, l_, e_, d_, Exclam, 0xFF};
+/*0x1B9*/ u8 telekinesis_end_text[] = {BuffCharac, 15, Space, w_, a_, s_, Space, f_, r_, e_, e_, d_, Space, f_, r_, o_, m_, JumpLine, t_, h_, e_, Space, T_, e_, l_, e_, k_, i_, n_, e_, s_, i_, s_, Exclam, 0xFF};
+/*0x1BA*/ u8 embargoend_text[] = {BuffCharac, 15, Space, c_, a_, n_, Space, u_, s_, e_, JumpLine, i_, t_, e_, m_, s_, Space, a_, g_, a_, i_, n_, Exclam, 0xFF};
+/*0x1BB*/ u8 magnetriseend_text[] = {BuffCharac, 15, Apos, s_, Space, e_, l_, e_, c_, t_, r_, o_, m_, a_, g_, n_, e_, t_, i_, s_, m_, JumpLine, w_, o_, r_, e_, Space, o_, f_, f_, Exclam, 0xFF};
+/*0x1BC*/ u8 wrapped_text[] = {BuffCharac, 16, Space, w_, a_, s_, Space, t_, r_, a_, p_, p_, e_, d_, JumpLine, b_, y_, Space, 0xFD, 0, Exclam, 0xFF};
+/*0x1BD*/ u8 nofiremoves_text[] = {T_, h_, e_, Space, F_, i_, r_, e_, Dash, t_, y_,p_,e_, a_,t_,t_,a_,c_,k_,JumpLine, f_,i_,z_,z_,l_,e_,d_,Space, o_,u_,t_,Space, i_,n_, Space,t_,h_,e_, Space, h_,e_,a_,v_,y_,Space, r_,a_,i_,n_,Exclam,0xFF};
+/*0x1BE*/ u8 nowatermoves_text[] = {T_, h_, e_, Space, W_, a_, t_, e_, r_, Dash, t_, y_,p_,e_, a_,t_,t_,a_,c_,k_,JumpLine, e_,v_,a_,p_,o_,r_,a_,t_,e_,d_, Space, i_,n_, Space, t_,h_,e_, Space, h_,a_,r_,s_,h_, Space, s_,u_,n_,l_,i_,g_,h_,t_, Exclam, 0xFF};
+/*0x1BF*/ u8 trickroom_ends[] = {T_, h_, e_, Space, d_, i_, m_, e_, n_, s_, i_, o_, n_, s_, Space, r_, e_, t_, u_, r_, n_, e_, d_, Space, t_, o_, Space, n_, o_, r_, m_, a_, l_, Exclam, 0xFF};
+/*0x1C0*/ u8 magicroom_ends[] = {M_, a_, g_, i_, c_, Space, R_, o_, o_, m_, Space, w_, o_, r_, e_, Space, o_, f_, f_, Space, a_, n_, d_, Space, h_, e_, l_, d_, JumpLine, i_, t_, e_, m_, s_, Apos, Space, e_, f_, f_, e_, c_, t_, s_, Space, r_, e_, t_, u_, r_, n_, e_, d_, Space, t_, o_, Space, n_, o_, r_, m_, a_, l_, Exclam, 0xFF};
+/*0x1C1*/ u8 wonderoom_ends[] = {W_, o_, n_, d_, e_, r_, Space, R_, o_, o_, m_, Space, w_, o_, r_, e_, Space, o_, f_, f_, Space, a_, n_, d_, Space, D_, e_, f_, e_, n_, s_, e_, Space, a_, n_, d_, JumpLine,S_, p_, Dot, Space, D_, e_, f_, Space, s_, t_, a_, t_, s_, Space, r_, e_, t_, u_, r_, n_, e_, d_, Space, t_, o_, Space, n_, o_, r_, m_, a_, l_, Exclam, 0xFF};
+/*0x1C2*/ u8 gravity_ends_text[] = {G_, r_, a_, v_, i_, t_, y_, Space, r_, e_, t_, u_, r_, n_, e_, d_, Space, t_, o_, Space, n_, o_, r_, m_, a_, l_, Exclam, 0xFF};
+/*0x1C3*/ u8 grassyterainends_text[] = {T_, h_, e_, Space, g_, r_, a_, s_, s_, Space, d_, i_, s_, a_, p_, p_, e_, a_, r_, e_, d_, Space, f_, r_, o_, m_, JumpLine,t_, h_, e_, Space, b_, a_, t_, t_, l_, e_, f_, i_, e_, l_, d_, Exclam, 0xFF};
+/*0x1C4*/ u8 mistyterrainends_text[] = {T_, h_, e_, Space, m_, i_, s_, t_,  Space, d_, i_, s_, a_, p_, p_, e_, a_, r_, e_, d_, Space, f_, r_, o_, m_, JumpLine,t_, h_, e_, Space, b_, a_, t_, t_, l_, e_, f_, i_, e_, l_, d_, Exclam, 0xFF};
+/*0x1C5*/ u8 electrerrainends_text[] = {T_, h_, e_, Space, e_, l_, e_, c_, t_, r_, i_, c_, i_, t_, y_, Space, d_, i_, s_, a_, p_, p_, e_, a_, r_, e_, d_, Space, f_, r_, o_, m_, JumpLine,t_, h_, e_, Space, b_, a_, t_, t_, l_, e_, f_, i_, e_, l_, d_, Dot, 0xFF};
+/*0x1C6*/ u8 grassyterrain_heal[] = {BuffCharac, 19, Space, r_, e_, s_, t_, o_, r_, e_, d_, Space, s_, o_, m_, e_, Space, o_, f_, JumpLine, i_, t_, s_, Space, H_, P_, Space, u_, s_, i_, n_, g_, Space, G_, r_, a_, s_, s_, y_, Space, T_, e_, r_, r_, a_, i_, n_, Exclam, 0xFF};
+/*0x1C7*/ u8 fogcontinues_text[] = {T_, h_, e_, Space, f_, o_, g_, Space, i_, s_, Space, d_, e_, e_, p_, Dot, Dot, Dot, 0xFF};
+/*0x1C8*/ u8 fogends_text[] = {T_, h_, e_, Space, f_, o_, g_, Space, l_, i_, f_, t_, e_, d_, Exclam, 0xFF};
 
 void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activation_text, &heavyrain_activation_text, &mysticalaircurrent_activation_text, &forewarn_text, &slowstart_text, &anticipation_text, &dryskin_damage_text, &solarpower_text, &harvest_text, &healer_text, &pickup_text, &moldbreaker_text, &turboblaze_text, &terravolt_text, &downloadatk_text,
 &downloadspatk_text, &absorbabilityboost_text , &absorbabilityimmune_text, &userteam_text/*0x190*/, &foeteam_text/*0x191*/,
@@ -86,7 +107,9 @@ void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activ
 &hurtbyitem_text, &got_burned_text, &got_badlypoisoned_text, &airballoon_text, &bad_dreams_text, &item_text, &rockyhelmet_text, &popped_text, &fellinlove_text, &healblockend_text, &magicbounce_text,
 &angerpoint_text, &stealhrock_text, &stickyweb_text, &gotpoisoned_text, &absorbed_spikes_text, &lost_some_hp_text, &tauntended_text, &tormentended_text,
 &healblockprevents_text, &gravityprevents_text, &embargoprevents_text, &aromaveilprevents_text, &spikyshield_damage, &symbiosispassing_text,
-&restored_hp_text, &replacement_healed_text};
+&restored_hp_text, &replacement_healed_text, &telekinesis_end_text, &embargoend_text, &magnetriseend_text, &wrapped_text,
+&nofiremoves_text, &nowatermoves_text, &trickroom_ends, &magicroom_ends, &wonderoom_ends, &gravity_ends_text, &grassyterainends_text,
+&mistyterrainends_text, &electrerrainends_text, &grassyterrain_heal, &fogcontinues_text, &fogends_text};
 
 void battle_string_loader(u16 string_id)
 {
@@ -279,9 +302,83 @@ void hazards_bank_return()
     return;
 }
 
+u32 percent_boost(u32 number, u16 percent);
+
+void leechseed_update()
+{
+    if (new_battlestruct.ptr->bank_affecting[bank_target].heal_block)
+        damage_loc = 0;
+    else if (get_item_effect(bank_target, 1) == ITEM_EFFECT_BIGROOT)
+        damage_loc = percent_boost(damage_loc, 30);
+}
+
+void callasm_stat_change(u8 bank, void* battlescript_ptr)
+{
+    battle_scripting.stat_changer = read_byte(battlescripts_curr_instruction);
+    battlescripts_curr_instruction++;
+    battlescript_push();
+    battlescripts_curr_instruction = battlescript_ptr;
+    return;
+}
+
+void target_stat_change()
+{
+    callasm_stat_change(bank_target, &changetargetstat_bs);
+    return;
+}
+
+void attacker_stat_change()
+{
+    callasm_stat_change(bank_attacker, &changeattackerstat_bs);
+    return;
+}
+
+void moxie_stat_raise()
+{
+    if ((current_move == MOVE_BLOCK || check_ability(bank_attacker, ABILITY_MOXIE)) && bank_attacker != bank_target && DAMAGING_MOVE)
+    {
+        //check if that's the last opponent pokemon, if yes, then we'll skip the animation
+        if (is_bank_from_opponent_side(bank_target))
+        {
+            for (u8 i = 0; i < 6; i++)
+            {
+                if (!(get_attributes(&party_opponent[i], ATTR_CURRENT_HP, 0) == 0 || get_attributes(&party_opponent[i], ATTR_IS_EGG, 0) || get_attributes(&party_opponent[i], ATTR_SPECIES, 0) == 0))
+                    break;
+                if (i == 5)
+                    return;
+            }
+        }
+        battlescript_push();
+        battlescripts_curr_instruction = &changeattackerstat_bs;
+        battle_scripting.stat_changer = 0x21;
+    }
+    return;
+}
+
+void grassyterrainn_heal()
+{
+    for (u8 i = 0; i < no_of_all_banks; i++)
+    {
+        if (!new_battlestruct.ptr->bank_affecting[i].grassyterrain_heal && get_airborne_state(i, 0, 1) <= 2 && battle_participants[i].current_hp < battle_participants[i].max_hp)
+        {
+            new_battlestruct.ptr->bank_affecting[i].grassyterrain_heal = 1;
+            battlescripts_curr_instruction -= 3;
+            battlescript_push();
+            battlescripts_curr_instruction = &grassyheal;
+            battle_scripting.active_bank = i;
+            damage_loc = get_1_16_of_max_hp(i) * -1;
+            break;
+        }
+        if (i == no_of_all_banks)
+            break;
+    }
+    return;
+}
+
 void* callasm_table[] = {&call_ability_effects, &apply_burn_animation, &change_attacker_item, &try_to_lower_def, &try_to_raise_spd,
 &changestatvar1, &changestatvar2, &frisk_target_item, &set_stat_msg_buffer, &set_type_msg_buffer, &set_team_msg_buffer, &bad_dreams_damage_calc,
-&weaknesspolicy, &mentalherb, &placeholder0x14, &hazards_bank_switcher, &hazards_bank_return};
+&weaknesspolicy, &mentalherb, &placeholder0x14, &hazards_bank_switcher, &hazards_bank_return, &leechseed_update,
+&target_stat_change, &attacker_stat_change, &moxie_stat_raise, &grassyterrainn_heal};
 
 void callasm_cmd()
 {
@@ -291,14 +388,4 @@ void callasm_cmd()
     battlescripts_curr_instruction += 3;
     command = callasm_table[(command_id_ms<<8)+command_id_ls];
     command();
-}
-
-u8 magicbounce_loop_avoider()
-{
-    if (new_battlestruct.ptr->various.magicbounce)
-    {
-        new_battlestruct.ptr->various.magicbounce = 0;
-        return false;
-    }
-    return true;
 }
