@@ -10,6 +10,7 @@ struct status_main{
     u32 freeze : 1;
     u32 paralysis: 1;
     u32 toxic_poison : 1;
+    u32 poison_counter : 4;
 };
 
 union main_status{
@@ -308,7 +309,7 @@ struct disable_struct{
     u8 rollout_timer;
     u8 charge_timer;
     u8 taunt_timer;
-    u8 field14;
+    u8 bank_preventing_escape;
     u8 always_hits_bank;
     u8 is_first_turn;
     u8 field17;
