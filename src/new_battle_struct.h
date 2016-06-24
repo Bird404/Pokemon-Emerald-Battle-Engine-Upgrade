@@ -36,6 +36,7 @@ struct bank_affecting{
     u8 powertrick : 1;
     u8 kingsshield_damage : 1;
     u8 spikyshield_damage : 1;
+    u8 grassyterrain_heal : 1;
     u8 item_used : 1;
     u8 slowstart_duration : 3;
     u8 aegislash_form : 2; //0 = not aegi, 1 = defensive, 2 = attacking
@@ -43,8 +44,9 @@ struct bank_affecting{
     u8 bank_that_lowered_stats : 2;
     u8 same_move_used : 3;
     u8 wrap_bank : 2;
+    u8 move_failed : 1;
+    u8 type3 : 5;
     u8 autonomize_uses;
-    u8 type3;
 };
 
 struct side_affecting{
@@ -56,7 +58,9 @@ struct side_affecting{
     u8 stealthrock : 1;
     u8 stealthrock_done : 1;
     u8 lucky_chant : 3;
+    u8 lucky_chant_bank : 2;
     u8 tailwind : 3;
+    u8 tailwind_bank : 2;
     u8 wide_guard : 1;
     u8 quick_guard : 1;
     u8 crafty_shield : 1;
