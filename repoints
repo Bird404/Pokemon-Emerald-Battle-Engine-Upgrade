@@ -6,6 +6,8 @@ ability_names_table 081C3028
 ### ability descriptions repoint
 ability_desc_table 080001C4
 ability_desc_table 081C3078
+### move animations repoint
+move_animations_table 080A3A44
 ### move names repoint
 move_names_table 08000148
 move_names_table 08059B14
