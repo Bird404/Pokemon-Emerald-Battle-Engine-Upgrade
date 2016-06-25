@@ -38,7 +38,6 @@ u8 get_item_effect(u8 bank, u8 check_negating_effects)
     {
         return get_item_x12_battle_function(battle_participants[bank].held_item);
     }
-    return 1;
 }
 
 u8 is_of_type(u8 bank, u8 type)
@@ -916,7 +915,8 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                             effect = true;
                             battle_stuff_ptr.ptr->used_held_items[i] = 0;
                             execute_battle_script(&pickup_bs);
-                            battle_participants[bank].held_item = battle_stuff_ptr.ptr->used_held_items[i];
+                            battle_participants[bank].held_item = new_battlestruct.ptr->various.recently_used_item;
+                            new_battlestruct.ptr->various.recently_used_item = 0;
                             active_bank = bank;
                             prepare_setattributes_in_battle(0, 2, 0, 2,&battle_participants[bank].held_item);
                             mark_buffer_bank_for_execution(bank);
@@ -1689,7 +1689,7 @@ u8 cant_poison(u8 bank, u8 self_inflicted)
         return 4;
     if (side_affecting_halfword[is_bank_from_opponent_side(bank)].safeguard_on && !self_inflicted)
         return 5;
-    if (new_battlestruct.ptr->field_affecting.misty_terrain && get_airborne_state(bank, 1, 1) <= 2)
+    if (new_battlestruct.ptr->field_affecting.misty_terrain && get_airborne_state(bank, 1, 1) <= 2 && !self_inflicted)
         return 8;
     return 0;
 }
@@ -1721,9 +1721,9 @@ u8 cant_fall_asleep(u8 bank, u8 self_inflicted)
                 return 6;
         }
     }
-    if (new_battlestruct.ptr->field_affecting.misty_terrain && get_airborne_state(bank, 1, 1) <= 2)
+    if (new_battlestruct.ptr->field_affecting.misty_terrain && get_airborne_state(bank, 1, 1) <= 2 && !self_inflicted)
         return 8;
-    if (new_battlestruct.ptr->field_affecting.electic_terrain && get_airborne_state(bank, 1, 1) <= 2)
+    if (new_battlestruct.ptr->field_affecting.electic_terrain && get_airborne_state(bank, 1, 1) <= 2 && !self_inflicted)
         return 9;
     return 0;
 }
@@ -1746,7 +1746,7 @@ u8 cant_become_paralyzed(u8 bank, u8 self_inflicted)
         return 4;
     if (side_affecting_halfword[is_bank_from_opponent_side(bank)].safeguard_on && !self_inflicted)
         return 5;
-    if (new_battlestruct.ptr->field_affecting.misty_terrain && get_airborne_state(bank, 1, 1) <= 2)
+    if (new_battlestruct.ptr->field_affecting.misty_terrain && get_airborne_state(bank, 1, 1) <= 2 && !self_inflicted)
         return 8;
     return 0;
 }
@@ -1769,7 +1769,7 @@ u8 cant_become_burned(u8 bank, u8 self_inflicted)
         return 4;
     if (side_affecting_halfword[is_bank_from_opponent_side(bank)].safeguard_on && !self_inflicted)
         return 5;
-    if (new_battlestruct.ptr->field_affecting.misty_terrain && get_airborne_state(bank, 1, 1) <= 2)
+    if (new_battlestruct.ptr->field_affecting.misty_terrain && get_airborne_state(bank, 1, 1) <= 2 && !self_inflicted)
         return 8;
     return 0;
 }
@@ -1795,7 +1795,7 @@ u8 cant_become_freezed(u8 bank, u8 self_inflicted)
         return 5;
     if (weather_abilities_effect() && battle_weather.int_bw & (weather_harsh_sun || weather_permament_sun || weather_sun))
         return 7;
-    if (new_battlestruct.ptr->field_affecting.misty_terrain && get_airborne_state(bank, 1, 1) <= 2)
+    if (new_battlestruct.ptr->field_affecting.misty_terrain && get_airborne_state(bank, 1, 1) <= 2 && !self_inflicted)
         return 8;
     return 0;
 }
@@ -2092,27 +2092,6 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 record_usage_of_item(bank, get_item_effect(bank, 0));
             }
             break;
-        case ITEM_EFFECT_FLAMEORB:
-            if (battle_participants[bank].status.int_status == 0 && !is_of_type(bank, TYPE_FIRE) && !move_turn)
-            {
-                if (!(has_ability_effect(bank, 0, 1) && (battle_participants[bank].ability_id == ABILITY_WATER_VEIL || (battle_participants[bank].ability_id == ABILITY_LEAF_GUARD && (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)))))
-                {
-                    effect = 1;
-                    battle_participants[bank].status.flags.burn = 1;
-                    call_bc_move_exec(&flameorb_bs);
-                    record_usage_of_item(bank, ITEM_EFFECT_FLAMEORB);
-                }
-            }
-            break;
-        case ITEM_EFFECT_TOXICORB:
-            if (!move_turn && !cant_poison(bank, 1))
-            {
-                effect = 1;
-                battle_participants[bank].status.flags.toxic_poison = 1;
-                call_bc_move_exec(&toxicorb_bs);
-                record_usage_of_item(bank, ITEM_EFFECT_TOXICORB);
-            }
-            break;
         }
         active_bank = bank;
         battle_scripting.active_bank = bank;
@@ -2167,6 +2146,24 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 effect = 7;
                 call_bc_move_exec(&rockyhelmet_bs);
                 record_usage_of_item(bank, ITEM_EFFECT_ROCKYHELMET);
+            }
+            break;
+        case ITEM_EFFECT_STICKYBARB:
+            if (move_table[current_move].move_flags.flags.makes_contact && TARGET_TURN_DAMAGED && !(battle_participants[bank_attacker].status2.substitute) && battle_participants[bank_attacker].current_hp && battle_participants[bank_attacker].held_item == 0)
+            {
+                effect = 2;
+                u16* target_item = &battle_participants[bank].held_item;
+                u16* attacker_item = &battle_participants[bank_attacker].held_item;
+                *attacker_item = *target_item;
+                *target_item = 0;
+                active_bank = bank;
+                prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, target_item);
+                mark_buffer_bank_for_execution(bank);
+                active_bank = bank_attacker;
+                prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, attacker_item);
+                mark_buffer_bank_for_execution(active_bank);
+                call_bc_move_exec(&stickybarbswap);
+                bank = bank_attacker;
             }
             break;
         case ITEM_EFFECT_AIRBALLOON:
@@ -2361,21 +2358,44 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 break;
             }
         }
-    }
-    if (eaten_berry)
-    {
-        new_battlestruct.ptr->bank_affecting[bank].eaten_berry = 1;
+        break;
+    case 5: //toxic and flame orb
+        switch (item_effect)
+        {
+        case ITEM_EFFECT_FLAMEORB:
+            if (!cant_become_burned(bank, 1))
+            {
+                effect = 1;
+                battle_participants[bank].status.flags.burn = 1;
+                call_bc_move_exec(&flameorb_bs);
+                record_usage_of_item(bank, ITEM_EFFECT_FLAMEORB);
+            }
+            break;
+        case ITEM_EFFECT_TOXICORB:
+            if (!cant_poison(bank, 1))
+            {
+                effect = 1;
+                battle_participants[bank].status.flags.toxic_poison = 1;
+                call_bc_move_exec(&toxicorb_bs);
+                record_usage_of_item(bank, ITEM_EFFECT_TOXICORB);
+            }
+            break;
+        }
+        break;
     }
     if (effect)
     {
-        last_used_item = battle_participants[bank].held_item;
-        new_battlestruct.ptr->various.recently_used_item = battle_participants[bank].held_item;
+        u16 item = battle_participants[bank].held_item;
+        last_used_item = item;
+        new_battlestruct.ptr->various.recently_used_item = item;
         new_battlestruct.ptr->bank_affecting[bank].item_used = 1;
-    }
-    if (effect == 1)
-    {
-        prepare_setattributes_in_battle(0, 0x28, 0, 4, &battle_participants[bank].status.flags);
-        mark_buffer_bank_for_execution(bank);
+        if (eaten_berry)
+            new_battlestruct.ptr->bank_affecting[bank].eaten_berry = 1;
+        if (effect == 1)
+        {
+            prepare_setattributes_in_battle(0, 0x28, 0, 4, &battle_participants[bank].status.flags);
+            mark_buffer_bank_for_execution(bank);
+        }
     }
     return effect;
 }
@@ -2409,41 +2429,6 @@ u8 berry_eaten(u8 how_to_call, u8 bank)
         }
     }
     return cheek_pouch;
-}
-
-u8 symbiosis_effect(u8 how_to_call, u8 bank)
-{
-    u8 symbiosis = 0;
-    if (new_battlestruct.ptr->bank_affecting[bank].item_used)
-    {
-        new_battlestruct.ptr->bank_affecting[bank].item_used = 0;
-        u8 ally_bank = bank ^ 2;
-        if (ability_battle_effects(20, bank, ABILITY_SYMBIOSIS, 0, 0) && battle_participants[bank].held_item == 0 && battle_participants[ally_bank].held_item)
-        {
-            symbiosis = 1;
-            battle_participants[bank].held_item = battle_participants[ally_bank].held_item;
-            battle_participants[ally_bank].held_item = 0;
-            active_bank = bank;
-            prepare_setattributes_in_battle(0, 2, 0, 2, &battle_participants[bank].held_item);
-            mark_buffer_bank_for_execution(active_bank);
-            active_bank = ally_bank;
-            prepare_setattributes_in_battle(0, 2, 0, 2, &battle_participants[ally_bank].held_item);
-            mark_buffer_bank_for_execution(active_bank);
-            if (how_to_call == 0)
-            {
-                battlescript_push();
-                battlescripts_curr_instruction = &symbiosispass_bs;
-            }
-            else
-            {
-                call_bc_move_exec(&symbiosispass2_bs);
-            }
-            battle_scripting.active_bank = bank;
-            bank_target = ally_bank;
-            record_usage_of_ability(ally_bank, ABILITY_SYMBIOSIS);
-        }
-    }
-    return symbiosis;
 }
 
 u8 poison_heal_check()
@@ -2540,9 +2525,7 @@ u8 battle_turn_move_effects()
                     if (berry_eaten(1, active_bank))
                         effect = 1;
                     break;
-                case 6: //symbiosis effect
-                    if (symbiosis_effect(1, active_bank))
-                        effect = 1;
+                case 6:
                     break;
                 case 7: //check leech seed
                     if (not_magicguard(active_bank) && status3[active_bank].leech_seed && current_hp && battle_participants[status3[active_bank].leech_seed_hp_receiver].current_hp)
@@ -2776,11 +2759,22 @@ u8 battle_turn_move_effects()
                             call_bc_move_exec((void*) 0x082DB378);
                         }
                     }
+                case 26: //item effects again
+                    if (item_battle_effects(1, active_bank, 1))
+                        effect = 1;
+                    break;
+                case 27: //cheeck pouch again
+                    if (berry_eaten(1, active_bank))
+                        effect = 1;
+                    break;
+                case 28: //toxic/flame orb
+                    if (item_battle_effects(5, active_bank, 0))
+                        effect = 1;
                     break;
 
             }
             *tracker += 1;
-            #define TRACKER_MAX 26
+            #define TRACKER_MAX 28
             if (*tracker == TRACKER_MAX)
             {
                 *tracker = 0;
@@ -3222,7 +3216,7 @@ u8 recoil_damage(u8 bank_to_apply)
     u16 recoil;
     if (current_move == MOVE_HEAD_SMASH || current_move == MOVE_LIGHT_OF_RUIN) //1/2 of damage dealt
         recoil = hp_dealt >> 1;
-    else if (current_move == MOVE_STRUGGLE || current_move == MOVE_TAKE_DOWN) //1/4 of damage dealt
+    else if (current_move == MOVE_STRUGGLE || current_move == MOVE_TAKE_DOWN || current_move == MOVE_WILD_CHARGE || current_move == MOVE_HEAD_CHARGE) //1/4 of damage dealt
         recoil = hp_dealt >> 2;
     else //1/3 of damage dealt hp
         recoil = __udivsi3(hp_dealt, 3);
