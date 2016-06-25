@@ -27,85 +27,83 @@ s8 get_priority(u16 move, u8 bank)
     return priority;
 }
 
+u32 get_1_4_of_max_hp(u8 bank);
+
+s8 get_bracket_alteration_factor(u8 bank, u8 item_effect) // will be used for quick claw message
+{
+    switch(item_effect)
+    {
+    case ITEM_EFFECT_QUICKCLAW:
+        if(__umodsi3(battle_turn_random_no,100)<get_item_quality(battle_participants[bank].held_item))
+            return 1;
+        break;
+    case ITEM_EFFECT_CUSTAPBERRY:
+        if(battle_participants[bank].current_hp<get_1_4_of_max_hp(bank))
+            return 1;
+        break;
+    case ITEM_EFFECT_LAGGINGTAIL:
+        return -1;
+    }
+    return 0;
+}
+
 u8 get_first_to_strike(u8 bank1, u8 bank2, u8 ignore_priority)
 {
-    u16 speed1 = get_speed(bank1);
-    u16 speed2 = get_speed(bank2);
-    s8 priority1 = 0;
-    s8 priority2 = 0;
-    u8 faster_bank;
+    u8 quash1=new_battlestruct.ptr->bank_affecting[bank1].quashed;
+    u8 quash2=new_battlestruct.ptr->bank_affecting[bank2].quashed;
+    u8 faster=2;
 
-    if (new_battlestruct.ptr->bank_affecting[bank1].quashed)
-        return 1;
-    else if (new_battlestruct.ptr->bank_affecting[bank2].quashed)
-        return 0;
+    if (quash1 && !quash2)
+        faster=1;
+    else if (!quash1 && quash2)
+        faster=0;
     else if (!ignore_priority)
     {
+        s8 priority1 = 0;
+        s8 priority2 = 0;
         u8 move1 = battle_participants[bank1].moves[battle_stuff_ptr.ptr->chosen_move_position[bank1]];
         u8 move2 = battle_participants[bank2].moves[battle_stuff_ptr.ptr->chosen_move_position[bank2]];
         priority1 = get_priority(move1, bank1);
         priority2 = get_priority(move2, bank2);
+        if (priority1 > priority2)
+            faster=0;
+        else if (priority2 > priority1)
+            faster=1;
     }
-    if (priority1 > priority2)
-        faster_bank = bank1;
-    else if (priority2 > priority1)
-        faster_bank = bank2;
-    else //priorities are equal; quick claw moves first
+    if(faster==2)
     {
-        u8 item1 = get_item_effect(bank1, 1);
-        u8 item2 = get_item_effect(bank2, 1);
-        u16 quickclaw1 = 0;
-        u16 quickclaw2 = 0;
-        if (item1 == ITEM_EFFECT_QUICKCLAW && percent_chance(20))
-            quickclaw1 = rng();
-        if (item2 == ITEM_EFFECT_QUICKCLAW && percent_chance(20))
-            quickclaw2 = rng();
-        if (quickclaw1 > quickclaw2)
-            faster_bank = bank1;
-        else if (quickclaw2 > quickclaw1)
-            faster_bank = bank2;
-        else //lagging tail moves last
-        {
-            if (item1 == ITEM_EFFECT_LAGGINGTAIL)
-                quickclaw1 = rng();
-            if (item2 == ITEM_EFFECT_LAGGINGTAIL)
-                quickclaw2 = rng();
-            if (quickclaw1 > quickclaw2)
-                faster_bank = bank2;
-            else if (quickclaw2 > quickclaw1)
-                faster_bank = bank1;
-            else //stall moves last
-            {
-                if (check_ability(bank1, ABILITY_STALL))
-                    quickclaw1 = speed1;
-                if (check_ability(bank2, ABILITY_STALL))
-                    quickclaw2 = speed2;
-                if (quickclaw1 > quickclaw2)
-                    faster_bank = bank2;
-                else if (quickclaw2 > quickclaw1)
-                    faster_bank = bank1;
+        s8 bracket1=get_bracket_alteration_factor(bank1,get_item_effect(bank1,1));
+        s8 bracket2=get_bracket_alteration_factor(bank2,get_item_effect(bank2,1));
+        if (bracket1 > bracket2)
+            faster=0;
+        else if (bracket1 < bracket2)
+            faster=1;
+        else
+            { //faster moves first unless trick room is active
+                u8 stall1 = check_ability(bank1,ABILITY_STALL);
+                u8 stall2 = check_ability(bank2,ABILITY_STALL);
+                if(stall1 && !stall2)
+                    faster=1;
+                else if(stall2 && !stall1)
+                    faster=0;
                 else
-                { //faster moves first unless trick room is active
-                    if (new_battlestruct.ptr->field_affecting.trick_room) //swapping speeds will do the job
+                {
+                    u16 speed1 = get_speed(bank1);
+                    u16 speed2 = get_speed(bank2);
+                    if (new_battlestruct.ptr->field_affecting.trick_room || (stall1 && stall2)) //swapping speeds will do the job
                     {
                         u16 placeholder = speed1;
                         speed1 = speed2;
                         speed2 = placeholder;
                     }
                     if (speed1 > speed2)
-                        faster_bank = bank1;
+                        faster=0;
                     else if (speed2 > speed1)
-                        faster_bank = bank2;
-                    else //speed are equal
-                    {
-                        faster_bank = two_options_rand(bank1, bank2);
-                    }
+                        faster=1;
+                    else if(rng()&1)
+                        faster=0;
                 }
             }
-        }
     }
-    if (faster_bank == bank1)
-        return 0;
-    else
-        return 1;
+    return faster;
 }
