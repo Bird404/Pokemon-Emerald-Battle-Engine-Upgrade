@@ -22,6 +22,7 @@ u8 percent_chance(u8 percent);
 void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank);
 u8 find_move_in_table(u16 move, u16 table_ptr[]);
 u8 protect_affects(u16 move, u8 set);
+u8 berry_eaten(u8 how_tocall, u8 bank);
 
 void atk7D_set_rain()
 {
@@ -543,8 +544,8 @@ void atk49_move_end_turn()
         case 11: //held items
             for (u8 i = 0; i < no_of_all_banks; i++)
             {
-                if (battle_stuff_ptr.ptr->changed_held_items[i])
-                    battle_participants[i].held_item = 0;
+                //if (battle_stuff_ptr.ptr->changed_held_items[i])
+                    //battle_participants[i].held_item = 0;
             }
             INC_END_EVENTS
             break;
@@ -586,31 +587,16 @@ void atk49_move_end_turn()
             INC_END_EVENTS
             break;
         case 15: //item move end turn
+            if (item_battle_effects(3, 0, 0))
+                effect = 1;
             INC_END_EVENTS
             break;
         case 16: //cheek pouch and berry adder
             {
                 for (u8 i = 0; i < no_of_all_banks; i++)
                 {
-                    if (new_battlestruct.ptr->bank_affecting[i].eaten_berry)
-                    {
-                        new_battlestruct.ptr->bank_affecting[i].eaten_berry = 0;
-                        if (check_ability(i, ABILITY_CHEEK_POUCH) && battle_participants[i].current_hp != battle_participants[i].max_hp)
-                        {
-                            effect = 1;
-                            s32 damage = __udivsi3(battle_participants[i].max_hp, 3);
-                            if (damage == 0)
-                                damage = 1;
-                            if (battle_participants[i].current_hp + damage > battle_participants[i].max_hp)
-                                damage = battle_participants[i].max_hp - battle_participants[i].current_hp;
-                            damage_loc = damage * -1;
-                            battlescript_push();
-                            battlescripts_curr_instruction = &cheekpouch_bs;
-                            bank_target = i;
-                            record_usage_of_ability(i, ABILITY_CHEEK_POUCH);
-                            break;
-                        }
-                    }
+                    if (berry_eaten(0, i))
+                        effect = 1;
                 }
                 if (effect == 0)
                     INC_END_EVENTS
@@ -666,7 +652,6 @@ void atk49_move_end_turn()
             }
             INC_END_EVENTS
             break;
-
         case 20: //setup mirror_move_buffers
             if (!(absent_bank_flags & bits_table[bank_attacker] & battle_stuff_ptr.ptr->absent_bank_flags_prev_turn) &&
                 move_table[current_move].move_flags.flags.affected_by_mirrormove && (hitmarker & HITMARKER_OBEYS) &&
@@ -677,38 +662,6 @@ void atk49_move_end_turn()
                 }
             INC_END_EVENTS
             break;
-        //case 19: //symbiosis item passing . (To be shifted to remove item command
-           /* {
-                for (u8 i = 0; i < no_of_all_banks; i++)
-                {
-                    if (new_battlestruct.ptr->bank_affecting[i].item_used)
-                    {
-                        new_battlestruct.ptr->bank_affecting[i].item_used = 0;
-                        if (ability_battle_effects(20, i, ABILITY_SYMBIOSIS, 0, 0) && battle_participants[i].held_item == 0 && battle_participants[i ^ 2].held_item)
-                        {
-                            effect = 1;
-                            battle_participants[i].held_item = battle_participants[i ^ 2].held_item;
-                            battle_participants[i ^ 2].held_item = 0;
-                            active_bank = i;
-                            prepare_setattributes_in_battle(0, 2, 0, 2, &battle_participants[i].held_item);
-                            mark_buffer_bank_for_execution(active_bank);
-                            active_bank = i ^ 2;
-                            prepare_setattributes_in_battle(0, 2, 0, 2, &battle_participants[i ^ 2].held_item);
-                            mark_buffer_bank_for_execution(active_bank);
-                            battlescript_push();
-                            battlescripts_curr_instruction = &symbiosispass_bs;
-                            battle_scripting.active_bank = i;
-                            bank_target = i ^ 2;
-                            record_usage_of_ability(i ^ 2, ABILITY_SYMBIOSIS);
-                        }
-                    }
-                }
-                if (effect == 0)
-                    battle_scripting.cmd49_state_tracker++;
-            } */
-          //  break;
-
-
         case 21: //dual target moves
             if(!(hitmarker&HITMARKER_IMMOBILE_DUE_TO_STATUS) && move_table[current_move].target==move_target_both && battle_flags.double_battle &&
                !protect_structs[bank_attacker].flag0_onlystruggle && !(hitmarker&HITMARKER_NO_ATTACKSTRING)
@@ -727,7 +680,6 @@ void atk49_move_end_turn()
             }
             INC_END_EVENTS
             break;
-
         case 22: //triple target moves
             if(!(hitmarker&HITMARKER_IMMOBILE_DUE_TO_STATUS) && move_table[current_move].target==move_target_foes_and_ally &&
                 battle_flags.double_battle &&!protect_structs[bank_attacker].flag0_onlystruggle)
@@ -750,7 +702,7 @@ void atk49_move_end_turn()
             }
             INC_END_EVENTS
             break;
-        case 23: //life orb damage, I think it should go first
+        case 23: //life orb damage
             if (attacker_struct->current_hp && new_battlestruct.ptr->bank_affecting[bank_attacker].life_orbed && !new_battlestruct.ptr->bank_affecting[bank_attacker].sheerforce_bonus && not_magicguard(bank_attacker))
             {
                 u32 damage = __udivsi3(attacker_struct->max_hp, 10);
@@ -777,7 +729,7 @@ void atk49_move_end_turn()
             battle_scripting.cmd49_state_tracker = case_max;
         else if (arg1 == 2 && arg2 == battle_scripting.cmd49_state_tracker)
             battle_scripting.cmd49_state_tracker = case_max;
-        if (battle_scripting.cmd49_state_tracker == case_max)
+        if (battle_scripting.cmd49_state_tracker >= case_max)
             break;
     }
 
@@ -1218,5 +1170,49 @@ void atk88_drain_damage()
     }
     damage_loc = damage * -1;
     battlescripts_curr_instruction++;
+    return;
+}
+
+u8 symbiosis_effect(u8 bank)
+{
+    u8 symbiosis = 0;
+    if (new_battlestruct.ptr->bank_affecting[bank].item_used)
+    {
+        new_battlestruct.ptr->bank_affecting[bank].item_used = 0;
+        u8 ally_bank = bank ^ 2;
+        if (ability_battle_effects(20, bank, ABILITY_STATIC, 0, 0) && battle_participants[bank].held_item == 0 && battle_participants[ally_bank].held_item)
+        {
+            symbiosis = 1;
+            battle_participants[bank].held_item = battle_participants[ally_bank].held_item;
+            battle_participants[ally_bank].held_item = 0;
+            active_bank = bank;
+            prepare_setattributes_in_battle(0, 2, 0, 2, &battle_participants[bank].held_item);
+            mark_buffer_bank_for_execution(active_bank);
+            active_bank = ally_bank;
+            prepare_setattributes_in_battle(0, 2, 0, 2, &battle_participants[ally_bank].held_item);
+            mark_buffer_bank_for_execution(active_bank);
+            battlescript_push();
+            battlescripts_curr_instruction = &symbiosispass_bs;
+            battle_scripting.active_bank = bank;
+            bank_target = ally_bank;
+            record_usage_of_ability(ally_bank, ABILITY_SYMBIOSIS);
+        }
+    }
+    return symbiosis;
+}
+
+void atk6A_remove_item()
+{
+    u8 bank = get_battle_bank(read_byte(battlescripts_curr_instruction + 1));
+    battlescripts_curr_instruction += 2;
+    u16* item = &battle_participants[bank].held_item;
+    battle_stuff_ptr.ptr->used_held_items[bank] = *item;
+    *item = 0;
+    active_bank = bank;
+    if (symbiosis_effect(bank) == 0)
+    {
+        prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, item);
+        mark_buffer_bank_for_execution(bank);
+    }
     return;
 }
