@@ -3,6 +3,7 @@
 
 #include "types.h"
 
+u16 battle_turn_random_no;
 u8 last_used_ability;
 u16 last_used_item;
 u8 bank_attacker;
