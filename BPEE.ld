@@ -1,3 +1,4 @@
+battle_turn_random_no = 0x02024330;
 last_used_ability = 0x0202420A;
 last_used_item = 0x02024208;
 hitmarker = 0x02024280;
