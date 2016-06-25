@@ -3,7 +3,8 @@
 #include "battle_locations.h"
 #include "battle_structs.h"
 #include "vanilla_functions.h"
-#include "static_resources.h"
+#include "move_table.h"
+#include "battlescripts.h"
 #include "new_battle_struct.h"
 
 u8 check_ability(u8 bank, u8 ability);
