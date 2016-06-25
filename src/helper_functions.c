@@ -4,18 +4,8 @@
 #include "battle_structs.h"
 #include "vanilla_functions.h"
 #include "new_battle_struct.h"
+#include "static_references.h"
 
-extern struct move_info move_table[1024];
-extern void *changetargetstat_bs;
-extern void *changeattackerstat_bs;
-extern void *healblock_end_bs;
-extern void *encore_end_bs;
-extern void *disable_end_bs;
-extern void *weaknesspolicyspattack;
-extern void *weaknesspolicyattack;
-extern void *taunt_end_bs;
-extern void *tormentend_bs;
-extern void *grassyheal;
 u8 check_ability(u8 bank, u8 ability);
 u8 get_airborne_state(u8 bank, u8 mode, u8 check_levitate);
 u16 get_1_16_of_max_hp(u8 bank);
