@@ -3,7 +3,7 @@
 #include "battle_locations.h"
 #include "battle_structs.h"
 #include "vanilla_functions.h"
-#include "static_resources.h"
+#include "static_references.h"
 #include "new_battle_struct.h"
 #include <string.h>
 
