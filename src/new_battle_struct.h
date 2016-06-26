@@ -25,7 +25,6 @@ struct bank_affecting{
     u8 sunshine_form : 1;
     u8 cherrim_transformed : 1;
     u8 gastro_acided : 1;
-    u8 lowered_stats : 1;
     u8 sky_drop_attacker : 1;
     u8 sky_drop_target : 1;
     u8 gem_boost : 1;
@@ -41,11 +40,11 @@ struct bank_affecting{
     u8 slowstart_duration : 3;
     u8 aegislash_form : 2; //0 = not aegi, 1 = defensive, 2 = attacking
     u8 killer_bank : 2;
-    u8 bank_that_lowered_stats : 2;
     u8 same_move_used : 3;
     u8 wrap_bank : 2;
     u8 move_failed : 1;
     u8 type3 : 5;
+    u8 stat_lowered : 1;
     u8 autonomize_uses;
 };
 
