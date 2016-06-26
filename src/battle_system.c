@@ -1325,31 +1325,6 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                         }
                     }
                     break;
-            // to be shifted to printfromtable command
-             /*   case ABILITY_DEFIANT:
-                    battle_scripting.stat_changer = 0x21;
-                    stat_pointer = &battle_participants[bank].atk_buff;
-                    goto STAT_CHANGE;
-                case ABILITY_COMPETITIVE:
-                    battle_scripting.stat_changer = 0x24;
-                    stat_pointer = &battle_participants[bank].sp_atk_buff;
-                STAT_CHANGE:
-                    if (get_battle_side(bank) != get_battle_side(new_battlestruct.ptr->bank_affecting[bank].bank_that_lowered_stats) && new_battlestruct.ptr->bank_affecting[bank].lowered_stats)
-                    {
-                        u8* stat_ptr = &battle_participants[bank].atk_buff;
-                        for (u8 i = 0; i < 7; i++)
-                        {
-                            if (*(stat_ptr + i) < 6 && *stat_pointer != 0xC)
-                            {
-                                effect = true;
-                                battlescript_push();
-                                battlescripts_curr_instruction = &defiant_bs;
-                                new_battlestruct.ptr->bank_affecting[bank].lowered_stats = 0;
-                                break;
-                            }
-                        }
-                    }
-                    break;*/
                 }
                 if (common_effect && contact && percent_chance(30))
                 {
@@ -2488,7 +2463,6 @@ u8 battle_turn_move_effects()
             switch (*tracker)
             {
                 case 0: //clear new turn stuff for banks
-                    ptr_to_struct->bank_that_lowered_stats = 0;
                     ptr_to_struct->electrify = 0;
                     ptr_to_struct->gem_boost = 0;
                     ptr_to_struct->just_switched_in = 0;
