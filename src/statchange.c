@@ -199,9 +199,6 @@ u8 change_stats(struct stat stat_change, u8 stat, struct failbank bank, void* ba
                     battle_communication_struct.multistring_chooser = 0;
                 }
 
-                new_battlestruct.ptr->bank_affecting[active_bank].bank_that_lowered_stats = bank_attacker;
-                new_battlestruct.ptr->bank_affecting[active_bank].lowered_stats = 1;
-
                 u8 lowered_stats = 0;
                 u8 amount = 0;
                 battle_scripting.stat_changer &= 0x8F;
@@ -301,5 +298,7 @@ u8 change_stats(struct stat stat_change, u8 stat, struct failbank bank, void* ba
             battle_text_buff2[i + 2] = 0xFF;
         }
     }
+    if (fail == 0 && battle_communication_struct.multistring_chooser != 2 && stat_change.decrement && has_ability && active_bank != bank_attacker)
+        new_battlestruct.ptr->bank_affecting[active_bank].stat_lowered = 1;
     return fail;
 }
