@@ -16,7 +16,7 @@ u32 percent_lose(u32 number, u16 percent);
 u8 accuracy_helper_replacement(u16 move)
 {
     u8 done_status = 0;
-    if (((status3[bank_target].always_hits || status3[bank_target].always_hits_unkown) && disable_structs[bank_target].always_hits_bank == bank_attacker)
+    if ((status3[bank_target].always_hits && disable_structs[bank_target].always_hits_bank == bank_attacker)
         || (has_ability_effect(bank_attacker, 0, 1) && battle_participants[bank_attacker].ability_id == ABILITY_NO_GUARD) || (has_ability_effect(bank_target, 0, 1) && battle_participants[bank_target].ability_id == ABILITY_NO_GUARD)
         || (current_move == MOVE_TOXIC && is_of_type(bank_attacker, TYPE_POISON))
         || (new_battlestruct.ptr->bank_affecting[bank_target].telekinesis && move_table[current_move].script_id != 38)) //lock-on/mind reader checked, then no guard, always hiting toxic on poison types, then always hitting telekinesis except OHKO moves
@@ -149,7 +149,7 @@ void accuracy_calc()
     }
     else
     {
-        if ((status3[bank_target].always_hits || status3[bank_target].always_hits_unkown) && arg == 0xFFFF && disable_structs[bank_target].always_hits_bank == bank_attacker)
+        if (status3[bank_target].always_hits && arg == 0xFFFF && disable_structs[bank_target].always_hits_bank == bank_attacker)
         {
             battlescripts_curr_instruction += 7;
         }
