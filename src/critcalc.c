@@ -13,7 +13,9 @@ void critcalc_cmd4()
 {
     u8 crit_chance = 0;
     crit_loc = 1;
-    if (!(has_ability_effect(bank_target, 1, 1) && (battle_participants[bank_target].ability_id == ABILITY_SHELL_ARMOR || battle_participants[bank_target].ability_id == ABILITY_BATTLE_ARMOR)))
+    if (!((has_ability_effect(bank_target, 1, 1) && (battle_participants[bank_target].ability_id == ABILITY_SHELL_ARMOR || battle_participants[bank_target].ability_id == ABILITY_BATTLE_ARMOR))
+        ) || status3[bank_attacker].unkown_no_crit || battle_flags.wally || (battle_flags.save_birch && is_bank_from_opponent_side(bank_attacker))
+        || new_battlestruct.ptr->side_affecting[is_bank_from_opponent_side(bank_target)].lucky_chant)
     {
         if (current_move == MOVE_FROST_BREATH || current_move == MOVE_STORM_THROW)
             crit_loc = 2;
