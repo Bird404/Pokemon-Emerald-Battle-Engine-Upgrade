@@ -22,3 +22,5 @@ atkBB_set_sunny 0831BFFC
 atkC8_set_hail 0831C030
 atkE2_switchout_abilities 0831C098
 atk88_drain_damage 080509E8
+###start attack
+bs_start_attack 0831BC0C
