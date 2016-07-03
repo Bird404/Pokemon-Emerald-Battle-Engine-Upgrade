@@ -14,13 +14,15 @@ atk6A_remove_item 0831BEB8
 atk7D_set_rain 0831BF04
 atk7E_set_reflect 0831BF08
 atk7F_set_leech_seed 0831BF0C
+atk88_drain_damage 0831BF30
 atk8D_multihit_move_loop_counter 0831BF44
 atk92_set_lightscreen 0831BF58
 atk95_set_sandstorm 0831BF64
 atk96_weather_damage 0831BF68
+atkA3_disable_move 0831BF9C
+atkA4_encore_move 0831BFA0
 atkBB_set_sunny 0831BFFC
 atkC8_set_hail 0831C030
 atkE2_switchout_abilities 0831C098
-atk88_drain_damage 080509E8
 ###start attack
 bs_start_attack 0831BC0C
