@@ -30,8 +30,7 @@ struct flags2{
     u32 flinched : 1; //0x8
     u32 uproar : 3; //0x10 | 0x20 | 0x40
     u32 flag_x80 : 1; //0x80
-    u32 flag_x100 : 1; //0x100
-    u32 flag_x200 : 1; //0x200
+    u32 bide : 2; //0x100 | 0x200
     u32 flag_x400 : 1; //0x400
     u32 flag_x800 : 1; //0x800
     u32 multiple_turn_move : 1; //0x1000
@@ -174,7 +173,17 @@ struct b_enigma_berry{
 extern struct b_enigma_berry enigma_berry_battle[4];
 
 struct b_scripting{
-    u8 field0[14];
+    u8 field_0;
+    u8 field_1;
+    u8 field_2;
+    u8 field_3;
+    u32 bide_damage;
+    u8 field_8;
+    u8 field_9;
+    u8 field_A;
+    u8 field_B;
+    u8 field_C;
+    u8 field_D;
     u8 damage_multiplier;
     u8 fieldF;
     u8 field10;
