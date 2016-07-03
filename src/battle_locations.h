@@ -47,6 +47,8 @@ u32 status_flags_for_move_effects[0x3F];
 void* battlescripts_for_moveeffects[0x3F];
 s32 hp_dealt;
 u8 battle_state_mode;
+u8 terrain_to_type_table[10];
+u8 battle_background;
 
 u32 poison_status_flag;
 u32 sleep_status_flag;
