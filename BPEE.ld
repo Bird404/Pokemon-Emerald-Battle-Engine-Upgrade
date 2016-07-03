@@ -68,6 +68,7 @@ payday_money = 0x0202432E;
 current_move_turn = 0x02024082;
 party_opponent = 0x02024744;
 hp_dealt = 0x020241F4;
+battle_background = 0x02022FF0;
 
 poison_status_flag = 0x0831BC70;
 sleep_status_flag = 0x0831BC78;
@@ -76,6 +77,7 @@ burn_status_flag = 0x0831BC88;
 freeze_status_flag = 0x0831BC90;
 status_flags_for_move_effects = 0x0831C134;
 battlescripts_for_moveeffects = 0x0831C224;
+terrain_to_type_table = 0x0831C483;
 
 prepare_setattributes_in_battle = 0x08033900|1;
 strcpy_xFF_terminated_0 = 0x08008BA0|1;
