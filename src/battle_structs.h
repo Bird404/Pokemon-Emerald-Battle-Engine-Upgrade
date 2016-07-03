@@ -229,7 +229,7 @@ struct battle_stuff{
     u8 field_84[13]; //0x84-0x90
     u8 absent_bank_flags_prev_turn; //0x91
     u8 field_92[6]; //0x92-0x97
-    u16 mirror_moves_pbs[8]; //0x98-0x9F
+    u16 mirror_moves_pbs[4]; //0x98-0x9F
     u8 field_A0[18]; //0xA0-0xB1
     u8 synchronize_effect_chooser; //0xB2
     u8 field_B3[5];
