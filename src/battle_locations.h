@@ -49,6 +49,8 @@ s32 hp_dealt;
 u8 battle_state_mode;
 u8 terrain_to_type_table[10];
 u8 battle_background;
+u32 taken_damage[4];
+u8 hurt_by[4];
 
 u32 poison_status_flag;
 u32 sleep_status_flag;
