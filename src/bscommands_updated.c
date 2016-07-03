@@ -1253,3 +1253,21 @@ void atkA4_encore_move()
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction + 1);
     return;
 }
+
+void atkD0_set_taunt()
+{
+    void* failjump = (void*) read_word(battlescripts_curr_instruction + 1);
+    if (disable_structs[bank_target].taunt_timer || ability_battle_effects(17, bank_target, ABILITY_AROMA_VEIL, 1, 0))
+        battlescripts_curr_instruction = failjump;
+    else if (battle_participants[bank_target].ability_id == ABILITY_OBLIVIOUS && has_ability_effect(bank_target, 1, 1))
+    {
+        battlescripts_curr_instruction = failjump;
+        record_usage_of_ability(bank_target, ABILITY_OBLIVIOUS);
+    }
+    else
+    {
+        disable_structs[bank_target].taunt_timer = 3;
+        battlescripts_curr_instruction += 5;
+    }
+    return;
+}
