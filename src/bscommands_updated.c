@@ -809,7 +809,7 @@ u8 check_if_cannot_attack()
                         battlescript_push();
                         battlescripts_curr_instruction = (void*) 0x82DB220;
                     }
-                    else if (current_move == MOVE_SLEEP_TALK || current_move == MOVE_SNORE)
+                    else if (current_move != MOVE_SLEEP_TALK && current_move != MOVE_SNORE)
                     {
                         effect = 1;
                         hitmarker |= 0x80000;
