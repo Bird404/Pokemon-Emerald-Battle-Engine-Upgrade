@@ -3375,8 +3375,8 @@ void move_effect_setter(u8 primary, u8 certain)
             disable_structs[bank_to_apply].recharge_counter = 2;
             locked_move[bank_to_apply] = current_move;
             break;
-        case 30: //set reage
-            applier_bank->status2.raged = 1;
+        case 30: //set rage
+            battle_participants[bank_attacker].status2.raged = 1;
             break;
         case 31: //steal item
             break;
