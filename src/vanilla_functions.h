@@ -59,7 +59,4 @@ u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);
 u32 bits_table[32];
 
-//not really a vanilla function but w/e
-u8 truant_hook(u8 truant_value);
-
 #endif /* VANILLA_FUNCTIONS */
