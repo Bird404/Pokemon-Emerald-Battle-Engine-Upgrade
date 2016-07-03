@@ -23,6 +23,8 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank);
 u8 find_move_in_table(u16 move, u16 table_ptr[]);
 u8 protect_affects(u16 move, u8 set);
 u8 berry_eaten(u8 how_tocall, u8 bank);
+u8 set_type(u8 bank, u8 type);
+u8 get_target_of_move(u16 move, u8 target_given, u8 adjust);
 
 void atk7D_set_rain()
 {
@@ -966,6 +968,27 @@ u8 check_if_cannot_attack()
             }
             break;
         case 15: //check bide
+            if (attacker_struct->status2.bide)
+            {
+                attacker_struct->status2.bide--;
+                if (attacker_struct->status2.bide == 0) //unleashing energy
+                {
+                    if (taken_damage[bank_attacker] == 0) //got no damage
+                        battlescripts_curr_instruction = (void*) 0x82DADC4;
+                    else
+                    {
+                        current_move = MOVE_BIDE;
+                        battle_scripting.bide_damage = taken_damage[bank_attacker] * 2;
+                        battlescripts_curr_instruction = (void*) 0x82DAD7C;
+                        bank_target = hurt_by[bank_attacker];
+                        if (absent_bank_flags & bits_table[bank_target]) //poke's not longer on the battlefield
+                            bank_target = get_target_of_move(MOVE_BIDE, 1, 1);
+                    }
+                }
+                else //storing energy
+                    battlescripts_curr_instruction = (void*) 0x82DAD71;
+                effect = 1;
+            }
             break;
         case 16: //aroma veil protection
             if (current_move == MOVE_TORMENT || current_move == MOVE_TAUNT || current_move == MOVE_HEAL_BLOCK || current_move == MOVE_DISABLE || current_move == MOVE_ATTRACT || current_move == MOVE_ENCORE)
@@ -1317,4 +1340,3 @@ void atkEB_set_type_to_terrain()
     }
     return;
 }
-
