@@ -27,3 +27,5 @@
 0806B3E4 00 00
 ## nop cmd6
 0831BD28 41 06 05 08
+## nop in the uproar script
+082D9F5A 06
