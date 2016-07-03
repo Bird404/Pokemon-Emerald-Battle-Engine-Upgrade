@@ -2605,6 +2605,42 @@ u8 battle_turn_move_effects()
                     }
                     break;
                 case 14: //uproar
+                    if (attacker_struct->status2.uproar)
+                    {
+                        for (u8 i = 0; i < no_of_all_banks; i++)
+                        {
+                            bank_attacker = i;
+                            if (battle_participants[i].status.flags.sleep && !(battle_participants[i].ability_id == ABILITY_SOUNDPROOF && has_ability_effect(i, 0, 1)))
+                            {
+                                battle_participants[i].status.flags.sleep = 0;
+                                battle_participants[i].status2.nightmare = 0;
+                                battle_communication_struct.multistring_chooser = 1;
+                                call_bc_move_exec((void*)0x82DB234);
+                                active_bank = i;
+                                prepare_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &battle_participants[i].status);
+                                mark_buffer_bank_for_execution(active_bank);
+                                effect = 5;
+                                break;
+                            }
+                        }
+                        if (effect != 5)
+                        {
+                            bank_attacker = active_bank;
+                            attacker_struct->status2.uproar--;
+                            if (check_if_move_failed(active_bank) || attacker_struct->status2.uproar == 0)
+                            {
+                                reset_several_turns_stuff(active_bank);
+                                battle_communication_struct.multistring_chooser = 1;
+                            }
+                            else
+                            {
+                                battle_communication_struct.multistring_chooser = 0;
+                                attacker_struct->status2.multiple_turn_move = 1;
+                            }
+                            effect = 1;
+                            call_bc_move_exec((void*)0x82DB2A6);
+                        }
+                    }
                     break;
                 case 15: //bide I guess
                     break;
@@ -2748,7 +2784,8 @@ u8 battle_turn_move_effects()
                     break;
 
             }
-            *tracker += 1;
+            if (effect != 5) //check for uproar
+                 *tracker += 1;
             #define TRACKER_MAX 28
             if (*tracker == TRACKER_MAX)
             {
