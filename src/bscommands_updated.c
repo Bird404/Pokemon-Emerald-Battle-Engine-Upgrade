@@ -1271,3 +1271,24 @@ void atkD0_set_taunt()
     }
     return;
 }
+
+void atkB5_furycutter_calc()
+{
+    u8* cutter_timer = &disable_structs[bank_attacker].fury_cutter_timer;
+    if (!MOVE_WORKED)
+    {
+        *cutter_timer = 0;
+        battlescripts_curr_instruction = (void*)0x82D8A60;
+    }
+    else
+    {
+        if (last_used_moves[bank_attacker] != MOVE_FURY_CUTTER)
+            *cutter_timer = 0;
+
+        if (*cutter_timer < 5)
+            *cutter_timer += 1;
+        dynamic_base_power = move_table[current_move].base_power * *cutter_timer;
+        battlescripts_curr_instruction++;
+    }
+    return;
+}
