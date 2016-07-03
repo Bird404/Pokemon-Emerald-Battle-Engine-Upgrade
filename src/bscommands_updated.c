@@ -248,8 +248,9 @@ void atkE2_switchout_abilities()
 
 void atk8D_multihit_move_loop_counter()
 {
-    if (read_byte(battlescripts_curr_instruction + 1) != 0)
-        multihit_counter = 0;
+    u8 arg_counter = read_byte(battlescripts_curr_instruction + 1);
+    if (arg_counter != 0)
+        multihit_counter = arg_counter;
     else
     {
         if (has_ability_effect(bank_attacker, 0, 1) && battle_participants[bank_attacker].ability_id == ABILITY_SKILL_LINK)
@@ -1156,13 +1157,13 @@ void atk00_move_canceller()
 
 void atk88_drain_damage()
 {
-    u32 damage = 0;
+    s32 damage = 0;
     if (!(new_battlestruct.ptr->bank_affecting[bank_attacker].heal_block && healblock_forbidden_moves(current_move, 0)))
     {
         if (current_move == MOVE_DRAINING_KISS || current_move == MOVE_OBLIVION_WING)
             damage = percent_lose(hp_dealt, 25);
         else
-            damage = hp_dealt >> 1;
+            damage = hp_dealt / 2;
         if (get_item_effect(bank_attacker, 1) == ITEM_EFFECT_BIGROOT)
             damage = percent_boost(damage, 30);
         if (damage == 0)
