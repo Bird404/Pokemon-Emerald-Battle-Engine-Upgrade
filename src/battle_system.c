@@ -928,29 +928,25 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 }
                 break;
             case ABILITY_BAD_DREAMS:
-            {
                 effect = true;
                 battle_stuff_ptr.ptr->intimidate_user=bank;
                 execute_battle_script(bad_dreams_bs);
-            }
-            break;
                 break;
             case ABILITY_SPEED_BOOST:
                 if (battle_participants[bank].spd_buff != 0xC && disable_structs[bank].is_first_turn != 2)
                 {
-                    battle_participants[bank].spd_buff ++;
+                    effect = 1;
+                    battle_participants[bank].spd_buff++;
                     battle_scripting.active_bank = bank;
                     battle_scripting.field10 = 0x11;
-                    battle_scripting.field11 = 0x11;
+                    battle_scripting.field11 = 0;
                     script_ptr = (void*) 0x082DB444;
                     execute_battle_script(script_ptr);
                 }
                 break;
             case ABILITY_TRUANT:
-                {
-                    disable_structs[bank].truant_counter = truant_hook(disable_structs[bank].truant_counter);
-                    break;
-                }
+                disable_structs[bank].truant_counter ^= 1;
+                break;
             case ABILITY_MOODY:
                 {
                     u8 raiseable_stats = 0;
@@ -1290,7 +1286,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     }
                     break;
                 case ABILITY_COLOR_CHANGE:
-                    if (curr_move != MOVE_STRUGGLE && (!new_battlestruct.ptr->bank_affecting[bank_attacker].sheerforce_bonus) && (!is_of_type(bank, move_type)) && (multihit_counter == 1 || multihit_counter == 0))
+                    if (curr_move != MOVE_STRUGGLE && !new_battlestruct.ptr->bank_affecting[bank_attacker].sheerforce_bonus && !is_of_type(bank, move_type) && (multihit_counter == 1 || multihit_counter == 0))
                     {
                         battle_text_buff1[0] = 0xFD;
                         battle_text_buff1[1] = 0x3;
@@ -1780,9 +1776,12 @@ u8 cant_become_freezed(u8 bank, u8 self_inflicted)
 u8 hp_condition(u8 bank, u8 percent) //1 = 50 %, 2 = 25 %
 {
     struct battle_participant* ptr_to_struct = &battle_participants[bank];
-    if (ptr_to_struct->ability_id == ABILITY_GLUTTONY && has_ability_effect(bank, 0, 1))
-        percent = 1;
-    if (ptr_to_struct->current_hp <= (ptr_to_struct->max_hp >> percent))
+    if (ptr_to_struct->ability_id == ABILITY_GLUTTONY && has_ability_effect(bank, 0, 1) && percent > 1)
+    {
+        percent--;
+        record_usage_of_ability(bank, ABILITY_GLUTTONY);
+    }
+    if (ptr_to_struct->current_hp && ptr_to_struct->current_hp <= (ptr_to_struct->max_hp >> percent))
         return 1;
     return 0;
 }
@@ -3150,12 +3149,14 @@ u8 update_turn_counters()
                 effect = 1;
                 battle_effects_duration.weather_dur--;
                 if (battle_weather.flags.permament_hail || battle_effects_duration.weather_dur)
-                    call_bc_move_exec((void*)0x82DACD2);
+                    call_bc_move_exec((void*)0x82DAC47);
                 else
                 {
                     battle_weather.flags.hail = 0;
-                    call_bc_move_exec((void*)0x82DACE0);
+                    call_bc_move_exec((void*)0x82DACC9);
                 }
+                battle_scripting.field10 = 0xD;
+                battle_communication_struct.multistring_chooser = 1;
             }
             *statetracker += 1;
             break;
