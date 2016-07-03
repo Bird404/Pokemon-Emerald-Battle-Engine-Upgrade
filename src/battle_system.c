@@ -12,14 +12,15 @@ u8 change_stats(s8 arg1, s8 arg2, s8 arg3, void* battlescript_if_fails);
 
 u8 get_attacking_move_type()
 {
-    u8 move_type;
-    if(has_ability_effect(bank_attacker,0,1) && battle_participants[bank_attacker].ability_id==ABILITY_NORMALIZE)
-        move_type=0;
-    else
+    u8 move_type=battle_stuff_ptr.ptr->dynamic_move_type&0x3F;
+    if(!move_type)
     {
-        move_type=battle_stuff_ptr.ptr->dynamic_move_type&0x3F;
-        if (!move_type)
+        if(check_ability(bank_attacker,ABILITY_NORMALIZE))
+            move_type = TYPE_NORMAL;
+        else
             move_type = move_table[current_move].type;
+        if(move_type==TYPE_NORMAL && new_battlestruct.ptr->field_affecting.ion_deluge)
+            move_type = TYPE_ELECTRIC;
     }
     return move_type;
 }
