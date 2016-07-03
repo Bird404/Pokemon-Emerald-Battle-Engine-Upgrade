@@ -50,6 +50,7 @@ calling_move_used = 0x2024248;
 
 current_move = 0x020241EA;
 last_used_move = 0x020241EC;
+last_used_moves = 0x02024248;
 dynamic_base_power = 0x02024400;
 damage_loc = 0x020241F0;
 unk_3005D04 = 0x03005D04;
