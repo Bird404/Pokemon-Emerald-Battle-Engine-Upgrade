@@ -15,6 +15,7 @@ u8 abilities_by_banks[4];
 u16 move_power;
 u16 current_move;
 u16 last_used_move;
+u16 last_used_moves[4];
 s32 damage_loc;
 u8 no_of_all_banks;
 u8 battle_text_buff1[0x10];
@@ -44,7 +45,7 @@ u16 locked_move[4];
 u16 payday_money;
 u32 status_flags_for_move_effects[0x3F];
 void* battlescripts_for_moveeffects[0x3F];
-u32 hp_dealt;
+s32 hp_dealt;
 u8 battle_state_mode;
 
 u32 poison_status_flag;
