@@ -1292,3 +1292,29 @@ void atkB5_furycutter_calc()
     }
     return;
 }
+
+void atkEB_set_type_to_terrain()
+{
+    u8 terrain_type;
+    if (new_battlestruct.ptr->field_affecting.grassy_terrain)
+        terrain_type = TYPE_GRASS;
+    else if (new_battlestruct.ptr->field_affecting.misty_terrain)
+        terrain_type = TYPE_FAIRY;
+    else if (new_battlestruct.ptr->field_affecting.electic_terrain)
+        terrain_type = TYPE_ELECTRIC;
+    else
+        terrain_type = terrain_to_type_table[battle_background];
+    if (is_of_type(bank_attacker, terrain_type))
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction + 1);
+    else
+    {
+        battlescripts_curr_instruction += 5;
+        set_type(bank_attacker, terrain_type);
+        battle_text_buff1[0] = 0xFD;
+        battle_text_buff1[1] = 3;
+        battle_text_buff1[2] = terrain_type;
+        battle_text_buff1[3] = 0xFF;
+    }
+    return;
+}
+
