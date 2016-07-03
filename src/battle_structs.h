@@ -51,6 +51,16 @@ struct flags2{
     u32 tormented : 1; //0x80 000 000
 };
 
+struct iv_set
+{
+    u32 iv_hp: 5;
+    u32 iv_atk: 5;
+    u32 iv_def: 5;
+    u32 iv_spd: 5;
+    u32 iv_sp_atk: 5;
+    u32 iv_sp_def: 5;
+};
+
 struct battle_participant {
     u16 poke_species;
     u16 atk;
@@ -59,7 +69,7 @@ struct battle_participant {
     u16 sp_atk;
     u16 sp_def;
     u16 moves[4];
-    u32 iv_word;
+    struct iv_set ivs;
     u8 hp_buff;
     u8 atk_buff;
     u8 def_buff;
@@ -197,7 +207,7 @@ struct battle_stuff{
     u8 field_2; //0x2
     u8 end_turn_statetracker2; //0x3
     u16 trapped_move[4]; //0x4 - 0xB
-    u8 sth_with_targeting[4]; //0xC - 0xF
+    u8 move_target[4]; //0xC - 0xF
     u8 field_10; //0x10
     u8 field_11; //0x11
     u8 field_12; //0x12
@@ -299,14 +309,14 @@ struct status_3{
 extern struct status_3 status3[4];
 
 struct disable_struct{
-    u8 field1 [3];
+    u8 field1 [4];
     u16 disabled_move;
     u16 encored_move;
     u8 protect_endure_effect;
     u8 stockpile_counter;
     u8 substitute_hp;
     u8 disable_timer;
-    u8 fieldC;
+    u8 encored_index;
     u8 fieldD;
     u8 encore_timer;
     u8 perishsong_timer;
@@ -420,6 +430,7 @@ u32 hitmarker;
 #define HITMARKER_PURSUIT_TRAP 0x1000
 #define HITMARKER_NO_ATTACKSTRING 0x200 //used in dual foe and user defrosting moves
 #define HITMARKER_NO_ATTACKSTRING2 0x400
+#define HITMARKER_NO_PPDEDUCT 0x800
 #define HITMARKER_FAINTED(bank) (bits_table[bank]>>0x1C)
 
 struct side_affecting_hword{
@@ -509,19 +520,6 @@ struct battle_flags{
 };
 
 extern struct battle_flags battle_flags;
-
-struct battle_state{
-    u8 flag1 : 1;
-    u8 flag2 : 1;
-    u8 flag4 : 1;
-    u8 flag8 : 1;
-    u8 flag10 : 1;
-    u8 flag20 : 1;
-    u8 flag40 : 1;
-    u8 flag80 : 1;
-};
-
-extern struct battle_state battle_state_flags;
 
 struct pokemon{
 	u32 PID;
