@@ -294,8 +294,7 @@ extern struct special_status special_statuses[4];
 struct status_3{
     u32 leech_seed_hp_receiver : 2; // 2 bits
     u32 leech_seed : 1; //4
-    u32 always_hits_unkown : 1; //x8
-    u32 always_hits : 1; //x10
+    u32 always_hits : 2; //x8 | x10
     u32 perish_song : 1; //x20
     u32 on_air : 1; //x40
     u32 underground : 1;//80
