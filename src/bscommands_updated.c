@@ -1216,3 +1216,39 @@ void atk6A_remove_item()
     }
     return;
 }
+
+void atkA3_disable_move()
+{
+    s8 position = get_move_position(bank_target, last_used_moves[bank_target]);
+    if (position != -1 && disable_structs[bank_target].disabled_move == 0 && battle_participants[bank_target].current_pp[position])
+    {
+        u16 move = battle_participants[bank_target].moves[position];
+        battlescripts_curr_instruction += 5;
+        battle_text_buff1[0] = 0xFD;
+        battle_text_buff1[1] = 2;
+        battle_text_buff1[2] = move;
+        battle_text_buff1[3] = move >> 8;
+        battle_text_buff1[4] = 0xFF;
+        disable_structs[bank_target].disabled_move = move;
+        disable_structs[bank_target].disable_timer = 4;
+    }
+    else
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction + 1);
+    return;
+}
+
+void atkA4_encore_move()
+{
+    u16 move = last_used_moves[bank_target];
+    s8 position = get_move_position(bank_target, move);
+    if (position != -1 && disable_structs[bank_target].encored_move == 0 && battle_participants[bank_target].current_pp[position]
+        && move != MOVE_STRUGGLE && move != MOVE_ENCORE && move != MOVE_MIRROR_MOVE && move != MOVE_MIMIC && move != MOVE_TRANSFORM && move != MOVE_SKETCH)
+    {
+        battlescripts_curr_instruction += 5;
+        disable_structs[bank_target].encored_move = move;
+        disable_structs[bank_target].encore_timer = 3;
+    }
+    else
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction + 1);
+    return;
+}
