@@ -278,6 +278,7 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
         case MOVE_AVALANCHE:
         case MOVE_SMELLING_SALTS:
         case MOVE_WEATHER_BALL:
+        case MOVE_PURSUIT:
             base_power *= battle_scripting.damage_multiplier;
             break;
         case MOVE_NATURAL_GIFT: //checking for held item and the capability of using an item should happen before damage calculation
@@ -444,8 +445,6 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
             {
                 base_power *= 2;
             }
-            break;
-        case MOVE_PURSUIT: //not sure where the game applies boost, whether in the damage multiplier or in the dynamic base power location
             break;
     }
     return base_power;
