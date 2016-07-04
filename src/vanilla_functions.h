@@ -54,6 +54,7 @@ void prepare_pokemon_battle_sprite_manipulation_buffer(u8 unknown, u8 unknown2);
 u8 check_failure_due_to_status(u8 bank);
 void sub_803CEDC(u8 bank1, u8 bank2);
 u8 get_attributes(struct pokemon* poke_address, u8 request, void* destination);
+u8 item_is_mail(u8 itemID);
 
 u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);
