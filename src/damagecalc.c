@@ -16,6 +16,7 @@ extern u16 sheerforce_moves_table[];
 extern u16 biting_moves_table[];
 extern u16 megalauncher_moves_table[];
 u8 get_airborne_state(u8 bank, u8 mode, u8 check_levitate);
+u8 can_lose_item(u8 bank, u8 sticky_msg);
 
 #define MOVE_PHYSICAL 0
 #define MOVE_SPECIAL 1
@@ -775,6 +776,12 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
         if (new_battlestruct.ptr->field_affecting.grassy_terrain && get_airborne_state(def_bank, 1, 1) <= 1)
         {
             modifier = chain_modifier(modifier, 0x800);
+        }
+        break;
+    case MOVE_KNOCK_OFF:
+        if (battle_participants[def_bank].held_item && can_lose_item(def_bank, 0))
+        {
+            modifier = chain_modifier(modifier, 0x1800);
         }
         break;
     }
