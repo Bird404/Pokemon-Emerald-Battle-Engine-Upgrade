@@ -31,8 +31,7 @@ struct flags2{
     u32 uproar : 3; //0x10 | 0x20 | 0x40
     u32 flag_x80 : 1; //0x80
     u32 bide : 2; //0x100 | 0x200
-    u32 flag_x400 : 1; //0x400
-    u32 flag_x800 : 1; //0x800
+    u32 locked_and_confuse : 2; //0x400 | 0x800
     u32 multiple_turn_move : 1; //0x1000
     u32 trapped_in_wrap : 3; //0x2000 | 0x4000 | 0x8000
     u32 in_love : 4; //each bit for bank 0x10 000 | 0x20 000 | 0x40 0000 | 0x80 000
