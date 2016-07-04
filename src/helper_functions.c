@@ -56,14 +56,14 @@ u8 bad_dreams_text[] = {BuffCharac, 0x10, Space, i_, s_, Space, t_, o_, r_, m_, 
 u8 item_text[] = {BuffCharac, 16, Apos, Space, BuffCharac, 22, Exclam, 0xFF};
 u8 rockyhelmet_text[] = {BuffCharac, 15, Space, i_, s_, Space, h_, u_, r_, t_, Space, b_, y_, JumpLine, BuffCharac, 16, Apos, Space, BuffCharac, 22, Exclam, 0xFF};
 u8 popped_text[] = {BuffCharac, 16, Apos, Space, BuffCharac, 22, Space, p_, o_, p_, p_, e_, d_, Exclam, 0xFF};
-u8 fellinlove_text[] = {BuffCharac, 15, Space, f_,e_,l_,l_, Space, i_, n_, Space, l_, o_, v_, e_, JumpLine, w_, i_, t_, h_, Space, BuffCharac, 16, Exclam, 0xFF};
-u8 healblockend_text[] = {H_, e_, a_, l_, Space, B_, l_, o_, c_, k_, Space, f_, o_, r_, BuffCharac, 18, JumpLine, h_, a_, s_, Space, e_, n_, d_, e_, d_, Exclam, 0xFF};
-u8 magicbounce_text[] = {BuffCharac, 15, Apos, s_, Space, BuffCharac, 20, JumpLine, w_, a_, s_, Space, b_, o_, u_, n_, c_, e_, d_, Space, b_, a_, c_, k_, Space, b_, y_, Space, BuffCharac, 25, Exclam, 0xFF};
-u8 angerpoint_text[] = {0xFD, 0x10, Apos, s_, 0, 0xFD, 0x19, 0 ,m_, a_, x_, e_, d_, 0, i_, t_, s_, 0xFE, a_, t_, t_, a_, c_, k_, Exclam, 0xFF};
-u8 stealhrock_text[] = {P_, o_, i_, n_, t_, e_, d_, Space, s_, t_, o_, n_, e_, s_, Space, d_, u_, g_, Space, i_, n_, t_, o_, JumpLine, BuffCharac, 16, Exclam, 0xFF};
-u8 stickyweb_text[] = {BuffCharac, 16, Space, w_, a_, s_, Space, c_, a_, u_, g_, h_, t_, Space, i_, n_, Space, a_, Space, S_, t_, i_, c_, k_, y_, Space, W_, e_, b_, Exclam, 0xFF};
-u8 gotpoisoned_text[] = {BuffCharac, 16, Space, g_, o_, t_, Space, p_, o_, i_, s_, o_, n_, e_, d_, Exclam, 0xFF};
-u8 absorbed_spikes_text[] = {T_, o_, x_, i_, c_, Space, S_, p_, i_, k_, e_, s_, Space, h_, a_, v_, e_, Space, b_, e_, e_, n_, JumpLine, a_, b_, s_, o_, r_, b_, e_, d_, Space, b_, y_, Space, BuffCharac, 16, Exclam, 0xFF};
+/*0x1A6*/ u8 fellinlove_text[] = {BuffCharac, 15, Space, f_,e_,l_,l_, Space, i_, n_, Space, l_, o_, v_, e_, JumpLine, w_, i_, t_, h_, Space, BuffCharac, 16, Exclam, 0xFF};
+/*0x1A7*/ u8 healblockend_text[] = {H_, e_, a_, l_, Space, B_, l_, o_, c_, k_, Space, f_, o_, r_, BuffCharac, 18, JumpLine, h_, a_, s_, Space, e_, n_, d_, e_, d_, Exclam, 0xFF};
+/*0x1A8*/ u8 magicbounce_text[] = {BuffCharac, 15, Apos, s_, Space, BuffCharac, 20, JumpLine, w_, a_, s_, Space, b_, o_, u_, n_, c_, e_, d_, Space, b_, a_, c_, k_, Space, b_, y_, Space, BuffCharac, 25, Exclam, 0xFF};
+/*0x1A9*/ u8 angerpoint_text[] = {0xFD, 0x10, Apos, s_, 0, 0xFD, 0x19, 0 ,m_, a_, x_, e_, d_, 0, i_, t_, s_, 0xFE, a_, t_, t_, a_, c_, k_, Exclam, 0xFF};
+/*0x1AA*/ u8 stealhrock_text[] = {P_, o_, i_, n_, t_, e_, d_, Space, s_, t_, o_, n_, e_, s_, Space, d_, u_, g_, Space, i_, n_, t_, o_, JumpLine, BuffCharac, 16, Exclam, 0xFF};
+/*0x1AB*/ u8 stickyweb_text[] = {BuffCharac, 16, Space, w_, a_, s_, Space, c_, a_, u_, g_, h_, t_, Space, i_, n_, Space, a_, Space, S_, t_, i_, c_, k_, y_, Space, W_, e_, b_, Exclam, 0xFF};
+/*0x1AC*/ u8 gotpoisoned_text[] = {BuffCharac, 16, Space, g_, o_, t_, Space, p_, o_, i_, s_, o_, n_, e_, d_, Exclam, 0xFF};
+/*0x1AD*/ u8 absorbed_spikes_text[] = {T_, o_, x_, i_, c_, Space, S_, p_, i_, k_, e_, s_, Space, h_, a_, v_, e_, Space, b_, e_, e_, n_, JumpLine, a_, b_, s_, o_, r_, b_, e_, d_, Space, b_, y_, Space, BuffCharac, 16, Exclam, 0xFF};
 /*0x1AE*/ u8 lost_some_hp_text[] = {BuffCharac, 15, Space, l_, o_, s_, t_, Space, s_, o_, m_, e_, Space, o_, f_, Space, i_, t_, s_, Space, H_, P_, Exclam, 0xFF};
 /*0x1AF*/ u8 tauntended_text[] = {BuffCharac, 18, Space, i_, s_, Space, n_, o_, Space, l_, o_, n_, g_, e_, r_, Space, T_, a_, u_, n_, t_, e_, d_, Exclam, 0xFF};
 /*0x1B0*/ u8 tormentended_text[] = {BuffCharac, 18, Space, i_, s_, Space, n_, o_, Space, l_, o_, n_, g_, e_, r_, Space, T_, o_, r_, m_, e_, n_, e_, d_, Exclam, 0xFF};
@@ -92,6 +92,12 @@ u8 absorbed_spikes_text[] = {T_, o_, x_, i_, c_, Space, S_, p_, i_, k_, e_, s_, 
 /*0x1C7*/ u8 fogcontinues_text[] = {T_, h_, e_, Space, f_, o_, g_, Space, i_, s_, Space, d_, e_, e_, p_, Dot, Dot, Dot, 0xFF};
 /*0x1C8*/ u8 fogends_text[] = {T_, h_, e_, Space, f_, o_, g_, Space, l_, i_, f_, t_, e_, d_, Exclam, 0xFF};
 /*0x1C9*/ u8 obtaineditem[] = {BuffCharac, 15, Space, o_, b_, t_, a_, i_, n_, e_, d_, Space, BuffCharac, 22, Exclam, 0xFF};
+/*0x1CA*/ u8 tailwind_begins_text[] = {T_, h_, e_, 0, T_, a_, i_, l_, w_, i_, n_, d_, 0, b_, l_, e_, w_, 0, f_, r_, o_, m_, 0xFE, b_, e_, h_, i_, n_, d_, 0, 0xFD, 0xF, Apos, s_, 0, t_, e_, a_, m_, Exclam, 0xFF};
+/*0x1CB*/ u8 luckychant_begins_text[] = {T_, h_, e_, 0, l_, u_, c_, k_, y_, 0, c_, h_, a_, n_, t_, 0, s_, h_, i_, e_, l_, d_, e_, d_, 0, 0xFD, 0xF, Apos, s_, 0xFE, t_, e_, a_, m_, 0, f_, r_, o_, m_, 0, c_, r_, i_, t_, i_, c_, a_, l_, 0, h_, i_, t_, s_, Exclam, 0xFF};
+/*0x1CC*/ u8 magnetrise_begins_text[] = {0xFD, 0xF, 0, l_, e_, v_, i_, t_, a_, t_, e_, d_, 0xFE, w_, i_, t_, h_, 0, e_, l_, e_, c_, t_, r_, o_, m_, a_, g_, n_, e_, t_, i_, s_, m_, Exclam, 0xFF};
+/*0x1CD*/ u8 magicroom_start_text[] = {I_, t_, 0, c_, r_, e_, a_, t_, e_, d_, 0, a_, 0, b_, i_, z_, a_, r_, r_, e_, 0, a_, r_, e_, a_, 0, i_, n_, 0, w_, h_, i_, c_, h_, 0xFE, P_, o_, k_, Poke_e, m_, o_, n_, Apos, s_, 0, h_, e_, l_, d_, 0, i_, t_, e_, m_, s_, 0, l_, o_, s_, e_, 0, t_, h_, e_, i_, r_, 0xFB, e_, f_, f_, e_, c_, t_, s_, Exclam, 0xFF};
+/*0x1CE*/ u8 trickroom_start_text[] = {0xFD, 0xF, 0, t_, w_, i_, s_, t_, e_, d_, 0xFE, t_, h_, e_, 0, d_, i_, m_, e_, n_, s_, i_, o_, n_, s_, Exclam, 0xFF};
+/*0x1CD*/ u8 wonderroom_start_text[] = {I_, t_, 0, c_, r_, e_, a_, t_, e_, d_, 0, a_, 0, b_, i_, z_, a_, r_, r_, e_, 0, a_, r_, e_, a_, 0, i_, n_, 0, w_, h_, i_, c_, h_, 0xFE, D_, e_, f_, e_, n_, s_, e_, 0, a_, n_, d_, 0, S_, p_, Dot, 0, D_, e_, f_, 0, s_, t_, a_, t_, s_, 0, a_, r_, e_, 0, s_, w_, a_, p_, p_, e_, d_, Exclam, 0xFF};
 
 void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activation_text, &heavyrain_activation_text, &mysticalaircurrent_activation_text, &forewarn_text, &slowstart_text, &anticipation_text, &dryskin_damage_text, &solarpower_text, &harvest_text, &healer_text, &pickup_text, &moldbreaker_text, &turboblaze_text, &terravolt_text, &downloadatk_text,
 &downloadspatk_text, &absorbabilityboost_text , &absorbabilityimmune_text, &userteam_text/*0x190*/, &foeteam_text/*0x191*/,
@@ -101,7 +107,8 @@ void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activ
 &healblockprevents_text, &gravityprevents_text, &embargoprevents_text, &aromaveilprevents_text, &spikyshield_damage, &symbiosispassing_text,
 &restored_hp_text, &replacement_healed_text, &telekinesis_end_text, &embargoend_text, &magnetriseend_text, &wrapped_text,
 &nofiremoves_text, &nowatermoves_text, &trickroom_ends, &magicroom_ends, &wonderoom_ends, &gravity_ends_text, &grassyterainends_text,
-&mistyterrainends_text, &electrerrainends_text, &grassyterrain_heal, &fogcontinues_text, &fogends_text, &obtaineditem};
+&mistyterrainends_text, &electrerrainends_text, &grassyterrain_heal, &fogcontinues_text, &fogends_text, &obtaineditem,
+&tailwind_begins_text, &luckychant_begins_text, &magnetrise_begins_text, &magicroom_start_text, &trickroom_start_text, &wonderroom_start_text};
 
 void battle_string_loader(u16 string_id)
 {
