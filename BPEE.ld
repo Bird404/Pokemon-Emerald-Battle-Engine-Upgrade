@@ -137,6 +137,7 @@ check_if_imprisioned = 0x08040130|1;
 get_bank_in_love = 0x0806F8A8|1;
 sub_803CEDC = 0x803CEDC|1;
 get_attributes = 0x0806A518|1;
+item_is_mail = 0x080D47BC|1;
 
 attack_iteration_cleanup = 0x804AF30|1;
 prepare_pokemon_battle_sprite_manipulation_buffer = 0x08034414|1;
