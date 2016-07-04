@@ -278,7 +278,7 @@ u16 damage_type_effectiveness_update(u8 attacking_type, u8 defending_type, u8 at
     else if (effect == 0 && (get_item_effect(def_bank, true) == ITEM_EFFECT_RINGTARGET))
     {
         effect = 10;
-    }
+        }
     else if (battle_weather.flags.air_current && defending_type == TYPE_FLYING && effect == 20 && weather_abilities_effect())
     {
         effect = 10;
@@ -2442,6 +2442,357 @@ u8 check_if_move_failed(u8 bank)
     return 0;
 }
 
+u8 affected_by_substitute(u8 substitute_bank);
+
+u8 recoil_damage(u8 bank_to_apply)
+{
+    u8 can = 1;
+    u16 recoil;
+    if (current_move == MOVE_HEAD_SMASH || current_move == MOVE_LIGHT_OF_RUIN) //1/2 of damage dealt
+        recoil = hp_dealt >> 1;
+    else if (current_move == MOVE_STRUGGLE || current_move == MOVE_TAKE_DOWN || current_move == MOVE_WILD_CHARGE || current_move == MOVE_HEAD_CHARGE) //1/4 of damage dealt
+        recoil = hp_dealt >> 2;
+    else //1/3 of damage dealt hp
+        recoil = __udivsi3(hp_dealt, 3);
+    if (recoil == 0)
+        recoil = 1;
+    damage_loc = recoil;
+    if ((check_ability(bank_to_apply, ABILITY_ROCK_HEAD) || check_ability(bank_to_apply, ABILITY_MAGIC_GUARD)) && current_move != MOVE_STRUGGLE)
+        record_usage_of_ability(bank_to_apply, ABILITY_ROCK_HEAD);
+    return can;
+}
+
+void effect_stat_change(void* pointer)
+{
+    battle_scripting.field10 = battle_communication_struct.move_effect & 0x3F;
+    battle_scripting.field11 = 0;
+    battlescript_push();
+    battlescripts_curr_instruction = pointer;
+}
+
+void move_effect_setter(u8 primary, u8 certain)
+{
+    battlescripts_curr_instruction++;
+    u8 *move_effect = &battle_communication_struct.move_effect;
+    u8 affects_user = 0;
+    u8 bank_to_apply;
+    if (*move_effect & 0x40)
+    {
+        bank_to_apply = bank_attacker;
+        *move_effect &= 0xBF;
+        battle_scripting.active_bank = bank_target;
+        affects_user = 0x40;
+    }
+    else
+    {
+       bank_to_apply = bank_target;
+       battle_scripting.active_bank = bank_attacker;
+    }
+
+    struct battle_participant* applier_bank = &battle_participants[bank_to_apply];
+    u16 current_hp = applier_bank->current_hp;
+    u8 substitute = 0;
+    if (affected_by_substitute(bank_to_apply) && !affects_user)
+        substitute = 1;
+    u8 shield_dust = 0;
+    if (applier_bank->ability_id == ABILITY_SHIELD_DUST && has_ability_effect(bank_to_apply, 1, 1) && !primary)
+        shield_dust = 1;
+
+    u8 status_change = 8;
+    u8 status_table = status_flags_for_move_effects[*move_effect];
+    void* script_pointer = battlescripts_for_moveeffects[*move_effect];
+    if (*move_effect == 9) //tri attack
+        *move_effect = 3 + __umodsi3(rng(), 3);
+
+    switch (*move_effect)
+    {
+        case 1: //put to sleep
+            if (current_hp && !shield_dust && !substitute)
+                status_change = cant_fall_asleep(bank_to_apply, 0);
+            break;
+        case 2: //poison
+        case 6: //bad poison
+            if (current_hp && !shield_dust && !substitute)
+                status_change = cant_poison(bank_to_apply, 0);
+            break;
+        case 3: //burn
+            if (current_hp && !shield_dust && !substitute)
+                status_change = cant_become_burned(bank_to_apply, 0);
+            break;
+        case 4: //freeze
+            if (current_hp && !shield_dust && !substitute)
+                status_change = cant_become_freezed(bank_to_apply, 0);
+            break;
+        case 5: //paralysis
+            if (current_hp && !shield_dust && !substitute)
+                status_change = cant_become_paralyzed(bank_to_apply, 0);
+            break;
+        case 7: //confusion
+            if (current_hp && !shield_dust && !substitute && !applier_bank->status2.confusion && !check_ability(bank_to_apply, ABILITY_OWN_TEMPO))
+            {
+                applier_bank->status2.confusion = 2 + __umodsi3(rng(), 4);
+                battlescript_push();
+                battlescripts_curr_instruction = script_pointer;
+            }
+            break;
+        case 8: //flinch
+            if (current_hp && !shield_dust && !substitute)
+            {
+                if (check_ability(bank_to_apply, ABILITY_INNER_FOCUS))
+                {
+                    if (certain == 0x80)
+                    {
+                        last_used_ability = ABILITY_INNER_FOCUS;
+                        record_usage_of_ability(bank_to_apply, ABILITY_INNER_FOCUS);
+                        battlescripts_curr_instruction = (void*) 0x82DB603;
+                    }
+                }
+                else
+                {
+                    if (get_bank_turn_order(bank_to_apply) > current_move_turn)
+                        applier_bank->status2.flinched = 1;
+                }
+            }
+            break;
+        case 0xA: //start uproar
+            if (!applier_bank->status2.uproar)
+            {
+                applier_bank->status2.multiple_turn_move = 1;
+                locked_move[bank_to_apply] = current_move;
+                applier_bank->status2.uproar = 3;
+                battlescript_push();
+                battlescripts_curr_instruction = script_pointer;
+            }
+            break;
+        case 0xB: //payday mulla
+            if (!is_bank_from_opponent_side(bank_to_apply))
+            {
+                u8 to_give = 5 * applier_bank->level;
+                if (payday_money + to_give > 0xFFFF)
+                    payday_money = 0xFFFF;
+                else
+                    payday_money += to_give;
+                battlescript_push();
+                battlescripts_curr_instruction = script_pointer;
+            }
+            break;
+        case 0xC: //set repeating flag
+            applier_bank->status2.multiple_turn_move = 1;
+            locked_move[bank_to_apply] = current_move;
+            protect_structs[bank_to_apply].flag1_chargingturn = 1;
+            break;
+        case 0xD: //wrap
+            if (!applier_bank->status2.trapped_in_wrap && current_hp)
+            {
+                if (get_item_effect(battle_scripting.active_bank, 1) == ITEM_EFFECT_GRIPCLAW)
+                    applier_bank->status2.trapped_in_wrap = 7;
+                else
+                    applier_bank->status2.trapped_in_wrap = 4 + (rng() & 1);
+                battle_stuff_ptr.ptr->trapped_move[bank_to_apply] = current_move;
+                battle_stuff_ptr.ptr->trapper = bank_attacker;
+                new_battlestruct.ptr->bank_affecting[bank_to_apply].wrap_bank = battle_scripting.active_bank;
+                battlescript_push();
+                battlescripts_curr_instruction = &wrapped_bs;
+                battle_text_buff1[0] = 0xFD;
+                battle_text_buff1[1] = 2;
+                battle_text_buff1[2] = current_move;
+                battle_text_buff1[3] = current_move >> 8;
+                battle_text_buff1[4] = 0xFF;
+            }
+            break;
+        case 0xE: //recoil damage
+            if (recoil_damage(bank_to_apply) && current_hp)
+            {
+                battlescript_push();
+                battlescripts_curr_instruction = script_pointer;
+            }
+            break;
+        case 15: //raise stat by 1
+        case 16:
+        case 17:
+        case 18:
+        case 19:
+        case 20:
+        case 21:
+            if (change_stats(0x10, 0xF2 + *move_effect, affects_user, 0) == 0 && current_hp)
+                effect_stat_change((void*)0x082D8CD4);
+            break;
+        case 22: //lower stat by 1
+        case 23:
+        case 24:
+        case 25:
+        case 26:
+        case 27:
+        case 28:
+            if (change_stats(0x90, 0xEB + *move_effect, affects_user, 0) == 0 && current_hp)
+                effect_stat_change((void*) 0x82D8D65);
+            break;
+        case 29: //recharge needed
+            applier_bank->status2.recharge = 1;
+            disable_structs[bank_to_apply].recharge_counter = 2;
+            locked_move[bank_to_apply] = current_move;
+            break;
+        case 30: //set rage
+            battle_participants[bank_attacker].status2.raged = 1;
+            break;
+        case 31: //steal item
+            {
+                u16* target_item = &battle_participants[bank_target].held_item;
+                u16* attacker_item = &battle_participants[bank_attacker].held_item;
+                if (!*attacker_item && *target_item && *target_item != ITEM_ENIGMABERRY && !item_is_mail(*target_item))
+                {
+                    //for now thief is usable everywhere by all pokemon and the items won't be returned
+                    //will change later
+                    if (battle_participants[bank_target].ability_id == ABILITY_STICKY_HOLD && has_ability_effect(bank_target, 1, 1))
+                    {
+                        battlescript_push();
+                        battlescripts_curr_instruction = (void*) 0x82DB682;
+                        last_used_ability = ABILITY_STICKY_HOLD;
+                        record_usage_of_ability(bank_target, ABILITY_STICKY_HOLD);
+                    }
+                    else
+                    {
+                        battle_stuff_ptr.ptr->changed_held_items[bank_attacker] = last_used_item = *attacker_item = *target_item;
+                        *target_item = 0;
+                        active_bank = bank_target;
+                        prepare_setattributes_in_battle(0,REQUEST_HELDITEM_BATTLE, 0, 2, target_item);
+                        mark_buffer_bank_for_execution(active_bank);
+                        active_bank = bank_attacker;
+                        prepare_setattributes_in_battle(0,REQUEST_HELDITEM_BATTLE, 0, 2, attacker_item);
+                        mark_buffer_bank_for_execution(active_bank);
+                        battlescript_push();
+                        battlescripts_curr_instruction = (void*) 0x82DB422;
+                        battle_stuff_ptr.ptr->choiced_move[bank_target] = 0;
+                    }
+                }
+            }
+            break;
+        case 32: //prevent escape
+            applier_bank->status2.cant_escape = 1;
+            disable_structs[bank_to_apply].bank_preventing_escape = bank_attacker;
+            break;
+        case 0x21: //nightmare
+            if (applier_bank->status.flags.sleep)
+                applier_bank->status2.nightmare = 1;
+            break;
+        case 0x22: //ancientpower stat raise
+            battlescript_push();
+            battlescripts_curr_instruction = (void*) 0x082DAF27;
+            break;
+        case 0x23: //rapid spin
+            if (current_hp)
+            {
+                battlescript_push();
+                battlescripts_curr_instruction = (void*) 0x82DAFC3;
+            }
+            break;
+        case 0x24: //wake up slap and smelling salts
+            if ((((current_move == MOVE_WAKEUP_SLAP && applier_bank->status.flags.sleep) || (current_move == MOVE_SMELLING_SALTS && applier_bank->status.flags.paralysis)) && current_hp))
+            {
+                applier_bank->status.int_status = 0;
+                active_bank = bank_to_apply;
+                prepare_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &applier_bank->status);
+                mark_buffer_bank_for_execution(active_bank);
+                battlescript_push();
+                battlescripts_curr_instruction = (void*) 0x82DB361;
+            }
+            break;
+        case 0x25: //superpower and closecombat/dragon ascent
+            {
+                void* pointer = 0;
+                if (current_move == MOVE_CLOSE_COMBAT || current_move == MOVE_DRAGON_ASCENT)
+                    pointer = &closecombat_bs;
+                else
+                    pointer = (void*) 0x82DB117;
+                battlescript_push();
+                battlescripts_curr_instruction = pointer;
+            }
+            break;
+        case 0x26: //recoil and paralysis/burn
+            {
+                battlescript_push();
+                if (current_move == MOVE_FLARE_BLITZ)
+                    battlescripts_curr_instruction = &burn_chance_bs;
+                else
+                    battlescripts_curr_instruction = &paralysis_chance_bs;
+                if (recoil_damage(bank_to_apply))
+                {
+                    battlescript_push();
+                    battlescripts_curr_instruction = script_pointer;
+                }
+            }
+            break;
+        case 39://raise stats by two
+        case 40:
+        case 41:
+        case 42:
+        case 43:
+        case 44:
+        case 45:
+            if (change_stats(0x20, 0xDA + *move_effect, affects_user, 0) == 0 && current_hp)
+                effect_stat_change((void*)0x82D8CD4);
+            break;
+        case 46://lower stats by two
+        case 47:
+        case 48:
+        case 49:
+        case 50:
+        case 51:
+        case 52:
+            if (change_stats(0xA0, 0xD3 + *move_effect, affects_user, 0) == 0 && current_hp)
+                effect_stat_change((void*)0x82D8D65);
+            break;
+        case 53: //thrash
+            if (applier_bank->status2.locked_and_confuse == 0)
+            {
+                applier_bank->status2.multiple_turn_move = 1;
+                applier_bank->status2.locked_and_confuse = 2 + (rng() & 1); //2 or 3 turns
+                locked_move[bank_to_apply] = current_move;
+            }
+            break;
+        case 54: //knock off
+            break;
+        case 59: //overheat, leaf storm, psycho boost and draco meteor, suprisingly all lower sp. atk by two stages
+            if (current_hp)
+            {
+                battlescript_push();
+                battlescripts_curr_instruction = (void*) 0x82DB1D5;
+            }
+            break;
+    }
+    if (status_change != 8)
+    {
+        switch (status_change)
+        {
+        case 0: //can apply condition
+            battlescript_push();
+            if (status_table == 7)
+                status_table = 2 + __umodsi3(rng(), 4);
+            applier_bank->status.int_status |= status_table;
+            battlescripts_curr_instruction = script_pointer;
+            active_bank = bank_to_apply;
+            prepare_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &applier_bank->status);
+            mark_buffer_bank_for_execution(active_bank);
+            if (hitmarker & 0x2000)
+            {
+                battle_communication_struct.multistring_chooser = 1;
+                hitmarker &= 0xFFFFDFFF;
+            }
+            else
+                battle_communication_struct.multistring_chooser = 0;
+            if (*move_effect == 1 || *move_effect == 4)
+                reset_several_turns_stuff(bank_to_apply);
+            else
+                battle_stuff_ptr.ptr->synchronize_effect_chooser = *move_effect;
+            break;
+        }
+    }
+    bank_partner_def = bank_to_apply;
+    battle_communication_struct.move_effect = 0;
+    return;
+}
+
+
 u8 battle_turn_move_effects()
 {
     u8 effect = 0;
@@ -2642,7 +2993,25 @@ u8 battle_turn_move_effects()
                         }
                     }
                     break;
-                case 15: //bide I guess
+                case 15: //thrash aka lock and confuse
+                    if (attacker_struct->status2.locked_and_confuse)
+                    {
+                        attacker_struct->status2.locked_and_confuse--;
+                        if (check_if_move_failed(active_bank))
+                            reset_several_turns_stuff(active_bank);
+                        else if (attacker_struct->status2.locked_and_confuse == 0 && attacker_struct->status2.multiple_turn_move)
+                        {
+                            attacker_struct->status2.multiple_turn_move = 0;
+                            if (!attacker_struct->status2.confusion)
+                            {
+                                effect = 1;
+                                battle_communication_struct.move_effect = 0x47;
+                                set_move_effect(1, 0);
+                                if (attacker_struct->status2.confusion)
+                                    call_bc_move_exec((void*)0x82DB2AF);
+                            }
+                        }
+                    }
                     break;
                 case 16: //disable
                     if (current_hp && disable_structs[active_bank].disable_timer)
@@ -3220,318 +3589,4 @@ u8 update_turn_counters()
             break;
     }
     return effect;
-}
-
-u8 affected_by_substitute(u8 substitute_bank);
-
-u8 recoil_damage(u8 bank_to_apply)
-{
-    u8 can = 1;
-    u16 recoil;
-    if (current_move == MOVE_HEAD_SMASH || current_move == MOVE_LIGHT_OF_RUIN) //1/2 of damage dealt
-        recoil = hp_dealt >> 1;
-    else if (current_move == MOVE_STRUGGLE || current_move == MOVE_TAKE_DOWN || current_move == MOVE_WILD_CHARGE || current_move == MOVE_HEAD_CHARGE) //1/4 of damage dealt
-        recoil = hp_dealt >> 2;
-    else //1/3 of damage dealt hp
-        recoil = __udivsi3(hp_dealt, 3);
-    if (recoil == 0)
-        recoil = 1;
-    damage_loc = recoil;
-    if ((check_ability(bank_to_apply, ABILITY_ROCK_HEAD) || check_ability(bank_to_apply, ABILITY_MAGIC_GUARD)) && current_move != MOVE_STRUGGLE)
-        record_usage_of_ability(bank_to_apply, ABILITY_ROCK_HEAD);
-    return can;
-}
-
-void effect_stat_change(void* pointer)
-{
-    battle_scripting.field10 = battle_communication_struct.move_effect & 0x3F;
-    battle_scripting.field11 = 0;
-    battlescript_push();
-    battlescripts_curr_instruction = pointer;
-}
-
-void move_effect_setter(u8 primary, u8 certain)
-{
-    battlescripts_curr_instruction++;
-    u8 *move_effect = &battle_communication_struct.move_effect;
-    u8 affects_user = 0;
-    u8 bank_to_apply;
-    if (*move_effect & 0x40)
-    {
-        bank_to_apply = bank_attacker;
-        *move_effect &= 0xBF;
-        battle_scripting.active_bank = bank_target;
-        affects_user = 0x40;
-    }
-    else
-    {
-       bank_to_apply = bank_target;
-       battle_scripting.active_bank = bank_attacker;
-    }
-
-    struct battle_participant* applier_bank = &battle_participants[bank_to_apply];
-    u16 current_hp = applier_bank->current_hp;
-    u8 substitute = 0;
-    if (affected_by_substitute(bank_to_apply) && !affects_user)
-        substitute = 1;
-    u8 shield_dust = 0;
-    if (applier_bank->ability_id == ABILITY_SHIELD_DUST && has_ability_effect(bank_to_apply, 1, 1) && !primary)
-        shield_dust = 1;
-
-    u8 status_change = 8;
-    u8 status_table = status_flags_for_move_effects[*move_effect];
-    void* script_pointer = battlescripts_for_moveeffects[*move_effect];
-    if (*move_effect == 9) //tri attack
-        *move_effect = 3 + __umodsi3(rng(), 3);
-
-    switch (*move_effect)
-    {
-        case 1: //put to sleep
-            if (current_hp && !shield_dust && !substitute)
-                status_change = cant_fall_asleep(bank_to_apply, 0);
-            break;
-        case 2: //poison
-        case 6: //bad poison
-            if (current_hp && !shield_dust && !substitute)
-                status_change = cant_poison(bank_to_apply, 0);
-            break;
-        case 3: //burn
-            if (current_hp && !shield_dust && !substitute)
-                status_change = cant_become_burned(bank_to_apply, 0);
-            break;
-        case 4: //freeze
-            if (current_hp && !shield_dust && !substitute)
-                status_change = cant_become_freezed(bank_to_apply, 0);
-            break;
-        case 5: //paralysis
-            if (current_hp && !shield_dust && !substitute)
-                status_change = cant_become_paralyzed(bank_to_apply, 0);
-            break;
-        case 7: //confusion
-            if (current_hp && !shield_dust && !substitute && !applier_bank->status2.confusion && !check_ability(bank_to_apply, ABILITY_OWN_TEMPO))
-            {
-                applier_bank->status2.confusion = 2 + __umodsi3(rng(), 4);
-                battlescript_push();
-                battlescripts_curr_instruction = script_pointer;
-            }
-            break;
-        case 8: //flinch
-            if (current_hp && !shield_dust && !substitute)
-            {
-                if (check_ability(bank_to_apply, ABILITY_INNER_FOCUS))
-                {
-                    if (certain == 0x80)
-                    {
-                        last_used_ability = ABILITY_INNER_FOCUS;
-                        record_usage_of_ability(bank_to_apply, ABILITY_INNER_FOCUS);
-                        battlescripts_curr_instruction = (void*) 0x82DB603;
-                    }
-                }
-                else
-                {
-                    if (get_bank_turn_order(bank_to_apply) > current_move_turn)
-                        applier_bank->status2.flinched = 1;
-                }
-            }
-            break;
-        case 0xA: //start uproar
-            if (!applier_bank->status2.uproar)
-            {
-                applier_bank->status2.multiple_turn_move = 1;
-                locked_move[bank_to_apply] = current_move;
-                applier_bank->status2.uproar = 3;
-                battlescript_push();
-                battlescripts_curr_instruction = script_pointer;
-            }
-            break;
-        case 0xB: //payday mulla
-            if (!is_bank_from_opponent_side(bank_to_apply))
-            {
-                u8 to_give = 5 * applier_bank->level;
-                if (payday_money + to_give > 0xFFFF)
-                    payday_money = 0xFFFF;
-                else
-                    payday_money += to_give;
-                battlescript_push();
-                battlescripts_curr_instruction = script_pointer;
-            }
-            break;
-        case 0xC: //set repeating flag
-            applier_bank->status2.multiple_turn_move = 1;
-            locked_move[bank_to_apply] = current_move;
-            protect_structs[bank_to_apply].flag1_chargingturn = 1;
-            break;
-        case 0xD: //wrap
-            if (!applier_bank->status2.trapped_in_wrap && current_hp)
-            {
-                if (get_item_effect(battle_scripting.active_bank, 1) == ITEM_EFFECT_GRIPCLAW)
-                    applier_bank->status2.trapped_in_wrap = 7;
-                else
-                    applier_bank->status2.trapped_in_wrap = 4 + (rng() & 1);
-                battle_stuff_ptr.ptr->trapped_move[bank_to_apply] = current_move;
-                battle_stuff_ptr.ptr->trapper = bank_attacker;
-                new_battlestruct.ptr->bank_affecting[bank_to_apply].wrap_bank = battle_scripting.active_bank;
-                battlescript_push();
-                battlescripts_curr_instruction = &wrapped_bs;
-                battle_text_buff1[0] = 0xFD;
-                battle_text_buff1[1] = 2;
-                battle_text_buff1[2] = current_move;
-                battle_text_buff1[3] = current_move >> 8;
-                battle_text_buff1[4] = 0xFF;
-            }
-            break;
-        case 0xE: //recoil damage
-            if (recoil_damage(bank_to_apply) && current_hp)
-            {
-                battlescript_push();
-                battlescripts_curr_instruction = script_pointer;
-            }
-            break;
-        case 15: //raise stat by 1
-        case 16:
-        case 17:
-        case 18:
-        case 19:
-        case 20:
-        case 21:
-            if (change_stats(0x10, 0xF2 + *move_effect, affects_user, 0) == 0 && current_hp)
-                effect_stat_change((void*)0x082D8CD4);
-            break;
-        case 22: //lower stat by 1
-        case 23:
-        case 24:
-        case 25:
-        case 26:
-        case 27:
-        case 28:
-            if (change_stats(0x90, 0xEB + *move_effect, affects_user, 0) == 0 && current_hp)
-                effect_stat_change((void*) 0x82D8D65);
-            break;
-        case 29: //recharge needed
-            applier_bank->status2.recharge = 1;
-            disable_structs[bank_to_apply].recharge_counter = 2;
-            locked_move[bank_to_apply] = current_move;
-            break;
-        case 30: //set rage
-            battle_participants[bank_attacker].status2.raged = 1;
-            break;
-        case 31: //steal item
-            break;
-        case 32: //prevent escape
-            applier_bank->status2.cant_escape = 1;
-            disable_structs[bank_to_apply].bank_preventing_escape = bank_attacker;
-            break;
-        case 0x21: //nightmare
-            if (applier_bank->status.flags.sleep)
-                applier_bank->status2.nightmare = 1;
-            break;
-        case 0x22: //ancientpower stat raise
-            battlescript_push();
-            battlescripts_curr_instruction = (void*) 0x082DAF27;
-            break;
-        case 0x23: //rapid spin
-            if (current_hp)
-            {
-                battlescript_push();
-                battlescripts_curr_instruction = (void*) 0x82DAFC3;
-            }
-            break;
-        case 0x24: //wake up slap and smelling salts
-            if ((((current_move == MOVE_WAKEUP_SLAP && applier_bank->status.flags.sleep) || (current_move == MOVE_SMELLING_SALTS && applier_bank->status.flags.paralysis)) && current_hp))
-            {
-                applier_bank->status.int_status = 0;
-                active_bank = bank_to_apply;
-                prepare_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &applier_bank->status);
-                mark_buffer_bank_for_execution(active_bank);
-                battlescript_push();
-                battlescripts_curr_instruction = (void*) 0x82DB361;
-            }
-            break;
-        case 0x25: //superpower and closecombat/dragon ascent
-            {
-                void* pointer = 0;
-                if (current_move == MOVE_CLOSE_COMBAT || current_move == MOVE_DRAGON_ASCENT)
-                    pointer = &closecombat_bs;
-                else
-                    pointer = (void*) 0x82DB117;
-                battlescript_push();
-                battlescripts_curr_instruction = pointer;
-            }
-            break;
-        case 0x26: //recoil and paralysis/burn
-            {
-                battlescript_push();
-                if (current_move == MOVE_FLARE_BLITZ)
-                    battlescripts_curr_instruction = &burn_chance_bs;
-                else
-                    battlescripts_curr_instruction = &paralysis_chance_bs;
-                if (recoil_damage(bank_to_apply))
-                {
-                    battlescript_push();
-                    battlescripts_curr_instruction = script_pointer;
-                }
-            }
-            break;
-        case 39://raise stats by two
-        case 40:
-        case 41:
-        case 42:
-        case 43:
-        case 44:
-        case 45:
-            if (change_stats(0x20, 0xDA + *move_effect, affects_user, 0) == 0 && current_hp)
-                effect_stat_change((void*)0x82D8CD4);
-            break;
-        case 46://lower stats by two
-        case 47:
-        case 48:
-        case 49:
-        case 50:
-        case 51:
-        case 52:
-            if (change_stats(0xA0, 0xD3 + *move_effect, affects_user, 0) == 0 && current_hp)
-                effect_stat_change((void*)0x82D8D65);
-            break;
-        case 53: //thrash
-            break;
-        case 54: //knock off
-            break;
-        case 59: //overheat, leaf storm, psycho boost and draco meteor, suprisingly all lower sp. atk by two stages
-            if (current_hp)
-            {
-                battlescript_push();
-                battlescripts_curr_instruction = (void*) 0x82DB1D5;
-            }
-            break;
-    }
-    if (status_change != 8)
-    {
-        switch (status_change)
-        {
-        case 0: //can apply condition
-            battlescript_push();
-            if (status_table == 7)
-                status_table = 2 + __umodsi3(rng(), 4);
-            applier_bank->status.int_status |= status_table;
-            battlescripts_curr_instruction = script_pointer;
-            active_bank = bank_to_apply;
-            prepare_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &applier_bank->status);
-            mark_buffer_bank_for_execution(active_bank);
-            if (hitmarker & 0x2000)
-            {
-                battle_communication_struct.multistring_chooser = 1;
-                hitmarker &= 0xFFFFDFFF;
-            }
-            else
-                battle_communication_struct.multistring_chooser = 0;
-            if (*move_effect == 1 || *move_effect == 4)
-                reset_several_turns_stuff(bank_to_apply);
-            else
-                battle_stuff_ptr.ptr->synchronize_effect_chooser = *move_effect;
-            break;
-        }
-    }
-    bank_partner_def = bank_to_apply;
-    battle_communication_struct.move_effect = 0;
-    return;
 }
