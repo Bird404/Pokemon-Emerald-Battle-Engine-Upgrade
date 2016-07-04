@@ -2470,6 +2470,27 @@ void effect_stat_change(void* pointer)
     battlescripts_curr_instruction = pointer;
 }
 
+u8 can_lose_item(u8 bank, u8 sticky_message)
+{
+    u8 can_lose = 1;
+    u16 item = battle_participants[bank].held_item;
+    if (battle_participants[bank].ability_id == ABILITY_STICKY_HOLD && has_ability_effect(bank, 1, 1))
+    {
+        can_lose = 0;
+        if (sticky_message)
+        {
+            battlescript_push();
+            battlescripts_curr_instruction = (void*) 0x82DB682;
+            last_used_ability = ABILITY_STICKY_HOLD;
+            record_usage_of_ability(bank_target, ABILITY_STICKY_HOLD);
+        }
+    }
+    else if (item == ITEM_ENIGMABERRY || item_is_mail(item))
+        can_lose = 1;
+    //mega stones, drives for genesects and plates for Arceus else if ()
+    return can_lose;
+}
+
 void move_effect_setter(u8 primary, u8 certain)
 {
     battlescripts_curr_instruction++;
@@ -2639,31 +2660,22 @@ void move_effect_setter(u8 primary, u8 certain)
             {
                 u16* target_item = &battle_participants[bank_target].held_item;
                 u16* attacker_item = &battle_participants[bank_attacker].held_item;
-                if (!*attacker_item && *target_item && *target_item != ITEM_ENIGMABERRY && !item_is_mail(*target_item))
+                if (!*attacker_item && *target_item && can_lose_item(bank_target, 1))
                 {
                     //for now thief is usable everywhere by all pokemon and the items won't be returned
                     //will change later
-                    if (battle_participants[bank_target].ability_id == ABILITY_STICKY_HOLD && has_ability_effect(bank_target, 1, 1))
-                    {
-                        battlescript_push();
-                        battlescripts_curr_instruction = (void*) 0x82DB682;
-                        last_used_ability = ABILITY_STICKY_HOLD;
-                        record_usage_of_ability(bank_target, ABILITY_STICKY_HOLD);
-                    }
-                    else
-                    {
-                        battle_stuff_ptr.ptr->changed_held_items[bank_attacker] = last_used_item = *attacker_item = *target_item;
-                        *target_item = 0;
-                        active_bank = bank_target;
-                        prepare_setattributes_in_battle(0,REQUEST_HELDITEM_BATTLE, 0, 2, target_item);
-                        mark_buffer_bank_for_execution(active_bank);
-                        active_bank = bank_attacker;
-                        prepare_setattributes_in_battle(0,REQUEST_HELDITEM_BATTLE, 0, 2, attacker_item);
-                        mark_buffer_bank_for_execution(active_bank);
-                        battlescript_push();
-                        battlescripts_curr_instruction = (void*) 0x82DB422;
-                        battle_stuff_ptr.ptr->choiced_move[bank_target] = 0;
-                    }
+
+                    battle_stuff_ptr.ptr->changed_held_items[bank_attacker] = last_used_item = *attacker_item = *target_item;
+                    *target_item = 0;
+                    active_bank = bank_target;
+                    prepare_setattributes_in_battle(0,REQUEST_HELDITEM_BATTLE, 0, 2, target_item);
+                    mark_buffer_bank_for_execution(active_bank);
+                    active_bank = bank_attacker;
+                    prepare_setattributes_in_battle(0,REQUEST_HELDITEM_BATTLE, 0, 2, attacker_item);
+                    mark_buffer_bank_for_execution(active_bank);
+                    battlescript_push();
+                    battlescripts_curr_instruction = (void*) 0x82DB422;
+                    battle_stuff_ptr.ptr->choiced_move[bank_target] = 0;
                 }
             }
             break;
@@ -2751,6 +2763,18 @@ void move_effect_setter(u8 primary, u8 certain)
             }
             break;
         case 54: //knock off
+            {
+                u16* item = &battle_participants[bank_target].held_item;
+                if (*item && can_lose_item(bank_target, 1))
+                {
+                    last_used_item = *item;
+                    battle_effects_duration.knocked_off_pokes[is_bank_from_opponent_side(bank_target)] |= bits_table[battle_team_id_by_side[bank_target]];
+                    battle_stuff_ptr.ptr->choiced_move[bank_target] = 0;
+                    *item = 0;
+                    battlescript_push();
+                    battlescripts_curr_instruction = (void*) 0x082DB168;
+                }
+            }
             break;
         case 59: //overheat, leaf storm, psycho boost and draco meteor, suprisingly all lower sp. atk by two stages
             if (current_hp)
