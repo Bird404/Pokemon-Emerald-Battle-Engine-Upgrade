@@ -156,7 +156,7 @@ struct b_stuff_duration{
     u8 wish_duration[4];
     u8 id_of_wish_user[4];
     u8 weather_dur;
-    u16 field29;
+    u8 knocked_off_pokes[2];
 };
 
 extern struct b_stuff_duration battle_effects_duration;
