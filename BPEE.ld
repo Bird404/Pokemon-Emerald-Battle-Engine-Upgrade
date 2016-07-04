@@ -71,7 +71,6 @@ hp_dealt = 0x020241F4;
 battle_background = 0x02022FF0;
 taken_damage = 0x020241F8;
 hurt_by = 0x02024288;
-team_poke_id = 0x0202406E;
 
 poison_status_flag = 0x0831BC70;
 sleep_status_flag = 0x0831BC78;
