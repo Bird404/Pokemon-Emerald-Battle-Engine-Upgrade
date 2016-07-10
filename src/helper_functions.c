@@ -152,6 +152,38 @@ void battle_string_loader(u16 string_id)
     return;
 }
 
+u8 count_party_pokemon(u8 bank)
+{
+    struct pokemon* poke;
+    if (is_bank_from_opponent_side(bank))
+        poke = &party_opponent[0];
+    else
+        poke = &party_player[0];
+    u8 usable_pokes = 0;
+    for (u8 i = 0; i < 6; i ++)
+    {
+        if (get_attributes(&poke[i], ATTR_CURRENT_HP, 0) != 0 && get_attributes(&poke[i], ATTR_IS_EGG, 0) != 1 && get_attributes(&poke[i], ATTR_SPECIES, 0) != 0)
+            usable_pokes++;
+    }
+    return usable_pokes;
+}
+
+u8 count_party_poke_statused(u8 bank)
+{
+    struct pokemon* poke;
+    if (is_bank_from_opponent_side(bank))
+        poke = &party_opponent[0];
+    else
+        poke = &party_player[0];
+    u8 statused_pokes = 0;
+    for (u8 i = 0; i < 6; i ++)
+    {
+        if (get_attributes(&poke[i], ATTR_STATUS_AILMENT, 0))
+            statused_pokes++;
+    }
+    return statused_pokes;
+}
+
 extern void call_ability_effects();
 
 void apply_burn_animation()
