@@ -16,8 +16,6 @@
 ## pokemom type pallet tweaks
 08D97BC1 FF 66
 08D97BC8 3D 66
-## hanged on item message now doesn't replace last used item
-08048488 00 00
 ## Negates encryption substructure pokemon
 0806A236 00 00 10 60 59 68 00 00
 0806A25A 00 00 10 60 19 68 00 00
@@ -29,7 +27,5 @@
 0831BD28 41 06 05 08
 ## nop in the uproar script
 082D9F5A 06
-## PSS Split in the UpdateHP Command
-08047F03 7A
-08048148 00 2E 41 D1
-080481CC 00
+## smellingsalts text now allows all conditions
+085CA024 FD 00 AB FF
