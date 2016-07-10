@@ -28,6 +28,7 @@ multihit_counter = 0x02024212;
 bits_table = 0x0832A328;
 chosen_move_by_banks = 0x02024274;
 battle_team_id_by_side = 0x202406E;
+battle_execution_buffer = 0x02024068;
 
 bank_attacker = 0x0202420B;
 bank_target = 0x0202420C;
@@ -67,10 +68,15 @@ locked_move = 0x02024268;
 payday_money = 0x0202432E;
 current_move_turn = 0x02024082;
 party_opponent = 0x02024744;
+party_player = 0x020244EC;
 hp_dealt = 0x020241F4;
 battle_background = 0x02022FF0;
 taken_damage = 0x020241F8;
 hurt_by = 0x02024288;
+slot_in_learnset_table = 0x020244E8;
+move_to_learn = 0x020244E2;
+tai_current_instruction = 0x0203AB38;
+tai_bank = 0x0203AB3C;
 
 poison_status_flag = 0x0831BC70;
 sleep_status_flag = 0x0831BC78;
@@ -80,6 +86,8 @@ freeze_status_flag = 0x0831BC90;
 status_flags_for_move_effects = 0x0831C134;
 battlescripts_for_moveeffects = 0x0831C224;
 terrain_to_type_table = 0x0831C483;
+some_strings_table =  0x085CC834;
+protect_chance_table = 0x0831C3D8;
 
 prepare_setattributes_in_battle = 0x08033900|1;
 strcpy_xFF_terminated_0 = 0x08008BA0|1;
@@ -138,6 +146,10 @@ get_bank_in_love = 0x0806F8A8|1;
 sub_803CEDC = 0x803CEDC|1;
 get_attributes = 0x0806A518|1;
 item_is_mail = 0x080D47BC|1;
+get_lvl_from_exp = 0x080690C0|1;
+teach_move_in_available_slot = 0x08069140|1;
+new_move_for_the_first = 0x080694D0|1;
+get_ai_bank = 0x08131E70|1;
 
 attack_iteration_cleanup = 0x804AF30|1;
 prepare_pokemon_battle_sprite_manipulation_buffer = 0x08034414|1;
