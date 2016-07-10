@@ -47,14 +47,20 @@ struct failbank{
 
 u8 change_stats(struct stat stat_change, u8 stat, struct failbank bank, void* battlescript_if_fails)
 {
+    if (stat_change.decrement)
+        battle_scripting.stat_changer |= 0x80;
+    else
+        battle_scripting.stat_changer &= 0x7F;
     u8 fail = 0;
     if (bank.attacker)
     {
         active_bank = bank_attacker;
+        battle_scripting.active_bank = bank_attacker;
     }
     else
     {
         active_bank = bank_target;
+        battle_scripting.active_bank = bank_target;
     }
     battle_text_buff1[0] = 0xFD;
     battle_text_buff1[1] = 5;
