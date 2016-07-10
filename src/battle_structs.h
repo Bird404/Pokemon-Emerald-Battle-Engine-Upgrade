@@ -300,8 +300,7 @@ struct status_3{
     u32 minimized : 1; //x100
     u32 charged_up : 1; //x200
     u32 rooted : 1; //x400
-    u32 yawn_sleep : 1; //x800
-    u32 yawn_next_turn : 1; //x1000
+    u32 yawn : 2; //x800 || x1000
     u32 imprision : 1; //x2000
     u32 grudge : 1; //x4000
     u32 unkown_no_crit : 1; //x8000
@@ -383,9 +382,34 @@ struct ability_flags{
     struct flags_ability flags_ability[4];
 };
 
+struct tai_state{
+    u8 phase;
+    u8 moveset_index;
+    u16 curr_move;
+    s8 score[4];
+    u32 var;
+    u32 scripts_to_run;
+    u8 move_state_flags;
+    u8 curr_script;
+};
+
+struct battle_history{
+    u16 poke1_used_moves[4];
+    u8 field_8[24];
+    u16 poke2_used_moves[4];
+    u8 field_28[24];
+    u8 ability[4];
+    u8 item[4];
+};
+
 struct b_resources_field0{
     u32 field0;
     struct ability_flags *ability_flags_ptr;
+    u32 battlescript_stack;
+    u32 battlescript_execute_stack;
+    u32 field10;
+    struct tai_state *tai_state;
+    struct battle_history *battle_history;
 };
 
 struct battle_resources{
@@ -420,6 +444,7 @@ struct move_outcome{
     u8 failed : 1;
     u8 endured : 1;
     u8 hanged_on_using_item : 1;
+    u8 sturdied : 1;
 };
 
 extern struct move_outcome move_outcome;
@@ -479,9 +504,9 @@ struct move_info{
     u8 target;
     s8 priority;
     union move_flags move_flags;
-    u8 padd1;
+    u8 arg1;
     u8 split;
-    u8 second_type;
+    u8 arg2;
 };
 
 //extern struct move_info move_info;
@@ -551,5 +576,6 @@ struct pokemon{
 };
 
 extern struct pokemon party_opponent[6];
+extern struct pokemon party_player[6];
 
 #endif /* B_STRUCTS */
