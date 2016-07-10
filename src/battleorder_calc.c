@@ -9,6 +9,7 @@
 u16 get_speed(u8 bank);
 u8 percent_chance(u8 percent);
 u32 two_options_rand(u32 option1, u32 option2);
+u8 hp_condition(u8 bank, u8 percent);
 
 u8 check_ability(u8 bank, u8 ability)
 {
@@ -38,7 +39,7 @@ s8 get_bracket_alteration_factor(u8 bank, u8 item_effect) // will be used for qu
             return 1;
         break;
     case ITEM_EFFECT_CUSTAPBERRY:
-        if(battle_participants[bank].current_hp<get_1_4_of_max_hp(bank))
+        if(hp_condition(bank, 2))
             return 1;
         break;
     case ITEM_EFFECT_LAGGINGTAIL:
@@ -61,8 +62,8 @@ u8 get_first_to_strike(u8 bank1, u8 bank2, u8 ignore_priority)
     {
         s8 priority1 = 0;
         s8 priority2 = 0;
-        u8 move1 = battle_participants[bank1].moves[battle_stuff_ptr.ptr->chosen_move_position[bank1]];
-        u8 move2 = battle_participants[bank2].moves[battle_stuff_ptr.ptr->chosen_move_position[bank2]];
+        u16 move1 = battle_participants[bank1].moves[battle_stuff_ptr.ptr->chosen_move_position[bank1]];
+        u16 move2 = battle_participants[bank2].moves[battle_stuff_ptr.ptr->chosen_move_position[bank2]];
         priority1 = get_priority(move1, bank1);
         priority2 = get_priority(move2, bank2);
         if (priority1 > priority2)
