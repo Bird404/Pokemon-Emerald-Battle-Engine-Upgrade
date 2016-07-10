@@ -722,6 +722,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 script_ptr = (void*) 0x082DB4B8;
                 execute_battle_script(script_ptr);
                 battle_stuff_ptr.ptr->intimidate_user=bank;
+                bank_attacker = bank;
                 effect=true;
             }
             break;
@@ -1048,7 +1049,6 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         break;
 
     case 3: //abilities that affect type
-
             if (curr_move && has_ability_effect(bank, 1, 1))
             {
                 if (protect_structs[bank_attacker].flag2_notfirststrike)
@@ -1407,10 +1407,10 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         {
             break;
         }
-    case 7: //target's synchronize
+    case 7: //user's synchronize
         adder=0x40;
-    case 8: //user's synchronize after static etc.
-        if(battle_participants[bank].ability_id==ABILITY_SYNCHRONIZE && has_ability_effect(bank,0,1) && hitmarker&0x4000)
+    case 8: //target's synchronize after static etc.
+        if(battle_participants[bank].ability_id==ABILITY_SYNCHRONIZE && has_ability_effect(bank,0,1))
         {
             effect=true;
             hitmarker &= 0xFFFFBFFF;
@@ -1599,6 +1599,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         record_usage_of_ability(bank, last_used_ability);
     return effect;
 }
+
 
 void call_ability_effects()
 {
