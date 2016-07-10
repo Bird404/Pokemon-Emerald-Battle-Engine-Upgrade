@@ -13,7 +13,7 @@ u8 affected_by_substitute(u8 substitute_bank)
 {
     if (battle_participants[substitute_bank].status2.substitute)
     {
-        if (!(hitmarker & HITMARKER_IGNORE_SUBSTITUTE || disable_structs[substitute_bank].substitute_hp
+        if (!(hitmarker & HITMARKER_IGNORE_SUBSTITUTE || disable_structs[substitute_bank].substitute_hp == 0
               || (has_ability_effect(bank_attacker, 0, 1) && battle_participants[bank_attacker].ability_id == ABILITY_INFILTRATOR && bank_attacker != substitute_bank)
               || find_move_in_table(current_move, &sound_moves[0])))
         {
@@ -32,14 +32,19 @@ void final_damagecalc_cmd7()
     if (!affected_by_substitute(bank_target))
     {
         u16 target_hp = battle_participants[bank_target].current_hp;
-        if ((current_move == MOVE_FALSE_SWIPE || current_move == MOVE_HOLD_BACK) && damage_loc > target_hp && !(move_outcome.failed || move_outcome.missed || move_outcome.not_affected))
+        if (protect_structs[bank_target].flag0_endure)
+        {
+            damage_loc = target_hp - 1;
+            move_outcome.endured = 1;
+        }
+        else if ((current_move == MOVE_FALSE_SWIPE || current_move == MOVE_HOLD_BACK) && damage_loc > target_hp && !(move_outcome.failed || move_outcome.missed || move_outcome.not_affected))
         {
             damage_loc = target_hp - 1;
         }
         else if (battle_participants[bank_target].ability_id == ABILITY_STURDY && has_ability_effect(bank_target, 1, 1) && damage_loc > target_hp && target_hp == battle_participants[bank_target].max_hp)
         {
             damage_loc = target_hp - 1;
-            move_outcome.endured = 1;
+            move_outcome.sturdied = 1;
         }
         else
         {
