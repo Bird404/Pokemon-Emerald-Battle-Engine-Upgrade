@@ -29,3 +29,6 @@
 082D9F5A 06
 ## smellingsalts text now allows all conditions
 085CA024 FD 00 AB FF
+## intimidate uses bank attacker
+085CB0F6 18
+085CB0F1 0F
