@@ -102,6 +102,7 @@ def funcwrap(rom, space, hook_at, nparams, isreturning):
                 hook_at -= 1
             
         rom.seek(hook_at)
+        nparams=nparams-1
 
         if nparams<4:
                 data = bytes([0x10, 0xB5, 0x3, 0x4C, 0x0, 0xF0, 0x3, 0xF8, 0x10, 0xBC , (isreturning+1), 0xBC , (isreturning<<3), 0x47, 0x20, 0x47])
