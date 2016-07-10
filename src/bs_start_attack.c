@@ -154,7 +154,7 @@ u8 get_target_of_move(u16 move, u8 target_given, u8 adjust)
 void set_attacking_move_type()
 {
     u8 ability=battle_participants[bank_attacker].ability_id;
-    u8 move_type=0;
+    u8 move_type = TYPE_EGG;
     if(new_battlestruct.ptr->bank_affecting[bank_attacker].electrify)
         move_type=TYPE_ELECTRIC;
     else
@@ -199,7 +199,7 @@ void set_attacking_move_type()
             break;
         }
         u8 ate=0;
-        if(!move_type && (DAMAGING_MOVE) && has_ability_effect(bank_attacker,0,1))
+        if(move_type == TYPE_EGG && (DAMAGING_MOVE) && has_ability_effect(bank_attacker,0,1))
         {
             switch(ability)
             {
@@ -220,13 +220,25 @@ void set_attacking_move_type()
         if(ate==1 && DAMAGING_MOVE)
             new_battlestruct.ptr->bank_affecting[bank_attacker].ate_bonus=1;
     }
-    battle_stuff_ptr.ptr->dynamic_move_type=move_type;
+    if (move_type != TYPE_EGG)
+    {
+        battle_stuff_ptr.ptr->dynamic_move_type=move_type + 0x80;
+    }
+    else
+        battle_stuff_ptr.ptr->dynamic_move_type = 0;
 }
 
 
 void clear_move_outcome()
 {
     *(u8 *)(0x202427C)=0;
+}
+
+void* get_move_battlescript_ptr(u16 move)
+{
+    u32* ptr_to_movesciprts_table = (void*) 0x0803E854;
+    u32* ptr_to_movescript = (void*) *ptr_to_movesciprts_table + move_table[move].script_id * 4;
+    return (void*) *ptr_to_movescript;
 }
 
 void bs_start_attack()
@@ -310,8 +322,8 @@ void bs_start_attack()
                 set_attacking_move_type();
             bank_target=get_target_of_move(current_move,0,0);
         }
-        u32 next_loc=(0x82D86A8+(move_table[current_move].script_id<<2)); //soon to be changed
-        battlescripts_curr_instruction=(void *)(*(u32 *)next_loc);
+
+        battlescripts_curr_instruction = get_move_battlescript_ptr(current_move);
         battle_state_mode=0xA;
     }
     else
