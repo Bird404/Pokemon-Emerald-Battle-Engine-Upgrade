@@ -336,7 +336,7 @@ u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8
     {
         if (move == dual_type_moves[i])
         {
-            chained_effect = apply_type_effectiveness(chained_effect, move_table[move].second_type,
+            chained_effect = apply_type_effectiveness(chained_effect, move_table[move].arg2,
                                                       def_bank, atk_bank, airstatus);
             break;
         }
