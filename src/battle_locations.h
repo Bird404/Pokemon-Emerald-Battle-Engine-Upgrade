@@ -51,6 +51,13 @@ u8 terrain_to_type_table[10];
 u8 battle_background;
 u32 taken_damage[4];
 u8 hurt_by[4];
+u8 slot_in_learnset_table;
+u16 move_to_learn;
+void* tai_current_instruction;
+u8 tai_bank;
+u32 battle_execution_buffer;
+u16 some_strings_table[4];
+u16 protect_chance_table[4];
 
 u32 poison_status_flag;
 u32 sleep_status_flag;
