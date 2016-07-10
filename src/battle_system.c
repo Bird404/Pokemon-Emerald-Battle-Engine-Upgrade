@@ -19,11 +19,12 @@ u8 get_attacking_move_type()
             move_type = TYPE_NORMAL;
         else
             move_type = move_table[current_move].type;
-        if(move_type==TYPE_NORMAL && new_battlestruct.ptr->field_affecting.ion_deluge)
+        if(move_type==TYPE_NORMAL && (new_battlestruct.ptr->field_affecting.ion_deluge || new_battlestruct.ptr->bank_affecting[bank_target].electrify))
             move_type = TYPE_ELECTRIC;
     }
     return move_type;
 }
+
 
 u8 get_item_effect(u8 bank, u8 check_negating_effects)
 {
