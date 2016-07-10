@@ -12,3 +12,5 @@ protect_affecting_moves	080464AC	1
 battle_turn_move_effects	08040924	0
 move_effect_setter	08048760	3
 update_turn_counters	080401D0	0
+fill_with_default_moves	08069270	1
+teach_move_player	08069318	2
