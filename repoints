@@ -236,3 +236,10 @@ shiny_particle_image 08172FB8
 shiny_particle_pallet 08172FBC
 battle_particle_table 080A3D74 -80000
 battle_particle_pallets 080A3D78 -80000
+### move battlescript table
+battlescripts_table 0803E854
+battlescripts_table 0804E9EC
+battlescripts_table 08050288
+battlescripts_table 08052578
+battlescripts_table 08054C54
+battlescripts_table 0804BCE4
