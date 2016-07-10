@@ -5,16 +5,12 @@
 .equ Greater_Than, 0x3
 .equ Has_One_Bit_Common, 0x4
 
+@banks
+.equ bank_target, 0x0
+.equ bank_attacker, 0x1
+.equ bank_scripting_active, 10
+
 @@@@@@@@@@@@@@@@@ Macro
-
-@@ Banks
-.macro BANK_USER
-.byte 0x1
-.endm
-
-.macro BANK_TARGET
-.byte 0
-.endm
 
 @@ Delay
 .macro DELAY_HALFSECOND
@@ -28,6 +24,11 @@
 @@ Super commands
 .macro calculatedamage
 .word 0x7060504
+.endm
+
+.macro jumpiftypenotaffected jumpiftypenotaffected_address
+.byte 5 @damage calc 
+jumpifbyte 0x4 0x202427C 0x29 \jumpiftypenotaffected_address
 .endm
 
 @@ Index commands
@@ -58,11 +59,19 @@
 .byte 5
 .endm
 
+.macro damagecalc
+.byte 5
+.endm
+
 .macro cmd6
 .byte 6
 .endm
 
 .macro cmd7
+.byte 7
+.endm
+
+.macro damageadjustment
 .byte 7
 .endm
 
@@ -125,15 +134,15 @@
 .word \printfromtable2_table
 .endm
 
-.macro seteffectwithchancetarget
+.macro seteffectwithchance
 .byte 0x15
 .endm
 
-.macro seteffecttarget
+.macro seteffectprimary
 .byte 0x16
 .endm
 
-.macro seteffectuser
+.macro seteffectsecondary
 .byte 0x17
 .endm
 
@@ -196,7 +205,7 @@
 .word \jumpifstat_address
 .endm
 
-.macro jumpifspecialstatusflag jumpifspecialstatusflag_bank jumpifspecialstatusflag_word_to_and jumpifspecialstatusflag_statut jumpifspecialstatusflag_address
+.macro jumpifspecialstatus3 jumpifspecialstatusflag_bank jumpifspecialstatusflag_word_to_and jumpifspecialstatusflag_statut jumpifspecialstatusflag_address
 .byte 0x21
 .byte \jumpifspecialstatusflag_bank
 .word \jumpifspecialstatusflag_word_to_and
@@ -233,6 +242,11 @@
 .macro cmd27 cmd27_address
 .byte 0x27
 .word \cmd27_address
+.endm
+
+.macro jumpifmultihitcontinues jumpifmultihitcontinues_address
+.byte 0x27
+.word \jumpifmultihitcontinues_address
 .endm
 
 .macro goto_cmd goto_address
@@ -473,13 +487,13 @@
 .word \openpartyscreen_address
 .endm
 
-.macro cmd51 cmd51_bank cmd51_param2
+.macro switch_handle_order cmd51_bank cmd51_param2
 .byte 0x51
 .byte \cmd51_bank
 .byte \cmd51_param2
 .endm
 
-.macro cmd52 cmd52_bank
+.macro switchineffects cmd52_bank
 .byte 0x52
 .byte \cmd52_bank
 .endm
@@ -533,6 +547,11 @@
 .macro cmd5c cmd5c_bank
 .byte 0x5C
 .byte \cmd5c_bank
+.endm
+
+.macro hitanim hitanim_bank
+.byte 0x5C
+.byte \hitanim_bank
 .endm
 
 .macro cmd5d
@@ -624,7 +643,7 @@
 .byte \cmd6f_bank
 .endm
 
-.macro cmd70 cmd70_bank
+.macro recordability cmd70_bank
 .byte 0x70
 .byte \cmd70_bank
 .endm
@@ -717,6 +736,12 @@
 .hword \callasm_index
 .endm
 
+.macro setnewmoveeffect setnewmoveeffect_fail
+.byte 0x83
+.hword 23
+.word \setnewmoveeffect_fail
+.endm
+
 .macro jumpifcannotsleep jumpifcannotsleep_address
 .byte 0x84
 .word \jumpifcannotsleep_address
@@ -736,7 +761,7 @@
 .word \stockpiletohprecovery_address
 .endm
 
-.macro negativedamage
+.macro draindamage
 .byte 0x88
 .endm
 
@@ -766,6 +791,10 @@
 .endm
 
 .macro cmd8e
+.byte 0x8E
+.endm
+
+.macro preparemultihit
 .byte 0x8E
 .endm
 
@@ -809,9 +838,9 @@
 .word \tryinfatuatetarget_address
 .endm
 
-.macro cmd98 cmd98_byte
+.macro statusiconeupdate statusiconeupdate_bank
 .byte 0x98
-.byte \cmd98_byte
+.byte \statusiconeupdate_bank
 .endm
 
 .macro setmisteffect
@@ -1147,7 +1176,7 @@
 .word \cmde1_address
 .endm
 
-.macro cmde2 cmde2_bank
+.macro swithchoutabilities cmde2_bank
 .byte 0xE2
 .byte \cmde2_bank
 .endm
