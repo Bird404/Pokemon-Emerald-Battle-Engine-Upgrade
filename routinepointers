@@ -9,8 +9,12 @@ damage_calc_cmd_05 0831BD24
 final_damagecalc_cmd7 0831BD2C
 callasm_cmd 0831BF1C
 atk00_move_canceller 0831BD10
+atk0C_datahpupdate 0831BD40
+atk0F_resultmessage 0831BD4C
 atk49_move_end_turn 0831BE34
 atk6A_remove_item 0831BEB8
+atk70_record_ability_of_bank 0831BED0
+atk77_set_protect_stuff 0831BEEC
 atk7D_set_rain 0831BF04
 atk7E_set_reflect 0831BF08
 atk7F_set_leech_seed 0831BF0C
