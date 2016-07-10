@@ -118,4 +118,18 @@ extern void* fogcontinues_bs;
 extern void* fogends_bs;
 extern void* fog_animation;
 extern void* stickybarbswap;
+extern void* stat_raise;
+extern void* stat_lower;
+extern void* cant_lower_bs;
+extern void* cant_raise_bs;
+extern void* attackingstatschange_bs;
+extern void* return_bs;
+extern void* frisk_bs();
+extern void* bad_dreams_bs();
+extern void* incinerateberry_bs;
+extern void* bugbiteeffect_bs;
+extern void* magnetrise_end_return_bs;
+extern void* telekinesis_end_return_bs;
+extern void* gravitybringsdown_bs;
+
 #endif /* static_references */
