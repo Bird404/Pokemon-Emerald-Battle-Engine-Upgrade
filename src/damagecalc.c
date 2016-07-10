@@ -277,20 +277,26 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
             break;
         case MOVE_REVENGE:
         case MOVE_AVALANCHE:
-        case MOVE_SMELLING_SALTS:
         case MOVE_WEATHER_BALL:
         case MOVE_PURSUIT:
             base_power *= battle_scripting.damage_multiplier;
             break;
         case MOVE_NATURAL_GIFT: //checking for held item and the capability of using an item should happen before damage calculation
             {                   //dynamic type will be set here
-                u8 berryID = itemid_to_berryid(battle_participants[atk_bank].held_item);
+                s8 berryID = itemid_to_berryid(battle_participants[atk_bank].held_item);
                 base_power = natural_gift_table[berryID].move_power;
                 battle_stuff_ptr.ptr->dynamic_move_type = natural_gift_table[berryID].move_type + 0x80;
+                if ((new_battlestruct.ptr->field_affecting.ion_deluge || new_battlestruct.ptr->bank_affecting[atk_bank].electrify) && battle_stuff_ptr.ptr->dynamic_move_type == 0x80)
+                    battle_stuff_ptr.ptr->dynamic_move_type = TYPE_ELECTRIC + 0x80;
             }
             break;
         case MOVE_WAKEUP_SLAP:
             if (battle_participants[def_bank].status.flags.sleep)
+            {
+                base_power *= 2;
+            }
+        case MOVE_SMELLING_SALTS:
+            if (battle_participants[def_bank].status.flags.paralysis)
             {
                 base_power *= 2;
             }
@@ -1113,10 +1119,12 @@ u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8
 
 void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
 {
+    u16 base_power = apply_base_power_modifiers(move, move_type, atk_bank, def_bank, get_base_power(move, atk_bank, def_bank));
+    if (battle_stuff_ptr.ptr->dynamic_move_type)
+        move_type = battle_stuff_ptr.ptr->dynamic_move_type &0x3F;
     u16 chained_effectiveness=type_effectiveness_calc(move, move_type, atk_bank,def_bank,1);
     if (chained_effectiveness==0) // avoid wastage of time in case of non effective moves
         return;
-    u16 base_power = apply_base_power_modifiers(move, move_type, atk_bank, def_bank, get_base_power(move, atk_bank, def_bank));
     u16 atk_stat = get_attack_stat(move, move_type, atk_bank, def_bank);
     u16 def_stat = get_def_stat(move, atk_bank, def_bank);
     u32 damage = ((((2 * battle_participants[atk_bank].level) / 5 + 2) * base_power * atk_stat) / def_stat) / 50 + 2;
