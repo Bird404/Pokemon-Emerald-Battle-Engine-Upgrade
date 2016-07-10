@@ -226,3 +226,13 @@ type_names 0814F740
 type_names 081D2A30
 ### moxie battlescript
 moxie_bs 08049C8C
+##### battle animation backgrounds
+battle_anim_bg_table 080A5038
+battle_anim_bg_table 080A5084
+##### battle animation particles
+battle_particle_table 080A3DD0
+battle_particle_table 080A40BC
+shiny_particle_image 08172FB8
+shiny_particle_pallet 08172FBC
+battle_particle_table 080A3D74 -80000
+battle_particle_pallets 080A3D78 -80000
