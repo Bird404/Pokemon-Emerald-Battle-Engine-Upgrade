@@ -45,6 +45,7 @@ struct bank_affecting{
     u8 move_failed : 1;
     u8 type3 : 5;
     u8 stat_lowered : 1;
+    u8 roost : 3;
     u8 autonomize_uses;
 };
 
