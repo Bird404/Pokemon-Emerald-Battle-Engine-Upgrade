@@ -1775,8 +1775,6 @@ u8 cant_become_freezed(u8 bank, u8 self_inflicted)
 
 u8 hp_condition(u8 bank, u8 percent) //1 = 50 %, 2 = 25 %
 {
-    if (new_battlestruct.ptr->bank_affecting[bank].bugbite)
-        return 1;
     struct battle_participant* ptr_to_struct = &battle_participants[bank];
     if (ptr_to_struct->ability_id == ABILITY_GLUTTONY && has_ability_effect(bank, 0, 1) && percent > 1)
     {
