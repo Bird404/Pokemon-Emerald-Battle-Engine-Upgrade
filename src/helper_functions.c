@@ -10,7 +10,6 @@ u8 check_ability(u8 bank, u8 ability);
 u8 get_airborne_state(u8 bank, u8 mode, u8 check_levitate);
 u16 get_1_16_of_max_hp(u8 bank);
 u8 item_battle_effects(u8 switchid, u8 bank, u8 moveturn);
-u8 count_party_pokemon(u8 bank);
 u8 affected_by_substitute(u8 substitute_bank);
 u8 change_stats(s8 arg1, s8 arg2, s8 arg3, void* battlescript_if_fails);
 u8 cant_become_paralyzed(u8 bank, u8 self_inflicted);
@@ -1348,6 +1347,17 @@ void powder_setter()
 {
     new_battlestruct.ptr->bank_affecting[bank_target].powder = 1;
 }
+void jumpifnoally()
+{
+    u8 ally_bank = bank_attacker ^ 2;
+    if (ally_bank < no_of_all_banks && battle_participants[ally_bank].current_hp)
+    {
+        battlescripts_curr_instruction += 4;
+        bank_target = ally_bank;
+    }
+    else
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+}
 
 void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*/, &change_attacker_item /*2*/, &try_to_lower_def /*3*/, &try_to_raise_spd /*4*/,
 &changestatvar1 /*5*/, &changestatvar2 /*6*/, &frisk_target_item /*7*/, &set_stat_msg_buffer /*8*/, &set_type_msg_buffer /*9*/, &set_team_msg_buffer /*10*/, &bad_dreams_damage_calc /*11*/,
@@ -1359,7 +1369,7 @@ void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*
 &jumpifonlyonepokemon /*38*/, &setlunardanceeffect /*39*/, &weatherhpheal /*40*/, &checkifcantransfercondition /*41*/, &choosestatusinflictiontext /*42*/,
 &roostactivation /*43*/, &gravitysetter /*44*/, &gravity_ender /*45*/, &setidentifierbit /*46*/, &breakprotection /*47*/,
 &suckerpunchchecker /*48*/, &oppositegenderscheck /*49*/, &setthirdtype /*50*/, &ability_change /*51*/, &roomsetter /*52*/, &countercalc /*53*/,
-&gastroacid /*54*/, &setembargo /*55*/, &naturalgift /*56*/, &afteryou_check /*57*/, &powder_setter /*58*/};
+&gastroacid /*54*/, &setembargo /*55*/, &naturalgift /*56*/, &afteryou_check /*57*/, &powder_setter /*58*/, &jumpifnoally /*59*/};
 
 void callasm_cmd()
 {
