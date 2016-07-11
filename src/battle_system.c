@@ -2631,6 +2631,25 @@ void move_effect_setter(u8 primary, u8 certain)
                 battle_text_buff1[4] = 0xFF;
             }
             break;
+         case 12: //clear stat changes
+            {
+                u8 effect = 0;
+                u8* stat_ptr = &battle_participants[bank_to_apply].hp_buff;
+                for (u8 i = 0; i < 8; i++)
+                {
+                    if (*(stat_ptr + i) != 6)
+                    {
+                        effect++;
+                        *(stat_ptr + i) = 6;
+                    }
+                }
+                if (effect)
+                {
+                    battlescript_push();
+                    battlescripts_curr_instruction = &clearstats_bs;
+                }
+            }
+            break;
         case 0x11: //stat +1
         case 0x12:
         case 0x13:
