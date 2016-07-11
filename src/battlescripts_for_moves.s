@@ -63,6 +63,12 @@
 .byte \weatherhphealbank
 .endm
 
+.macro jumpifnoally jumpifnoally_address
+.byte 0x83
+.hword 59
+.word \jumpifnoally_address
+.endm
+
 battlescripts_table:
 .word ATTACKING_MOVE	@ 0	Just attacks target(Tackle)
 .word FIXED_DAMAGE		@1 Sonicboom, Dragon Rage, etc.
@@ -114,6 +120,23 @@ battlescripts_table:
 .word NATURALGIFT		@47 natural gift
 .word AFTERYOU			@48 target moves right after the user
 .word POWDER			@49 set powder bit
+.word CHANGEALLYSTAT	@50 Aromatic-Mist like arg1 is statvalue
+.word ATTACKCLEARSTATCHANGES	@51 Clears target's stat changes
+
+ATTACKCLEARSTATCHANGES:
+	setbyte EffectChooser 12
+	attackcanceler
+	accuracycheck MOVE_FAILED 0xFFFF
+	critcalc
+	damagecalc
+	goto_cmd SUCCESS_MOVE_ATTACK
+
+CHANGEALLYSTAT:
+	attackcanceler
+	jumpifnoally MOVE_FAILED
+	jumpifsubstituteaffects MOVE_FAILED
+	accuracycheck MOVE_FAILED 0xFFFF
+	goto_cmd ONE_STAT_TARGET_WORKED
 
 POWDER:
 	attackcanceler
