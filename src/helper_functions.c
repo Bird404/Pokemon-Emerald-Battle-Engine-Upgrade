@@ -129,6 +129,7 @@ u8 popped_text[] = {BuffCharac, 16, Apos, Space, BuffCharac, 22, Space, p_, o_, 
 /*0x1DF*/ u8 afteryout_text[] = {BuffCharac, 16, Space, t_, o_, o_, k_, Space, t_, h_, e_, Space, k_, i_, n_, d_, Space, o_, f_, f_, e_, r_, Exclam, 0xFF};
 /*0x1E0*/ u8 powder_text[] = {BuffCharac, 16, Space, i_, s_, JumpLine, c_, o_, v_, e_, r_, e_, d_, Space, i_, n_, Space, p_, o_, w_, d_, e_, r_, Exclam, 0xFF};
 /*0x1E1*/ u8 powderdamage_text[] = {W_, h_, e_, n_, Space, t_, h_, e_, Space, f_, l_, a_, m_, e_, Space, t_, o_, u_, c_, h_, e_, d_, Space, t_, h_, e_, Space, p_, o_, w_, d_, e_, r_, JumpLine, o_, n_, Space, t_, h_, e_, Space, 0xFD, 15, Comma, Space, i_, t_, Space, e_, x_, p_, l_, o_, d_, e_, d_, Exclam, 0xFF};
+/*0x1E2*/ u8 statchangesremoved_text[] = {0xFD, 17, Apos, s_, Space, s_, t_, a_, t_, s_, Space, c_,h_,a_,n_,g_,e_,s_, JumpLine, w_, e_, r_, e_, Space, r_, e_, m_, o_, v_, e_, d_, Exclam, 0xFF};
 
 void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activation_text, &heavyrain_activation_text, &mysticalaircurrent_activation_text, &forewarn_text, &slowstart_text, &anticipation_text, &dryskin_damage_text, &solarpower_text, &harvest_text, &healer_text, &pickup_text, &moldbreaker_text, &turboblaze_text, &terravolt_text, &downloadatk_text,
 &downloadspatk_text, &absorbabilityboost_text , &absorbabilityimmune_text, &userteam_text/*0x190*/, &foeteam_text/*0x191*/,
@@ -142,7 +143,7 @@ void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activ
 &tailwind_begins_text, &luckychant_begins_text, &magnetrise_begins_text, &magicroom_start_text, &trickroom_start_text, &wonderroom_start_text,
 &gravitystarts_text, &telekinesis_start_text, &abilitychange_text, &statswap_text, &heartswap_text, &bugbite_text, &incinerate_text,
 &gravitybringsdown_text, &fellforfeint, &protection_broken, &teamprotection, &becameatype, &targetsabilitybecameattacker,
-&gastro_text, &embargostart_text, &afteryout_text, &powder_text, &powderdamage_text};
+&gastro_text, &embargostart_text, &afteryout_text, &powder_text, &powderdamage_text, &statchangesremoved_text};
 
 void battle_string_loader(u16 string_id)
 {
