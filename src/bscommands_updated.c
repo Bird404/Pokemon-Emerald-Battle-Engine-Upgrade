@@ -14,7 +14,6 @@ u32 percent_lose(u32 number, u16 percent);
 u32 percent_boost(u32 number, u16 percent);
 u8 is_of_type(u8 bank, u8 type);
 u16 get_airborne_state(u8 bank, u8 mode, u8 check_levitate);
-u16 apply_type_effectiveness(u16 chained_effect, u8 move_type, u8 target_bank, u8 atk_bank, u8 airstatus);
 u8 cant_poison(u8 bank, u8 self_inflicted);
 u8 get_attacking_move_type();
 u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn);
@@ -27,6 +26,7 @@ u8 set_type(u8 bank, u8 type);
 u8 get_target_of_move(u16 move, u8 target_given, u8 adjust);
 void* get_move_battlescript_ptr(u16 move);
 u8 affected_by_substitute(u8 bank);
+u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8 effects_handling_and_recording);
 
 void atk7D_set_rain()
 {
@@ -341,8 +341,26 @@ u8 entry_hazards_hook()
         }
         else
         {
-            u32 damage = get_1_8_of_max_hp(active_bank);
-            damage = (damage * apply_type_effectiveness(64, TYPE_ROCK, active_bank, active_bank ^1, get_airborne_state(active_bank, 1, 0))) >> 6;
+            u32 damage = 0;
+            u16 max_hp = battle_participants[active_bank].max_hp;
+            switch (type_effectiveness_calc(MOVE_STEALTH_ROCK, TYPE_ROCK, active_bank ^ 1, active_bank, 0) >> 4)
+            {
+            case 1:
+                damage = max_hp >> 5;
+                break;
+            case 2:
+                damage = max_hp >> 4;
+                break;
+            case 4:
+                damage = max_hp >> 3;
+                break;
+            case 8:
+                damage = max_hp >> 2;
+                break;
+            case 16:
+                damage = max_hp >> 1;
+                break;
+            }
             if (damage == 0)
                 damage = 1;
             damage_loc = damage;
