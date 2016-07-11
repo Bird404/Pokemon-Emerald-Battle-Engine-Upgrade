@@ -131,5 +131,6 @@ extern void* bugbiteeffect_bs;
 extern void* magnetrise_end_return_bs;
 extern void* telekinesis_end_return_bs;
 extern void* gravitybringsdown_bs;
+extern void* clearstats_bs;
 
 #endif /* static_references */
