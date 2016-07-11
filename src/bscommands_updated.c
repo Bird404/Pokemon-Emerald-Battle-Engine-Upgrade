@@ -323,7 +323,7 @@ u8 entry_hazards_hook()
         }
         else
         {
-            u32 damage = __udivsi3(battle_participants[active_bank].max_hp, 5 - side_timers[banks_side].spikes_amount);
+            u32 damage = __udivsi3(battle_participants[active_bank].max_hp, (5 - side_timers[banks_side].spikes_amount) * 2);
             if (damage == 0)
                 damage = 1;
             damage_loc = damage;
