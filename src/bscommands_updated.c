@@ -184,7 +184,7 @@ void atk96_weather_damage()
     {
         if (battle_weather.flags.sandstorm || battle_weather.flags.permament_sandstorm)
         {
-            if (!(is_of_type(bank_attacker, TYPE_GROUND) && is_of_type(bank_attacker, TYPE_STEEL) && is_of_type(bank_attacker, TYPE_ROCK)) && !(ability_effect && (ability == ABILITY_SAND_FORCE || ability == ABILITY_SAND_RUSH)))
+	        if (!(is_of_type(bank_attacker, TYPE_GROUND) || is_of_type(bank_attacker, TYPE_STEEL) || is_of_type(bank_attacker, TYPE_ROCK)) && !(ability_effect && (ability == ABILITY_SAND_FORCE || ability == ABILITY_SAND_RUSH)))
             {
                 if (!(status3[bank_attacker].underground || status3[bank_attacker].underwater))
                 {
@@ -1297,6 +1297,7 @@ void atkA4_encore_move()
         battlescripts_curr_instruction += 5;
         disable_structs[bank_target].encored_move = move;
         disable_structs[bank_target].encore_timer = 3;
+        disable_structs[bank_target].encored_index = position;
     }
     else
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction + 1);
@@ -1327,7 +1328,7 @@ void atkB5_furycutter_calc()
     if (!MOVE_WORKED)
     {
         *cutter_timer = 0;
-        battlescripts_curr_instruction = (void*)0x82D8A60;
+        battlescripts_curr_instruction = (void*)0x82D8A5E;
     }
     else
     {
@@ -1612,7 +1613,7 @@ void atk0C_datahpupdate()
                 }
                 else //damage is added
                 {
-                    *current_hp += damage_loc;
+                    *current_hp = *current_hp + (damage_loc * (-1));
                     if (*current_hp > battle_participants[bank].max_hp)
                         *current_hp = battle_participants[bank].max_hp;
                 }
