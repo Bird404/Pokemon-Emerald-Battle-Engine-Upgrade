@@ -155,7 +155,7 @@ void set_attacking_move_type()
 {
     u8 ability=battle_participants[bank_attacker].ability_id;
     u8 move_type = TYPE_EGG;
-    if(new_battlestruct.ptr->bank_affecting[bank_attacker].electrify)
+    if(new_battlestruct.ptr->bank_affecting[bank_attacker].electrify || new_battlestruct.ptr->field_affecting.ion_deluge)
         move_type=TYPE_ELECTRIC;
     else
     {
