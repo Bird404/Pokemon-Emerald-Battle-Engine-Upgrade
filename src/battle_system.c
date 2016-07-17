@@ -1309,11 +1309,11 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     }
                     break;
                 case ABILITY_CUTE_CHARM:
-                    if (battle_participants[bank_attacker].ability_id != ABILITY_OBLIVIOUS && percent_chance(100) && contact && !ability_battle_effects(12, bank_attacker, ABILITY_AROMA_VEIL, 1, 0))
+                    if (battle_participants[bank_attacker].ability_id != ABILITY_OBLIVIOUS && percent_chance(30) && contact && !ability_battle_effects(12, bank_attacker, ABILITY_AROMA_VEIL, 1, 0))
                     {
                         u8 target_gender = gender_from_pid(battle_participants[bank].poke_species, battle_participants[bank].pid);
                         u8 attacker_gender = gender_from_pid(battle_participants[bank_attacker].poke_species, battle_participants[bank_attacker].pid);
-                        if (target_gender != attacker_gender && target_gender != 0xFF && attacker_gender != 0xFF && !(battle_participants[bank_attacker].status2.in_love))
+                        if (target_gender != attacker_gender && target_gender != 0xFF && attacker_gender != 0xFF && ((battle_participants[bank_attacker].status2.in_love & bits_table[bank_target]) == 0))
                         {
                             effect = true;
                             battle_participants[bank_attacker].status2.in_love |= bits_table[bank];
@@ -2843,7 +2843,7 @@ u8 battle_turn_move_effects()
                     {
                         if (!poison_heal_check())
                         {
-                            if (attacker_struct->status.flags.poison_counter != 16)
+                            if (attacker_struct->status.flags.poison_counter != 15)
                                 attacker_struct->status.flags.poison_counter++;
                             u32 damage = attacker_struct->max_hp >> 4;
                             if (damage == 0)
