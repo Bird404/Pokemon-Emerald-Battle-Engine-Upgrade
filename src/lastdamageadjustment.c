@@ -32,7 +32,7 @@ void final_damagecalc_cmd7()
     if (!affected_by_substitute(bank_target))
     {
         u16 target_hp = battle_participants[bank_target].current_hp;
-        if (protect_structs[bank_target].flag0_endure)
+        if (protect_structs[bank_target].flag0_endure && damage_loc > target_hp)
         {
             damage_loc = target_hp - 1;
             move_outcome.endured = 1;
