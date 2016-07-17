@@ -19,7 +19,7 @@ u8 accuracy_helper_replacement(u16 move)
     if ((status3[bank_target].always_hits && disable_structs[bank_target].always_hits_bank == bank_attacker)
         || (has_ability_effect(bank_attacker, 0, 1) && battle_participants[bank_attacker].ability_id == ABILITY_NO_GUARD) || (has_ability_effect(bank_target, 0, 1) && battle_participants[bank_target].ability_id == ABILITY_NO_GUARD)
         || (current_move == MOVE_TOXIC && is_of_type(bank_attacker, TYPE_POISON))
-        || (new_battlestruct.ptr->bank_affecting[bank_target].telekinesis && move_table[current_move].script_id != 38)) //lock-on/mind reader checked, then no guard, always hiting toxic on poison types, then always hitting telekinesis except OHKO moves
+        || (new_battlestruct.ptr->bank_affecting[bank_target].telekinesis && move_table[current_move].script_id != 70)) //lock-on/mind reader checked, then no guard, always hiting toxic on poison types, then always hitting telekinesis except OHKO moves
     {
         jump_if_move_has_no_effect(7, move);
         done_status = 1;
@@ -34,7 +34,7 @@ u8 accuracy_helper_replacement(u16 move)
         done_status = 1;
     }
     else if ((weather_abilities_effect() && (battle_weather.flags.heavy_rain || battle_weather.flags.downpour || battle_weather.flags.rain || battle_weather.flags.permament_rain) && (current_move == MOVE_THUNDER || current_move == MOVE_HURRICANE))
-             || (move_table[current_move].script_id == 0x11 /*swift, etc.*/ || move_table[current_move].script_id == 0x4E /*vital throw*/))
+             || (move_table[move].accuracy == 0))
     {
         jump_if_move_has_no_effect(7, move);
         done_status = 1;
