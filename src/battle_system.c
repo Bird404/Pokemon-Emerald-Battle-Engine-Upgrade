@@ -2581,7 +2581,10 @@ void move_effect_setter(u8 primary, u8 certain)
         case 8: //flinch
             statustoeffect();
             if (*move_effect && current_hp && !shield_dust && !substitute && calculate_effect_chance(bank_attacker, current_move))
+            {
+                battlescripts_curr_instruction--;
                 move_effect_setter(0, 0);
+            }
             if (current_hp && !shield_dust && !substitute && calculate_effect_chance(bank_attacker, current_move))
             {
                 if (check_ability(bank_to_apply, ABILITY_INNER_FOCUS))
@@ -2697,7 +2700,10 @@ void move_effect_setter(u8 primary, u8 certain)
         case 0x30: //recoil
             statustoeffect();
             if (*move_effect && current_hp && !shield_dust && !substitute && calculate_effect_chance(bank_attacker, current_move))
+            {
+                battlescripts_curr_instruction--;
                 move_effect_setter(0, 0);
+            }
             if (recoil_damage(bank_attacker))
             {
                 battlescript_push();
@@ -2754,7 +2760,6 @@ void move_effect_setter(u8 primary, u8 certain)
     battle_communication_struct.move_effect = 0;
     return;
 }
-
 
 u8 battle_turn_move_effects()
 {
