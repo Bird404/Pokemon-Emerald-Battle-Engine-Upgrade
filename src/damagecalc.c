@@ -98,9 +98,9 @@ u16 percent_to_modifier(u8 percent) //20 gives exactly 0x1333, 30 is short on 1
     return 0x1000 + __udivsi3(percent * 819, 20);
 }
 
-u16 get_poke_weight(u8 bank)
+s16 get_poke_weight(u8 bank)
 {
-    u16 poke_weight = get_height_or_weight(species_to_national_dex(battle_participants[bank].poke_species), 1);
+    s16 poke_weight = get_height_or_weight(species_to_national_dex(battle_participants[bank].poke_species), 1);
     if (has_ability_effect(bank, 1, 1))
     {
         switch (battle_participants[bank].ability_id)
@@ -117,8 +117,8 @@ u16 get_poke_weight(u8 bank)
     {
         poke_weight *= 2;
     }
-
-    poke_weight -= 1000 * new_battlestruct.ptr->bank_affecting[bank].autonomize_uses;
+    s16 to_sub = 1000 * new_battlestruct.ptr->bank_affecting[bank].autonomize_uses;
+    poke_weight -= to_sub;
     if (poke_weight < 1)
         poke_weight = 1;
 
@@ -208,7 +208,7 @@ u16 get_speed(u8 bank)
     }
     //paralysis
     if (battle_participants[bank].status.flags.paralysis)
-        speed >>= 1;
+        speed >>= 2;
     //tailwind
     if (new_battlestruct.ptr->side_affecting[is_bank_from_opponent_side(bank)].tailwind)
         speed <<= 1;
@@ -258,16 +258,32 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
                 }
                 break;
             }
+        case MOVE_ERUPTION:
+        case MOVE_WATER_SPOUT:
+            base_power = base_power * battle_participants[atk_bank].current_hp / battle_participants[atk_bank].max_hp;
+            break;
+        case MOVE_FLAIL:
+        case MOVE_REVERSAL:
+            base_power = 48 * battle_participants[atk_bank].current_hp / battle_participants[atk_bank].max_hp;
+            break;
+        case MOVE_RETURN:
+            {
+                u32 return_damage = battle_participants[bank_attacker].happiness * 10 / 25;
+                if (return_damage == 0)
+                    return_damage = 1;
+                base_power = return_damage;
+            }
+        case MOVE_FRUSTRATION:
+            {
+                u32 frustration_damage = (255 - battle_participants[bank_attacker].happiness) * 10 / 25;
+                if (frustration_damage == 0)
+                    frustration_damage = 1;
+                base_power = frustration_damage;
+            }
+        case MOVE_FURY_CUTTER:
         case MOVE_ROLLOUT:
         case MOVE_MAGNITUDE:
         case MOVE_PRESENT:
-        case MOVE_FURY_CUTTER:
-        case MOVE_FLAIL:
-        case MOVE_REVERSAL:
-        case MOVE_ERUPTION:
-        case MOVE_WATER_SPOUT:
-        case MOVE_RETURN:
-        case MOVE_FRUSTRATION:
         case MOVE_SPIT_UP:
         case MOVE_TRIPLE_KICK:
             if (dynamic_base_power)
@@ -277,9 +293,15 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
             break;
         case MOVE_REVENGE:
         case MOVE_AVALANCHE:
+            {
+                struct protect_struct* protect_str = &protect_structs[bank_attacker];
+                if ((protect_str->physical_damage && protect_structs->counter_target == bank_target) || (protect_str->special_damage && protect_structs->mirrorcoat_target == bank_target))
+                    base_power *= 2;
+            }
         case MOVE_WEATHER_BALL:
         case MOVE_PURSUIT:
-            base_power *= battle_scripting.damage_multiplier;
+            if (battle_scripting.damage_multiplier)
+                base_power *= battle_scripting.damage_multiplier;
             break;
         case MOVE_NATURAL_GIFT: //checking for held item and the capability of using an item should happen before damage calculation
             {                   //dynamic type will be set here
