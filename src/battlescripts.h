@@ -135,6 +135,7 @@ u16 protection_broken_strings[] = {0x1D9, 0x1D8};
 u16 protect_moves_strings[] = {0x98, 0x65, 0x1DA};
 u16 abilitychange_strings[] = {0xB8, 0xB0, 0x1DC};
 u16 rooms_strings[] = {0x1BF, 0x1CE, 0x1C1, 0x1CF, 0x1C0, 0x1CD};
+u16 hazards_strings[] = {0x94, 0x1E4, 0x1E5, 0x1E6};
 
 //not function declarations. Just used to link Battle Scripts that are implemented using ASM and BSP's format
 void *frisk_bs();
