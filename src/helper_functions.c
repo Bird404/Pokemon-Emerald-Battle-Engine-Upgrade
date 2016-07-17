@@ -23,6 +23,7 @@ u8 find_move_in_table(u16 move, u16 table_ptr[]);
 u8 is_of_type(u8 bank, u8 type);
 u8 set_type(u8 bank, u8 type);
 u8 get_first_to_strike(u8 bank1, u8 bank2, u8 ignore_priority);
+u16 get_poke_weight(u8 bank);
 
 u8 sample_text[] = {0xDD, 0xFF};
 u8 snowwarning_text[] = {0xFD, 0x13, 0xB4, 0xE7, 0, 0xFD, 0x1A, 0xFE, 0xEB, 0xDC, 0xDD, 0xE4, 0xE4, 0xD9, 0xD8, 0x00, 0xE9, 0xE4, 0x00, 0xD5, 0x00, 0xDC, 0xD5, 0xDD, 0xE0, 0xE7, 0xE8, 0xE3, 0xE6, 0xE1, 0xAB, 0xFF};
@@ -130,6 +131,14 @@ u8 popped_text[] = {BuffCharac, 16, Apos, Space, BuffCharac, 22, Space, p_, o_, 
 /*0x1E0*/ u8 powder_text[] = {BuffCharac, 16, Space, i_, s_, JumpLine, c_, o_, v_, e_, r_, e_, d_, Space, i_, n_, Space, p_, o_, w_, d_, e_, r_, Exclam, 0xFF};
 /*0x1E1*/ u8 powderdamage_text[] = {W_, h_, e_, n_, Space, t_, h_, e_, Space, f_, l_, a_, m_, e_, Space, t_, o_, u_, c_, h_, e_, d_, Space, t_, h_, e_, Space, p_, o_, w_, d_, e_, r_, JumpLine, o_, n_, Space, t_, h_, e_, Space, 0xFD, 15, Comma, Space, i_, t_, Space, e_, x_, p_, l_, o_, d_, e_, d_, Exclam, 0xFF};
 /*0x1E2*/ u8 statchangesremoved_text[] = {0xFD, 17, Apos, s_, Space, s_, t_, a_, t_, s_, Space, c_,h_,a_,n_,g_,e_,s_, JumpLine, w_, e_, r_, e_, Space, r_, e_, m_, o_, v_, e_, d_, Exclam, 0xFF};
+/*0x1E3*/ u8 electify_text[] = {0xFD, 16, Apos, s_, Space, m_, o_, v_, e_, s_, Space, h_, a_, v_, e_, Space, b_, e_, e_, n_, JumpLine, e_, l_, e_, c_, t_, r_, i_, f_, i_, e_, d_, Exclam, 0xFF};
+/*0x1E4*/ u8 stealthrock2_text[] = {P_, o_, i_, n_, t_, e_, d_, Space, s_, t_, o_, n_, e_, s_, Space, f_, l_, o_, a_, t_, Space, a_, l_, l_, Space, a_, r_, o_, u_, n_, d_, JumpLine, t_, h_, e_, Space, o_, p_, p_, o_, n_, e_, n_, t_, Apos, s_, Space, s_, i_, d_, e_, Exclam, 0xFF};
+/*0x1E5*/ u8 toxicspikes2_text[] = {P_, o_, i_, s_, o_, n_, Space, s_, p_, i_, k_, e_, s_, Space, w_, e_, r_, e_, Space, s_, c_, a_, t_, t_, e_, r_, e_, d_, JumpLine, a_, l_, l_, Space, a_, r_, o_, u_, n_, d_, Space, t_, h_, e_, Space, o_, p_, p_, o_, n_, e_, n_, t_, Apos, s_, Space, s_, i_, d_, e_, Exclam, 0xFF};
+/*0x1E6*/ u8 stickyweb2_text[] = {A_, Space, s_, t_, i_, c_, k_, y_, Space, w_, e_, b_, Space, s_, p_, r_, e_, a_, d_, s_, Space, o_, u_, t_, Space, b_, e_, n_, e_, a_, t_, h_, JumpLine, t_, h_, e_, Space, o_, p_, p_, o_, n_, e_, n_, t_, Apos, s_, Space, s_, i_, d_, e_, Exclam, 0xFF};
+/*0x1E7*/ u8 nimble_text[] = {0xFD, 15, Space, b_, e_, c_, a_, m_, e_, Space, n_, i_, m_, b_, l_, e_, Exclam, 0xFF};
+/*0x1E8*/ u8 iondelugeset_text[] = {A_, Space, d_, e_, l_, u_, g_, e_, Space, o_, f_, Space, i_, o_, n_, s_, Space, s_, h_, o_, w_, e_, r_, s_, JumpLine, t_, h_, e_, Space, b_, a_, t_, t_, l_, e_, f_, i_, e_, l_, d_, Exclam, 0xFF};
+/*0x1E9*/ u8 reflecttype_text[] = {0xFD, 15, Apos, s_, Space, t_, y_, p_, e_, Space, b_, e_, c_, a_, m_, e_, Space, t_, h_, e_, JumpLine, s_, a_, m_, e_, Space, a_, s_, Space, 0xFD, 16, Apos, s_, Space, t_, y_, p_, e_, Exclam, Termin};
+/*0x1EA*/ u8 healblock_start_text[] = {0xFD, 16, Space, w_, a_, s_, Space, p_, r_, e_, v_, e_, n_, t_, e_, d_, JumpLine, f_, r_, o_, m_, Space, h_, e_, a_, l_, i_, n_, g_, Exclam, 0xFF};
 
 void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activation_text, &heavyrain_activation_text, &mysticalaircurrent_activation_text, &forewarn_text, &slowstart_text, &anticipation_text, &dryskin_damage_text, &solarpower_text, &harvest_text, &healer_text, &pickup_text, &moldbreaker_text, &turboblaze_text, &terravolt_text, &downloadatk_text,
 &downloadspatk_text, &absorbabilityboost_text , &absorbabilityimmune_text, &userteam_text/*0x190*/, &foeteam_text/*0x191*/,
@@ -143,7 +152,8 @@ void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activ
 &tailwind_begins_text, &luckychant_begins_text, &magnetrise_begins_text, &magicroom_start_text, &trickroom_start_text, &wonderroom_start_text,
 &gravitystarts_text, &telekinesis_start_text, &abilitychange_text, &statswap_text, &heartswap_text, &bugbite_text, &incinerate_text,
 &gravitybringsdown_text, &fellforfeint, &protection_broken, &teamprotection, &becameatype, &targetsabilitybecameattacker,
-&gastro_text, &embargostart_text, &afteryout_text, &powder_text, &powderdamage_text, &statchangesremoved_text};
+&gastro_text, &embargostart_text, &afteryout_text, &powder_text, &powderdamage_text, &statchangesremoved_text, &electify_text,
+&stealthrock2_text, &toxicspikes2_text, &stickyweb2_text, &nimble_text, &iondelugeset_text, &reflecttype_text, &healblock_start_text};
 
 void battle_string_loader(u16 string_id)
 {
@@ -544,7 +554,8 @@ void doublestatchange_check()
     new_battlestruct.ptr->various.var1 = 0;
     if (checkifstatchangehaseffect())
         battlescripts_curr_instruction += 4;
-    battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
 }
 
 u8 bit_to_stat(u8 value)
@@ -578,7 +589,6 @@ void dostatchanges()
         affects_user = 0;
         bank_partner_def = bank_target;
     }
-
     for (u8 i = 0; i < 7; i++)
     {
         if (stats_to_change & bits_table[i] && !(*done_stats & bits_table[i]))
@@ -643,7 +653,6 @@ void confuse_applystatchange()
     battle_scripting.stat_changer = stat_to_change;
     if (stat_to_change !=0 && change_stats(stat_to_change & 0xF0, stat_to_change & 7, 0, 0) == 0)
     {
-         battlescripts_curr_instruction += 4;
          bank_partner_def = bank_target;
          battlescript_push();
          if (battle_scripting.stat_changer & 0x80)
@@ -727,6 +736,8 @@ void statustoeffect()
         battle_communication_struct.move_effect = 2;
     else if (stat_to_change & STATUS_TOXIC_POISON)
         battle_communication_struct.move_effect = 6;
+    else
+        battle_communication_struct.move_effect = 0;
     return;
 }
 
@@ -1360,6 +1371,135 @@ void jumpifnoally()
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
 }
 
+void electrify()
+{
+    if (get_bank_turn_order(bank_attacker) > get_bank_turn_order(bank_target) || new_battlestruct.ptr->bank_affecting[bank_target].electrify)
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else
+    {
+        new_battlestruct.ptr->bank_affecting[bank_target].electrify = 1;
+        battlescripts_curr_instruction += 4;
+    }
+}
+
+void set_entry_hazards()
+{
+    u8 fail = 0;
+    u8 targets_side = is_bank_from_opponent_side(bank_target);
+    struct side_affecting* target_struct = &new_battlestruct.ptr->side_affecting[targets_side];
+    u8* string_chooser = &battle_communication_struct.multistring_chooser;
+    switch (current_move)
+    {
+    case MOVE_SPIKES:
+        if (side_timers[targets_side].spikes_amount >= 3)
+            fail = 1;
+        else
+        {
+            side_timers[targets_side].spikes_amount++;
+            side_affecting_halfword[targets_side].spikes_on = 1;
+            *string_chooser = 0;
+        }
+        break;
+    case MOVE_STEALTH_ROCK:
+        if (target_struct->stealthrock)
+            fail = 1;
+        else
+        {
+            target_struct->stealthrock = 1;
+            *string_chooser = 1;
+        }
+        break;
+    case MOVE_TOXIC_SPIKES:
+        *string_chooser = 2;
+        if (target_struct->toxic_spikes_psn && target_struct->toxic_spikes_badpsn)
+            fail = 1;
+        else if(target_struct->toxic_spikes_psn)
+            target_struct->toxic_spikes_badpsn = 1;
+        else
+            target_struct->toxic_spikes_psn = 1;
+        break;
+    case MOVE_STICKY_WEB:
+        if (target_struct->sticky_web)
+            fail = 1;
+        else
+        {
+            *string_chooser = 3;
+            target_struct->sticky_web = 1;
+        }
+        break;
+    }
+    if (fail)
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else
+        battlescripts_curr_instruction += 4;
+}
+
+void jumpifnotdoublebattle()
+{
+    if (battle_flags.double_battle)
+        battlescripts_curr_instruction += 4;
+    else
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+}
+
+void jumpifattackerandtargetdontsharetypes()
+{
+    u8 type1 = battle_participants[bank_attacker].type1;
+    u8 type2 = battle_participants[bank_attacker].type2;
+    u8 type3 = new_battlestruct.ptr->bank_affecting[bank_attacker].type3;
+    if ((is_of_type(bank_target, type1) && type1 != TYPE_EGG) || (is_of_type(bank_target, type2) && type2 != TYPE_EGG) || (is_of_type(bank_target, type3) && type3 != TYPE_EGG))
+        battlescripts_curr_instruction += 4;
+    else
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+}
+
+void try_autotonomize()
+{
+    u8* auto_uses = &new_battlestruct.ptr->bank_affecting[bank_attacker].autonomize_uses;
+    if (get_poke_weight(bank_attacker) == 1)
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else
+    {
+        *auto_uses += 1;
+        battlescripts_curr_instruction += 4;
+    }
+    return;
+}
+
+void set_iondeluge()
+{
+    if (new_battlestruct.ptr->field_affecting.ion_deluge)
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else
+    {
+        battlescripts_curr_instruction += 4;
+        new_battlestruct.ptr->field_affecting.ion_deluge = 1;
+    }
+}
+
+void reflecttypes()
+{
+    new_battlestruct.ptr->bank_affecting[bank_attacker].type3 = new_battlestruct.ptr->bank_affecting[bank_target].type3;
+    battle_participants[bank_attacker].type1 = battle_participants[bank_target].type1;
+    battle_participants[bank_attacker].type2 = battle_participants[bank_target].type2;
+}
+
+void sethealblock()
+{
+    if (new_battlestruct.ptr->bank_affecting[bank_target].heal_block)
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else
+    {
+        new_battlestruct.ptr->bank_affecting[bank_target].heal_block = 5;
+        battlescripts_curr_instruction += 4;
+    }
+}
+
+void traptarget()
+{
+    battle_participants[bank_target].status2.cant_escape = 1;
+}
+
 void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*/, &change_attacker_item /*2*/, &try_to_lower_def /*3*/, &try_to_raise_spd /*4*/,
 &changestatvar1 /*5*/, &changestatvar2 /*6*/, &frisk_target_item /*7*/, &set_stat_msg_buffer /*8*/, &set_type_msg_buffer /*9*/, &set_team_msg_buffer /*10*/, &bad_dreams_damage_calc /*11*/,
 &weaknesspolicy /*12*/, &mentalherb /*13*/, &placeholder0x14 /*14*/, &hazards_bank_switcher /*15*/, &hazards_bank_return /*16*/, &leechseed_update /*17*/,
@@ -1370,7 +1510,9 @@ void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*
 &jumpifonlyonepokemon /*38*/, &setlunardanceeffect /*39*/, &weatherhpheal /*40*/, &checkifcantransfercondition /*41*/, &choosestatusinflictiontext /*42*/,
 &roostactivation /*43*/, &gravitysetter /*44*/, &gravity_ender /*45*/, &setidentifierbit /*46*/, &breakprotection /*47*/,
 &suckerpunchchecker /*48*/, &oppositegenderscheck /*49*/, &setthirdtype /*50*/, &ability_change /*51*/, &roomsetter /*52*/, &countercalc /*53*/,
-&gastroacid /*54*/, &setembargo /*55*/, &naturalgift /*56*/, &afteryou_check /*57*/, &powder_setter /*58*/, &jumpifnoally /*59*/};
+&gastroacid /*54*/, &setembargo /*55*/, &naturalgift /*56*/, &afteryou_check /*57*/, &powder_setter /*58*/, &jumpifnoally /*59*/,
+&electrify /*60*/, &set_entry_hazards /*61*/, &jumpifnotdoublebattle /*62*/, &jumpifattackerandtargetdontsharetypes /*63*/,
+&try_autotonomize /*64*/, &set_iondeluge /*65*/, &reflecttypes /*66*/, &sethealblock /*67*/, &traptarget /*68*/};
 
 void callasm_cmd()
 {
