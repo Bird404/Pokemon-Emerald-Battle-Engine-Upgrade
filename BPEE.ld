@@ -27,7 +27,7 @@ battle_resources_ptr = 0x020244A8;
 multihit_counter = 0x02024212;
 bits_table = 0x0832A328;
 chosen_move_by_banks = 0x02024274;
-battle_team_id_by_side = 0x202406E;
+battle_team_id_by_side = 0x0202406E;
 battle_execution_buffer = 0x02024068;
 
 bank_attacker = 0x0202420B;
@@ -109,6 +109,7 @@ battlescript_custom_push = 0x0803FAD8|1;
 does_protect_affect_move = 0x080464AC|1;
 jump_if_move_has_no_effect = 0x080463AC|1;
 memset = 0x082E9434|1;
+memcpy = 0x082E93D4|1;
 is_bank_from_opponent_side = 0x080A6A30|1;
 get_bank_turn_order = 0x08048728|1;
 read_word = 0x080842DC|1;
