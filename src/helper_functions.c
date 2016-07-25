@@ -165,6 +165,9 @@ u8 popped_text[] = {BuffCharac, 16, Apos, Space, BuffCharac, 22, Space, p_, o_, 
 /*0x1FD*/ u8 electricterrain_text[] = {A_, n_, Space, e_, l_, e_, c_, t_, r_, i_, c_, Space, c_, u_, r_, r_, e_, n_, t_, JumpLine, r_, u_, n_, s_, Space, a_, c_, r_, o_, s_, s_, Space, t_, h_, e_, Space, b_, a_, t_, t_, l_, e_, f_, i_, e_, l_, d_, Exclam, 0xFF};
 /*0x1FE*/ u8 aquaring_text[] = {0xFD, 15, Space, s_, u_, r_, r_, o_, u_, n_, d_, e_, d_, Space, i_, t_, s_, e_, l_, f_, JumpLine, w_, i_, t_, h_, Space, a_, Space, v_, e_, i_, l_, Space, o_, f_, Space, w_, a_, t_, e_, r_,Exclam, 0xFF};
 /*0x1FF*/ u8 aquaringheal_text[] = {A_, q_, u_, a_, Space, R_, i_, n_,g_, Space, r_, e_, s_, t_, o_, r_, e_, d_, Space, 0xFD, 15, Apos, s_, Space, H_, P_, Exclam, 0xFF};
+/*0x200*/ u8 assaultvest_text[] = {T_, h_, e_, Space, e_, f_, f_, e_, c_, t_, s_, Space, o_, f_, Space, 0xFD, 22, JumpLine, p_, r_, e_, v_, e_, n_, t_, Space, u_, s_, i_, n_, g_, Space, s_, t_, a_, t_, u_, s_, Space, m_, o_, v_, e_, s_, Exclam, 0xFB, 0xFF};
+/*0x201*/ u8 gravityprevents2_text[] = {0xFD, 18, Space, c_, a_, n_, Apos, t_, Space, u_, s_, e_, JumpLine, 0xFD, 20, Space, b_, e_, c_, a_, u_, s_, e_, Space, o_, f_, Space, g_, r_, a_, v_, i_, t_, y_, Exclam, 0xFB, 0xFF};
+/*0x202*/ u8 healblockprevents2_text[] = {0xFD, 18, Space, c_, a_, n_, Apos, t_, Space, u_, s_, e_, JumpLine, 0xFD, 20, Space, b_, e_, c_, a_, u_, s_, e_, Space, o_, f_, Space, H_, e_, a_, l_, Space, B_, l_, o_, c_, k_, Exclam, 0xFB, 0xFF};
 
 void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activation_text, &heavyrain_activation_text, &mysticalaircurrent_activation_text, &forewarn_text, &slowstart_text, &anticipation_text, &dryskin_damage_text, &solarpower_text, &harvest_text, &healer_text, &pickup_text, &moldbreaker_text, &turboblaze_text, &terravolt_text, &downloadatk_text,
 &downloadspatk_text, &absorbabilityboost_text , &absorbabilityimmune_text, &userteam_text/*0x190*/, &foeteam_text/*0x191*/,
@@ -182,7 +185,8 @@ void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activ
 &stealthrock2_text, &toxicspikes2_text, &stickyweb2_text, &nimble_text, &iondelugeset_text, &reflecttype_text, &healblock_start_text, &smackdown_text,
 &rapidspinontoxicspikes_text, &rapidspinonstealthrock_text, &rapidspinonstickyweb_text, &powertrick_text, &soak_text, &defogspikes_text,
 &power_text, &guard_text, &psychosplit_text, &stockpileend_text, &geomancy_text, &powerherb_text, &iceburn_text, &freezeshock_text,
-&shadowforce_text, &mistyterrain_text, &grassyterrain_text, &electricterrain_text, &aquaring_text, &aquaringheal_text};
+&shadowforce_text, &mistyterrain_text, &grassyterrain_text, &electricterrain_text, &aquaring_text, &aquaringheal_text, &assaultvest_text,
+&gravityprevents2_text, &healblockprevents2_text};
 
 void battle_string_loader(u16 string_id)
 {
@@ -637,14 +641,14 @@ void dostatchanges()
             *done_stats |= bits_table[i];
             if (change_stats(by_how_much, bit_to_stat(bits_table[i]), affects_user, 0) == 0) //it worked
             {
-                if (battle_scripting.active_bank & 0x80)
+                if (battle_scripting.stat_changer & 0x80)
                     stat_msg = &stat_lower;
                 else
                     stat_msg = &stat_raise;
             }
             else
             {
-                if (battle_scripting.active_bank & 0x80)
+                if (battle_scripting.stat_changer & 0x80)
                     stat_msg = &cant_lower_bs;
                 else
                     stat_msg = &cant_raise_bs;
@@ -997,11 +1001,13 @@ void gravity_ender()
         {
             status3[i].on_air = 0;
             battle_participants[i].status2.multiple_turn_move = 0;
+            bank_attacker = i;
             instruction = &gravitybringsdown_bs;
             effect = 1;
         }
         else if (check_ability(i, ABILITY_LEVITATE))
         {
+            bank_attacker = i;
             instruction = &gravitybringsdown_bs;
             effect = 1;
         }
