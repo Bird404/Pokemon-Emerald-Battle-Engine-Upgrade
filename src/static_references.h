@@ -132,5 +132,12 @@ extern void* magnetrise_end_return_bs;
 extern void* telekinesis_end_return_bs;
 extern void* gravitybringsdown_bs;
 extern void* clearstats_bs;
+extern void* smackdown_bs;
+extern void* rapidspinonstealthrock_bs;
+extern void* rapidspinonstickyweb_bs;
+extern void* rapidspinontoxicspikes_bs;
+extern void* defogblows_bs;
+extern void* powerherb_bs;
+extern void* aquaring_bs;
 
 #endif /* static_references */
