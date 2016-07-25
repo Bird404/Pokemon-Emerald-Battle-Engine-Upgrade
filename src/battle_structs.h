@@ -578,4 +578,12 @@ struct pokemon{
 extern struct pokemon party_opponent[6];
 extern struct pokemon party_player[6];
 
+struct battle_buffer{
+    u8 command_id;
+    u8 args[511];
+};
+
+extern struct battle_buffer battle_bufferA[4];
+extern struct battle_buffer battle_bufferB[4];
+
 #endif /* B_STRUCTS */
