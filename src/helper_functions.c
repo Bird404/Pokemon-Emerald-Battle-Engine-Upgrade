@@ -24,6 +24,11 @@ u8 is_of_type(u8 bank, u8 type);
 u8 set_type(u8 bank, u8 type);
 u8 get_first_to_strike(u8 bank1, u8 bank2, u8 ignore_priority);
 u16 get_poke_weight(u8 bank);
+u8 get_attacking_move_type();
+u16 type_effectiveness_calc(u16 move, u8 type, u8 atkbank, u8 defbank, u8 effectshandling);
+void* get_move_battlescript_ptr(u16 move);
+u8 get_target_of_move(u16 move, u8 target_given, u8 adjust);
+void move_to_buffer(u16 move);
 
 u8 sample_text[] = {0xDD, 0xFF};
 u8 snowwarning_text[] = {0xFD, 0x13, 0xB4, 0xE7, 0, 0xFD, 0x1A, 0xFE, 0xEB, 0xDC, 0xDD, 0xE4, 0xE4, 0xD9, 0xD8, 0x00, 0xE9, 0xE4, 0x00, 0xD5, 0x00, 0xDC, 0xD5, 0xDD, 0xE0, 0xE7, 0xE8, 0xE3, 0xE6, 0xE1, 0xAB, 0xFF};
@@ -109,16 +114,16 @@ u8 popped_text[] = {BuffCharac, 16, Apos, Space, BuffCharac, 22, Space, p_, o_, 
 /*0x1CA*/ u8 tailwind_begins_text[] = {T_, h_, e_, 0, T_, a_, i_, l_, w_, i_, n_, d_, 0, b_, l_, e_, w_, 0, f_, r_, o_, m_, 0xFE, b_, e_, h_, i_, n_, d_, 0, 0xFD, 0xF, Apos, s_, 0, t_, e_, a_, m_, Exclam, 0xFF};
 /*0x1CB*/ u8 luckychant_begins_text[] = {T_, h_, e_, 0, l_, u_, c_, k_, y_, 0, c_, h_, a_, n_, t_, 0, s_, h_, i_, e_, l_, d_, e_, d_, 0, 0xFD, 0xF, Apos, s_, 0xFE, t_, e_, a_, m_, 0, f_, r_, o_, m_, 0, c_, r_, i_, t_, i_, c_, a_, l_, 0, h_, i_, t_, s_, Exclam, 0xFF};
 /*0x1CC*/ u8 magnetrise_begins_text[] = {0xFD, 0xF, 0, l_, e_, v_, i_, t_, a_, t_, e_, d_, 0xFE, w_, i_, t_, h_, 0, e_, l_, e_, c_, t_, r_, o_, m_, a_, g_, n_, e_, t_, i_, s_, m_, Exclam, 0xFF};
-/*0x1CD*/ u8 magicroom_start_text[] = {I_, t_, 0, c_, r_, e_, a_, t_, e_, d_, 0, a_, 0, b_, i_, z_, a_, r_, r_, e_, 0, a_, r_, e_, a_, 0, i_, n_, 0, w_, h_, i_, c_, h_, 0xFE, P_, o_, k_, Poke_e, m_, o_, n_, Apos, s_, 0, h_, e_, l_, d_, 0, i_, t_, e_, m_, s_, 0, l_, o_, s_, e_, 0, t_, h_, e_, i_, r_, 0xFB, e_, f_, f_, e_, c_, t_, s_, Exclam, 0xFF};
+/*0x1CD*/ u8 magicroom_start_text[] = {I_, t_, 0, c_, r_, e_, a_, t_, e_, d_, 0, a_, 0, b_, i_, z_, a_, r_, r_, e_, 0, a_, r_, e_, a_, 0, i_, n_, 0, w_, h_, i_, c_, h_, 0xFE, P_, o_, k_, Poke_e, m_, o_, n_, Apos, s_, 0, h_, e_, l_, d_, 0, i_, t_, e_, m_, s_, 0, l_, o_, s_, e_, 0, t_, h_, e_, i_, r_, 0xFA, e_, f_, f_, e_, c_, t_, s_, Exclam, 0xFF};
 /*0x1CE*/ u8 trickroom_start_text[] = {0xFD, 0xF, 0, t_, w_, i_, s_, t_, e_, d_, 0xFE, t_, h_, e_, 0, d_, i_, m_, e_, n_, s_, i_, o_, n_, s_, Exclam, 0xFF};
 /*0x1CF*/ u8 wonderroom_start_text[] = {I_, t_, 0, c_, r_, e_, a_, t_, e_, d_, 0, a_, 0, b_, i_, z_, a_, r_, r_, e_, 0, a_, r_, e_, a_, 0, i_, n_, 0, w_, h_, i_, c_, h_, 0xFE, D_, e_, f_, e_, n_, s_, e_, 0, a_, n_, d_, 0, S_, p_, Dot, 0, D_, e_, f_, 0, s_, t_, a_, t_, s_, 0, a_, r_, e_, 0, s_, w_, a_, p_, p_, e_, d_, Exclam, 0xFF};
 /*0x1D0*/ u8 gravitystarts_text[] = {G_, r_, a_, v_, i_, t_, y_, Space, i_, n_, t_, e_, n_, s_, i_, f_, i_, e_, d_, Exclam, 0xFF};
 /*0x1D1*/ u8 telekinesis_start_text[] = {0xFD, 16, Space, w_, a_, s_, Space, h_, u_, r_, l_, e_, d_, JumpLine, i_, n_, t_, o_, Space, t_, h_, e_, Space, a_, i_, r_, Exclam, 0xFF};
 /*0x1D2*/ u8 abilitychange_text[] = {0xFD, 16, Apos, Space, a_, b_, i_, l_, i_, t_, y_, JumpLine, b_, e_, c_, a_, m_, e_, Space, 0xFD, 0x19, Exclam, 0xFF};
-/*0x1D3*/ u8 statswap_text[] = {0xFD, 15, Space, s_, w_, i_, t_, c_, h_, e_, d_, Space, a_, l_, l_, Space, s_, t_, a_, t_, JumpLine, c_, h_, a_, n_, g_, e_, s_, Space, t_, o_, Space, i_, t_, s_, Space, 0xFD, 0, Space, a_, n_, d_, Space, 0xFD, 1, 0xFB, w_, i_, t_, h_, Space, t_, h_, e_, Space, t_, a_, r_, g_, e_, t_, Exclam, 0xFF};
+/*0x1D3*/ u8 statswap_text[] = {0xFD, 15, Space, s_, w_, i_, t_, c_, h_, e_, d_, Space, a_, l_, l_, Space, s_, t_, a_, t_, JumpLine, c_, h_, a_, n_, g_, e_, s_, Space, t_, o_, Space, i_, t_, s_, Space, 0xFD, 0, Space, a_, n_, d_, Space, 0xFD, 1, 0xFA, w_, i_, t_, h_, Space, t_, h_, e_, Space, t_, a_, r_, g_, e_, t_, Exclam, 0xFF};
 /*0x1D4*/ u8 heartswap_text[] = {0xFD, 15, Space, s_, w_, i_, t_, c_, h_, e_, d_, Space, s_, t_, a_, t_, JumpLine, c_, h_, a_, n_, g_, e_, s_, Space, w_, i_, t_, h_, Space, t_, h_, e_, Space, t_, a_, r_, g_, e_, t_, Exclam, 0xFF};
 /*0x1D5*/ u8 bugbite_text[] = {0xFD, 15, Space, s_, t_, o_, l_, e_, Space, a_, n_, d_, Space, a_, t_, e_, JumpLine, 0xFD, 16, Apos, Space, 0xFD, 22, Exclam, 0xFF};
-/*0x1D6*/ u8 incinerate_text[] = {0xFD, 16, Space, 0xFD, 22, Space, w_, a_, s_, JumpLine, b_, u_, r_, n_, t_, Space, u_, p_, Exclam, 0xFF};
+/*0x1D6*/ u8 incinerate_text[] = {0xFD, 16, Apos, s_, Space, 0xFD, 22, Space, w_, a_, s_, JumpLine, b_, u_, r_, n_, t_, Space, u_, p_, Exclam, 0xFF};
 /*0x1D7*/ u8 gravitybringsdown_text[] = {0xFD, 15, Space, c_, o_, u_, l_, d_, Space, n_, o_, t_, Space, s_, t_, a_, y_, JumpLine, a_, i_, r_, b_, o_, r_, n_, e_, Space, b_, e_, c_, a_, u_, s_, e_, Space, o_, f_, Space, G_, r_, a_, v_, i_, t_, y_, Exclam, 0xFF};
 /*0x1D8*/ u8 fellforfeint[] = {0xFD, 16, Space, f_, e_, l_, l_, Space, f_, o_, r_, Space, t_, h_, e_, Space, f_, e_, i_, n_, t_, Exclam, 0xFF};
 /*0x1D9*/ u8 protection_broken[] = {0xFD, 15, Space, b_, r_, o_, k_, e_, Space, t_, h_, r_, o_, u_, g_, h_, JumpLine, 0xFD, 16, Space, p_, r_, o_, t_, e_, c_, t_, i_, o_, n_, Exclam, 0xFF};
@@ -139,6 +144,27 @@ u8 popped_text[] = {BuffCharac, 16, Apos, Space, BuffCharac, 22, Space, p_, o_, 
 /*0x1E8*/ u8 iondelugeset_text[] = {A_, Space, d_, e_, l_, u_, g_, e_, Space, o_, f_, Space, i_, o_, n_, s_, Space, s_, h_, o_, w_, e_, r_, s_, JumpLine, t_, h_, e_, Space, b_, a_, t_, t_, l_, e_, f_, i_, e_, l_, d_, Exclam, 0xFF};
 /*0x1E9*/ u8 reflecttype_text[] = {0xFD, 15, Apos, s_, Space, t_, y_, p_, e_, Space, b_, e_, c_, a_, m_, e_, Space, t_, h_, e_, JumpLine, s_, a_, m_, e_, Space, a_, s_, Space, 0xFD, 16, Apos, s_, Space, t_, y_, p_, e_, Exclam, Termin};
 /*0x1EA*/ u8 healblock_start_text[] = {0xFD, 16, Space, w_, a_, s_, Space, p_, r_, e_, v_, e_, n_, t_, e_, d_, JumpLine, f_, r_, o_, m_, Space, h_, e_, a_, l_, i_, n_, g_, Exclam, 0xFF};
+/*0x1EB*/ u8 smackdown_text[] = {0xFD, 16, Space, f_, e_, l_, l_, Space, s_, t_, r_, a_, i_, g_, h_, t_, Space, d_, o_, w_, n_, Exclam, 0xFF};
+/*0x1EC*/ u8 rapidspinontoxicspikes_text[] = {T_, h_, e_, Space, p_, o_, i_, s_, o_, n_, Space, s_, p_, i_, k_, e_, s_, Space, d_, i_, s_, a_, p_, p_, e_, a_, r_, e_, d_, JumpLine, f_, r_, o_, m_, Space, a_, r_, o_, u_, n_, d_, Space, 0xFD, 15, Apos, s_, Space, s_, i_, d_, e_, Exclam, 0xFF};
+/*0x1ED*/ u8 rapidspinonstealthrock_text[] = {T_, h_, e_, Space, p_, o_, i_, n_, t_, e_, d_, Space, s_, t_, o_, n_, e_, s_, Space, d_, i_, s_, a_, p_, p_, e_, a_, r_, e_, d_, JumpLine, f_, r_, o_, m_, Space, a_, r_, o_, u_, n_, d_, Space, 0xFD, 15, Apos, s_, Space, s_, i_, d_, e_, Exclam, 0xFF};
+/*0x1EE*/ u8 rapidspinonstickyweb_text[] = {T_, h_, e_, Space, s_, t_, i_, c_, k_, y_, Space, w_, e_, b_, Space, d_, i_, s_, a_, p_, p_, e_, a_, r_, e_, d_, JumpLine, f_, r_, o_, m_, Space, b_, e_, n_, e_, a_, t_, h_, Space, 0xFD, 15, Apos, s_, Space, s_, i_, d_, e_, Exclam, 0xFF};
+/*0x1EF*/ u8 powertrick_text[] = {0xFD, 15, Space, s_, w_, i_, t_, c_, h_, e_, d_, JumpLine, i_, t_, s_, Space, A_, t_, t_, a_, c_, k_, Space, a_, n_, d_, Space, D_, e_, f_, e_, n_, s_, e_, Exclam, 0xFF};
+/*0x1F0*/ u8 soak_text[] = {0xFD, 16, Space, t_, r_, a_, s_, f_, o_, r_, m_, e_, d_, JumpLine, i_, n_, t_, o_, Space, t_, h_, e_, Space, 0xFD, 0, Space, t_, y_, p_, e_, Exclam, 0xFF};
+/*0x1F1*/ u8 defogspikes_text[] = {T_, h_, e_, Space, s_, p_, i_, k_, e_, s_, Space, d_, i_, s_, a_, p_, p_, e_, a_, r_, e_, d_, JumpLine, f_, r_, o_, m_, Space, a_, r_, o_, u_, n_, d_, Space, 0xFD, 15, Apos, s_, Space, s_, i_, d_, e_, Exclam, 0xFF};
+/*0x1F2*/ u8 power_text[] = {p_, o_, w_, e_, r_, 0xFF};
+/*0x1F3*/ u8 guard_text[] = {g_, u_, a_, r_, d_, 0xFF};
+/*0x1F4*/ u8 psychosplit_text[] = {0xFD, 15, Space, s_, h_, a_, r_, e_, d_, Space, i_, t_, s_, JumpLine, 0xFD, 0, Space, w_, i_, t_, h_, Space, t_, h_, e_, Space, t_, a_, r_, g_, e_, t_, Exclam, 0xFF};
+/*0x1F5*/ u8 stockpileend_text[] = {0xFD, 15, Apos, s_, Space, S_, t_, o_, c_, k_, p_, i_, l_, e_, JumpLine, e_, f_, f_, e_, c_, t_, Space, w_, o_, r_, e_, Space, o_, f_, f_, Exclam, 0xFF};
+/*0x1F6*/ u8 geomancy_text[] = {0xFD, 15, Space, i_, s_, Space, a_, b_, o_, r_, b_, i_, n_,g_, Space, p_, o_, w_, e_, r_, Exclam, 0xFF};
+/*0x1F7*/ u8 powerherb_text[] = {0xFD, 15, Space, b_, e_, c_, a_, m_, e_, Space, f_, u_, l_, l_, y_, Space, c_, h_, a_, r_, g_, e_, d_, JumpLine, d_, u_, e_, Space, t_, o_, Space, 0xFD, 22, Exclam, 0xFF};
+/*0x1F8*/ u8 iceburn_text[] = {0xFD, 15, Space, b_, e_, c_, a_, m_, e_, Space, c_, l_, o_, a_, k_, e_, d_, JumpLine, i_, n_, Space ,f_, r_, e_, e_, z_, i_, n_, g_, Space, a_, i_, r_, Exclam, 0xFF};
+/*0x1F9*/ u8 freezeshock_text[] = {0xFD, 15, Space, b_, e_, c_, a_, m_, e_, Space, c_, l_, o_, a_, k_, e_, d_, JumpLine, i_, n_, Space ,f_, r_, e_, e_, z_, i_, n_, g_, Space, l_, i_, g_, h_, t_, Exclam, 0xFF};\
+/*0x1FA*/ u8 shadowforce_text[] = {0xFD, 15, Space, v_, a_, n_, i_, s_, h_, e_, d_, Space, i_, n_, s_, t_, a_, n_, t_, l_, y_, Exclam, 0xFF};
+/*0x1FB*/ u8 mistyterrain_text[] = {M_, i_, s_, t_, Space, s_, w_, i_, r_, l_, e_, d_, Space, a_, b_, o_, u_, t_, Space, t_, h_, e_, Space, b_, a_, t_, t_, l_, e_, f_, i_, e_, l_, d_, Exclam, 0xFF};
+/*0x1FC*/ u8 grassyterrain_text[] = {G_, r_, a_, s_, s_, Space, g_, r_, e_, w_, Space, t_, o_, Space, c_, o_, v_, e_, r_, Space, t_, h_, e_, Space, b_, a_, t_, t_, l_, e_, f_, i_, e_, l_, d_, Exclam, 0xFF};
+/*0x1FD*/ u8 electricterrain_text[] = {A_, n_, Space, e_, l_, e_, c_, t_, r_, i_, c_, Space, c_, u_, r_, r_, e_, n_, t_, JumpLine, r_, u_, n_, s_, Space, a_, c_, r_, o_, s_, s_, Space, t_, h_, e_, Space, b_, a_, t_, t_, l_, e_, f_, i_, e_, l_, d_, Exclam, 0xFF};
+/*0x1FE*/ u8 aquaring_text[] = {0xFD, 15, Space, s_, u_, r_, r_, o_, u_, n_, d_, e_, d_, Space, i_, t_, s_, e_, l_, f_, JumpLine, w_, i_, t_, h_, Space, a_, Space, v_, e_, i_, l_, Space, o_, f_, Space, w_, a_, t_, e_, r_,Exclam, 0xFF};
+/*0x1FF*/ u8 aquaringheal_text[] = {A_, q_, u_, a_, Space, R_, i_, n_,g_, Space, r_, e_, s_, t_, o_, r_, e_, d_, Space, 0xFD, 15, Apos, s_, Space, H_, P_, Exclam, 0xFF};
 
 void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activation_text, &heavyrain_activation_text, &mysticalaircurrent_activation_text, &forewarn_text, &slowstart_text, &anticipation_text, &dryskin_damage_text, &solarpower_text, &harvest_text, &healer_text, &pickup_text, &moldbreaker_text, &turboblaze_text, &terravolt_text, &downloadatk_text,
 &downloadspatk_text, &absorbabilityboost_text , &absorbabilityimmune_text, &userteam_text/*0x190*/, &foeteam_text/*0x191*/,
@@ -153,7 +179,10 @@ void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activ
 &gravitystarts_text, &telekinesis_start_text, &abilitychange_text, &statswap_text, &heartswap_text, &bugbite_text, &incinerate_text,
 &gravitybringsdown_text, &fellforfeint, &protection_broken, &teamprotection, &becameatype, &targetsabilitybecameattacker,
 &gastro_text, &embargostart_text, &afteryout_text, &powder_text, &powderdamage_text, &statchangesremoved_text, &electify_text,
-&stealthrock2_text, &toxicspikes2_text, &stickyweb2_text, &nimble_text, &iondelugeset_text, &reflecttype_text, &healblock_start_text};
+&stealthrock2_text, &toxicspikes2_text, &stickyweb2_text, &nimble_text, &iondelugeset_text, &reflecttype_text, &healblock_start_text, &smackdown_text,
+&rapidspinontoxicspikes_text, &rapidspinonstealthrock_text, &rapidspinonstickyweb_text, &powertrick_text, &soak_text, &defogspikes_text,
+&power_text, &guard_text, &psychosplit_text, &stockpileend_text, &geomancy_text, &powerherb_text, &iceburn_text, &freezeshock_text,
+&shadowforce_text, &mistyterrain_text, &grassyterrain_text, &electricterrain_text, &aquaring_text, &aquaringheal_text};
 
 void battle_string_loader(u16 string_id)
 {
@@ -435,7 +464,7 @@ void grassyterrainn_heal()
 {
     for (u8 i = 0; i < no_of_all_banks; i++)
     {
-        if (!new_battlestruct.ptr->bank_affecting[i].grassyterrain_heal && get_airborne_state(i, 0, 1) <= 2 && battle_participants[i].current_hp < battle_participants[i].max_hp)
+        if (!new_battlestruct.ptr->bank_affecting[i].grassyterrain_heal && get_airborne_state(i, 0, 1) <= 2 && battle_participants[i].current_hp < battle_participants[i].max_hp && !SEMI_INVULNERABLE(i))
         {
             new_battlestruct.ptr->bank_affecting[i].grassyterrain_heal = 1;
             battlescripts_curr_instruction -= 3;
@@ -460,6 +489,9 @@ void callitemeffects()
 void damagecalc2()
 {
     u32 damage = 0;
+    type_effectiveness_calc(current_move, get_attacking_move_type(), bank_attacker, bank_target, 1);
+    move_outcome.super_effective = 0;
+    move_outcome.not_very_effective = 0;
     switch (current_move)
     {
     case MOVE_DRAGON_RAGE:
@@ -480,6 +512,14 @@ void damagecalc2()
         break;
     case MOVE_PSYWAVE:
         damage = battle_participants[bank_attacker].level * 10 * (__umodsi3(rng(),16) + 5) / 100;
+        break;
+    case MOVE_ENDEAVOR:
+        if (battle_participants[bank_attacker].current_hp > battle_participants[bank_target].current_hp)
+        {
+            battlescripts_curr_instruction = (void*) 0x082D9F1A;
+            return;
+        }
+        damage = battle_participants[bank_target].current_hp - battle_participants[bank_attacker].current_hp;
         break;
     }
     if (damage < 1)
@@ -1500,6 +1540,508 @@ void traptarget()
     battle_participants[bank_target].status2.cant_escape = 1;
 }
 
+u16 mefirstforbiddenmoves[] = {MOVE_COVET, MOVE_THIEF, MOVE_STRUGGLE, MOVE_CHATTER, MOVE_COUNTER, MOVE_METAL_BURST, MOVE_LIGHT_SCREEN, MOVE_ME_FIRST, MOVE_FOCUS_PUNCH, 0xFFFF};
+
+void mefirst_check()
+{
+    u16 chosen_move = chosen_move_by_banks[bank_target];
+    if (get_bank_turn_order(bank_target) > current_move_turn && move_table[chosen_move].base_power && !find_move_in_table(chosen_move, &mefirstforbiddenmoves[0]))
+     {
+         battlescripts_curr_instruction += 4;
+         new_battlestruct.ptr->bank_affecting[bank_attacker].me_first = 1;
+         new_battlestruct.ptr->various.var1 = chosen_move;
+     }
+    else
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    return;
+}
+
+void jump_to_move_bs()
+{
+    battle_scripting.field18 = 0;
+    battle_scripting.field19 = 0;
+    hitmarker &= 0xFFFFFBFF;
+    hitmarker |= HITMARKER_NO_PPDEDUCT;
+    u16 move = new_battlestruct.ptr->various.var1;
+    battlescripts_curr_instruction = get_move_battlescript_ptr(move);
+    current_move = move;
+    bank_target = get_target_of_move(move, 0, 1);
+}
+
+void setluckychant()
+{
+    u8 side = is_bank_from_opponent_side(bank_attacker);
+    if (new_battlestruct.ptr->side_affecting[side].lucky_chant)
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else
+    {
+        new_battlestruct.ptr->side_affecting[side].lucky_chant = 5;
+        new_battlestruct.ptr->side_affecting[side].lucky_chant_bank = bank_attacker;
+        battlescripts_curr_instruction += 4;
+    }
+}
+
+void settailwind()
+{
+    u8 side = is_bank_from_opponent_side(bank_attacker);
+    if (new_battlestruct.ptr->side_affecting[side].tailwind)
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else
+    {
+        new_battlestruct.ptr->side_affecting[side].tailwind = 5;
+        new_battlestruct.ptr->side_affecting[side].tailwind_bank = bank_attacker;
+        battlescripts_curr_instruction += 4;
+    }
+}
+
+void cansetnightmare()
+{
+    if (battle_participants[bank_target].status.flags.sleep && battle_participants[bank_target].status2.nightmare == 0)
+    {
+        battle_participants[bank_target].status2.nightmare = 1;
+        battlescripts_curr_instruction += 4;
+    }
+    else
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    return;
+}
+
+void bellydrum()
+{
+    u16 halvedmaxhp = battle_participants[bank_attacker].max_hp / 2;
+    u8* buff = &battle_participants[bank_attacker].hp_buff + move_table[current_move].arg1;
+    if (battle_participants[bank_attacker].current_hp > halvedmaxhp && *buff != 0xC)
+    {
+        *buff = 0xC;
+        damage_loc = halvedmaxhp;
+        battlescripts_curr_instruction += 4;
+    }
+    else
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+}
+
+void setmagnetrise()
+{
+    struct bank_affecting* magnetrise = &new_battlestruct.ptr->bank_affecting[bank_attacker];
+    if (magnetrise->magnet_rise || magnetrise->smacked_down || status3[bank_attacker].rooted)
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else
+    {
+        battlescripts_curr_instruction += 4;
+        magnetrise->magnet_rise = 5;
+    }
+    return;
+}
+
+void settelekinesis()
+{
+    struct bank_affecting* telekinesis = &new_battlestruct.ptr->bank_affecting[bank_target];
+    if (telekinesis->telekinesis || telekinesis->smacked_down || status3[bank_target].rooted)
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else
+    {
+        battlescripts_curr_instruction += 4;
+        telekinesis->telekinesis = 5;
+    }
+    return;
+}
+
+void setpowertrick()
+{
+    u16* atk = &battle_participants[bank_attacker].atk;
+    u16* def = &battle_participants[bank_attacker].def;
+    u16 placeholder = *atk;
+    *atk = *def;
+    *def = placeholder;
+    new_battlestruct.ptr->bank_affecting[bank_attacker].powertrick ^= 1;
+}
+
+void make_pokemon_one_type()
+{
+    u8 type = move_table[current_move].arg1 & 0x1F;
+    if (battle_participants[bank_target].type1 == type && (battle_participants[bank_target].type2 == type || battle_participants[bank_target].type2 == TYPE_EGG) && (new_battlestruct.ptr->bank_affecting[bank_target].type3 == type || new_battlestruct.ptr->bank_affecting[bank_target].type3 == TYPE_EGG))
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else
+    {
+        battlescripts_curr_instruction += 4;
+        set_type(bank_target, type);
+        battle_text_buff1[0] = 0xFD;
+        battle_text_buff1[1] = 3;
+        battle_text_buff1[2] = type;
+        battle_text_buff1[3] = 0xFF;
+    }
+    return;
+}
+
+void defog_effect()
+{
+    bank_attacker = turn_order[current_move_turn];
+    u8 attackers_side = is_bank_from_opponent_side(bank_attacker);
+    u8 effect = 0;
+    u8 targets_side = is_bank_from_opponent_side(bank_target);
+    struct side_affecting_hword* target_side = &side_affecting_halfword[targets_side];
+    struct side_timer* target_timer = &side_timers[targets_side];
+    void* ptr_to_script = 0;
+    if (target_side->reflect_on)
+    {
+        effect = 1;
+        target_side->reflect_on = 0;
+        target_timer->reflect_timer = 0;
+        bank_attacker = target_timer->reflect_bank;
+        ptr_to_script = &defogblows_bs;
+        move_to_buffer(MOVE_REFLECT);
+    }
+    else if (target_side->light_screen_on)
+    {
+        effect = 1;
+        target_side->light_screen_on = 0;
+        target_timer->lightscreen_timer = 0;
+        bank_attacker = target_timer->lightscreen_bank;
+        ptr_to_script = &defogblows_bs;
+        move_to_buffer(MOVE_LIGHT_SCREEN);
+    }
+    else if (target_side->mist_on)
+    {
+        effect = 1;
+        target_side->mist_on = 0;
+        target_timer->mist_timer = 0;
+        bank_attacker = target_timer->mist_bank;
+        ptr_to_script = &defogblows_bs;
+        move_to_buffer(MOVE_MIST);
+    }
+    else if (target_side->safeguard_on)
+    {
+        effect = 1;
+        target_side->safeguard_on = 0;
+        target_timer->safeguard_timer = 0;
+        bank_attacker = target_timer->safeguard_bank;
+        ptr_to_script = &defogblows_bs;
+        move_to_buffer(MOVE_SAFEGUARD);
+    }
+    else if (target_side->spikes_on)
+    {
+        effect = 1;
+        target_side->spikes_on = 0;
+        target_timer->spikes_amount = 0;
+        bank_attacker = bank_target;
+        ptr_to_script = (void*) 0x082DAFDD;
+    }
+    else if (new_battlestruct.ptr->side_affecting[targets_side].stealthrock)
+    {
+        effect = 1;
+        new_battlestruct.ptr->side_affecting[targets_side].stealthrock = 0;
+        bank_attacker = bank_target;
+        ptr_to_script = &rapidspinonstealthrock_bs;
+    }
+    else if (new_battlestruct.ptr->side_affecting[targets_side].toxic_spikes_psn)
+    {
+        effect = 1;
+        new_battlestruct.ptr->side_affecting[targets_side].toxic_spikes_psn = 0;
+        new_battlestruct.ptr->side_affecting[targets_side].toxic_spikes_badpsn = 0;
+        bank_attacker = bank_target;
+        ptr_to_script = &rapidspinontoxicspikes_bs;
+    }
+    else if (new_battlestruct.ptr->side_affecting[targets_side].sticky_web)
+    {
+        effect = 1;
+        new_battlestruct.ptr->side_affecting[targets_side].sticky_web = 0;
+        bank_attacker = bank_target;
+        ptr_to_script = &rapidspinonstickyweb_bs;
+    }
+    else if (side_affecting_halfword[attackers_side].spikes_on)
+    {
+        effect = 1;
+        side_affecting_halfword[attackers_side].spikes_on = 0;
+        side_timers[attackers_side].spikes_amount = 0;
+        ptr_to_script = (void*) 0x082DAFDD;
+    }
+    else if (new_battlestruct.ptr->side_affecting[attackers_side].stealthrock)
+    {
+        effect = 1;
+        new_battlestruct.ptr->side_affecting[attackers_side].stealthrock = 0;
+        ptr_to_script = &rapidspinonstealthrock_bs;
+    }
+    else if (new_battlestruct.ptr->side_affecting[attackers_side].toxic_spikes_psn)
+    {
+        effect = 1;
+        new_battlestruct.ptr->side_affecting[attackers_side].toxic_spikes_psn = 0;
+        new_battlestruct.ptr->side_affecting[attackers_side].toxic_spikes_badpsn = 0;
+        ptr_to_script = &rapidspinontoxicspikes_bs;
+    }
+    else if (new_battlestruct.ptr->side_affecting[attackers_side].sticky_web)
+    {
+        effect = 1;
+        new_battlestruct.ptr->side_affecting[attackers_side].sticky_web = 0;
+        ptr_to_script = &rapidspinonstickyweb_bs;
+    }
+    if (effect)
+    {
+        if (battle_communication_struct.multistring_chooser == 0)
+                battle_communication_struct.multistring_chooser = 2;
+        battlescripts_curr_instruction -= 3;
+        battlescript_push();
+        battlescripts_curr_instruction = ptr_to_script;
+    }
+    else if (effect == 0 && battle_communication_struct.multistring_chooser == 0)
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else
+    {
+        bank_attacker = turn_order[current_move_turn];
+        battlescripts_curr_instruction += 4;
+    }
+    return;
+}
+
+u16 copycat_forbidden_moves[] = {MOVE_ASSIST, MOVE_BELCH, MOVE_BESTOW, MOVE_CHATTER, MOVE_CIRCLE_THROW, MOVE_COPYCAT, MOVE_COUNTER, MOVE_COVET, MOVE_DESTINY_BOND, MOVE_DETECT, MOVE_DRAGON_TAIL, MOVE_ENDURE, MOVE_FEINT, MOVE_FOCUS_PUNCH, MOVE_FOLLOW_ME, MOVE_HELPING_HAND, MOVE_HOLD_HANDS, MOVE_KINGS_SHIELD, MOVE_MAT_BLOCK, MOVE_ME_FIRST, MOVE_METRONOME, MOVE_MIMIC, MOVE_MIRROR_COAT, MOVE_MIRROR_MOVE, MOVE_NATURE_POWER, MOVE_PROTECT, MOVE_RAGE_POWDER, MOVE_ROAR, MOVE_SKETCH, MOVE_SLEEP_TALK, MOVE_SNATCH, MOVE_SPIKY_SHIELD, MOVE_STRUGGLE, MOVE_SWITCHEROO, MOVE_THIEF, MOVE_TRANSFORM, MOVE_TRICK, MOVE_WHIRLWIND, 0x0, 0xFFFF};
+
+void copycat_move()
+{
+    if (find_move_in_table(new_battlestruct.ptr->various.previous_move, &copycat_forbidden_moves[0]))
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else
+    {
+        new_battlestruct.ptr->various.var1 = new_battlestruct.ptr->various.previous_move;
+        battlescripts_curr_instruction += 4;
+    }
+}
+
+void psycho_swaps()
+{
+    u8 stat1 = move_table[current_move].arg1;
+    if (stat1)
+        battle_communication_struct.multistring_chooser = 0;
+    else
+        battle_communication_struct.multistring_chooser = 1;
+    u8 stat2 = move_table[current_move].arg2;
+    for (u8 i = 0; i < 8; i++)
+    {
+        u8 *atk_stat = &battle_participants[bank_attacker].hp_buff + i;
+        u8 *def_stat = &battle_participants[bank_target].hp_buff + i;
+        u8 placeholder = *atk_stat;
+        if (stat1 == 0)
+        {
+            *atk_stat = *def_stat;
+            *def_stat = placeholder;
+        }
+        else if (i == stat1)
+        {
+            *atk_stat = *def_stat;
+            *def_stat = placeholder;
+            battle_text_buff1[0] = 0xFD;
+            battle_text_buff1[1] = 5;
+            battle_text_buff1[2] = i;
+            battle_text_buff1[3] = 0xFF;
+        }
+        else if (i == stat2)
+        {
+            *atk_stat = *def_stat;
+            *def_stat = placeholder;
+            battle_text_buff2[0] = 0xFD;
+            battle_text_buff2[1] = 5;
+            battle_text_buff2[2] = i;
+            battle_text_buff2[3] = 0xFF;
+        }
+    }
+}
+
+void psychosplits()
+{
+    switch (current_move)
+    {
+    case MOVE_POWER_SPLIT:
+        {
+            u16 *atk_atk = &battle_participants[bank_attacker].atk;
+            u16 *atk_trg = &battle_participants[bank_target].atk;
+            u16 average = (*atk_atk + *atk_trg) / 2;
+            *atk_atk = average;
+            *atk_trg = average;
+
+            atk_atk = &battle_participants[bank_attacker].sp_atk;
+            atk_trg = &battle_participants[bank_target].sp_atk;
+            average = (*atk_atk + *atk_trg) / 2;
+            *atk_atk = average;
+            *atk_trg = average;
+
+            battle_text_buff1[0] = 0xFD;
+            battle_text_buff1[1] = 0;
+            battle_text_buff1[2] = 0xF2;
+            battle_text_buff1[3] = 1;
+            battle_text_buff1[4] = 0xFF;
+        }
+        break;
+    case MOVE_GUARD_SPLIT:
+        {
+            u16 *def_def = &battle_participants[bank_attacker].def;
+            u16 *def_trg = &battle_participants[bank_target].def;
+            u16 average = (*def_def + *def_trg) / 2;
+            *def_def = average;
+            *def_trg = average;
+
+            def_def = &battle_participants[bank_attacker].sp_def;
+            def_trg = &battle_participants[bank_target].sp_def;
+            average = (*def_def + *def_trg) / 2;
+            *def_def = average;
+            *def_trg = average;
+
+            battle_text_buff1[0] = 0xFD;
+            battle_text_buff1[1] = 0;
+            battle_text_buff1[2] = 0xF3;
+            battle_text_buff1[3] = 1;
+            battle_text_buff1[4] = 0xFF;
+        }
+        break;
+    }
+}
+
+void stockpile_record()
+{
+    struct battle_participant* attacker_stats = &battle_participants[bank_attacker];
+    u8* stockpile_def = (u8*)&(new_battlestruct.ptr->various.var2);
+    u8* stockpile_spdef = (u8*)&(new_battlestruct.ptr->various.var2) + 1;
+    struct bank_affecting* attacker_stockpile = &new_battlestruct.ptr->bank_affecting[bank_attacker];
+    switch (read_byte(battlescripts_curr_instruction))
+    {
+    case 0:
+        *stockpile_def = attacker_stats->def_buff;
+        *stockpile_spdef = attacker_stats->sp_def_buff;
+        break;
+    case 1:
+        attacker_stockpile->stockpile_def_changes += (attacker_stats->def_buff - *stockpile_def);
+        attacker_stockpile->stockpile_sp_def_changes += (attacker_stats->sp_def_buff - *stockpile_spdef);
+        break;
+    case 2: //reset stat buffs
+        {
+            attacker_stats->def_buff -= attacker_stockpile->stockpile_def_changes;
+            attacker_stats->sp_def_buff -= attacker_stockpile->stockpile_sp_def_changes;
+            new_battlestruct.ptr->various.var2 = 0;
+            attacker_stockpile->stockpile_def_changes = 0;
+            attacker_stockpile->stockpile_sp_def_changes = 0;
+            break;
+        }
+    }
+    battlescripts_curr_instruction++;
+}
+
+void twoturn_moves()
+{
+    u8 adder;
+    u8* stringchooser = &battle_communication_struct.multistring_chooser;
+    if (move_table[current_move].split == 2)
+        adder = 0;
+    else
+        adder = move_table[current_move].arg2;
+    switch (current_move)
+    {
+    case MOVE_GEOMANCY:
+        *stringchooser = 0;
+        break;
+    case MOVE_SKY_ATTACK:
+        *stringchooser = 1;
+        break;
+    case MOVE_SKULL_BASH:
+        *stringchooser = 2;
+        break;
+    case MOVE_SOLAR_BEAM:
+        *stringchooser = 3;
+        break;
+    case MOVE_BOUNCE:
+        *stringchooser = 4;
+        break;
+    case MOVE_ICE_BURN:
+        *stringchooser = 5;
+        break;
+    case MOVE_FREEZE_SHOCK:
+        *stringchooser = 6;
+        break;
+    case MOVE_RAZOR_WIND:
+        *stringchooser = 7;
+        break;
+    case MOVE_PHANTOM_FORCE:
+    case MOVE_SHADOW_FORCE:
+        *stringchooser = 8;
+        break;
+    case MOVE_FLY:
+        *stringchooser = 9;
+        break;
+    case MOVE_DIG:
+        *stringchooser = 10;
+        break;
+    case MOVE_DIVE:
+        *stringchooser = 11;
+        break;
+    }
+    battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction + 4 * adder);
+}
+
+void powerherb_check()
+{
+    if (get_item_effect(bank_attacker, 1) == ITEM_EFFECT_POWERHERB)
+    {
+        last_used_item = battle_participants[bank_attacker].held_item;
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+        battlescript_push();
+        battlescripts_curr_instruction = &powerherb_bs;
+    }
+    else
+        battlescripts_curr_instruction += 4;
+}
+
+void set_terrain()
+{
+    u8 fail = 0;
+    switch (current_move)
+    {
+    case MOVE_MISTY_TERRAIN:
+        if (new_battlestruct.ptr->field_affecting.misty_terrain)
+            fail = 1;
+        else
+        {
+            new_battlestruct.ptr->field_affecting.misty_terrain = 5;
+            battle_communication_struct.multistring_chooser = 0;
+        }
+        break;
+    case MOVE_GRASSY_TERRAIN:
+        if (new_battlestruct.ptr->field_affecting.grassy_terrain)
+            fail = 1;
+        else
+        {
+            new_battlestruct.ptr->field_affecting.grassy_terrain = 5;
+            battle_communication_struct.multistring_chooser = 1;
+        }
+        break;
+    case MOVE_ELECTRIC_TERRAIN:
+        if (new_battlestruct.ptr->field_affecting.electic_terrain)
+            fail = 1;
+        else
+        {
+            new_battlestruct.ptr->field_affecting.electic_terrain = 5;
+            battle_communication_struct.multistring_chooser = 2;
+        }
+        break;
+    }
+    if (fail)
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else
+        battlescripts_curr_instruction += 4;
+}
+
+void setaquaring()
+{
+    if (new_battlestruct.ptr->bank_affecting[bank_attacker].aqua_ring)
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else
+    {
+        battlescripts_curr_instruction += 4;
+        new_battlestruct.ptr->bank_affecting[bank_attacker].aqua_ring = 1;
+    }
+    return;
+}
+
+void shiftgear_check()
+{
+    if (battle_participants[bank_attacker].spd_buff == 0xC && battle_participants[bank_attacker].atk_buff == 0xC)
+}
+
 void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*/, &change_attacker_item /*2*/, &try_to_lower_def /*3*/, &try_to_raise_spd /*4*/,
 &changestatvar1 /*5*/, &changestatvar2 /*6*/, &frisk_target_item /*7*/, &set_stat_msg_buffer /*8*/, &set_type_msg_buffer /*9*/, &set_team_msg_buffer /*10*/, &bad_dreams_damage_calc /*11*/,
 &weaknesspolicy /*12*/, &mentalherb /*13*/, &placeholder0x14 /*14*/, &hazards_bank_switcher /*15*/, &hazards_bank_return /*16*/, &leechseed_update /*17*/,
@@ -1512,7 +2054,11 @@ void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*
 &suckerpunchchecker /*48*/, &oppositegenderscheck /*49*/, &setthirdtype /*50*/, &ability_change /*51*/, &roomsetter /*52*/, &countercalc /*53*/,
 &gastroacid /*54*/, &setembargo /*55*/, &naturalgift /*56*/, &afteryou_check /*57*/, &powder_setter /*58*/, &jumpifnoally /*59*/,
 &electrify /*60*/, &set_entry_hazards /*61*/, &jumpifnotdoublebattle /*62*/, &jumpifattackerandtargetdontsharetypes /*63*/,
-&try_autotonomize /*64*/, &set_iondeluge /*65*/, &reflecttypes /*66*/, &sethealblock /*67*/, &traptarget /*68*/};
+&try_autotonomize /*64*/, &set_iondeluge /*65*/, &reflecttypes /*66*/, &sethealblock /*67*/, &traptarget /*68*/, &mefirst_check /*69*/,
+&jump_to_move_bs /*70*/, &setluckychant /*71*/, &settailwind /*72*/, &cansetnightmare /*73*/, &bellydrum /*74*/, &setmagnetrise /*75*/,
+&settelekinesis /*76*/, &setpowertrick /*77*/, &make_pokemon_one_type /*78*/, &defog_effect /*79*/, &copycat_move /*80*/,
+&psycho_swaps /*81*/, &psychosplits /*82*/, &stockpile_record /*83*/, &twoturn_moves /*84*/, &powerherb_check /*85*/, &set_terrain /*86*/,
+&setaquaring /*87*/};
 
 void callasm_cmd()
 {
