@@ -10,6 +10,9 @@ u8 check_ability(u8 bank, u8 ability);
 u8 change_stats(s8 arg1, s8 arg2, s8 arg3, void* battlescript_if_fails);
 void statustoeffect();
 u8 find_move_in_table(u16 move, u16 table_ptr[]);
+u8 healblock_forbidden_moves(u16 move, u8 with_leechseed);
+u8 gravity_forbidden_move(u16 move);
+u8 embargo_forbidden_move(u16 move);
 
 u8 get_attacking_move_type()
 {
@@ -3688,4 +3691,109 @@ u8 update_turn_counters()
             break;
     }
     return effect;
+}
+
+struct move_limitation{
+    u8 limitation_no_move : 1; //0x1
+    u8 limitation_no_pp : 1; //0x2
+    u8 limitation_disabled : 1; //0x4
+    u8 limitation_x8 : 1; //0x8
+    u8 limitation_taunt : 1; //0x10
+    u8 limitation_imprision : 1; //0x20
+};
+
+u8 check_move_limitations(u8 bank, u8 not_usable_moves, struct move_limitation limitations)
+{
+    struct battle_participant* checking_bank = &battle_participants[bank];
+    for (u8 i = 0; i < 4; i++)
+    {
+        u16 move_to_check = checking_bank->moves[i];
+        if (move_to_check == 0 && limitations.limitation_no_move)
+            not_usable_moves |= bits_table[i];
+        else if (checking_bank->current_pp[i] == 0 && limitations.limitation_no_pp)
+            not_usable_moves |= bits_table[i];
+        else if (disable_structs[bank].disabled_move == move_to_check && limitations.limitation_disabled)
+            not_usable_moves |= bits_table[i];
+        else if (disable_structs[bank].taunt_timer && move_table[move_to_check].base_power == 0 && limitations.limitation_taunt)
+            not_usable_moves |= bits_table[i];
+        else if (status3[bank].imprision && check_if_imprisioned(bank, move_to_check) && limitations.limitation_imprision)
+            not_usable_moves |= bits_table[i];
+        else if (get_item_effect(bank, 1) == CHOICE_ITEM && battle_stuff_ptr.ptr->choiced_move[bank] != move_to_check)
+            not_usable_moves |= bits_table[i];
+        else if (get_item_effect(bank, 1) == ITEM_EFFECT_ASSAULTVEST && move_table[move_to_check].split == 2)
+            not_usable_moves |= bits_table[i];
+        else if (disable_structs[bank].encore_timer && disable_structs[bank].encored_move != move_to_check)
+            not_usable_moves |= bits_table[i];
+        else if (checking_bank->status2.tormented && last_used_moves[bank] == move_to_check)
+            not_usable_moves |= bits_table[i];
+        else if (new_battlestruct.ptr->field_affecting.gravity && gravity_forbidden_move(move_to_check))
+            not_usable_moves |= bits_table[i];
+        else if (new_battlestruct.ptr->bank_affecting[bank].heal_block && healblock_forbidden_moves(move_to_check, 0))
+            not_usable_moves |= bits_table[i];
+        else if (new_battlestruct.ptr->bank_affecting[bank].embargo && embargo_forbidden_move(move_to_check))
+            not_usable_moves |= bits_table[i];
+    }
+    return not_usable_moves;
+}
+
+u8 message_cant_choose_move()
+{
+    u8 bank = another_active_bank = active_bank;
+    struct battle_participant* checking_bank = &battle_participants[bank];
+    u8 move_index = battle_bufferB[bank].args[1];
+    u16 checking_move = checking_bank->moves[move_index];
+    void** loc_to_store_bs = (void*) 0x2024220 + bank * 4;
+    u8 cant = 0;
+    if (checking_bank->current_pp[move_index] == 0)
+    {
+        cant = 1;
+        *loc_to_store_bs = (void*) 0x82DB076;
+    }
+    else if (get_item_effect(bank, 1) == CHOICE_ITEM && battle_stuff_ptr.ptr->choiced_move[bank] && battle_stuff_ptr.ptr->choiced_move[bank] != 0xFFFF && battle_stuff_ptr.ptr->choiced_move[bank] != checking_move)
+    {
+        current_move = battle_stuff_ptr.ptr->choiced_move[bank];
+        cant = 1;
+        *loc_to_store_bs = (void*) 0x82DB812;
+        last_used_item = checking_bank->held_item;
+    }
+    else if (get_item_effect(bank, 1) == ITEM_EFFECT_ASSAULTVEST && move_table[checking_move].split == 2)
+    {
+        cant = 1;
+        last_used_item = checking_bank->held_item;
+        *loc_to_store_bs = &assaultvest_bs;
+    }
+    else if (status3[bank].imprision && check_if_imprisioned(bank, checking_move))
+    {
+        cant = 1;
+        *loc_to_store_bs = (void*) 0x82DB181;
+    }
+    else if (disable_structs[bank].taunt_timer && move_table[checking_move].base_power == 0)
+    {
+        cant = 1;
+        *loc_to_store_bs = (void*) 0x82DB0A0;
+    }
+    else if (checking_bank->status2.tormented && last_used_moves[bank] == checking_move && checking_move != MOVE_STRUGGLE)
+    {
+        cant = 1;
+        reset_several_turns_stuff(bank);
+        *loc_to_store_bs = (void*) 0x82DB089;
+    }
+    else if (disable_structs[bank].disabled_move == checking_move && disable_structs[bank].disable_timer)
+    {
+        cant = 1;
+        *loc_to_store_bs = (void*) 0x82DAE1F;
+    }
+    else if (new_battlestruct.ptr->field_affecting.gravity && gravity_forbidden_move(checking_move))
+    {
+        cant = 1;
+        current_move = checking_move;
+        *loc_to_store_bs = &gravityprevents2_bs;
+    }
+    else if (new_battlestruct.ptr->bank_affecting[bank].heal_block && healblock_forbidden_moves(checking_move, 0))
+    {
+        cant = 1;
+        current_move = checking_move;
+        *loc_to_store_bs = &cantselecthealblock_bs;
+    }
+    return cant;
 }
