@@ -11,6 +11,7 @@ callasm_cmd 0831BF1C
 atk00_move_canceller 0831BD10
 atk0C_datahpupdate 0831BD40
 atk0F_resultmessage 0831BD4C
+atk42_jump_if_type 0831BE18
 atk49_move_end_turn 0831BE34
 atk6A_remove_item 0831BEB8
 atk70_record_ability_of_bank 0831BED0
@@ -19,7 +20,7 @@ atk7D_set_rain 0831BF04
 atk7E_set_reflect 0831BF08
 atk7F_set_leech_seed 0831BF0C
 atk88_drain_damage 0831BF30
-atk8D_multihit_move_loop_counter 0831BF44
+atk8D_multihit_move_loop_counter 0831BFEC
 atk92_set_lightscreen 0831BF58
 atk93_ko_move 0831BF5C
 atk95_set_sandstorm 0831BF64
@@ -28,6 +29,7 @@ atk9E_metronome_chooser 0831BF88
 atkA3_disable_move 0831BF9C
 atkA4_encore_move 0831BFA0
 atkB5_furycutter_calc 0831BFE4
+atkB7_present_calc 0831BFEC
 atkBB_set_sunny 0831BFFC
 atkBE_rapidspin_away 0831C008
 atkC5_hide_pre_attack 0831C024
