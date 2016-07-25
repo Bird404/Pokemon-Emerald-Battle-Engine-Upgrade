@@ -325,6 +325,13 @@ void bs_start_attack()
 
         battlescripts_curr_instruction = get_move_battlescript_ptr(current_move);
         battle_state_mode=0xA;
+        if (current_move == last_used_moves[bank_attacker])
+        {
+            if (new_battlestruct.ptr->bank_affecting[bank_attacker].same_move_used < 5)
+                new_battlestruct.ptr->bank_affecting[bank_attacker].same_move_used++;
+        }
+        else
+            new_battlestruct.ptr->bank_affecting[bank_attacker].same_move_used = 0;
     }
     else
         battle_state_mode=0xC;
