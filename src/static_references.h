@@ -139,5 +139,7 @@ extern void* rapidspinontoxicspikes_bs;
 extern void* defogblows_bs;
 extern void* powerherb_bs;
 extern void* aquaring_bs;
-
+extern void* assaultvest_bs;
+extern void* gravityprevents2_bs;
+extern void* cantselecthealblock_bs;
 #endif /* static_references */
