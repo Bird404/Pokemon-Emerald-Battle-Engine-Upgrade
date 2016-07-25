@@ -14,7 +14,6 @@ struct bank_affecting{
     u8 smacked_down : 1;
     u8 quashed : 1;
     u8 just_switched_in : 1;
-    u8 taken_damage : 1;
     u8 ally_fainted_last_turn : 1;
     u8 miracle_eyed : 1;
     u8 spiky_shield : 1;
@@ -46,7 +45,11 @@ struct bank_affecting{
     u8 type3 : 5;
     u8 stat_lowered : 1;
     u8 roost : 3;
+    u8 bugbite : 1;
+    s8 stockpile_def_changes;
+    s8 stockpile_sp_def_changes;
     u8 autonomize_uses;
+    u16 wish_hp;
 };
 
 struct side_affecting{
@@ -99,6 +102,7 @@ struct various{
     u16 var1;
     u16 var2;
     u16 recently_used_item;
+    u16 previous_move;
 };
 
 struct new_battle_struct{
