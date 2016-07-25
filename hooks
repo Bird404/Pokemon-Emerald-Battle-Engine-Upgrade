@@ -15,3 +15,5 @@ update_turn_counters	080401D0	0
 fill_with_default_moves	08069270	1
 teach_move_player	08069318	2
 can_select_this_random_move	08052F84	1
+check_move_limitations 0803FECC 3
+message_cant_choose_move 0803FB4C 0
