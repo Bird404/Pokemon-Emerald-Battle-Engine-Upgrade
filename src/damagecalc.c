@@ -16,7 +16,7 @@ extern u16 sheerforce_moves_table[];
 extern u16 biting_moves_table[];
 extern u16 megalauncher_moves_table[];
 u8 get_airborne_state(u8 bank, u8 mode, u8 check_levitate);
-u8 can_lose_item(u8 bank, u8 sticky_msg);
+u8 can_lose_item(u8 bank, u8 stickyholdcheck, u8 sticky_message);
 
 #define MOVE_PHYSICAL 0
 #define MOVE_SPECIAL 1
@@ -268,28 +268,32 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
             break;
         case MOVE_RETURN:
             {
-                u32 return_damage = battle_participants[bank_attacker].happiness * 10 / 25;
+                u32 return_damage = battle_participants[atk_bank].happiness * 10 / 25;
                 if (return_damage == 0)
                     return_damage = 1;
                 base_power = return_damage;
             }
+            break;
         case MOVE_FRUSTRATION:
             {
-                u32 frustration_damage = (255 - battle_participants[bank_attacker].happiness) * 10 / 25;
+                u32 frustration_damage = (255 - battle_participants[atk_bank].happiness) * 10 / 25;
                 if (frustration_damage == 0)
                     frustration_damage = 1;
                 base_power = frustration_damage;
             }
+            break;
         case MOVE_FURY_CUTTER:
         case MOVE_ROLLOUT:
         case MOVE_MAGNITUDE:
         case MOVE_PRESENT:
-        case MOVE_SPIT_UP:
         case MOVE_TRIPLE_KICK:
             if (dynamic_base_power)
             {
                 base_power = dynamic_base_power;
             }
+            break;
+        case MOVE_SPIT_UP:
+            base_power = 100 * disable_structs[atk_bank].stockpile_counter;
             break;
         case MOVE_REVENGE:
         case MOVE_AVALANCHE:
@@ -298,6 +302,7 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
                 if ((protect_str->physical_damage && protect_structs->counter_target == bank_target) || (protect_str->special_damage && protect_structs->mirrorcoat_target == bank_target))
                     base_power *= 2;
             }
+            break;
         case MOVE_WEATHER_BALL:
         case MOVE_PURSUIT:
             if (battle_scripting.damage_multiplier)
@@ -317,6 +322,7 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
             {
                 base_power *= 2;
             }
+            break;
         case MOVE_SMELLING_SALTS:
             if (battle_participants[def_bank].status.flags.paralysis)
             {
@@ -335,6 +341,7 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
                 base_power = wringout_power;
                 break;
             }
+            break;
         case MOVE_HEX:
             if (battle_participants[def_bank].status.int_status)
             {
@@ -801,13 +808,13 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
     case MOVE_EARTHQUAKE:
     case MOVE_MAGNITUDE:
     case MOVE_BULLDOZE:
-        if (new_battlestruct.ptr->field_affecting.grassy_terrain && get_airborne_state(def_bank, 1, 1) <= 1)
+        if (new_battlestruct.ptr->field_affecting.grassy_terrain && get_airborne_state(def_bank, 1, 1) <= 2)
         {
             modifier = chain_modifier(modifier, 0x800);
         }
         break;
     case MOVE_KNOCK_OFF:
-        if (battle_participants[def_bank].held_item && can_lose_item(def_bank, 0))
+        if (battle_participants[def_bank].held_item && can_lose_item(def_bank, 0, 0))
         {
             modifier = chain_modifier(modifier, 0x1800);
         }
@@ -819,29 +826,27 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
         modifier = chain_modifier(modifier, 0x1800);
     }
 
-    if (status3[atk_bank].charged_up)
+    if (status3[atk_bank].charged_up && move_type == TYPE_ELECTRIC)
     {
         modifier = chain_modifier(modifier, 0x2000);
     }
-
     if ((move_type == TYPE_ELECTRIC && ability_battle_effects(0xE, 0, 0, 0xFD, 0)) || (move_type == TYPE_FIRE && ability_battle_effects(0xE, 0, 0, 0xFE, 0))) //mud and water sports
     {
         modifier = chain_modifier(modifier, 0x548);
     }
-
     if (new_battlestruct.ptr->bank_affecting[atk_bank].me_first)
     {
         modifier = chain_modifier(modifier, 0x1800);
     }
-    if (new_battlestruct.ptr->field_affecting.grassy_terrain && get_airborne_state(atk_bank, 0, 1) <= 1 && move_type == TYPE_GRASS)
+    if (new_battlestruct.ptr->field_affecting.grassy_terrain && get_airborne_state(atk_bank, 0, 1) <= 2 && move_type == TYPE_GRASS)
     {
         modifier = chain_modifier(modifier, 0x1800);
     }
-    if (new_battlestruct.ptr->field_affecting.misty_terrain && get_airborne_state(def_bank, 1, 1) >= 1 && move_type == TYPE_DRAGON)
+    if (new_battlestruct.ptr->field_affecting.misty_terrain && get_airborne_state(def_bank, 1, 1) >= 2 && move_type == TYPE_DRAGON)
     {
         modifier = chain_modifier(modifier, 0x800);
     }
-    if (new_battlestruct.ptr->field_affecting.electic_terrain && get_airborne_state(atk_bank, 0, 1) >= 1 && move_type == TYPE_ELECTRIC)
+    if (new_battlestruct.ptr->field_affecting.electic_terrain && get_airborne_state(atk_bank, 0, 1) >= 2 && move_type == TYPE_ELECTRIC)
     {
         modifier = chain_modifier(modifier, 0x1800);
     }
@@ -865,10 +870,7 @@ u16 get_attack_stat(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
     u8 attack_boost;
     if (move_split == MOVE_PHYSICAL)
     {
-        if(new_battlestruct.ptr->bank_affecting[atk_bank].powertrick && stat_bank==atk_bank)
-            attack_stat = battle_participants[stat_bank].def;
-        else
-            attack_stat = battle_participants[stat_bank].atk;
+        attack_stat = battle_participants[stat_bank].atk;
         attack_boost = battle_participants[stat_bank].atk_buff;
     }
     else
@@ -1055,10 +1057,7 @@ u16 get_def_stat(u16 move, u8 atk_bank, u8 def_bank)
     }
     else //def
     {
-        if(new_battlestruct.ptr->bank_affecting[def_bank].powertrick)
-            def_stat = battle_participants[def_bank].atk;
-        else
-            def_stat = battle_participants[def_bank].def;
+        def_stat = battle_participants[def_bank].def;
         def_boost = battle_participants[def_bank].def_buff;
     }
 
