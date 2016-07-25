@@ -77,6 +77,8 @@ slot_in_learnset_table = 0x020244E8;
 move_to_learn = 0x020244E2;
 tai_current_instruction = 0x0203AB38;
 tai_bank = 0x0203AB3C;
+battle_bufferA = 0x02023064;
+battle_bufferB = 0x02023864;
 
 poison_status_flag = 0x0831BC70;
 sleep_status_flag = 0x0831BC78;
