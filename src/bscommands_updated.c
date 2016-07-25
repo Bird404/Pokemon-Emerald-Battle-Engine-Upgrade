@@ -1874,3 +1874,29 @@ void atkCC_nature_power()
     return;
 }
 
+void atkB7_present_calc()
+{
+    u32 random_rumber = __umodsi3(rng() + 100, 101);
+    if (random_rumber < 40)
+        dynamic_base_power = 40;
+    else if (random_rumber < 70)
+        dynamic_base_power = 80;
+    else if (random_rumber < 80)
+        dynamic_base_power = 120;
+    else
+    {
+        dynamic_base_power = 0;
+        if (battle_participants[bank_target].current_hp >= battle_participants[bank_target].max_hp)
+            battlescripts_curr_instruction = (void*) 0x082D9EFB;
+        else if (new_battlestruct.ptr->bank_affecting[bank_target].heal_block)
+            battlescripts_curr_instruction = &healblock_prevents_usage_bs;
+        else
+        {
+            damage_loc = get_1_4_of_max_hp(bank_target) * (-1);
+            battlescripts_curr_instruction = (void*) 0x082D9EE1;
+        }
+
+    }
+    if (dynamic_base_power)
+        battlescripts_curr_instruction = (void*) 0x082D8A30;
+}
