@@ -9,6 +9,7 @@
 u8 check_ability(u8 bank, u8 ability);
 u8 change_stats(s8 arg1, s8 arg2, s8 arg3, void* battlescript_if_fails);
 void statustoeffect();
+u8 find_move_in_table(u16 move, u16 table_ptr[]);
 
 u8 get_attacking_move_type()
 {
@@ -2437,6 +2438,8 @@ u8 check_if_move_failed(u8 bank)
         return 1;
     if (failed->flag2_flinch_immobility)
         return 1;
+    if (failed->flag1_noteffective)
+        return 1;
     if (new_battlestruct.ptr->bank_affecting[bank].move_failed)
         return 1;
     return 0;
@@ -2472,11 +2475,11 @@ void effect_stat_change(void* pointer)
     battlescripts_curr_instruction = pointer;
 }
 
-u8 can_lose_item(u8 bank, u8 sticky_message)
+u8 can_lose_item(u8 bank, u8 stickyhold_check, u8 sticky_message)
 {
     u8 can_lose = 1;
     u16 item = battle_participants[bank].held_item;
-    if (battle_participants[bank].ability_id == ABILITY_STICKY_HOLD && has_ability_effect(bank, 1, 1))
+    if (stickyhold_check && battle_participants[bank].ability_id == ABILITY_STICKY_HOLD && has_ability_effect(bank, 1, 1))
     {
         can_lose = 0;
         if (sticky_message)
@@ -2488,7 +2491,7 @@ u8 can_lose_item(u8 bank, u8 sticky_message)
         }
     }
     else if (item == ITEM_ENIGMABERRY || item_is_mail(item))
-        can_lose = 1;
+        can_lose = 0;
     //mega stones, drives for genesects and plates for Arceus else if ()
     return can_lose;
 }
@@ -2522,7 +2525,7 @@ void move_effect_setter(u8 primary, u8 certain)
         battle_scripting.active_bank = bank_attacker;
     }
     bank_partner_def = bank_to_apply;
-    if (check_ability(bank_attacker, ABILITY_SHEER_FORCE) && bank_to_apply != bank_attacker && !primary && *move_effect < 0x30)
+    if (check_ability(bank_attacker, ABILITY_SHEER_FORCE) && bank_to_apply != bank_attacker && !primary && find_move_in_table(current_move, &sheerforce_moves_table[0]) && *move_effect < 0x30)
         *move_effect = 0; //move effects past 0x30 affect always the attacker
 
     struct battle_participant* applier_bank = &battle_participants[bank_to_apply];
@@ -2589,7 +2592,7 @@ void move_effect_setter(u8 primary, u8 certain)
             {
                 if (check_ability(bank_to_apply, ABILITY_INNER_FOCUS))
                 {
-                    if (certain == 0x80)
+                    if (certain || primary)
                     {
                         last_used_ability = ABILITY_INNER_FOCUS;
                         record_usage_of_ability(bank_to_apply, ABILITY_INNER_FOCUS);
@@ -2623,7 +2626,7 @@ void move_effect_setter(u8 primary, u8 certain)
                 else
                     applier_bank->status2.trapped_in_wrap = 4 + (rng() & 1);
                 battle_stuff_ptr.ptr->trapped_move[bank_to_apply] = current_move;
-                battle_stuff_ptr.ptr->trapper = bank_attacker;
+                battle_stuff_ptr.ptr->trapper[bank_to_apply] = bank_attacker;
                 new_battlestruct.ptr->bank_affecting[bank_to_apply].wrap_bank = battle_scripting.active_bank;
                 battlescript_push();
                 battlescripts_curr_instruction = &wrapped_bs;
@@ -2646,11 +2649,64 @@ void move_effect_setter(u8 primary, u8 certain)
                         *(stat_ptr + i) = 6;
                     }
                 }
-                if (effect)
+                if (effect && current_hp)
                 {
                     battlescript_push();
                     battlescripts_curr_instruction = &clearstats_bs;
                 }
+            }
+            break;
+         case 13: //steal item
+            {
+                u16* targets_item = &applier_bank->held_item;
+                u16* attackers_item = &battle_participants[bank_attacker].held_item;
+                u8 stickymsg = 0;
+                if (primary || certain)
+                    stickymsg = 1;
+                if (*targets_item && *attackers_item == 0 && can_lose_item(bank_target, 1, stickymsg))
+                {
+                    battlescript_push();
+                    battlescripts_curr_instruction = (void*) 0x82DB422;
+                    last_used_item = *targets_item;
+                    *attackers_item = *targets_item;
+                    *targets_item = 0;
+                    active_bank = bank_to_apply;
+                    prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, targets_item);
+                    mark_buffer_bank_for_execution(active_bank);
+                    active_bank = bank_attacker;
+                    prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, attackers_item);
+                    mark_buffer_bank_for_execution(active_bank);
+                    battle_stuff_ptr.ptr->choiced_move[bank_to_apply] = 0;
+                }
+            }
+            break;
+         case 14: //smack poke down
+             if (current_hp && new_battlestruct.ptr->bank_affecting[bank_to_apply].smacked_down == 0 && (get_airborne_state(bank_to_apply, 1, 1) >= 3 || is_of_type(bank_to_apply, TYPE_FLYING) || status3[bank_to_apply].on_air || new_battlestruct.ptr->bank_affecting[bank_to_apply].sky_drop_attacker || new_battlestruct.ptr->bank_affecting[bank_to_apply].sky_drop_target))
+             {
+                 new_battlestruct.ptr->bank_affecting[bank_to_apply].smacked_down = 1;
+                 new_battlestruct.ptr->bank_affecting[bank_to_apply].magnet_rise = 0;
+                 new_battlestruct.ptr->bank_affecting[bank_to_apply].telekinesis = 0;
+                 status3[bank_to_apply].on_air = 0;
+                 battlescript_push();
+                 battlescripts_curr_instruction = &smackdown_bs;
+             }
+            break;
+        case 15: //rapid spin
+            if (MOVE_WORKED && battle_participants[bank_attacker].current_hp)
+            {
+                battlescript_push();
+                battlescripts_curr_instruction = (void*) 0x82DAFC3;
+            }
+            break;
+        case 0x10: //knock off
+            if (applier_bank->held_item && can_lose_item(bank_to_apply, 1, 1))
+            {
+                last_used_item = applier_bank->held_item;
+                applier_bank->held_item = 0;
+                battle_effects_duration.knocked_off_pokes[is_bank_from_opponent_side(bank_to_apply)] |= bits_table[battle_team_id_by_side[bank_to_apply]];
+                battlescript_push();
+                battlescripts_curr_instruction = (void*) 0x082DB168;
+                battle_stuff_ptr.ptr->choiced_move[bank_to_apply] = 0;
             }
             break;
         case 0x11: //stat +1
@@ -2715,7 +2771,64 @@ void move_effect_setter(u8 primary, u8 certain)
             disable_structs[bank_to_apply].recharge_counter = 2;
             locked_move[bank_to_apply] = current_move;
             break;
-    }
+        case 0x32: //rage setter
+            applier_bank->status2.raged = 1;
+            break;
+        case 0x33: //payday
+            if (!is_bank_from_opponent_side(bank_to_apply))
+            {
+                u16 to_give = 5 * applier_bank->level;
+                if (payday_money + to_give > 0xFFFF)
+                    payday_money = 0xFFFF;
+                else
+                {
+                    payday_money += to_give;
+                    battlescript_push();
+                    battlescripts_curr_instruction = (void*) 0x082DB3D6;
+                }
+            }
+            break;
+        case 0x34: //uproar
+            if (applier_bank->status2.uproar == 0 && MOVE_WORKED)
+            {
+                applier_bank->status2.uproar = 3;
+                applier_bank->status2.multiple_turn_move = 1;
+                locked_move[bank_to_apply] = current_move;
+                battlescript_push();
+                battlescripts_curr_instruction = (void*) 0x82DB3C2;
+            }
+            break;
+        case 0x35: //set thrash
+            if (applier_bank->status2.locked_and_confuse == 0 && MOVE_WORKED)
+            {
+                applier_bank->status2.locked_and_confuse = 2 + (rng() & 1);
+                applier_bank->status2.multiple_turn_move = 1;
+                locked_move[bank_to_apply] = current_move;
+            }
+            break;
+        case 0x36: //berry eating
+            if (MOVE_WORKED && get_item_pocket_id(battle_participants[bank_to_apply].held_item == 4))
+            {
+                u8 arg = move_table[current_move].arg1 & 1;
+                new_battlestruct.ptr->bank_affecting[bank_attacker].bugbite = arg;
+                if (!arg)
+                {
+                    u16* berry = &battle_participants[bank_to_apply].held_item;
+                    last_used_item = *berry;
+                    *berry = 0;
+                    battlescript_push();
+                    battlescripts_curr_instruction = &incinerateberry_bs;
+                    active_bank = bank_to_apply;
+                    prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, berry);
+                    mark_buffer_bank_for_execution(bank_to_apply);
+                }
+            }
+            break;
+        case 0x37: //set twoturn move
+            battle_participants[bank_to_apply].status2.multiple_turn_move = 1;
+            locked_move[bank_to_apply] = current_move;
+            break;
+        }
     if (status_change != 8)
     {
         switch (status_change)
@@ -2792,7 +2905,7 @@ u8 battle_turn_move_effects()
                     ptr_to_struct->spiky_shield = 0;
                     break;
                 case 1: //ingrain
-                    if (current_hp && current_hp < attacker_struct->max_hp && status3[active_bank].rooted)
+                    if (current_hp && current_hp < attacker_struct->max_hp && status3[active_bank].rooted && !ptr_to_struct->heal_block)
                     {
                         damage_loc = get_1_16_of_max_hp(active_bank) * -1;
                         effect = 1;
@@ -2800,11 +2913,12 @@ u8 battle_turn_move_effects()
                     }
                     break;
                 case 2: //aqua ring
-                    if (current_hp && current_hp < attacker_struct->max_hp && new_battlestruct.ptr->bank_affecting[active_bank].aqua_ring)
+                    if (current_hp && current_hp < attacker_struct->max_hp && ptr_to_struct->aqua_ring && !ptr_to_struct->heal_block)
                     {
                         damage_loc = get_1_16_of_max_hp(active_bank) * -1;
                         effect = 1;
-                        //to write script for it
+                        hitmarker |= HITMARKER_IGNORE_SUBSTITUTE;
+                        call_bc_move_exec(&aquaring_bs);
                     }
                     break;
                 case 3: //end turn ability effects
