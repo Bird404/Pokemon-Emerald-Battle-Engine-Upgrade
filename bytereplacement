@@ -25,8 +25,6 @@
 0806B3E4 00 00
 ## nop cmd6
 0831BD28 41 06 05 08
-## nop in the uproar script
-082D9F5A 06
 ## smellingsalts text now allows all conditions
 085CA024 FD 00 AB FF
 ## intimidate uses bank attacker
@@ -34,3 +32,12 @@
 085CB0F1 0F
 ## battlestring for stat change now uses scripting active and not target/attacker banks because of a certain problem
 085CA05F 13
+## magnitude calc not changing the target bank
+08053E56 00 00
+08053E8A 00 00
+## spite always taking 4pp
+080532EA 04 20 00 00 06 1C
+## make speed button faster
+080008AC 00 B5 05 4A 13 88 01 20 83 43 13 80 02 DF 13 88 03 42 FB D0 00 BD 00 00 DC 22 00 03
+## Trick usable for wild/trainer Pokemon
+08054EDA 02
