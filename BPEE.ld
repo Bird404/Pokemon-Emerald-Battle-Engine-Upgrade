@@ -63,6 +63,7 @@ side_timers = 0x02024294;
 absent_bank_flags = 0x02024210;
 battle_outcome = 0x0202433A;
 battle_state_mode = 0x02024083;
+battle_state_mode_first_assigned = 0x0202307A;
 current_move_position = 0x020241E8;
 locked_move = 0x02024268;
 payday_money = 0x0202432E;
@@ -80,6 +81,8 @@ tai_bank = 0x0203AB3C;
 battle_bufferA = 0x02023064;
 battle_bufferB = 0x02023864;
 
+b_c = 0x3005D04;
+
 poison_status_flag = 0x0831BC70;
 sleep_status_flag = 0x0831BC78;
 paralysis_status_flag = 0x0831BC80;
@@ -91,6 +94,7 @@ terrain_to_type_table = 0x0831C483;
 some_strings_table =  0x085CC834;
 protect_chance_table = 0x0831C3D8;
 
+bc_bs_executer = 0x0803D818|1;
 prepare_setattributes_in_battle = 0x08033900|1;
 strcpy_xFF_terminated_0 = 0x08008BA0|1;
 get_item_x12_battle_function = 0x080D74DC|1;
@@ -153,6 +157,7 @@ get_lvl_from_exp = 0x080690C0|1;
 teach_move_in_available_slot = 0x08069140|1;
 new_move_for_the_first = 0x080694D0|1;
 get_ai_bank = 0x08131E70|1;
+clear_atk_up_if_hit_flag_unless_enraged = 0x08041A1C|1;
 
 attack_iteration_cleanup = 0x804AF30|1;
 prepare_pokemon_battle_sprite_manipulation_buffer = 0x08034414|1;
