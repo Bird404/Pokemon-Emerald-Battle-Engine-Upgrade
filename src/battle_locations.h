@@ -47,6 +47,7 @@ u32 status_flags_for_move_effects[0x3F];
 void* battlescripts_for_moveeffects[0x3F];
 s32 hp_dealt;
 u8 battle_state_mode;
+u8 battle_state_mode_first_assigned;
 u8 terrain_to_type_table[10];
 u8 battle_background;
 u32 taken_damage[4];
@@ -58,6 +59,7 @@ u8 tai_bank;
 u32 battle_execution_buffer;
 u16 some_strings_table[4];
 u16 protect_chance_table[4];
+void *b_c;
 
 u32 poison_status_flag;
 u32 sleep_status_flag;
