@@ -59,6 +59,8 @@ u8 get_lvl_from_exp(struct pokemon*);
 u16 teach_move_in_available_slot(struct pokemon* , u16 move);
 void new_move_for_the_first(struct pokemon*, u16 move);
 u8 get_ai_bank(u8 arg);
+void clear_atk_up_if_hit_flag_unless_enraged();
+void bc_bs_executer();
 
 u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);
