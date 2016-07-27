@@ -221,7 +221,9 @@ struct battle_stuff{
     u8 field_12; //0x12
     u8 dynamic_move_type; //0x13
     u8 trapper[4];//0x14
-    u8 field_15[50]; //0x15-0x49
+    u8 field_15[51]; //0x15-0x49
+    u8 pre_attacks_bank_counter; //0x48
+    u8 field_49; //0x49
     u8 money_multiplier; //0x4A
     u8 field_4B; //0x4B
     u8 switch_in_ability_bank_counter; //0x4C
@@ -412,8 +414,16 @@ struct b_resources_field0{
     struct battle_history *battle_history;
 };
 
+struct battlescript_stack{
+    u8 stack_data[32];
+    u8 stack_height;
+    u8 undefined[3];
+};
+
 struct battle_resources{
     struct b_resources_field0 *field0_ptr;
+    u32 field4;
+    struct battlescript_stack *battlescript_stack;
 };
 
 struct b_resources_ptr{
@@ -451,18 +461,19 @@ extern struct move_outcome move_outcome;
 
 //temp
 u32 hitmarker;
+#define HITMARKER_NO_ANIMATIONS 0x80
+#define HITMARKER_IGNORE_SUBSTITUTE 0x100
+#define HITMARKER_NO_ATTACKSTRING 0x200 //used in dual foe and user defrosting moves
+#define HITMARKER_NO_ATTACKSTRING2 0x400
+#define HITMARKER_NO_PPDEDUCT 0x800
+#define HITMARKER_PURSUIT_TRAP 0x1000
 #define HITMAKRER_IGNORE_SAFEGUARD 0x2000
+#define HITMARKER_FLEE 0x8000
 #define HITMARKER_IGNORE_ON_AIR 0x10000
 #define HITMERKER_IGNORE_UNDERGROUND 0x20000
 #define HITMARKER_IGNORE_UNDERWATER 0x40000
 #define HITMARKER_IMMOBILE_DUE_TO_STATUS 0x80000
 #define HITMARKER_OBEYS 0x2000000
-#define HITMARKER_IGNORE_SUBSTITUTE 0x100
-#define HITMARKER_NO_ANIMATIONS 0x80
-#define HITMARKER_PURSUIT_TRAP 0x1000
-#define HITMARKER_NO_ATTACKSTRING 0x200 //used in dual foe and user defrosting moves
-#define HITMARKER_NO_ATTACKSTRING2 0x400
-#define HITMARKER_NO_PPDEDUCT 0x800
 #define HITMARKER_FAINTED(bank) (bits_table[bank]>>0x1C)
 
 struct side_affecting_hword{
