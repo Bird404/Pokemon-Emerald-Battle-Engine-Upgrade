@@ -142,4 +142,6 @@ extern void* aquaring_bs;
 extern void* assaultvest_bs;
 extern void* gravityprevents2_bs;
 extern void* cantselecthealblock_bs;
+extern void* quickclaw_bs;
+extern void* custapberry_bs;
 #endif /* static_references */
