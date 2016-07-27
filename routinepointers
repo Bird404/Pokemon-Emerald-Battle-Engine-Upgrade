@@ -42,3 +42,6 @@ atkE2_switchout_abilities 0831C098
 atkEB_set_type_to_terrain 0831C0BC
 ###start attack
 bs_start_attack 0831BC0C
+###pre attacks
+bc_preattacks 0803D43C
+bc_preattacks 0803D578
