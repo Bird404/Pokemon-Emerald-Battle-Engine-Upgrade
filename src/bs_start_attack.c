@@ -336,3 +336,47 @@ void bs_start_attack()
     else
         battle_state_mode=0xC;
 }
+
+s8 get_bracket_alteration_factor(u8 bank, u8 item_effect);
+
+void bc_preattacks()
+{
+    u8 play_script=0;
+    u8 *count = &(battle_stuff_ptr.ptr->pre_attacks_bank_counter);
+    if(!(hitmarker&HITMARKER_FLEE))
+    {
+        while(*count<no_of_all_banks)
+        {   bank_attacker=*count;
+            (*count)++;
+            if((!battle_participants[bank_attacker].status.flags.sleep || chosen_move_by_banks[bank_attacker]==MOVE_SLEEP_TALK
+                || chosen_move_by_banks[bank_attacker]==MOVE_SNORE) && !(disable_structs[bank_attacker].truant_counter&1))
+            {
+                u8 item_effect=get_item_effect(bank_attacker,1);
+                s8 alteration_occurs=get_bracket_alteration_factor(bank_attacker,item_effect);
+                if(alteration_occurs==1)
+                {
+                    if(item_effect==ITEM_EFFECT_QUICKCLAW)
+                        call_bc_move_exec(&quickclaw_bs);
+                    else if(item_effect==ITEM_EFFECT_CUSTAPBERRY)
+                        call_bc_move_exec(&custapberry_bs);
+                    play_script=1;
+                    last_used_item=battle_participants[bank_attacker].held_item;
+                    break;
+                }
+            }
+        }
+    }
+    if(!play_script)
+    {
+        clear_atk_up_if_hit_flag_unless_enraged();
+        current_move_turn=0;
+        battle_state_mode=battle_state_mode_first_assigned;
+        dynamic_base_power=0;
+        battle_stuff_ptr.ptr->dynamic_move_type=0;
+        b_c=&bc_bs_executer;
+        battle_communication_struct.move_effect=0;
+        battle_communication_struct.field4=0;
+        battle_scripting.field16=0;
+        battle_resources_ptr.ptr->battlescript_stack->stack_height=0;
+    }
+}
