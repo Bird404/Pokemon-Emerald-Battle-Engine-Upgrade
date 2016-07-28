@@ -28,6 +28,7 @@ u8 get_target_of_move(u16 move, u8 target_given, u8 adjust);
 void* get_move_battlescript_ptr(u16 move);
 u8 affected_by_substitute(u8 bank);
 u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8 effects_handling_and_recording);
+void set_attacking_move_type();
 
 void atk7D_set_rain()
 {
@@ -1820,7 +1821,8 @@ void atk9E_metronome_chooser()
 
     hitmarker &= 0xFFFFFBFF;
     battlescripts_curr_instruction = get_move_battlescript_ptr(current_move);
-    bank_target = get_target_of_move(current_move, 0, 1);
+    bank_target = get_target_of_move(current_move, 0, 0);
+    set_attacking_move_type();
 }
 
 void atkC5_hide_pre_attack()
@@ -1868,7 +1870,8 @@ void atkCC_nature_power()
         current_move = MOVE_THUNDERBOLT;
     else
         current_move = naturepower_table[battle_background];
-    bank_target = get_target_of_move(current_move, 0, 1);
+    bank_target = get_target_of_move(current_move, 0, 0);
+    set_attacking_move_type();
     battlescript_custom_push(get_move_battlescript_ptr(current_move));
     battlescripts_curr_instruction++;
     return;
