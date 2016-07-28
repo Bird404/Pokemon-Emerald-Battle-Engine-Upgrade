@@ -348,8 +348,7 @@ void bc_preattacks()
         while(*count<no_of_all_banks)
         {   bank_attacker=*count;
             (*count)++;
-            if((!battle_participants[bank_attacker].status.flags.sleep || chosen_move_by_banks[bank_attacker]==MOVE_SLEEP_TALK
-                || chosen_move_by_banks[bank_attacker]==MOVE_SNORE) && !(disable_structs[bank_attacker].truant_counter&1))
+            if(menu_choice_pbs[bank_attacker]==0)
             {
                 u8 item_effect=get_item_effect(bank_attacker,1);
                 s8 alteration_occurs=get_bracket_alteration_factor(bank_attacker,item_effect);
