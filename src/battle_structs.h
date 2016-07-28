@@ -220,8 +220,8 @@ struct battle_stuff{
     u8 field_11; //0x11
     u8 field_12; //0x12
     u8 dynamic_move_type; //0x13
-    u8 trapper[4];//0x14
-    u8 field_15[51]; //0x15-0x49
+    u8 trapper[4];//0x14-0x17
+    u8 field_18[48]; //0x18-0x47
     u8 pre_attacks_bank_counter; //0x48
     u8 field_49; //0x49
     u8 money_multiplier; //0x4A
