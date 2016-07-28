@@ -101,7 +101,7 @@ jumpifbyte 0x4 0x202427C 0x29 \jumpiftypenotaffected_address
 .byte 0xD
 .endm
 
-.macro missmessage
+.macro effectiveness_sound
 .byte 0xE
 .endm
 
