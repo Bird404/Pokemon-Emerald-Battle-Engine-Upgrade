@@ -64,8 +64,10 @@ u8 get_first_to_strike(u8 bank1, u8 bank2, u8 ignore_priority)
         s8 priority2 = 0;
         u16 move1 = battle_participants[bank1].moves[battle_stuff_ptr.ptr->chosen_move_position[bank1]];
         u16 move2 = battle_participants[bank2].moves[battle_stuff_ptr.ptr->chosen_move_position[bank2]];
-        priority1 = get_priority(move1, bank1);
-        priority2 = get_priority(move2, bank2);
+        if(menu_choice_pbs[bank1]==0)
+            priority1 = get_priority(move1, bank1);
+        if(menu_choice_pbs[bank2]==0)
+            priority2 = get_priority(move2, bank2);
         if (priority1 > priority2)
             faster=0;
         else if (priority2 > priority1)
