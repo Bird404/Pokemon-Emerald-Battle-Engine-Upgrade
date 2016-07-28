@@ -29,6 +29,7 @@ bits_table = 0x0832A328;
 chosen_move_by_banks = 0x02024274;
 battle_team_id_by_side = 0x0202406E;
 battle_execution_buffer = 0x02024068;
+menu_choice_pbs = 0x202421C;
 
 bank_attacker = 0x0202420B;
 bank_target = 0x0202420C;
