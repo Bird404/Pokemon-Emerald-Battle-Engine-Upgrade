@@ -25,6 +25,7 @@
 .equ HitMarkerNoAnimations, 0x80
 .equ HitMarkerHitsSubstitute, 0x100
 .equ HitMarkerHitsOnAir, 0x10000
+.equ StatChanger, 0x0202448E
 
 @status3
 .equ status3_charged_up, 0x200
@@ -184,12 +185,12 @@ battlescripts_table:
 .word 0x082D96A5 		@101 Spite
 .word BELLYDRUMLIKE		@102 Belly Drum, arg1 is what stat we're maxing
 .word 0x082D968E 		@103 destiny bond
-.word ATTACKING_MOVE	@104 currently nothing
+.word 0x082D986D		@104 Curse
 .word ROLLOUT         	@105 Rollout, Ice Ball
 .word FURYCUTTER     	@106 fury cutter
 .word 0x082D964C		@107 Sleep Talk
 .word ATTACKING_MOVE @	.word HEAL_BELL             	108
-.word ATTACKING_MOVE @	.word PRESENT               	109
+.word PRESENTT          @109 Present
 .word 0x082D9A8E		@110 Safeguard
 .word 0x082D9585 		@111 Pain Split
 .word 0x082D9AB5 		@112 Baton Pass
@@ -236,7 +237,7 @@ battlescripts_table:
 .word TELEKINESIS      	@153 Telekinesis
 .word SMACK_DOWN 		@154 Smack Down
 .word CHANGE_TARGET_TYPE_TO	@155 @arg1 is type to change target into
-.word ATTACKING_MOVE @	".word SHELLSMASH			"	156
+.word SHELLSMASH		@156 Shell Smash
 .word ATTACKING_MOVE @	".word SKYDROP				"	157
 .word SHIFTGEAR			@158 Shift Gear; arg1 stats to raise + 2; arg2 stats to raise + 1
 .word ATTACKING_MOVE @	".word QUASHH				"	159
@@ -246,6 +247,88 @@ battlescripts_table:
 .word 0x082D9B55		@163 Sunny Day
 .word 0x082D9FD2		@164 Hail
 
+PRESENTT:
+	attackcanceler
+	accuracycheck MOVE_MISSED 0x0
+	jumpiftypenotaffected MOVE_FAILED
+	attackstring
+	ppreduce
+	presentdamagecalculation
+
+SHELLSMASH:
+	attackcanceler
+	attackstring
+	ppreduce
+	jumpifstat bank_attacker 0x1 0x2 0x0 SHELLSMASHDEF
+	jumpifstat bank_attacker 0x1 0x5 0x0 SHELLSMASHDEF
+	jumpifstat bank_attacker 0x1 0x1 0xC SHELLSMASHDEF
+	jumpifstat bank_attacker 0x1 0x3 0xC SHELLSMASHDEF
+	jumpifstat bank_attacker 0x0 0x4 0xC MOVE_FAILED + 2
+SHELLSMASHDEF:
+	attackanimation
+	waitanimation
+	setbyte StatChanger 0x92
+	statbuffchange 0x41 SHELLSMASHSPDEF
+	jumpifbyte 0x1 0x2024337 0x2 SHELLSMASHDEFCHANGE
+	pause_cmd 0x10
+	call STATBUFF_CHANGE_NEGATIVE_MSG
+	goto_cmd SHELLSMASHSPDEF
+SHELLSMASHDEFCHANGE:
+	call STATBUFF_CHANGE_NEGATIVE
+SHELLSMASHSPDEF:
+	setbyte StatChanger 0x95
+	statbuffchange 0x41 SHELLSMASHATK
+	jumpifbyte 0x1 0x2024337 0x2 SHELLSMASHSPDEF_CHANGE
+	pause_cmd 0x10
+	call STATBUFF_CHANGE_NEGATIVE_MSG
+	goto_cmd SHELLSMASHATK
+SHELLSMASHSPDEF_CHANGE:
+	call STATBUFF_CHANGE_NEGATIVE
+SHELLSMASHATK:
+	setbyte StatChanger 0x21
+	statbuffchange 0x41 SHELLSMASHSPATK
+	jumpifbyte 0x1 0x2024337 0x2 SHELLSMASHATK_CHANGE
+	pause_cmd 0x10
+	call STATBUFF_CHANGE_POSITIVE_MSG
+	goto_cmd SHELLSMASHSPATK
+SHELLSMASHATK_CHANGE:
+	call STATBUFF_CHANGE_POSITIVE
+SHELLSMASHSPATK:
+	setbyte StatChanger 0x24
+	statbuffchange 0x41 SHELLSMASHSPD
+	jumpifbyte 0x1 0x2024337 0x2 SHELLSMASHSPATK_CHANGE
+	pause_cmd 0x10
+	call STATBUFF_CHANGE_POSITIVE_MSG
+	goto_cmd SHELLSMASHSPD
+SHELLSMASHSPATK_CHANGE:
+	call STATBUFF_CHANGE_POSITIVE
+SHELLSMASHSPD:
+	setbyte StatChanger 0x23
+	statbuffchange 0x41 ENDTURN
+	jumpifbyte 0x1 0x2024337 0x2 SHELLSMASHSPD_CHANGE
+	pause_cmd 0x10
+	call STATBUFF_CHANGE_POSITIVE_MSG
+	goto_cmd ENDTURN
+SHELLSMASHSPD_CHANGE:
+	call STATBUFF_CHANGE_POSITIVE
+	goto_cmd ENDTURN
+	
+STATBUFF_CHANGE_POSITIVE:
+	cmd47
+	playanimation 0x1 0x1 0x2024484
+STATBUFF_CHANGE_POSITIVE_MSG:
+	printfromtable 0x85CC89C
+	waitmessage 0x40
+	return_cmd
+	
+STATBUFF_CHANGE_NEGATIVE:
+	cmd47
+	playanimation 0x1 0x1 0x2024484
+STATBUFF_CHANGE_NEGATIVE_MSG:
+	printfromtable 0x85CC8A8
+	waitmessage 0x40
+	return_cmd
+
 SHIFTGEAR:
 	attackcanceler
 	callasm_cmd 28
@@ -254,6 +337,29 @@ SHIFTGEAR:
 	ppreduce
 	attackanimation
 	waitanimation
+	setbyte StatChanger 0x23
+	statbuffchange bank_attacker | Override SHIFTGEARATTACK
+	jumpifbyte 0x1 0x2024337 0x2 SHIFTGEARSPEED
+	pause_cmd 0x10
+	goto_cmd SHIFTGEARSPEEDMSG
+SHIFTGEARSPEED:
+	call STATBUFF_CHANGE_POSITIVE
+	goto_cmd SHIFTGEARATTACK
+SHIFTGEARSPEEDMSG:
+	call STATBUFF_CHANGE_POSITIVE_MSG
+SHIFTGEARATTACK:
+	setbyte StatChanger 0x11
+	statbuffchange bank_attacker | Override SHIFTGEAREND
+	jumpifbyte 0x1 0x2024337 0x2 SHIFTGEARATTACKBOOST
+	pause_cmd 0x10
+	goto_cmd SHIFTGEARATTACKBOOST_MSG
+SHIFTGEARATTACKBOOST:
+	call STATBUFF_CHANGE_POSITIVE
+	goto_cmd SHIFTGEAREND
+SHIFTGEARATTACKBOOST_MSG:
+	call STATBUFF_CHANGE_POSITIVE_MSG
+SHIFTGEAREND:
+	goto_cmd ENDTURN
 	
 
 AQUA_RING:
