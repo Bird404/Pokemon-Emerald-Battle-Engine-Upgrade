@@ -183,7 +183,7 @@ battlescripts_table:
 .word ATTACK_STEALITEM	@99 thief, covet
 .word NEXTHITWILLHIT	@100 Lock-ON, Mind Reader
 .word 0x082D96A5 		@101 Spite
-.word BELLYDRUMLIKE		@102 Belly Drum, arg1 is what stat we're maxing
+.word BELLYDRUMLIKE		@102 Belly Drum
 .word 0x082D968E 		@103 destiny bond
 .word 0x082D986D		@104 Curse
 .word ROLLOUT         	@105 Rollout, Ice Ball
@@ -196,7 +196,7 @@ battlescripts_table:
 .word 0x082D9AB5 		@112 Baton Pass
 .word RAPID_SPIN        @113 Rapid Spin
 .word 0x082D9BA1        @114 Psych Up
-.word 0x082D9CC4		@115 Future Sight .word FUTURE_SIGHT          	115
+.word 0x082D9CC4		@115 Future Sight
 .word ATTACKING_MOVE @	.word BEAT_UP               	116
 .word UPROAR            @117 Uproar
 .word STOCKPILE_STUFF   @118 Stockpile, Swallow, Spit Up
@@ -246,7 +246,7 @@ battlescripts_table:
 .word 0x082D9B3D		@162 Rain Dance
 .word 0x082D9B55		@163 Sunny Day
 .word 0x082D9FD2		@164 Hail
-
+	
 PRESENTT:
 	attackcanceler
 	accuracycheck MOVE_MISSED 0x0
@@ -414,8 +414,9 @@ SPIT_UP:
 	damageadjustment
 	attackanimation
 	waitanimation
+	effectiveness_sound
 	hitanim bank_target
-	waitanimation
+	waitstate
 	graphicalhpupdate bank_target
 	datahpupdate bank_target
 	critmessage
@@ -859,8 +860,9 @@ AFTER_TRIPLEKICKEFFECTS:
 	damageadjustment
 	attackanimation
 	waitanimation
+	effectiveness_sound
 	hitanim bank_target
-	waitanimation
+	waitstate
 	graphicalhpupdate bank_target
 	datahpupdate bank_target
 	critmessage
@@ -1412,7 +1414,7 @@ ATTACK_SWITCH:
 	damageadjustment
 	attackanimation
 	waitanimation
-	missmessage
+	effectiveness_sound
 	hitanim bank_target
 	waitstate
 	graphicalhpupdate bank_target
@@ -1634,6 +1636,7 @@ ATTACK_FLINCH_CHANCE_CANCELLER_DONE:
 	ppreduce
 	attackanimation
 	waitanimation
+	effectiveness_sound
 	hitanim bank_target
 	waitstate
 	graphicalhpupdate bank_target
@@ -1832,6 +1835,7 @@ SUCCESS_MOVE_ATTACK:
 ATTACK_ANIM:
 	attackanimation
 	waitanimation
+	effectiveness_sound
 	hitanim bank_target
 	waitstate
 	graphicalhpupdate bank_target
