@@ -4,6 +4,7 @@
 
 .include "asm_defines.s"
 .include "particle_ids.s"
+.include "move_background_ids.s"
 
 move_animations_table:
 .byte 0x98, 0x93, 0x2C, 0x08
