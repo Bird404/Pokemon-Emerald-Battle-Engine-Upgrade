@@ -60,6 +60,7 @@ u32 battle_execution_buffer;
 u16 some_strings_table[4];
 u16 protect_chance_table[4];
 void *b_c;
+u8 menu_choice_pbs[4];
 
 u32 poison_status_flag;
 u32 sleep_status_flag;
