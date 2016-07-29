@@ -18,3 +18,4 @@ can_select_this_random_move	08052F84	1
 check_move_limitations 0803FECC 3
 message_cant_choose_move 0803FB4C 0
 get_relearnable_moves 0806E0B4 2
+POWER_SWAP_animation_hook 0810FD70 0
