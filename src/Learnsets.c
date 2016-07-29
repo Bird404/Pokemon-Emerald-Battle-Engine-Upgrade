@@ -550,7 +550,6 @@ struct learnset DUSTOX_MOVESET[] = {{MOVE_GUST, 10}, {MOVE_CONFUSION, 12},  {MOV
 //struct learnset LOTAD_MOVESET[] = {{MOVE_ASTONISH, 1},  {MOVE_GROWL, 3},  {MOVE_ABSORB, 6},  {MOVE_BUBBLE, 9},  {MOVE_NATURAL_GIFT, 12},  {MOVE_MIST, 15},  {MOVE_MEGA_DRAIN, 18},  {MOVE_BUBBLE_BEAM, 21},  {MOVE_NATURE_POWER, 24},  {MOVE_RAIN_DANCE, 27},  {MOVE_GIGA_DRAIN, 30}, {MOVE_ZEN_HEADBUTT, 33},  {MOVE_ENERGY_BALL, 36},  {MOVE_BLANK, END}};
 struct learnset LOTAD_MOVESET[] = {{MOVE_ASTONISH, 1},  {MOVE_GROWL, 3},  {MOVE_POWER_SWAP, 7},  {MOVE_BUBBLE, 16},  {MOVE_NATURAL_GIFT, 16},  {MOVE_MIST, 15},  {MOVE_MEGA_DRAIN, 18},  {MOVE_BUBBLE_BEAM, 21},  {MOVE_NATURE_POWER, 24},  {MOVE_RAIN_DANCE, 27},  {MOVE_GIGA_DRAIN, 30}, {MOVE_ZEN_HEADBUTT, 33},  {MOVE_ENERGY_BALL, 36},  {MOVE_BLANK, END}};
 
-
 struct learnset LOMBRE_MOVESET[] = {{MOVE_ASTONISH, 1},  {MOVE_GROWL, 3},  {MOVE_ABSORB, 6},  {MOVE_BUBBLE, 9},  {MOVE_FURY_SWIPES, 12},  {MOVE_FAKE_OUT, 16},  {MOVE_WATER_SPORT, 20}, {MOVE_BUBBLE_BEAM, 24},  {MOVE_NATURE_POWER, 28},  {MOVE_UPROAR, 32},  {MOVE_KNOCK_OFF, 36},  {MOVE_ZEN_HEADBUTT, 40}, {MOVE_HYDRO_PUMP, 44},  {MOVE_BLANK, END}};
 
 struct learnset LUDICOLO_MOVESET[] = {{MOVE_ASTONISH, 1},  {MOVE_GROWL, 1},  {MOVE_MEGA_DRAIN, 1},  {MOVE_NATURE_POWER, 1},  {MOVE_BLANK, END}};
@@ -1527,11 +1526,12 @@ u16 teach_move_player(struct pokemon* poke, u8 slot)
     return teach_move_in_available_slot(poke, move_to_learn);
 }
 
-u8 get_relearnable_moves(struct pokemon* poke, u16 moves_table[])
+#define MAX_RELEARNABLE 25
+
+u8 relearable_moves(struct pokemon* poke, u16 moves_table[])
 {
-    #define MAX_RELEARNABLE 25
     u8 number_of_moves = 0;
-    u8 level = get_lvl_from_exp(poke);
+    u8 level = get_attributes(poke, ATTR_LEVEL, 0);
     u16 species = get_attributes(poke, ATTR_SPECIES, 0);
     u16 known_moves[4];
     for (u8 j = 0; j < 4; j++)
@@ -1546,10 +1546,21 @@ u8 get_relearnable_moves(struct pokemon* poke, u16 moves_table[])
             u16 known_move = poke_moveset[i].move;
             if (known_move != known_moves[0] && known_move != known_moves[1] && known_move != known_moves[2] && known_move != known_moves[3] && number_of_moves < MAX_RELEARNABLE)
             {
-                moves_table[number_of_moves] = known_move;
+                if (moves_table)
+                    moves_table[number_of_moves] = known_move;
                 number_of_moves++;
             }
         }
     }
     return number_of_moves;
+}
+
+u8 get_relearnable_moves(struct pokemon* poke, u16 moves_table[])
+{
+    return relearable_moves(poke, &moves_table[0]);
+}
+
+u8 get_number_of_relearnable_moves(struct pokemon* poke)
+{
+    return relearable_moves(poke, 0);
 }
