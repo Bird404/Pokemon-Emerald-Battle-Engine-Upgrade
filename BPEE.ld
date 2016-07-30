@@ -81,6 +81,12 @@ tai_current_instruction = 0x0203AB38;
 tai_bank = 0x0203AB3C;
 battle_bufferA = 0x02023064;
 battle_bufferB = 0x02023864;
+move_anim_countdown = 0x020383FC;
+anim_execution_buffer = 0x020383FD;
+anim_execution_state = 0x020383FE;
+objects = 0x02020630;
+objID_pbs_moveanimations = 0x020241E4;
+tasks = 0x03005E00;
 
 b_c = 0x3005D04;
 
@@ -159,6 +165,12 @@ teach_move_in_available_slot = 0x08069140|1;
 new_move_for_the_first = 0x080694D0|1;
 get_ai_bank = 0x08131E70|1;
 clear_atk_up_if_hit_flag_unless_enraged = 0x08041A1C|1;
+prepare_battle_animation = 0x08034438|1;
+calculate_stats_pokekmon = 0x08068D0C|1;
+refresh_graphics = 0x0805E8F4|1;
+task_delete = 0x080A909C|1;
+move_anim_task_del = 0x080A3C1C|1;
+prepare_health_bar_update_buffer = 0x08033EFC|1;
 
 attack_iteration_cleanup = 0x804AF30|1;
 prepare_pokemon_battle_sprite_manipulation_buffer = 0x08034414|1;
