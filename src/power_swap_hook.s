@@ -11,19 +11,19 @@ POWER_SWAP_animation_hook:
 	cmp r0, r2
 	bne GUARD_SWAP_animation_hook
 	ldr r0, =(POWER_SWAP_animation_part_2)
-	b return
+	b return_swap_anim_hook
 
 GUARD_SWAP_animation_hook:
 	add r2, #0x1
 	cmp r0, r2
 	bne SKILL_SWAP_animation_hook
 	ldr r0, =(GUARD_SWAP_animation)
-	b return
+	b return_swap_anim_hook
 
 SKILL_SWAP_animation_hook:
 	ldr r0, =(0x08596864)
 
-return:
+return_swap_anim_hook:
 	mov r2, #0x1E
 	ldsh r1, [r5, r2]
 	mov r3, #0x20
