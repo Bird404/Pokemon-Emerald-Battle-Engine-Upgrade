@@ -597,4 +597,70 @@ struct battle_buffer{
 extern struct battle_buffer battle_bufferA[4];
 extern struct battle_buffer battle_bufferB[4];
 
+struct task{
+    void* function;
+    u8 id;
+    u8 previous;
+    u8 next;
+    u8 priority;
+    u16 private[16];
+};
+
+extern struct task tasks[16];
+
+struct sprite{
+    u8 y;
+    u8 flags1;
+    u8 x;
+    u8 msb_of_x_and_flags2;
+    u16 attr2;
+    u16 rotscaleinfo;
+};
+
+struct coords16{
+    u16 x;
+    u16 y;
+};
+
+struct coords8{
+    u8 x;
+    u8 y;
+};
+
+struct moveanim_priv{
+    u16 private[8];
+};
+
+union obj_privates{
+    struct moveanim_priv moveanim_priv;
+};
+
+struct object{
+    struct sprite final_oam;
+    void* anim_table;
+    void* gfx_table;
+    void* rotscale_table;
+    void* template;
+    u32 field_18;
+    void* callback;
+    struct coords16 pos1;
+    struct coords16 pos2;
+    struct coords8 pos_neg_center;
+    u8 anim_number;
+    u8 anim_frame;
+    u8 anim_delay_countdown;
+    u8 anim_unkown_counter;
+    union obj_privates privates;
+    u8 in_use : 1;
+    u8 flag2 : 1;
+    u8 invisible : 1;
+    u8 flags : 5;
+    u8 bitfield2;
+    u16 anim_data_offset;
+    u8 field_42;
+    u8 y_height_related;
+};
+
+extern struct object objects[64];
+
 #endif /* B_STRUCTS */
