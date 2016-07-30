@@ -61,6 +61,8 @@ u16 some_strings_table[4];
 u16 protect_chance_table[4];
 void *b_c;
 u8 menu_choice_pbs[4];
+u8 objID_pbs_moveanimations[4];
+u8 anim_execution_buffer;
 
 u32 poison_status_flag;
 u32 sleep_status_flag;
