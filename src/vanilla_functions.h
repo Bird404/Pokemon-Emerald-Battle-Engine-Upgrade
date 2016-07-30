@@ -61,6 +61,12 @@ void new_move_for_the_first(struct pokemon*, u16 move);
 u8 get_ai_bank(u8 arg);
 void clear_atk_up_if_hit_flag_unless_enraged();
 void bc_bs_executer();
+void calculate_stats_pokekmon(struct pokemon* poke);
+void prepare_battle_animation(u8 bufferID, u8 unkown, u8 special_arg);
+void refresh_graphics(u8 bank, u8 arg2, u8 objID);
+void task_delete(u8 taskID);
+void move_anim_task_del(u8 taskID);
+void prepare_health_bar_update_buffer(u8 bufferID, s16 hp_change);
 
 u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);
