@@ -20,6 +20,7 @@ s32 damage_loc;
 u8 no_of_all_banks;
 u8 battle_text_buff1[0x10];
 u8 battle_text_buff2[0x10];
+u8 battle_text_buff3[0x10];
 u8 active_bank;
 void* battlescripts_curr_instruction;
 void* move_anim_cursor;
