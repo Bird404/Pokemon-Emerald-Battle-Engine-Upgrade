@@ -3705,6 +3705,7 @@ struct move_limitation{
 u8 check_move_limitations(u8 bank, u8 not_usable_moves, struct move_limitation limitations)
 {
     struct battle_participant* checking_bank = &battle_participants[bank];
+    u8 item_effect = get_item_effect(bank, 1);
     for (u8 i = 0; i < 4; i++)
     {
         u16 move_to_check = checking_bank->moves[i];
@@ -3718,9 +3719,9 @@ u8 check_move_limitations(u8 bank, u8 not_usable_moves, struct move_limitation l
             not_usable_moves |= bits_table[i];
         else if (status3[bank].imprision && check_if_imprisioned(bank, move_to_check) && limitations.limitation_imprision)
             not_usable_moves |= bits_table[i];
-        else if (get_item_effect(bank, 1) == CHOICE_ITEM && battle_stuff_ptr.ptr->choiced_move[bank] != move_to_check)
+        else if (CHOICE_ITEM(item_effect) && battle_stuff_ptr.ptr->choiced_move[bank] && battle_stuff_ptr.ptr->choiced_move[bank] != 0xFFFF && battle_stuff_ptr.ptr->choiced_move[bank] != move_to_check)
             not_usable_moves |= bits_table[i];
-        else if (get_item_effect(bank, 1) == ITEM_EFFECT_ASSAULTVEST && move_table[move_to_check].split == 2)
+        else if (item_effect == ITEM_EFFECT_ASSAULTVEST && move_table[move_to_check].split == 2)
             not_usable_moves |= bits_table[i];
         else if (disable_structs[bank].encore_timer && disable_structs[bank].encored_move != move_to_check)
             not_usable_moves |= bits_table[i];
@@ -3744,19 +3745,20 @@ u8 message_cant_choose_move()
     u16 checking_move = checking_bank->moves[move_index];
     void** loc_to_store_bs = (void*) 0x2024220 + bank * 4;
     u8 cant = 0;
+    u8 item_effect = get_item_effect(bank, 1);
     if (checking_bank->current_pp[move_index] == 0)
     {
         cant = 1;
         *loc_to_store_bs = (void*) 0x82DB076;
     }
-    else if (get_item_effect(bank, 1) == CHOICE_ITEM && battle_stuff_ptr.ptr->choiced_move[bank] && battle_stuff_ptr.ptr->choiced_move[bank] != 0xFFFF && battle_stuff_ptr.ptr->choiced_move[bank] != checking_move)
+    else if (CHOICE_ITEM(item_effect) && battle_stuff_ptr.ptr->choiced_move[bank] && battle_stuff_ptr.ptr->choiced_move[bank] != 0xFFFF && battle_stuff_ptr.ptr->choiced_move[bank] != checking_move)
     {
         current_move = battle_stuff_ptr.ptr->choiced_move[bank];
         cant = 1;
         *loc_to_store_bs = (void*) 0x82DB812;
         last_used_item = checking_bank->held_item;
     }
-    else if (get_item_effect(bank, 1) == ITEM_EFFECT_ASSAULTVEST && move_table[checking_move].split == 2)
+    else if (item_effect == ITEM_EFFECT_ASSAULTVEST && move_table[checking_move].split == 2)
     {
         cant = 1;
         last_used_item = checking_bank->held_item;
