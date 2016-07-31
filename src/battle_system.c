@@ -2301,28 +2301,22 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
         }
         break;
     case 4:
-        if (damage_loc && !(move_outcome.missed || move_outcome.not_affected || move_outcome.failed) && battle_participants[bank_target].current_hp)
         {
             quality = get_all_item_quality(bank_attacker);
             item_effect = get_item_effect(bank_attacker, 1);
             switch (item_effect)
             {
             case ITEM_EFFECT_KINGSROCK:
-                if (special_statuses[bank_target].moveturn_losthp_physical || special_statuses[bank_target].moveturn_losthp_special)
+                if (MOVE_WORKED && special_statuses[bank_target].moveturn_losthp && percent_chance(quality) && move_table[current_move].move_flags.flags.affected_by_kingsrock)
                 {
-                    if (percent_chance(quality) && move_table[current_move].move_flags.flags.affected_by_kingsrock)
-                    {
-                        battle_communication_struct.move_effect = 8;
-                        battlescript_push();
-                        set_move_effect(0, 0);
-                        battlescript_pop();
-                    }
+                    battle_participants[bank_target].status2.flinched = 1;
+                    record_usage_of_item(bank_attacker, ITEM_EFFECT_KINGSROCK);
                 }
                 break;
             case ITEM_EFFECT_SHELLBELL:
-                if (special_statuses[bank_target].moveturn_losthp && special_statuses[bank_target].moveturn_losthp != 0xFF && bank_target != bank_attacker && battle_participants[bank_target].current_hp != battle_participants[bank_target].max_hp && !new_battlestruct.ptr->bank_affecting[bank_target].heal_block)
+                if (MOVE_WORKED && special_statuses[bank_target].moveturn_losthp && special_statuses[bank_target].moveturn_losthp != 0xFFFF && bank_target != bank_attacker && battle_participants[bank_attacker].current_hp && battle_participants[bank_attacker].current_hp <= battle_participants[bank_target].max_hp && !new_battlestruct.ptr->bank_affecting[bank_target].heal_block)
                 {
-                    effect = 1;
+                    effect = 2;
                     another_active_bank = bank_attacker;
                     bank = bank_attacker;
                     battle_scripting.active_bank = bank_attacker;
@@ -2373,6 +2367,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             new_battlestruct.ptr->bank_affecting[bank].eaten_berry = 1;
         if (effect == 1)
         {
+            active_bank = bank;
             prepare_setattributes_in_battle(0, 0x28, 0, 4, &battle_participants[bank].status.flags);
             mark_buffer_bank_for_execution(bank);
         }
