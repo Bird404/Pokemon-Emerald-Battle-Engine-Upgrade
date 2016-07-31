@@ -1369,7 +1369,7 @@ ATTACK_AND_TRAP:
 	goto_cmd ATTACKING_MOVE
 
 RECHARGE_NEEDED:
-	setbyte EffectChooser 0x31 | 0x40
+	setbyte EffectChooser 0x31 | 0x40 | 0x80
 	goto_cmd ATTACKING_MOVE
 
 LOWERSTAT_IFOPPOSITEGENDER:
@@ -1651,7 +1651,7 @@ ATTACK_FLINCH_CHANCE_CANCELLER_DONE:
 	goto_cmd ENDTURN
 
 RECOIL_ATTACK:
-	setbyte EffectChooser 0x30
+	setbyte EffectChooser 0x30 | 0x80
 	goto_cmd ATTACKING_MOVE
 
 ATTACK_STATUS_CHANCE:
