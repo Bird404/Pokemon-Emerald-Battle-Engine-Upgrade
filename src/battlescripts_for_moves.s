@@ -547,9 +547,9 @@ ITEMSWAP:
 	attackcanceler
 	jumpifsubstituteaffects MOVE_FAILED
 	accuracycheck MOVE_FAILED 0x0
-	itemswap MOVE_FAILED
 	attackstring
 	ppreduce
+	itemswap MOVE_FAILED + 0x2
 	goto_cmd 0x082DA23E
 
 CHANGE_TARGET_TYPE_TO:
