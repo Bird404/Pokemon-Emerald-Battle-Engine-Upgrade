@@ -580,10 +580,16 @@ void atk49_move_end_turn()
             break;
         }
         case 12: //held items
-            for (u8 i = 0; i < no_of_all_banks; i++)
             {
-                //if (battle_stuff_ptr.ptr->changed_held_items[i])
-                    //battle_participants[i].held_item = 0;
+                for (u8 i = 0; i < no_of_all_banks; i++)
+                {
+                    u16* changed_item = &battle_stuff_ptr.ptr->changed_held_items[i];
+                    if (*changed_item)
+                    {
+                        battle_participants[i].held_item = *changed_item;
+                        *changed_item = 0;
+                    }
+                }
             }
             INC_END_EVENTS
             break;
