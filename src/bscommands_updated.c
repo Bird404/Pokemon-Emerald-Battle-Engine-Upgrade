@@ -468,7 +468,6 @@ void atk49_move_end_turn()
         last_move = last_used_move;
     u8 arg1 = read_byte(battlescripts_curr_instruction + 1);
     u8 arg2 = read_byte(battlescripts_curr_instruction + 2);
-    u8 attacker_item = get_item_effect(bank_attacker, 1);
     u8 current_move_type = get_attacking_move_type();
     struct battle_participant* target_struct = &battle_participants[bank_target];
     struct battle_participant* attacker_struct = &battle_participants[bank_attacker];
@@ -563,16 +562,16 @@ void atk49_move_end_turn()
             break;
         case 11: //choice move update
         {
+            u16 attacker_item = get_item_effect(bank_attacker, 1);
             u16* choice_move = &battle_stuff_ptr.ptr->choiced_move[bank_attacker];
-            if (attacker_item == CHOICE_ITEM && last_used_move != MOVE_STRUGGLE && (hitmarker & HITMARKER_OBEYS) &&
-                 (*choice_move == 0 || *choice_move == 0xFFFF))
+            if (CHOICE_ITEM(attacker_item) && last_used_move != MOVE_STRUGGLE && (hitmarker & HITMARKER_OBEYS) && (*choice_move == 0 || *choice_move == 0xFFFF))
             {
                 if ((last_used_move == MOVE_BATON_PASS || last_used_move == MOVE_VOLT_SWITCH || last_used_move == MOVE_UTURN) && move_outcome.failed)
                 {
                     INC_END_EVENTS
                     break;
                 }
-                last_used_move = *choice_move;
+                *choice_move = last_used_move;
             }
             if (get_move_position(bank_attacker, *choice_move) == -1)
                 *choice_move = 0;
