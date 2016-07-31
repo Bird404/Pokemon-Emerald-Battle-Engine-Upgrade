@@ -626,6 +626,7 @@ TWOTURNSTATCHANGE_ACTUALMOVE:
 	
 TWOTURN_LOADINGTURN:
 	ppreduce
+	printstring 0x130 @this string is empty, it's here to change textbox
 	attackanimation
 	waitanimation
 	printfromtable twoturnstrings
