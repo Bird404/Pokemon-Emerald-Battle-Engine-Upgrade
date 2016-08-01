@@ -181,3 +181,4 @@ check_failure_due_to_status = 0x803F90C|1;
 /*Expandable tables*/
 battle_strings_table = 0x085CC270;
 evolution_table = 0x0832531C;
+pokemon_table = 0x083203CC;
