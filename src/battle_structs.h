@@ -663,4 +663,40 @@ struct object{
 
 extern struct object objects[64];
 
+struct poke_basestats{
+    u8 base_hp;
+    u8 base_atk;
+    u8 base_def;
+    u8 base_spd;
+    u8 base_spatk;
+    u8 base_spdef;
+    u8 type1;
+    u8 type2;
+    u8 catch_rate;
+    u8 exp_yield;
+    u16 evs_hp : 2;
+    u16 evs_atk : 2;
+    u16 evs_def : 2;
+    u16 evs_spd : 2;
+    u16 evs_spatk : 2;
+    u16 evs_spdef : 2;
+    u16 unused : 4;
+    u16 item1;
+    u16 item2;
+    u8 gender_ratio;
+    u8 hatching;
+    u8 friendship;
+    u8 exp_curve;
+    u8 egg_group1;
+    u8 egg_group2;
+    u8 ability1;
+    u8 ability2;
+    u8 safari_flee_rate;
+    u8 dex_colour;
+    u8 padding1;
+    u8 padding2;
+};
+
+extern struct poke_basestats pokemon_table[412];
+
 #endif /* B_STRUCTS */
