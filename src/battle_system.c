@@ -3778,6 +3778,7 @@ u8 message_cant_choose_move()
     else if (disable_structs[bank].disabled_move == checking_move && disable_structs[bank].disable_timer)
     {
         cant = 1;
+        current_move = checking_move;
         *loc_to_store_bs = (void*) 0x82DAE1F;
     }
     else if (new_battlestruct.ptr->field_affecting.gravity && gravity_forbidden_move(checking_move))
