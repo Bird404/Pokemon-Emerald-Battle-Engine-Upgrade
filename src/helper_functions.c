@@ -169,6 +169,8 @@ u8 popped_text[] = {BuffCharac, 16, Apos, Space, BuffCharac, 22, Space, p_, o_, 
 /*0x201*/ u8 gravityprevents2_text[] = {0xFD, 18, Space, c_, a_, n_, Apos, t_, Space, u_, s_, e_, JumpLine, 0xFD, 20, Space, b_, e_, c_, a_, u_, s_, e_, Space, o_, f_, Space, g_, r_, a_, v_, i_, t_, y_, Exclam, 0xFB, 0xFF};
 /*0x202*/ u8 healblockprevents2_text[] = {0xFD, 18, Space, c_, a_, n_, Apos, t_, Space, u_, s_, e_, JumpLine, 0xFD, 20, Space, b_, e_, c_, a_, u_, s_, e_, Space, o_, f_, Space, H_, e_, a_, l_, Space, B_, l_, o_, c_, k_, Exclam, 0xFB, 0xFF};
 /*0x203*/ u8 let_it_move_first_text[] = {0xFD, 15, Apos, s_, Space, 0xFD, 0x16, Space, l_, e_, t_, s_, JumpLine, i_, t_, Space, m_, o_, v_, e_, Space, f_, i_, r_, s_, t_, Exclam, Termin };
+/*0x204*/ u8 mega_evolved_text[] = {0xFD, 15, Space, h_, a_, s_, Space, M_, e_, g_, a_, Space, E_, v_, o_, l_, v_, e_, d_, JumpLine, i_, n_, t_, o_, Space, M_, e_, g_, a_, Space, 0xFD, 0, Exclam, 0xFB, 0xFF};
+/*0x205*/ u8 mega_trigger_player_text[] = {0xFD, 15, Apos, s_, Space, 0xFD, 22, Space, i_, s_, Space, r_, e_, a_, c_, t_, i_, n_, g_, JumpLine, t_, o_, Space , 0xFD, 35, Apos, s_, Space, 0xFD, 1, Exclam, 0xFB, 0xFF};
 
 void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activation_text, &heavyrain_activation_text, &mysticalaircurrent_activation_text, &forewarn_text, &slowstart_text, &anticipation_text, &dryskin_damage_text, &solarpower_text, &harvest_text, &healer_text, &pickup_text, &moldbreaker_text, &turboblaze_text, &terravolt_text, &downloadatk_text,
 &downloadspatk_text, &absorbabilityboost_text , &absorbabilityimmune_text, &userteam_text/*0x190*/, &foeteam_text/*0x191*/,
@@ -187,7 +189,7 @@ void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activ
 &rapidspinontoxicspikes_text, &rapidspinonstealthrock_text, &rapidspinonstickyweb_text, &powertrick_text, &soak_text, &defogspikes_text,
 &power_text, &guard_text, &psychosplit_text, &stockpileend_text, &geomancy_text, &powerherb_text, &iceburn_text, &freezeshock_text,
 &shadowforce_text, &mistyterrain_text, &grassyterrain_text, &electricterrain_text, &aquaring_text, &aquaringheal_text, &assaultvest_text,
-&gravityprevents2_text, &healblockprevents2_text , &let_it_move_first_text};
+&gravityprevents2_text, &healblockprevents2_text , &let_it_move_first_text, &mega_evolved_text, &mega_trigger_player_text};
 
 void battle_string_loader(u16 string_id)
 {
@@ -1093,7 +1095,7 @@ void suckerpunchchecker()
 {
     if (move_table[battle_participants[bank_target].moves[battle_stuff_ptr.ptr->chosen_move_position[bank_target]]].split == 2 ||
         get_bank_turn_order(bank_attacker) > get_bank_turn_order(bank_target))
-          battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+            battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
         battlescripts_curr_instruction += 4;
 }
