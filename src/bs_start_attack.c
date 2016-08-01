@@ -71,19 +71,19 @@ u8 get_target_of_move(u16 move, u8 target_given, u8 adjust)
                     else if (move_type == TYPE_WATER)
                         ability = ABILITY_STORM_DRAIN;
                     u8 alive_candidates = target_alive+ally_alive+target_partner_alive;
-                    if(check_ability(target_side,ability) && target_alive && max_speed<get_speed(target_side))
+                    if(ability && check_ability(target_side,ability) && target_alive && max_speed<get_speed(target_side))
                     {
                         redirect_candidate=target_side;
                         max_speed=get_speed(target_side);
                         redirect=1;
                     }
-                    if(check_ability(target_partner,ability) && target_partner_alive && max_speed<get_speed(target_partner))
+                    if(ability && check_ability(target_partner,ability) && target_partner_alive && max_speed<get_speed(target_partner))
                     {
                         redirect_candidate=target_partner;
                         max_speed=get_speed(target_partner);
                         redirect=1;
                     }
-                    if(check_ability(ally_bank,ability) && ally_alive && max_speed<get_speed(ally_bank))
+                    if(ability && check_ability(ally_bank,ability) && ally_alive && max_speed<get_speed(ally_bank))
                     {
                         redirect_candidate=ally_bank;
                         redirect=1;
