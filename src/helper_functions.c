@@ -1091,8 +1091,9 @@ void breakprotection()
 
 void suckerpunchchecker()
 {
-    if (move_table[battle_participants[bank_target].moves[battle_stuff_ptr.ptr->chosen_move_position[bank_target]]].split == 2)
-        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    if (move_table[battle_participants[bank_target].moves[battle_stuff_ptr.ptr->chosen_move_position[bank_target]]].split == 2 ||
+        get_bank_turn_order(bank_attacker) > get_bank_turn_order(bank_target))
+          battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
         battlescripts_curr_instruction += 4;
 }
