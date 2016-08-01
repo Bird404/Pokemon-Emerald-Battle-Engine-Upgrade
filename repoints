@@ -243,3 +243,5 @@ battlescripts_table 08050288
 battlescripts_table 08052578
 battlescripts_table 08054C54
 battlescripts_table 0804BCE4
+### New Animation Table
+NewPlayAnimationTable 0805DA3C
