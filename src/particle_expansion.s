@@ -303,9 +303,9 @@ shiny_particle_image:
 .byte 0xE4, 0xBE, 0xC1, 0x08, 0x00, 0x01, 0x30, 0x28
 .word MEGA_EVOLUTION_RAINBOW_particle
 .byte 0x80, 0x01, MEGA_EVOLUTION_RAINBOW_particle_ID, 0x28
-.word MEGA_EVOLUTION_STONE_palette
+.word MEGA_EVOLUTION_STONE_particle
 .byte 0x00, 0x08, MEGA_EVOLUTION_STONE_particle_ID, 0x28
-.word MEGA_EVOLUTION_SYMBOL_palette
+.word MEGA_EVOLUTION_SYMBOL_particle
 .byte 0x00, 0x02, MEGA_EVOLUTION_SYMBOL_particle_ID, 0x28
 .word HAMMER_ARM_particle
 .byte 0x00, 0x02, HAMMER_ARM_particle_ID, 0x28
