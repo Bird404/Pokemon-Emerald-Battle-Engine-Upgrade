@@ -77,6 +77,7 @@ struct side_affecting{
     u8 lunardance : 1;
     u8 lunardance_done : 1;
     u8 echo_voice_counter : 3;
+    u8 mega_evo_state : 2; //0 = neither mega evolved nor triggered, 1 = triggered to mega evolve(if set, should reset next turn in case poke didn't mega evolve), 2 = mega evolved
 };
 
 struct field_affecting{
