@@ -426,7 +426,10 @@ u16 get_forewarn_move(u8 bank)
             }
         }
     }
-    return most_powerful_move;
+    if (best_power == 0)
+        return 0;
+    else
+        return most_powerful_move;
 }
 
 u8 anticipation_shudder(u8 bank)
@@ -686,15 +689,18 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             break;
         case ABILITY_FOREWARN:
             {
-                effect = true;
-                battle_scripting.active_bank = bank;
-                execute_battle_script(&forewarn_bs);
-                battle_text_buff1[0] = 0xFD;
-                battle_text_buff1[1] = 0x2;
                 u16 best_move = get_forewarn_move(bank);
-                battle_text_buff1[2] = best_move;
-                battle_text_buff1[3] = (best_move >> 8);
-                battle_text_buff1[4] = 0xFF;
+                if (best_move)
+                {
+                    effect = true;
+                    battle_scripting.active_bank = bank;
+                    execute_battle_script(&forewarn_bs);
+                    battle_text_buff1[0] = 0xFD;
+                    battle_text_buff1[1] = 0x2;
+                    battle_text_buff1[2] = best_move;
+                    battle_text_buff1[3] = (best_move >> 8);
+                    battle_text_buff1[4] = 0xFF;
+                }
             }
             break;
         case ABILITY_ANTICIPATION:
