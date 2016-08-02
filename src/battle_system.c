@@ -3003,7 +3003,7 @@ u8 battle_turn_move_effects()
                     }
                     break;
                 case 13: //check being trapped in a multiturn attack like wrap or whirpool
-                    if (current_hp && attacker_struct->status2.trapped_in_wrap && not_magicguard(active_bank))
+                    if (current_hp && attacker_struct->status2.trapped_in_wrap)
                     {
                         u16 trapped_move = battle_stuff_ptr.ptr->trapped_move[active_bank];
                         battle_text_buff1[0] = 0xFD;
@@ -3012,7 +3012,7 @@ u8 battle_turn_move_effects()
                         battle_text_buff1[3] = trapped_move >> 8;
                         battle_text_buff1[4] = 0xFF;
                         attacker_struct->status2.trapped_in_wrap--;
-                        if (attacker_struct->status2.trapped_in_wrap) //we're doing damage
+                        if (attacker_struct->status2.trapped_in_wrap && not_magicguard(active_bank)) //we're doing damage
                         {
                             battle_scripting.field10 = trapped_move;
                             battle_scripting.field11 = trapped_move >> 8;
@@ -3028,7 +3028,7 @@ u8 battle_turn_move_effects()
 
                             call_bc_move_exec((void*) 0x82DB30E);
                         }
-                        else //broke free
+                        else if (attacker_struct->status2.trapped_in_wrap == 0) //broke free
                         {
                             call_bc_move_exec((void*)0x82DB320);
                         }
