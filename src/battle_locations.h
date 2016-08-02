@@ -64,6 +64,8 @@ void *b_c;
 u8 menu_choice_pbs[4];
 u8 objID_pbs_moveanimations[4];
 u8 anim_execution_buffer;
+u16 var_8015_trainer_opponent_A;
+u16 trainer_opponent_B;
 
 u32 poison_status_flag;
 u32 sleep_status_flag;
