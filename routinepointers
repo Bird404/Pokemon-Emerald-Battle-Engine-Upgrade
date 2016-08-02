@@ -11,6 +11,7 @@ callasm_cmd 0831BF1C
 atk00_move_canceller 0831BD10
 atk0C_datahpupdate 0831BD40
 atk0F_resultmessage 0831BD4C
+atk13_printfromtable 0831BD5C
 atk42_jump_if_type 0831BE18
 atk49_move_end_turn 0831BE34
 atk6A_remove_item 0831BEB8
