@@ -91,6 +91,7 @@ tasks = 0x03005E00;
 var_8015_trainer_opponent_A = 0x02038BCA;
 trainer_opponent_B = 0x02038BCC;
 tasks_for_banks = 0x03005D60;
+graphical_elements_pbs = 0x03005D70;
 
 b_c = 0x3005D04;
 
