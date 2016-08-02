@@ -90,6 +90,7 @@ objID_pbs_moveanimations = 0x020241E4;
 tasks = 0x03005E00;
 var_8015_trainer_opponent_A = 0x02038BCA;
 trainer_opponent_B = 0x02038BCC;
+tasks_for_banks = 0x03005D60;
 
 b_c = 0x3005D04;
 
@@ -178,6 +179,8 @@ prepare_health_bar_update_buffer = 0x08033EFC|1;
 get_player_name_address = 0x08009034|1;
 compare_two_strings = 0x08008C44|1;
 get_trainername_address = 0x0806F0B0|1;
+decompress_battle_healthbar_and_font = 0x0805E1B8|1;
+update_bank_graphical_elements = 0x08074860|1;
 
 attack_iteration_cleanup = 0x804AF30|1;
 prepare_pokemon_battle_sprite_manipulation_buffer = 0x08034414|1;
