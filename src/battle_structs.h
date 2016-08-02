@@ -492,8 +492,8 @@ extern struct side_affecting_hword side_affecting_halfword[2];
 struct prop_flags{
     u8 makes_contact : 1;//1
     u8 affected_by_protect : 1;//2
-    u8 affected_by_snatch : 1;//4
-    u8 affected_by_magic_coat : 1;//8
+    u8 affected_by_magic_coat : 1;//4
+    u8 affected_by_snatch : 1;//8
     u8 affected_by_mirrormove :1;//x10
     u8 affected_by_kingsrock :1;//x20
     u8 raised_crit_ratio :1;//x40
