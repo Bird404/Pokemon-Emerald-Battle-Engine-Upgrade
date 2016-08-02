@@ -1908,3 +1908,49 @@ void atkB7_present_calc()
     if (dynamic_base_power)
         battlescripts_curr_instruction = (void*) 0x082D8A30;
 }
+
+void atk13_printfromtable()
+{
+    if (battle_execution_buffer == 0)
+    {
+        u16* string_id = (u16*) read_word(battlescripts_curr_instruction + 1);
+        string_id += battle_communication_struct.multistring_chooser;
+        u8 lower = battle_scripting.stat_changer & 0x80;
+        u16 string_to_read = *string_id;
+        switch (*string_id)
+        {
+        case 0x3D:
+            if (lower)
+                string_to_read = 0x3E;
+            break;
+        case 0x3E:
+            if (lower == 0)
+                string_to_read = 0x3D;
+            break;
+        }
+        battle_communication_struct.is_message_displayed = 1;
+        b_std_message(string_to_read, bank_attacker);
+        battlescripts_curr_instruction += 5;
+        u8 bank = battle_scripting.active_bank;
+        if (lower && new_battlestruct.ptr->bank_affecting[bank].stat_lowered)
+        {
+            new_battlestruct.ptr->bank_affecting[bank].stat_lowered = 0;
+            if (check_ability(bank, ABILITY_DEFIANT) && battle_participants[bank].atk_buff != 0xC)
+            {
+                battle_scripting.stat_changer = 0x21;
+                battlescript_push();
+                battlescripts_curr_instruction = &defiant_bs;
+                record_usage_of_ability(bank, ABILITY_DEFIANT);
+            }
+            else if (check_ability(bank, ABILITY_COMPETITIVE) && battle_participants[bank].sp_atk_buff != 0xC)
+            {
+                battle_scripting.stat_changer = 0x24;
+                battlescript_push();
+                battlescripts_curr_instruction = &defiant_bs;
+                record_usage_of_ability(bank, ABILITY_COMPETITIVE);
+            }
+        }
+
+    }
+    return;
+}
