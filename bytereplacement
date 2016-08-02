@@ -32,6 +32,8 @@
 085CB0F1 0F
 ## battlestring for stat change now uses scripting active and not target/attacker banks because of a certain problem
 085CA05F 13
+085CA046 13
+085CA030 13
 ## magnitude calc not changing the target bank
 08053E56 00 00
 08053E8A 00 00
