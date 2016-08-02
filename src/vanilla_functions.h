@@ -68,6 +68,9 @@ void refresh_graphics(u8 bank, u8 arg2, u8 objID);
 void task_delete(u8 taskID);
 void move_anim_task_del(u8 taskID);
 void prepare_health_bar_update_buffer(u8 bufferID, s16 hp_change);
+char* get_player_name_address();
+s8 compare_two_strings(char* string1, char* string2);
+char* get_trainername_address(u16 trainerID);
 
 u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);
