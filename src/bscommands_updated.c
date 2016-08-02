@@ -1149,7 +1149,7 @@ void atk00_move_canceller()
         return;
     else if (immune_to_powder_moves(bank_target, current_move))
         return;
-    else if (battle_participants[bank_attacker].current_pp[current_move_position] == 0 && current_move != MOVE_STRUGGLE && !battle_participants[bank_attacker].status2.multiple_turn_move && ((hitmarker & (HITMARKER_NO_ATTACKSTRING || 0x800000)) == 0))
+    else if (battle_participants[bank_attacker].current_pp[current_move_position] == 0 && current_move != MOVE_STRUGGLE && !battle_participants[bank_attacker].status2.multiple_turn_move && ((hitmarker & (HITMARKER_NO_ATTACKSTRING || 0x800000)) == 0) && new_battlestruct.ptr->various.magicbounce == 0)
     {
         move_outcome.missed = 1;
         battlescripts_curr_instruction = (void*) 0x082DB07A; //no pp bs
@@ -1175,9 +1175,9 @@ void atk00_move_canceller()
     {
         protect_structs[bank_target].flag0_bouncemove = 0;
         pressure_pp_lose(bank_attacker, bank_target, MOVE_MAGIC_COAT);
+        new_battlestruct.ptr->various.magicbounce = 1;
         battlescript_push();
         battlescripts_curr_instruction = (void*) 0x082DB194;
-        new_battlestruct.ptr->various.magicbounce = 1;
         return;
     }
     else if ((battle_participants[bank_target].ability_id == ABILITY_MAGIC_BOUNCE && has_ability_effect(bank_target, 1, 1)) && move_table[current_move].move_flags.flags.affected_by_magic_coat && new_battlestruct.ptr->various.magicbounce == 0)
