@@ -245,3 +245,5 @@ battlescripts_table 08054C54
 battlescripts_table 0804BCE4
 ### New Animation Table
 NewPlayAnimationTable 0805DA3C
+### Pursuit mega evolution
+pursuit_megaevo_bs 082DAB3F
