@@ -4,7 +4,7 @@
 
 .include "anim_particle/particle_image.s"
 .include "anim_particle/particle_pallet.s"
-.include "particle_ids.s"
+.include "anim_particle/particle_ids.s"
 
 @Battle Animations Particles Table
 @Format for each entry is:
