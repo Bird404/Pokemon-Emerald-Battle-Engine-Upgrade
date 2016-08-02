@@ -2066,6 +2066,18 @@ void get_trainer_name_for_mega()
     strcpy_xFF_terminated_0(&battle_text_buff3, trainer_name);
 }
 
+void mega_evo_updatehpbar()
+{
+    struct pokemon* poke_address;
+    u8 bank = bank_attacker;
+    if (is_bank_from_opponent_side(bank))
+        poke_address = &party_opponent[battle_team_id_by_side[bank]];
+    else
+        poke_address = &party_player[battle_team_id_by_side[bank]];
+    u8 obj_ID = graphical_elements_pbs[bank];
+    update_bank_graphical_elements(obj_ID, poke_address, 0); //0 updates all things; gender, exp, hp, etc.
+}
+
 void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*/, &change_attacker_item /*2*/, &try_to_lower_def /*3*/, &try_to_raise_spd /*4*/,
 &changestatvar1 /*5*/, &changestatvar2 /*6*/, &frisk_target_item /*7*/, &set_stat_msg_buffer /*8*/, &set_type_msg_buffer /*9*/, &set_team_msg_buffer /*10*/, &bad_dreams_damage_calc /*11*/,
 &weaknesspolicy /*12*/, &mentalherb /*13*/, &placeholder0x14 /*14*/, &hazards_bank_switcher /*15*/, &hazards_bank_return /*16*/, &leechseed_update /*17*/,
@@ -2082,7 +2094,7 @@ void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*
 &jump_to_move_bs /*70*/, &setluckychant /*71*/, &settailwind /*72*/, &cansetnightmare /*73*/, &bellydrum /*74*/, &setmagnetrise /*75*/,
 &settelekinesis /*76*/, &setpowertrick /*77*/, &make_pokemon_one_type /*78*/, &defog_effect /*79*/, &copycat_move /*80*/,
 &psycho_swaps /*81*/, &psychosplits /*82*/, &stockpile_record /*83*/, &twoturn_moves /*84*/, &powerherb_check /*85*/, &set_terrain /*86*/,
-&setaquaring /*87*/, &get_trainer_name_for_mega /*88*/};
+&setaquaring /*87*/, &get_trainer_name_for_mega /*88*/, &mega_evo_updatehpbar /*89*/};
 
 void callasm_cmd()
 {
