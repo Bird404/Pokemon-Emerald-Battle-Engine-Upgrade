@@ -3,7 +3,7 @@
 .align 2
 
 .include "asm_defines.s"
-.include "anim_partice/particle_ids.s"
+.include "anim_particle/particle_ids.s"
 .include "anim_bg/move_background_ids.s"
 
 move_animations_table:
