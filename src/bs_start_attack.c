@@ -241,6 +241,77 @@ void* get_move_battlescript_ptr(u16 move)
     return (void*) *ptr_to_movescript;
 }
 
+u16 get_mega_species(u16 species) //0xFB = mega evo, 0xFC = primal reversion, 0xFD = raquaza mego evo, 0xFF = revert to normal state
+{
+    for (u8 i = 0; i < 5; i++)
+    {
+        if (evolution_table[species].evos[i].method == 0xFB)
+        {
+            return evolution_table[species].evos[i].poke;
+        }
+    }
+    return 0;
+}
+
+u8 mega_evolution_script[] = {0x83, 88, 0, 0x10, 0x05, 0x02, 0x45, 1, 0x1E, 0, 0, 0, 0, 0x3A, 0x83, 89, 0, 0x10, 0x04, 0x02, 0x83, 0x0, 0x0, 0x3F};
+
+u8 check_mega_evo(u8 bank)
+{
+    struct battle_participant* attacker_struct = &battle_participants[bank];
+    u16 mega_species = get_mega_species(attacker_struct->poke_species);
+    u8 banks_side = is_bank_from_opponent_side(bank);
+    if (mega_species && new_battlestruct.ptr->side_affecting[banks_side].mega_evo_state == 1)
+    {
+        new_battlestruct.ptr->side_affecting[banks_side].mega_evo_state = 2;
+        struct pokemon* poke_address;
+        if (banks_side == 1)
+            poke_address = &party_opponent[battle_team_id_by_side[bank]];
+        else
+            poke_address = &party_player[battle_team_id_by_side[bank]];
+        set_attributes(poke_address, ATTR_SPECIES, &mega_species);
+        calculate_stats_pokekmon(poke_address);
+        attacker_struct->atk = get_attributes(poke_address, ATTR_ATTACK, 0);
+        attacker_struct->def = get_attributes(poke_address, ATTR_DEFENCE, 0);
+        attacker_struct->spd = get_attributes(poke_address, ATTR_SPEED, 0);
+        attacker_struct->sp_atk = get_attributes(poke_address, ATTR_SPECIAL_ATTACK, 0);
+        attacker_struct->sp_def = get_attributes(poke_address, ATTR_SPECIAL_DEFENCE, 0);
+        attacker_struct->poke_species = mega_species;
+        attacker_struct->type1 = pokemon_table[mega_species].type1;
+        attacker_struct->type2 = pokemon_table[mega_species].type2;
+        u8 ability_bit = get_attributes(poke_address, ATTR_ABILITY_BIT, 0);
+        ability_bit = *(&pokemon_table[mega_species].ability1) + ability_bit;
+        if (ability_bit == 0)
+            ability_bit = pokemon_table[mega_species].ability1;
+        attacker_struct->ability_id = ability_bit;
+
+        attacker_struct->max_hp = get_attributes(poke_address, ATTR_TOTAL_HP, 0);
+        attacker_struct->current_hp = get_attributes(poke_address, ATTR_CURRENT_HP, 0);
+        attacker_struct->level = get_attributes(poke_address, ATTR_LEVEL, 0);
+
+        //set buffer for new species and item used
+        battle_text_buff1[0] = 0xFD;
+        battle_text_buff1[1] = 6;
+        battle_text_buff1[2] = mega_species;
+        battle_text_buff1[3] = mega_species >> 8;
+        battle_text_buff1[4] = 0xFF;
+        last_used_item = attacker_struct->held_item;
+
+        //buffer for mega ring
+        u16 MEGA_RING = 0x100; //set for testing purposes
+        battle_text_buff2[0] = 0xFD;
+        battle_text_buff2[1] = 10;
+        battle_text_buff2[2] = MEGA_RING;
+        battle_text_buff2[3] = MEGA_RING >> 8;
+        battle_text_buff2[4] = 0xFF;
+
+        execute_battle_script(&mega_evolution_script);
+        new_battlestruct.ptr->various.active_bank = bank;
+        return 1;
+    }
+    else
+        return 0;
+}
+
 void bs_start_attack()
 {
     /*if(START_EVENT_FLAG)
@@ -251,6 +322,19 @@ void bs_start_attack()
     u8 mode=0;  //mode 0 - get type with adjusting chosen target
                 //mode 1 - get type with calculating target from scratch
                 //mode 2 - don't get type and calculating target from scratch
+
+    //new_battlestruct.ptr->side_affecting[0].mega_evo_state = 1;
+    //new_battlestruct.ptr->side_affecting[1].mega_evo_state = 1;
+    for (u8 i = 0; i < no_of_all_banks; i++)
+    {
+        bank_attacker = i;
+        u8 banks_side = is_bank_from_opponent_side(i);
+        if (new_battlestruct.ptr->side_affecting[banks_side].mega_evo_state == 1 && menu_choice_pbs[i] == 0)
+        {
+            if (check_mega_evo(i))
+                return;
+        }
+    }
     bank_attacker=turn_order[current_move_turn];
     if(!(bits_table[bank_attacker]&battle_stuff_ptr.ptr->absent_bank_flags_prev_turn))
     {
