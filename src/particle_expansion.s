@@ -327,8 +327,8 @@ shiny_particle_image:
 .byte 0x80, 0x00, POWER_GEM_particle_ID, 0x28
 .word ENERGY_BALL_particle
 .byte 0x00, 0x02, ENERGY_BALL_particle_ID, 0x28
-.word FOCUS_BLAST_particle
-.byte 0x00, 0x08, FOCUS_BLAST_particle_ID, 0x28
+/*.word FOCUS_BLAST_particle
+.byte 0x00, 0x08, FOCUS_BLAST_particle_ID, 0x28*/
 
 .align 2
 
@@ -650,5 +650,5 @@ shiny_particle_pallet:
 .byte POWER_GEM_particle_ID, 0x28, 0x00, 0x00
 .word ENERGY_BALL_palette
 .byte ENERGY_BALL_particle_ID, 0x28, 0x00, 0x00
-.word FOCUS_BLAST_palette
-.byte FOCUS_BLAST_particle_ID, 0x28, 0x00, 0x00
+/*.word FOCUS_BLAST_palette
+.byte FOCUS_BLAST_particle_ID, 0x28, 0x00, 0x00*/
