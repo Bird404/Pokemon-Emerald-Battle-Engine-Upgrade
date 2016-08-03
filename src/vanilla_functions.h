@@ -73,6 +73,7 @@ s8 compare_two_strings(char* string1, char* string2);
 char* get_trainername_address(u16 trainerID);
 void decompress_battle_healthbar_and_font();
 void update_bank_graphical_elements(u8 objID, struct pokemon* poke, u8 element);
+void play_sound(u16 songID);
 
 u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);
