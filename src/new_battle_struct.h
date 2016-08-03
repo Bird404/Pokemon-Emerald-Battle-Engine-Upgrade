@@ -106,11 +106,19 @@ struct various{
     u16 previous_move;
 };
 
+struct mega_flags
+{  
+    u8 stone_mega: 1;
+    u8 wish_mega: 1;
+    u8 transformed: 1;
+};
+
 struct new_battle_struct{
     struct bank_affecting bank_affecting[4];
     struct side_affecting side_affecting[2];
     struct field_affecting field_affecting;
     struct various various;
+    struct mega_flags mega_trigger[4];
 };
 
 struct new_battlestruct_ptr{
