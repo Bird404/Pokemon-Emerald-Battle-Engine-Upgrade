@@ -44,7 +44,7 @@ void atk7D_set_rain()
     }
     else
     {
-        battle_weather.flags.rain = 1;
+        battle_weather.int_bw = weather_rain;
         battle_communication_struct.multistring_chooser = 1;
         if (get_item_effect(bank_attacker, 1) == ITEM_EFFECT_DAMPROCK)
             battle_effects_duration.weather_dur = 8;
@@ -68,7 +68,7 @@ void atk95_set_sandstorm()
     }
     else
     {
-        battle_weather.flags.sandstorm = 1;
+        battle_weather.int_bw = weather_sandstorm;
         battle_communication_struct.multistring_chooser = 3;
         if (get_item_effect(bank_attacker, 1) == ITEM_EFFECT_SMOOTHROCK)
             battle_effects_duration.weather_dur = 8;
@@ -92,7 +92,7 @@ void atkBB_set_sunny()
     }
     else
     {
-        battle_weather.flags.sun = 1;
+        battle_weather.int_bw = weather_sun;
         battle_communication_struct.multistring_chooser = 4;
         if (get_item_effect(bank_attacker, 1) == ITEM_EFFECT_HEATROCK)
             battle_effects_duration.weather_dur = 8;
@@ -116,7 +116,7 @@ void atkC8_set_hail()
     }
     else
     {
-        battle_weather.flags.hail = 1;
+        battle_weather.int_bw = weather_hail;
         battle_communication_struct.multistring_chooser = 5;
         if (get_item_effect(bank_attacker, 1) == ITEM_EFFECT_ICYROCK)
             battle_effects_duration.weather_dur = 8;
