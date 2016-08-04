@@ -1174,15 +1174,17 @@ void atk00_move_canceller()
     if (protect_structs[bank_target].flag0_bouncemove && move_table[current_move].move_flags.flags.affected_by_magic_coat && new_battlestruct.ptr->various.magicbounce == 0) //magic coat check
     {
         protect_structs[bank_target].flag0_bouncemove = 0;
+        last_used_moves[bank_attacker] = current_move;
         pressure_pp_lose(bank_attacker, bank_target, MOVE_MAGIC_COAT);
         new_battlestruct.ptr->various.magicbounce = 1;
         battlescript_push();
         battlescripts_curr_instruction = (void*) 0x082DB194;
         return;
     }
-    else if ((battle_participants[bank_target].ability_id == ABILITY_MAGIC_BOUNCE && has_ability_effect(bank_target, 1, 1)) && move_table[current_move].move_flags.flags.affected_by_magic_coat && new_battlestruct.ptr->various.magicbounce == 0)
+    else if ((battle_participants[bank_target].ability_id == ABILITY_MAGIC_BOUNCE && has_ability_effect(bank_target, 1, 1)) && move_table[current_move].move_flags.flags.affected_by_magic_coat && new_battlestruct.ptr->various.magicbounce == 0 && !protect_affects(current_move, 0) && !SEMI_INVULNERABLE(bank_target))
     {
         new_battlestruct.ptr->various.magicbounce = 1;
+        last_used_moves[bank_attacker] = current_move;
         battlescript_push();
         battlescripts_curr_instruction = &magicbounce_bs;
         return;
