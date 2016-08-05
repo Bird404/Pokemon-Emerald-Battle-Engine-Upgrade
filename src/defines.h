@@ -9,6 +9,23 @@
 #include "battle_structs.h"
 #include "battle_locations.h"
 
+struct evolution{
+    struct evolution_sub evos[NUM_OF_EVOS];
+};
+
+struct evolution* evolution_table = (void*) EVOTABLE_POINTER;
+
+//Pokemon Basestats table
+
+#define POKEBASESTATS_POINTER 0x083203CC
+
+struct poke_basestats* pokemon_table = (void*) POKEBASESTATS_POINTER;
+
+//mega item that the player has to posses in order to mega evolve
+
+#define KEYSTONE 0x28
+
+
 #define MOVE_WORKED !(move_outcome.failed || move_outcome.missed || move_outcome.not_affected)
 #define TARGET_TURN_DAMAGED (special_statuses[bank_target].moveturn_losthp)
 #define DAMAGING_MOVE move_table[current_move].base_power
