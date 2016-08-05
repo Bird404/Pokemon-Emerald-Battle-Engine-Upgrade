@@ -5,6 +5,7 @@
 #include "defines.h"
 
 u32 malloc_and_clear(u16 size);
+void revert_mega_to_normalform(u8 teamID, u8 opponent_side);
 
 void alloc_new_struct()
 {
@@ -27,6 +28,14 @@ void free_new_struct()
     ptr=(u32 *)(&battle_stuff_ptr);
     free(*ptr);
     *ptr=0;
+    //revert player's megas to normal form
+    if (new_battlestruct.ptr->side_affecting[0].mega_evolved)
+    {
+        for (u8 i = 0; i < 6; i++)
+        {
+            revert_mega_to_normalform(i, 0);
+        }
+    }
     ptr=(u32 *)(&new_battlestruct);
     free(*ptr);
     *ptr=0;
