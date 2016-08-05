@@ -104,12 +104,6 @@ struct evolution_sub{
     u16 padding;
 };
 
-struct evolution{
-    struct evolution_sub evos[5];
-};
-
-extern struct evolution evolution_table[700];
-
 struct in_battle_weather{
     u32 rain : 1;
     u32 downpour : 1;
@@ -696,7 +690,5 @@ struct poke_basestats{
     u8 padding1;
     u8 padding2;
 };
-
-extern struct poke_basestats pokemon_table[412];
 
 #endif /* B_STRUCTS */
