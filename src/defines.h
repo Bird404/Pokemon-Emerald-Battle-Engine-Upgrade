@@ -9,6 +9,9 @@
 #include "battle_structs.h"
 #include "battle_locations.h"
 
+#define NUM_OF_EVOS 5
+#define EVOTABLE_POINTER 0x0832531C
+
 struct evolution{
     struct evolution_sub evos[NUM_OF_EVOS];
 };
