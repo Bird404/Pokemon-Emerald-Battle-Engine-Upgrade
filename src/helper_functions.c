@@ -2051,14 +2051,10 @@ void setaquaring()
 void get_trainer_name_for_mega()
 {
     char* trainer_name;
+    //to do multi battle checks
     if (is_bank_from_opponent_side(bank_attacker))
     {
-        struct pokemon* poke = &party_opponent[battle_team_id_by_side[bank_attacker]];
-        char poke_name[8];
-        get_attributes(poke, ATTR_OT_NAME, &poke_name[0]);
         trainer_name = get_trainername_address(var_8015_trainer_opponent_A);
-        if (compare_two_strings(trainer_name, &poke_name[0]) != 0)
-            trainer_name = get_trainername_address(trainer_opponent_B);
     }
     else
     {
