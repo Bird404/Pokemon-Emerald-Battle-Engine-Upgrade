@@ -183,6 +183,9 @@ compare_two_strings = 0x08008C44|1;
 get_trainername_address = 0x0806F0B0|1;
 decompress_battle_healthbar_and_font = 0x0805E1B8|1;
 update_bank_graphical_elements = 0x08074860|1;
+get_item_lastword = 0x080D7644|1;
+checkitem = 0x080D6724|1;
+prepare_fainting_cry = 0x0803432C|1;
 
 attack_iteration_cleanup = 0x804AF30|1;
 prepare_pokemon_battle_sprite_manipulation_buffer = 0x08034414|1;
@@ -190,5 +193,3 @@ check_failure_due_to_status = 0x803F90C|1;
 
 /*Expandable tables*/
 battle_strings_table = 0x085CC270;
-evolution_table = 0x0832531C;
-pokemon_table = 0x083203CC;
