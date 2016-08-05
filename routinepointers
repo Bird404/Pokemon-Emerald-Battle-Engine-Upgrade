@@ -14,6 +14,7 @@ atk0F_resultmessage 0831BD4C
 atk13_printfromtable 0831BD5C
 atk42_jump_if_type 0831BE18
 atk49_move_end_turn 0831BE34
+atk56_prepare_fainting_cry 0831BE68
 atk6A_remove_item 0831BEB8
 atk70_record_ability_of_bank 0831BED0
 atk77_set_protect_stuff 0831BEEC
