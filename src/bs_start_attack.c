@@ -6,6 +6,8 @@
 #include "new_battle_struct.h"
 #include "static_references.h"
 
+u8 check_megastone(u8 bank);
+
 u8 is_bank_present(u8 bank)
 {
     if(absent_bank_flags & bits_table[bank])
@@ -243,7 +245,7 @@ void* get_move_battlescript_ptr(u16 move)
 
 u16 get_mega_species(u16 species) //0xFB = mega evo, 0xFC = primal reversion, 0xFD = raquaza mego evo, 0xFF = revert to normal state
 {
-    for (u8 i = 0; i < 5; i++)
+    for (u8 i = 0; i < NUM_OF_EVOS; i++)
     {
         if (evolution_table[species].evos[i].method == 0xFB)
         {
@@ -260,9 +262,10 @@ u8 check_mega_evo(u8 bank)
     struct battle_participant* attacker_struct = &battle_participants[bank];
     u16 mega_species = get_mega_species(attacker_struct->poke_species);
     u8 banks_side = is_bank_from_opponent_side(bank);
-    if (mega_species && new_battlestruct.ptr->side_affecting[banks_side].mega_evo_state == 1)
+    if (mega_species && new_battlestruct.ptr->side_affecting[banks_side].mega_evolved == 0 && (((banks_side & 1) && check_megastone(bank)) || (new_battlestruct.ptr->bank_affecting[bank].wish_mega || new_battlestruct.ptr->bank_affecting[bank].stone_mega)))
     {
-        new_battlestruct.ptr->side_affecting[banks_side].mega_evo_state = 2;
+        new_battlestruct.ptr->side_affecting[banks_side].mega_evolved = 1;
+        new_battlestruct.ptr->bank_affecting[bank].mega_transformed = 1;
         struct pokemon* poke_address;
         if (banks_side == 1)
             poke_address = &party_opponent[battle_team_id_by_side[bank]];
@@ -297,7 +300,7 @@ u8 check_mega_evo(u8 bank)
         last_used_item = attacker_struct->held_item;
 
         //buffer for mega ring
-        u16 MEGA_RING = 0x100; //set for testing purposes
+        u16 MEGA_RING = KEYSTONE;
         battle_text_buff2[0] = 0xFD;
         battle_text_buff2[1] = 10;
         battle_text_buff2[2] = MEGA_RING;
@@ -328,8 +331,7 @@ void bs_start_attack()
     for (u8 i = 0; i < no_of_all_banks; i++)
     {
         bank_attacker = i;
-        u8 banks_side = is_bank_from_opponent_side(i);
-        if (new_battlestruct.ptr->side_affecting[banks_side].mega_evo_state == 1 && menu_choice_pbs[i] == 0)
+        if (menu_choice_pbs[i] == 0)
         {
             if (check_mega_evo(i))
                 return;
