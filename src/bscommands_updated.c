@@ -29,6 +29,7 @@ void* get_move_battlescript_ptr(u16 move);
 u8 affected_by_substitute(u8 bank);
 u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8 effects_handling_and_recording);
 void set_attacking_move_type();
+void revert_mega_to_normalform(u8 teamID, u8 opponent_side);
 
 void atk7D_set_rain()
 {
@@ -1953,6 +1954,21 @@ void atk13_printfromtable()
             }
         }
 
+    }
+    return;
+}
+
+void atk56_prepare_fainting_cry()
+{
+    u8 bank = get_battle_bank(read_byte(battlescripts_curr_instruction + 1));
+    battlescripts_curr_instruction += 2;
+    active_bank = bank;
+    prepare_fainting_cry(0);
+    mark_buffer_bank_for_execution(bank);
+    u8 side = is_bank_from_opponent_side(bank);
+    if (new_battlestruct.ptr->side_affecting[side].mega_evolved)
+    {
+        revert_mega_to_normalform(battle_team_id_by_side[bank], side);
     }
     return;
 }
