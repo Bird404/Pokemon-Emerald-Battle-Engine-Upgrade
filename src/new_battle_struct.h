@@ -46,6 +46,9 @@ struct bank_affecting{
     u8 stat_lowered : 1;
     u8 roost : 3;
     u8 bugbite : 1;
+    u8 stone_mega: 1;
+    u8 wish_mega: 1;
+    u8 mega_transformed: 1;
     s8 stockpile_def_changes;
     s8 stockpile_sp_def_changes;
     u8 autonomize_uses;
@@ -77,7 +80,7 @@ struct side_affecting{
     u8 lunardance : 1;
     u8 lunardance_done : 1;
     u8 echo_voice_counter : 3;
-    u8 mega_evo_state : 2; //0 = neither mega evolved nor triggered, 1 = triggered to mega evolve(if set, should reset next turn in case poke didn't mega evolve), 2 = mega evolved
+    u8 mega_evolved : 1;
 };
 
 struct field_affecting{
@@ -106,19 +109,11 @@ struct various{
     u16 previous_move;
 };
 
-struct mega_flags
-{  
-    u8 stone_mega: 1;
-    u8 wish_mega: 1;
-    u8 transformed: 1;
-};
-
 struct new_battle_struct{
     struct bank_affecting bank_affecting[4];
     struct side_affecting side_affecting[2];
     struct field_affecting field_affecting;
     struct various various;
-    struct mega_flags mega_trigger[4];
 };
 
 struct new_battlestruct_ptr{
