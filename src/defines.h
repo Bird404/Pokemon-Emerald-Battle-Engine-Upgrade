@@ -1,3 +1,6 @@
+#ifndef DEFINES_H
+#define DEFINES_H
+
 #include "./Defines/poke_types.h"
 #include "./Defines/abilities.h"
 #include "./Defines/moves.h"
@@ -8,6 +11,8 @@
 #include "./Defines/flavours.h"
 #include "battle_structs.h"
 #include "battle_locations.h"
+
+//Evolution table defines
 
 #define NUM_OF_EVOS 5
 #define EVOTABLE_POINTER 0x0832531C
@@ -27,7 +32,6 @@ struct poke_basestats* pokemon_table = (void*) POKEBASESTATS_POINTER;
 //mega item that the player has to posses in order to mega evolve
 
 #define KEYSTONE 0x28
-
 
 #define MOVE_WORKED !(move_outcome.failed || move_outcome.missed || move_outcome.not_affected)
 #define TARGET_TURN_DAMAGED (special_statuses[bank_target].moveturn_losthp)
@@ -105,3 +109,5 @@ struct poke_basestats* pokemon_table = (void*) POKEBASESTATS_POINTER;
 #define x_ 0xEC
 #define y_ 0xED
 #define z_ 0xEE
+
+#endif /* DEFINES_H */
