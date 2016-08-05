@@ -46,7 +46,7 @@ struct stat_fractions stat_buffs[] = { {2, 8}, {2, 7}, {2, 6}, {2, 5}, {2, 4}, {
 
 u8 can_evolve(u16 poke_species)
 {
-    for (u8 i = 0; i < 5; i++)
+    for (u8 i = 0; i < NUM_OF_EVOS; i++)
     {
         if (evolution_table[poke_species].evos[i].method != 0 && evolution_table[poke_species].evos[i].method < 0xFA)
         {
