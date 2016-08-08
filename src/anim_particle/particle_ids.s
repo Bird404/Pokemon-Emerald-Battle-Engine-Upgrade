@@ -16,3 +16,4 @@
 .equ POWER_GEM_particle_ID, 0x3C
 .equ ENERGY_BALL_particle_ID, 0x3D
 .equ FOCUS_BLAST_particle_ID, 0x3E
+.equ PSYCHO_CUT_particle_ID, 0x3F
