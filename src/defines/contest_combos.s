@@ -107,7 +107,7 @@
 .equ BULLDOZE_combo, 0x67
 .equ SHIFT_GEAR_combo, 0x68
 .equ GROWL_combo, 0x69
-.equ STICKY_WEB, 0x6A
+.equ STICKY_WEB_combo, 0x6A
 .equ GRASSY_TERRAIN_combo, 0x6B
 .equ MISTY_TERRAIN_combo, 0x6C
 .equ ELECTRIC_TERRAIN_combo, 0x6D
