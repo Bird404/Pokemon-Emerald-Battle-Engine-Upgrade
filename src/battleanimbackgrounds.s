@@ -68,3 +68,15 @@ battle_anim_bg_table:
 .byte 0xEC, 0x5B, 0xC2, 0x08
 .word GIGA_IMPACT_background_palette
 .byte 0x24, 0x73, 0xC2, 0x08
+#trickroombackground
+.word TRICK_ROOM_background_image
+.word TRICK_ROOM_background_palette
+.word TRICK_ROOM_background_tilemap
+#magicroombackground
+.word TRICK_ROOM_background_image
+.word MAGIC_ROOM_background_palette
+.word TRICK_ROOM_background_tilemap
+#wonderroombackground
+.word TRICK_ROOM_background_image
+.word WONDER_ROOM_background_palette
+.word TRICK_ROOM_background_tilemap
