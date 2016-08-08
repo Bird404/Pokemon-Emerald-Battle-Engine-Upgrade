@@ -9,3 +9,6 @@
 .equ GIGA_IMPACT_background_user, 0x1F
 .equ GIGA_IMPACT_background_foe, 0x20
 .equ GIGA_IMPACT_background_foe_2, 0x21
+.equ TRICK_ROOM_background, 0x22
+.equ MAGIC_ROOM_background, 0x23
+.equ WONDER_ROOM_background, 0x24
