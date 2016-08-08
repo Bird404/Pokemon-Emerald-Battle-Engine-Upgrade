@@ -330,7 +330,7 @@ shiny_particle_image:
 .word FOCUS_BLAST_particle
 .byte 0x00, 0x08, FOCUS_BLAST_particle_ID, 0x28
 .word PSYCHO_CUT_particle
-.byte 0x00, 0x01, PSYCHO_CUT_particle_ID, 0x28
+.byte 0x00, 0x02, PSYCHO_CUT_particle_ID, 0x28
 
 .align 2
 
