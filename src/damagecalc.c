@@ -264,7 +264,21 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
             break;
         case MOVE_FLAIL:
         case MOVE_REVERSAL:
-            base_power = 48 * battle_participants[atk_bank].current_hp / battle_participants[atk_bank].max_hp;
+            {
+                u32 P = 48 * battle_participants[atk_bank].current_hp / battle_participants[atk_bank].max_hp;
+                if (P <= 1)
+                    base_power = 200;
+                else if (P >= 2 && P <= 4)
+                    base_power = 150;
+                else if (5 <= P && P <= 9)
+                    base_power = 100;
+                else if (10 <= P && P <= 16)
+                    base_power = 80;
+                else if (17 <= P && P <= 32)
+                    base_power = 40;
+                else
+                    base_power = 20;
+            }
             break;
         case MOVE_RETURN:
             {
