@@ -1079,7 +1079,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     if (move_type == TYPE_FIRE)
                     {
                         effect = 1;
-                        battle_resources_ptr.ptr->field0_ptr->ability_flags_ptr->flags_ability[bank].flag1_flashfire = 1;
+                        battle_resources.ptr->ability_flags_ptr->flags_ability[bank].flag1_flashfire = 1;
                         script_ptr = (void*) 0x082DB5A7;
                         script_ptr += adder;
                         battlescripts_curr_instruction = script_ptr;
