@@ -942,7 +942,7 @@ u16 get_attack_stat(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
             }
             break;
         case ABILITY_FLASH_FIRE:
-            if (move_type == TYPE_FIRE && battle_resources_ptr.field0_ptr->ability_flags_ptr->flags_ability[atk_bank].flag1_flashfire)
+            if (move_type == TYPE_FIRE && battle_resources.ptr->ability_flags_ptr->flags_ability[atk_bank].flag1_flashfire)
             {
                 modifier = chain_modifier(modifier, 0x1800);
             }
