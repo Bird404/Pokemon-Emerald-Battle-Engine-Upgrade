@@ -1165,7 +1165,7 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
     u32 damage = ((((2 * battle_participants[atk_bank].level) / 5 + 2) * base_power * atk_stat) / def_stat) / 50 + 2;
 
     //apply multi target modifier
-    if (move_table[move].target == move_target_both || move_table[move].target == move_target_foes_and_ally)
+    if ((move_table[move].target == move_target_both || move_table[move].target == move_target_foes_and_ally) && count_alive_pokes_on_side(2) == 2 && battle_flags.double_battle)
     {
         damage = apply_modifier(0xC00, damage);
     }
@@ -1220,7 +1220,7 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
     {
         if (crit_loc != 2 && !(has_ability_effect(atk_bank, 0, 1) && battle_participants[atk_bank].ability_id == ABILITY_INFILTRATOR))
         {
-            if (count_alive_pokes_on_side(2) == 2)
+            if (count_alive_pokes_on_side(2) == 2 && battle_flags.double_battle)
                 final_modifier = chain_modifier(final_modifier, 0xA8F);
             else
                 final_modifier = chain_modifier(final_modifier, 0x800);
