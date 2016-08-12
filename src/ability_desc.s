@@ -315,7 +315,7 @@ SLOW_START_description:
 .byte T_, a_, k_, e_, s_, Space, a_, Space, w_, h_, i_, l_, e_, Space, t_, o_, Space, g_, e_, t_, Space, g_, o_, i_, n_, g_, Dot, Termin
  
 SCRAPPY_description:
-.byte H_, i_, t_, s_, Space, G_, h_, o_, s_, t_, Dash, t_, y_, p_, e_, Space, P_, o_, k_, 0x1B, m_, o_, n_, Dot, Termin
+.byte H_, i_, t_, s_, Space, G_, h_, o_, s_, t_, Dash, t_, y_, p_, e_, Space, P_, o_, k_, Poke_e, m_, o_, n_, Dot, Termin
  
 STORM_DRAIN_description:
 .byte D_, r_, a_, w_, s_, Space, i_, n_, Space, W_, a_, t_, e_, r_, Space, m_, o_, v_, e_, s_, Dot, Termin
@@ -345,7 +345,7 @@ FLOWER_GIFT_description:
 .byte T_, r_, a_, n_, s_, f_, o_, r_, m_, s_, Space, i_, n_, Space, s_, u_, n_, s_, h_, i_, n_, e_, Dot, Termin
  
 BAD_DREAMS_description:
-.byte D_, a_, m_, a_, g_, e_, s_, Space, s_, l_, e_, e_, p_, i_, n_, g_, Space, P_, o_, k_, 0x1B, m_, o_, n_, Dot, Termin
+.byte D_, a_, m_, a_, g_, e_, s_, Space, s_, l_, e_, e_, p_, i_, n_, g_, Space, P_, o_, k_, Poke_e, m_, o_, n_, Dot, Termin
  
 PICKPOCKET_description:
 .byte S_, t_, e_, a_, l_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Apos, s_, Space, h_, o_, l_, d_, Space, i_, t_, e_, m_, Dot, Termin
@@ -369,7 +369,7 @@ CURSED_BODY_description:
 .byte D_, i_, s_, a_, b_, l_, e_, s_, Space, m_, o_, v_, e_, s_, Space, o_, n_, Space, c_, o_, n_, t_, a_, c_, t_, Dot, Termin
  
 HEALER_description:
-.byte H_, e_, a_, l_, s_, Space, p_, a_, r_, t_, n_, e_, r_, Space, P_, o_, k_, 0x1B, m_, o_, n_, Dot, Termin
+.byte H_, e_, a_, l_, s_, Space, p_, a_, r_, t_, n_, e_, r_, Space, P_, o_, k_, Poke_e, m_, o_, n_, Dot, Termin
  
 FRIEND_GUARD_description:
 .byte L_, o_, w_, e_, r_, s_, Space, d_, a_, m_, a_, g_, e_, Space, t_, o_, Space, p_, a_, r_, t_, n_, e_, r_, s_, Dot, Termin
@@ -550,5 +550,6 @@ DESOLATE_LAND_description:
  
 DELTA_STREAM_description:
 .byte F_, l_, y_, i_, n_, g_, Dash, t_, y_, p_, e_, s_, Space, a_, r_, e_, Space, s_, t_, r_, o_, n_, g_, e_, r_, Dot, Termin
+
 .word 0xFFFFFFF
 
