@@ -399,13 +399,7 @@ struct battle_history{
 };
 
 struct b_resources_field0{
-    u32 field0;
-    struct ability_flags *ability_flags_ptr;
-    u32 battlescript_stack;
-    u32 battlescript_execute_stack;
-    u32 field10;
-    struct tai_state *tai_state;
-    struct battle_history *battle_history;
+    u8 unkown;
 };
 
 struct battlescript_stack{
@@ -414,13 +408,22 @@ struct battlescript_stack{
     u8 undefined[3];
 };
 
-struct battle_resources{
+struct b_resources_table{
     struct b_resources_field0 *field0_ptr;
-    u32 field4;
+    struct ability_flags *ability_flags_ptr;
     struct battlescript_stack *battlescript_stack;
+    void* battle_callback1_stack;
+    void* field_10;
+    struct tai_state *tai_state;
+    struct battle_history *battle_history;
+    void* taiscripts_stack;
 };
 
-extern struct battle_resources battle_resources_ptr;
+struct b_resources{
+    struct b_resources_table* ptr;
+};
+
+extern struct b_resources battle_resources;
 
 struct b_communication{
     u8 field0;
