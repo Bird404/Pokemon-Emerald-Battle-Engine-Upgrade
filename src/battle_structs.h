@@ -420,11 +420,7 @@ struct battle_resources{
     struct battlescript_stack *battlescript_stack;
 };
 
-struct b_resources_ptr{
-    struct battle_resources *ptr;
-};
-
-extern struct b_resources_ptr battle_resources_ptr;
+extern struct battle_resources battle_resources_ptr;
 
 struct b_communication{
     u8 field0;
