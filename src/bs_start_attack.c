@@ -462,6 +462,6 @@ void bc_preattacks()
         battle_communication_struct.move_effect=0;
         battle_communication_struct.field4=0;
         battle_scripting.field16=0;
-        battle_resources_ptr.ptr->battlescript_stack->stack_height=0;
+        battle_resources_ptr.battlescript_stack->stack_height=0;
     }
 }
