@@ -1460,6 +1460,9 @@ void atk77_set_protect_stuff()
     u8 protects_team = 0;
     u8 attacker_side = is_bank_from_opponent_side(bank_attacker);
     u8* activity = &disable_structs[bank_attacker].protect_endure_effect;
+    u16 previous_move = last_used_moves[bank_attacker];
+    if (move_table[previous_move].script_id != 34 || previous_move == MOVE_MAT_BLOCK)
+        *activity = 0;
     if (current_move_turn == no_of_all_banks - 1)
         fail = 1;
     else if (current_move != MOVE_MAT_BLOCK) //mat block doesn't check it
