@@ -68,6 +68,8 @@ u16 var_8015_trainer_opponent_A;
 u16 trainer_opponent_B;
 void* tasks_for_banks[4];
 u8 graphical_elements_pbs[4];
+void *b_x[4];
+u8 healthbox_obj_id_pbs[4];
 
 u32 poison_status_flag;
 u32 sleep_status_flag;
