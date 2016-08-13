@@ -3,6 +3,7 @@
 #include "new_battle_struct.h"
 #include "battle_locations.h"
 #include "defines.h"
+#include "vanilla_functions.h"
 
 u32 malloc_and_clear(u16 size);
 void revert_mega_to_normalform(u8 teamID, u8 opponent_side);
@@ -25,11 +26,12 @@ void free(u32 address);
 void free_new_struct()
 {
     //revert player's megas to normal form
-    if (new_battlestruct.ptr->mega_related.evo_happened_pbs&0x5)
+    if(new_battlestruct.ptr->mega_related.evo_happened_pbs&0x5)
     {
         for (u8 i = 0; i < 6; i++)
         {
-            revert_mega_to_normalform(i, 0);
+            if((new_battlestruct.ptr->mega_related.party_mega_check)&bits_table[i])
+                revert_mega_to_normalform(i, 0);
         }
     }
     u32 *ptr;
