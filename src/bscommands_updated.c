@@ -1969,9 +1969,17 @@ void atk56_prepare_fainting_cry()
     prepare_fainting_cry(0);
     mark_buffer_bank_for_execution(bank);
     u8 side = is_bank_from_opponent_side(bank);
-    if (new_battlestruct.ptr->side_affecting[side].mega_evolved)
+    u8 checker;
+    if(side==0)
+    {
+        checker=0x5;
+    }
+    else
+    {
+        checker=0xA;
+    }
+    if (new_battlestruct.ptr->mega_related.evo_happened_pbs&checker)
     {
         revert_mega_to_normalform(battle_team_id_by_side[bank], side);
     }
-    return;
 }
