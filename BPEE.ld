@@ -191,5 +191,14 @@ attack_iteration_cleanup = 0x804AF30|1;
 prepare_pokemon_battle_sprite_manipulation_buffer = 0x08034414|1;
 check_failure_due_to_status = 0x803F90C|1;
 
+/*mega*/
+gpu_pal_obj_alloc_tag_and_apply = 0x8008744|1; 
+gpu_tile_obj_decompress_alloc_tag_and_upload = 0x8034530|1;
+template_instanciate_forward_search = 0x8006DF4|1;
+bx_move_chosing_menu = 0x08057BFC| 1;
+b_x = 0x3005D60;
+healthbox_obj_id_pbs = 0x3005D70;
+get_pingpong = 0x0806F534|1;
+
 /*Expandable tables*/
 battle_strings_table = 0x085CC270;
