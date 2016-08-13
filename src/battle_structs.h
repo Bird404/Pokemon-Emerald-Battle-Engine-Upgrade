@@ -601,11 +601,23 @@ struct task{
 
 extern struct task tasks[16];
 
+struct frame {
+  u16 data;
+  u16 duration;
+};
+
+struct rotscale_frame {
+  u16 scale_delta_x;
+  u16 scale_delta_y;
+  u8 rot_delta;
+  u8 duration;
+  u16 field_6;
+};
+
 struct sprite{
     u8 y;
     u8 flags1;
-    u8 x;
-    u8 msb_of_x_and_flags2;
+    u16 x_and_flag2;
     u16 attr2;
     u16 rotscaleinfo;
 };
@@ -620,20 +632,25 @@ struct coords8{
     u8 y;
 };
 
-struct moveanim_priv{
-    u16 private[8];
-};
+struct object;
+typedef void (*object_callback)(struct object*);
 
-union obj_privates{
-    struct moveanim_priv moveanim_priv;
+struct template {
+  u16 tiles_tag;
+  u16 pal_tag;
+  struct sprite *oam;
+  struct frame **animation;
+  u32 *graphics;
+  struct rotscale_frame **rotscale;
+  object_callback callback;
 };
 
 struct object{
     struct sprite final_oam;
-    void* anim_table;
+    struct frame **animation_table;
     void* gfx_table;
     void* rotscale_table;
-    void* template;
+    struct template* template;
     u32 field_18;
     void* callback;
     struct coords16 pos1;
@@ -643,7 +660,7 @@ struct object{
     u8 anim_frame;
     u8 anim_delay_countdown;
     u8 anim_unkown_counter;
-    union obj_privates privates;
+    u16 private[8];
     u8 in_use : 1;
     u8 flag2 : 1;
     u8 invisible : 1;
@@ -652,6 +669,12 @@ struct object{
     u16 anim_data_offset;
     u8 field_42;
     u8 y_height_related;
+};
+
+struct image_resource{
+    void *image;
+    u16 size;
+    u16 tag;
 };
 
 extern struct object objects[64];
