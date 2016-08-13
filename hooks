@@ -24,3 +24,7 @@ get_number_of_relearnable_moves 0806E25C 1
 POWER_SWAP_animation_hook 0810FD70 0
 mega_trigger_hook 08057E04 0
 reset_mega_trigger_hook 08057588 0
+load_graphics_hook 0805E1B0 1
+position_trigger_hook 08057C04 0
+slide_out_on_pressing_A_hook1 08057D6C 1
+slide_out_on_pressing_A_hook2 080578D8 1
