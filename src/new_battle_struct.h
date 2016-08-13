@@ -46,9 +46,6 @@ struct bank_affecting{
     u8 stat_lowered : 1;
     u8 roost : 3;
     u8 bugbite : 1;
-    u8 stone_mega: 1;
-    u8 wish_mega: 1;
-    u8 mega_transformed: 1;
     s8 stockpile_def_changes;
     s8 stockpile_sp_def_changes;
     u8 autonomize_uses;
@@ -80,7 +77,6 @@ struct side_affecting{
     u8 lunardance : 1;
     u8 lunardance_done : 1;
     u8 echo_voice_counter : 3;
-    u8 mega_evolved : 1;
 };
 
 struct field_affecting{
@@ -109,11 +105,23 @@ struct various{
     u16 previous_move;
 };
 
+struct mega_related
+{
+    u8 user_trigger: 2; // 0x0 for not set, //0x1 for stone, //0x2 for wish
+    u8 ally_trigger: 2;
+    u8 evo_happened_pbs: 4;
+    u8 party_mega_check: 6;
+    u8 ai_party_mega_check: 6;
+    u8 trigger_id;
+    u8 indicator_id_pbs[4];
+};
+
 struct new_battle_struct{
     struct bank_affecting bank_affecting[4];
     struct side_affecting side_affecting[2];
     struct field_affecting field_affecting;
     struct various various;
+    struct mega_related mega_related;
 };
 
 struct new_battlestruct_ptr{
