@@ -13,6 +13,9 @@ mega_trigger_hook:
 	bls check_start_press
 
 b_is_pressed:
+	bl hide_trigger
+	cmp r0, #0x0
+	beq bx_move_menu_return
 	ldr r0, =(0x8057E14|1)
 	bx r0
 
@@ -24,6 +27,7 @@ check_start_press:
 	ldr r0, =active_bank
 	ldrb r0, [r0]
 	bl set_mega_triggers_for_user_team
+bx_move_menu_return:
 	ldr r0, =(0x8057F9E|1)
 	bx r0
 
@@ -41,4 +45,4 @@ reset_mega_trigger_hook:
 	ldrb r0, [r4] 
 	ldr r1, =(0x08057590|1)
 	bx r1
-
+.align 2
