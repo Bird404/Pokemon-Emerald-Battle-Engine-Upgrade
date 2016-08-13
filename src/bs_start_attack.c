@@ -22,7 +22,6 @@ u16 get_speed(u8 bank);
 
 u8 get_target_of_move(u16 move, u8 target_given, u8 adjust)
 {
-
     u8 target_case;
     u8 old_target = battle_stuff_ptr.ptr->move_target[bank_attacker];
     u8 result_target = old_target;
@@ -257,20 +256,58 @@ u16 get_mega_species(u16 species) //0xFB = mega evo, 0xFC = primal reversion, 0x
 
 u8 mega_evolution_script[] = {0x83, 88, 0, 0x10, 0x05, 0x02, 0x45, 1, 0x1E, 0, 0, 0, 0, 0x3A, 0x83, 89, 0, 0x10, 0x04, 0x02, 0x83, 0x0, 0x0, 0x3F};
 
+u8 is_multi_battle();
+
 u8 check_mega_evo(u8 bank)
 {
     struct battle_participant* attacker_struct = &battle_participants[bank];
     u16 mega_species = get_mega_species(attacker_struct->poke_species);
     u8 banks_side = is_bank_from_opponent_side(bank);
-    if (mega_species && new_battlestruct.ptr->side_affecting[banks_side].mega_evolved == 0 && (((banks_side & 1) && check_megastone(bank)) || (new_battlestruct.ptr->bank_affecting[bank].wish_mega || new_battlestruct.ptr->bank_affecting[bank].stone_mega)))
+    u8 can_mega_evolve=0;
+    if(bank==0)
     {
-        new_battlestruct.ptr->side_affecting[banks_side].mega_evolved = 1;
-        new_battlestruct.ptr->bank_affecting[bank].mega_transformed = 1;
+        if((new_battlestruct.ptr->mega_related.user_trigger)!=0)
+        {
+            can_mega_evolve=1;
+            if(!is_multi_battle())
+            {
+                new_battlestruct.ptr->mega_related.evo_happened_pbs|=0x5;
+            }
+            else
+            {
+                new_battlestruct.ptr->mega_related.evo_happened_pbs|=0x1;
+            }
+        }
+    }
+    else if(bank==2 && !is_multi_battle())
+    {
+        if((new_battlestruct.ptr->mega_related.ally_trigger)!=0)
+        {
+            can_mega_evolve=1;
+            new_battlestruct.ptr->mega_related.evo_happened_pbs|=0x5;
+        }
+    }
+    else
+    {
+        if(check_megastone(bank))
+        {
+            can_mega_evolve=1;
+            (new_battlestruct.ptr->mega_related.evo_happened_pbs)|=bits_table[bank];
+        }
+    }
+    if(mega_species && can_mega_evolve)
+    {
         struct pokemon* poke_address;
         if (banks_side == 1)
+        {
             poke_address = &party_opponent[battle_team_id_by_side[bank]];
+            new_battlestruct.ptr->mega_related.ai_party_mega_check|=bits_table[battle_team_id_by_side[bank]];
+        }
         else
+        {
             poke_address = &party_player[battle_team_id_by_side[bank]];
+            new_battlestruct.ptr->mega_related.party_mega_check|=bits_table[battle_team_id_by_side[bank]];
+        }
         set_attributes(poke_address, ATTR_SPECIES, &mega_species);
         calculate_stats_pokekmon(poke_address);
         attacker_struct->atk = get_attributes(poke_address, ATTR_ATTACK, 0);
