@@ -8,26 +8,21 @@
 
 u16 get_mega_species(u16 species);
 
-u8 can_set_mega_trigger(u8 bank)
-{
-    struct bank_affecting *trigger = &(new_battlestruct.ptr->bank_affecting[bank]);
-    return (!(trigger->stone_mega) && !(trigger->wish_mega) && !(trigger->mega_transformed));
-}
-
 void clear_mega_triggers(u8 bank)
 {
-    struct bank_affecting *trigger = &(new_battlestruct.ptr->bank_affecting[bank]);
-    (trigger->stone_mega)=0;
-    (trigger->wish_mega)=0;
-    //(*trigger.transformed)=0;
+    if(bank==0)
+        new_battlestruct.ptr->mega_related.user_trigger=0;
+    else if(bank==2)
+        new_battlestruct.ptr->mega_related.ally_trigger=0;
 }
 
-u8 check_mega_conditions_and_set_triggers(u8 bank)
+void check_mega_conditions_and_set_triggers(u8 bank)
 {
-    struct bank_affecting *trigger = &(new_battlestruct.ptr->bank_affecting[bank]);
     // add mega stone condition here
-    (trigger->stone_mega)=1;
-    return 1;
+    if(bank==0)
+        new_battlestruct.ptr->mega_related.user_trigger=1;
+    else if(bank==2)
+        new_battlestruct.ptr->mega_related.ally_trigger=1;
 }
 
 u8 is_multi_battle()
@@ -44,12 +39,28 @@ u8 check_megastone(u8 bank)
     return 0;
 }
 
+u8 can_set_mega_trigger(u8 bank)
+{
+    struct mega_related* mega=&new_battlestruct.ptr->mega_related;
+    u8 res=0;
+    if(bank==0 && !(mega->user_trigger) &&
+       ((is_multi_battle() && !(mega->evo_happened_pbs&0x1)) || !(mega->evo_happened_pbs&0x5)))
+    {
+        res=1;
+    }
+    else if(bank==2 && !(mega->user_trigger) && !(mega->ally_trigger) && !(mega->evo_happened_pbs&0x5))
+    {
+        res=1;
+    }
+    return (res && check_megastone(bank) && checkitem(KEYSTONE, 1));
+}
+
 void set_mega_triggers_for_user_team(u8 bank)
 {
-    if(check_megastone(bank) && checkitem(KEYSTONE, 1) && can_set_mega_trigger(0) && (is_multi_battle() || can_set_mega_trigger(2)))
+    if(can_set_mega_trigger(bank))
     {
         check_mega_conditions_and_set_triggers(bank);
-        play_sound(5);
+        play_sound(2);
     }
 }
 
@@ -73,9 +84,9 @@ void revert_mega_to_normalform(u8 teamID, u8 opponent_side)
     }
     if (can_revert)
     {
-        new_battlestruct.ptr->side_affecting[opponent_side].mega_evolved = 0;
         set_attributes(poke_address, ATTR_SPECIES, &species_to_revert);
         calculate_stats_pokekmon(poke_address);
     }
     return;
 }
+
