@@ -1969,17 +1969,10 @@ void atk56_prepare_fainting_cry()
     prepare_fainting_cry(0);
     mark_buffer_bank_for_execution(bank);
     u8 side = is_bank_from_opponent_side(bank);
-    u8 checker;
-    if(side==0)
+    u8 id_by_side=battle_team_id_by_side[bank];
+    if ((side==0 && (new_battlestruct.ptr->mega_related.party_mega_check&bits_table[id_by_side]))
+        || (side==1 && (new_battlestruct.ptr->mega_related.ai_party_mega_check&bits_table[id_by_side])))
     {
-        checker=0x5;
-    }
-    else
-    {
-        checker=0xA;
-    }
-    if (new_battlestruct.ptr->mega_related.evo_happened_pbs&checker)
-    {
-        revert_mega_to_normalform(battle_team_id_by_side[bank], side);
+        revert_mega_to_normalform(id_by_side, side);
     }
 }
