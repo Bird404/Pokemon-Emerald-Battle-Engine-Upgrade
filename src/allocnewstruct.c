@@ -24,18 +24,18 @@ void free(u32 address);
 
 void free_new_struct()
 {
-    u32 *ptr;
-    ptr=(u32 *)(&battle_stuff_ptr);
-    free(*ptr);
-    *ptr=0;
     //revert player's megas to normal form
-    if (new_battlestruct.ptr->side_affecting[0].mega_evolved)
+    if (new_battlestruct.ptr->mega_related.evo_happened_pbs&0x5)
     {
         for (u8 i = 0; i < 6; i++)
         {
             revert_mega_to_normalform(i, 0);
         }
     }
+    u32 *ptr;
+    ptr=(u32 *)(&battle_stuff_ptr);
+    free(*ptr);
+    *ptr=0;
     ptr=(u32 *)(&new_battlestruct);
     free(*ptr);
     *ptr=0;
