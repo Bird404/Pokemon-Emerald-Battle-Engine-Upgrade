@@ -92,12 +92,14 @@ void revert_mega_to_normalform(u8 teamID, u8 opponent_side)
     u16 mega_current_species = get_attributes(poke_address, ATTR_SPECIES, 0);
     u8 can_revert = 0;
     u16 species_to_revert = 0;
+
+    struct evolution_data *evolution_table= (void *)(evo_table_ptr_ptr);
     for (u8 i = 0; i < NUM_OF_EVOS; i++)
     {
-        if (evolution_table[mega_current_species].evos[i].method == 0xFF)
+        if (evolution_table->poke_evolutions[mega_current_species].evos[i].method == 0xFF)
         {
             can_revert = 1;
-            species_to_revert = evolution_table[mega_current_species].evos[i].poke;
+            species_to_revert = evolution_table->poke_evolutions[mega_current_species].evos[i].poke;
         }
     }
     if (can_revert && species_to_revert)
