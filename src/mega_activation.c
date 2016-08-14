@@ -41,10 +41,17 @@ u8 is_multi_battle()
     return 0;
 }
 
+u32 get_item_extra_param(u16 item)
+{
+    struct item_data *item_set= (void *) (item_data_ptr_ptr);
+    return item_set->items[item].extra_param;
+}
+
 u8 check_megastone(u8 bank)
 {
     u16 mega_species = get_mega_species(battle_participants[bank].poke_species);
-    if (get_item_effect(bank, 0) == ITEM_EFFECT_MEGASTONE && mega_species && get_item_lastword(battle_participants[bank].held_item) == mega_species)
+    if (get_item_effect(bank, 0) == ITEM_EFFECT_MEGASTONE && mega_species &&
+        ((u16)get_item_extra_param(battle_participants[bank].held_item)) == mega_species)
         return 1;
     return 0;
 }
