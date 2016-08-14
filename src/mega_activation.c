@@ -8,8 +8,19 @@
 
 u16 get_mega_species(u16 species);
 
+#define PALLET_STATE 2
+#define REGULAR 0
+#define LIGHT_UP_TRIGGER 1
+#define TRIGGER_ON 2
+#define REVERT_COLORS 3
+
 void clear_mega_triggers(u8 bank)
 {
+    struct object *trigger=&objects[new_battlestruct.ptr->mega_related.trigger_id];
+    if(trigger->private[PALLET_STATE]==TRIGGER_ON)
+    {
+        trigger->private[PALLET_STATE]=REVERT_COLORS;
+    }
     if(bank==0)
         new_battlestruct.ptr->mega_related.user_trigger=0;
     else if(bank==2)
@@ -27,7 +38,6 @@ void check_mega_conditions_and_set_triggers(u8 bank)
 
 u8 is_multi_battle()
 {
-    // add multi battle_check here
     return 0;
 }
 
@@ -60,6 +70,7 @@ void set_mega_triggers_for_user_team(u8 bank)
     if(can_set_mega_trigger(bank))
     {
         check_mega_conditions_and_set_triggers(bank);
+        objects[new_battlestruct.ptr->mega_related.trigger_id].private[PALLET_STATE]=LIGHT_UP_TRIGGER;
         play_sound(2);
     }
 }
@@ -82,7 +93,7 @@ void revert_mega_to_normalform(u8 teamID, u8 opponent_side)
             species_to_revert = evolution_table[mega_current_species].evos[i].poke;
         }
     }
-    if (can_revert)
+    if (can_revert && species_to_revert)
     {
         set_attributes(poke_address, ATTR_SPECIES, &species_to_revert);
         calculate_stats_pokekmon(poke_address);
