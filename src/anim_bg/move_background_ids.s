@@ -12,3 +12,4 @@
 .equ TRICK_ROOM_background, 0x22
 .equ MAGIC_ROOM_background, 0x23
 .equ WONDER_ROOM_background, 0x24
+.equ LEAF_STORM_background, 0x25
