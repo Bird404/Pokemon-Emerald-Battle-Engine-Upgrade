@@ -80,3 +80,7 @@ battle_anim_bg_table:
 .word TRICK_ROOM_background_image
 .word WONDER_ROOM_background_palette
 .word TRICK_ROOM_background_tilemap
+#leafstormbackground
+.word LEAF_STORM_background_image
+.word LEAF_STORM_background_palette
+.word LEAF_STORM_background_tilemap
