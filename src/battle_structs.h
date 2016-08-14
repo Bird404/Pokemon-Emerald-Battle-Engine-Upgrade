@@ -679,6 +679,12 @@ struct image_resource{
 
 extern struct object objects[64];
 
+struct palette {
+  u16 c[16];
+};
+
+extern struct palette palette_obj_faded[16];
+
 struct poke_basestats{
     u8 base_hp;
     u8 base_atk;
