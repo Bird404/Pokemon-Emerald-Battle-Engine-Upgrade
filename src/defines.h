@@ -12,23 +12,6 @@
 #include "battle_structs.h"
 #include "battle_locations.h"
 
-//Evolution table defines
-
-#define NUM_OF_EVOS 5
-#define EVOTABLE_POINTER 0x0832531C
-
-struct evolution{
-    struct evolution_sub evos[NUM_OF_EVOS];
-};
-
-struct evolution* evolution_table = (void*) EVOTABLE_POINTER;
-
-//Pokemon Basestats table
-
-#define POKEBASESTATS_POINTER 0x083203CC
-
-struct poke_basestats* pokemon_table = (void*) POKEBASESTATS_POINTER;
-
 //mega item that the player has to posses in order to mega evolve
 
 #define KEYSTONE 0x28
