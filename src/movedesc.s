@@ -456,7 +456,7 @@ move_desc_table:
 #DISCHARGE
 .byte 0xBC, 0x91, 0x61, 0x08
 #LAVA PLUME
-.byte
+.word LAVA_PLUME_description
 #LEAF STORM
 .byte 0x82, 0xBD, 0x61, 0x08
 .word POWER_WHIP_description
@@ -2200,6 +2200,11 @@ ORIGIN_PULSE_description:
 PRECIPICE_BLADES_description:
 .byte F_, e_, a_, r_, s_, o_, m_, e_, Space, b_, l_, a_, d_, e_, s_, Space, o_, f_, Space, s_, t_, o_, n_, e_, JumpLine
 .byte a_, t_, t_, a_, c_, k_, Space, b_, o_, t_, h_, Space, f_, o_, e_, s_, Dot, Termin
+
+.align 2
+LAVA_PLUME_description:
+.byte S_, c_, a_, r_, l_, e_, t_, 0, f_, l_, a_, m_, e_, s_, 0, t_, o_, r_, c_, h_, e_, s_, 0xFE
+.byte e_, v_, e_, r_, y_, t_, h_, i_, n_, g_, 0, a_, r_, o_, u_, n_, d_, 0, t_, h_, e_, 0, u_, s_, e_, r_, Dot, 0xFF
 
 NOTHING_description:
 .byte N_, o_, t_, h_, i_, n_, g_, Space, f_, o_, r_, Space, n_, o_, w_, Dot, Termin
