@@ -742,4 +742,25 @@ struct item_data{
     struct item_struct items[0xFFFF];
 };
 
+//Evolution table defines
+#define NUM_OF_EVOS 5
+
+struct evolutions_of_poke{
+    struct evolution_sub evos[NUM_OF_EVOS];
+};
+
+extern struct evolution_of_poke *evo_table_ptr_ptr;
+
+struct evolution_data{
+    struct evolutions_of_poke poke_evolutions[0xFFFF];
+};
+
+//Pokemon Basestats table
+
+extern struct poke_basestats *poke_stat_table_ptr_ptr;
+
+struct basestat_data{
+    struct poke_basestats poke_stats[0xFFFF];
+};
+
 #endif /* B_STRUCTS */
