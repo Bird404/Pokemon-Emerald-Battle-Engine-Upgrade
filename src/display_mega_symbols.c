@@ -46,17 +46,58 @@ u8 is_in_triggering_state(u8 bank);
 #define DISABLED 7
 
 #define PALLET_STATE 2
+#define REGULAR 0
+#define LIGHT_UP_TRIGGER 1
+#define TRIGGER_ON 2
+#define REVERT_COLORS 3
 
 #define RELATIVE_X 3
 #define BASE_X 4
 #define SINGLES_HEALTHBOX_X 120
-#define DBL_HB_0_X 121
+#define DBL_HB_0_X 120
 #define DBL_HB_2_X 132
 #define SINGLES_HEALTHBOX_Y 90
 #define DBL_HB_0_Y 75
 #define DBL_HB_2_Y 100
+#define TRIGGER_NUM_IGNORED_COLORS 4
 
 u8 is_multi_battle();
+
+/* Declare the colors the trigger button ignores */
+u16 ignored_cols[TRIGGER_NUM_IGNORED_COLORS] = {0x2147, 0x424F, 0x31AA, 0x00E4};
+
+u8 ignored_trigger_color(u16 color) {
+  u8 i;
+  for (i = 0; i < TRIGGER_NUM_IGNORED_COLORS; ++i) {
+    if (ignored_cols[i] == color)
+        return 1;
+  }
+  return 0;
+}
+
+u16 calcEnabled(u16 clra)
+{
+    u16 clrb = 0x7FFF;
+
+    u32 currentAlpha  = 20;
+
+    u32 rbmask= ((0x1F)|(0x1F << 10)), gmask= 0x1F << 5;
+    u32 rbhalf= 0x4010, ghalf= 0x0200;
+
+    // Red and blue
+    u32 parta = clra & rbmask;
+    u32 partb = clrb & rbmask;
+    u32 part = (partb-parta) * (32 - ((currentAlpha < 0x100) ? currentAlpha : currentAlpha >> 12)) + parta*32 + rbhalf;
+    u16 clr = (part >> 5) & rbmask;
+
+    // Green
+    parta = clra & gmask;
+    partb = clrb & gmask;
+    part = (partb-parta) * (32 - ((currentAlpha < 0x100) ? currentAlpha : currentAlpha >> 12)) + parta*32 + ghalf;
+    clr |= (part >> 5) & gmask;
+
+    return clr;
+}
 
 void healthbar_trigger_callback(struct object *self)
 {
@@ -129,6 +170,58 @@ void healthbar_trigger_callback(struct object *self)
     case SLIDED_OUT:
     case HIDDEN:
     case DISABLED:
+        break;
+    }
+
+
+    switch(self->private[PALLET_STATE])
+    {
+    case LIGHT_UP_TRIGGER:
+    {
+        struct palette* pal = &palette_obj_faded[gpu_pal_tags_index_of(0x2345)];
+        if(battle_flags.double_battle)
+        {
+            for(u8 i = 1; i < 16; i++)
+            {
+                if (ignored_trigger_color(mega_triggerPalDbl[i]))
+                    continue;
+                pal->c[i] = calcEnabled(mega_triggerPalDbl[i]);
+            }
+        }
+        else
+        {
+            for(u8 i = 1; i < 16; i++)
+            {
+                if (ignored_trigger_color(mega_triggerPal[i]))
+                    continue;
+                pal->c[i] = calcEnabled(mega_triggerPal[i]);
+            }
+        }
+        self->private[PALLET_STATE]=TRIGGER_ON;
+        break;
+    }
+    case REVERT_COLORS:
+    {
+        struct palette* pal = &palette_obj_faded[gpu_pal_tags_index_of(0x2345)];
+        if(battle_flags.double_battle)
+        {
+            for(u8 i = 1; i < 16; i++)
+            {
+                pal->c[i] = mega_triggerPalDbl[i];
+            }
+        }
+        else
+        {
+            for(u8 i = 1; i < 16; i++)
+            {
+                pal->c[i] = mega_triggerPal[i];
+            }
+        }
+        self->private[PALLET_STATE]=REGULAR;
+        break;
+    }
+    case REGULAR:
+    case TRIGGER_ON:
         break;
     }
 }
@@ -254,8 +347,6 @@ void healthbar_load_graphics(u8 state)
   if (state == 2)
     {
     gpu_pal_obj_alloc_tag_and_apply(&pal_indicator);
-
-
     gpu_tile_obj_decompress_alloc_tag_and_upload(&gfx_indicator);
     if(battle_flags.double_battle)
     {
@@ -267,7 +358,6 @@ void healthbar_load_graphics(u8 state)
         gpu_pal_obj_alloc_tag_and_apply(&pal_trigger);
         gpu_tile_obj_decompress_alloc_tag_and_upload(&gfx_trigger);
     }
-
 
     // Create a Mega Indicator for every bank
     u8 bank;
