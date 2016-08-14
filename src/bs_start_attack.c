@@ -244,11 +244,12 @@ void* get_move_battlescript_ptr(u16 move)
 
 u16 get_mega_species(u16 species) //0xFB = mega evo, 0xFC = primal reversion, 0xFD = raquaza mego evo, 0xFF = revert to normal state
 {
+    struct evolution_data *evolution_table= (void *)(evo_table_ptr_ptr);
     for (u8 i = 0; i < NUM_OF_EVOS; i++)
     {
-        if (evolution_table[species].evos[i].method == 0xFB)
+        if (evolution_table->poke_evolutions[species].evos[i].method == 0xFB)
         {
-            return evolution_table[species].evos[i].poke;
+            return evolution_table->poke_evolutions[species].evos[i].poke;
         }
     }
     return 0;
@@ -316,12 +317,13 @@ u8 check_mega_evo(u8 bank)
         attacker_struct->sp_atk = get_attributes(poke_address, ATTR_SPECIAL_ATTACK, 0);
         attacker_struct->sp_def = get_attributes(poke_address, ATTR_SPECIAL_DEFENCE, 0);
         attacker_struct->poke_species = mega_species;
-        attacker_struct->type1 = pokemon_table[mega_species].type1;
-        attacker_struct->type2 = pokemon_table[mega_species].type2;
+        struct basestat_data *pokemon_table = (void *)(poke_stat_table_ptr_ptr);
+        attacker_struct->type1 = pokemon_table->poke_stats[mega_species].type1;
+        attacker_struct->type2 = pokemon_table->poke_stats[mega_species].type2;
         u8 ability_bit = get_attributes(poke_address, ATTR_ABILITY_BIT, 0);
-        ability_bit = *(&pokemon_table[mega_species].ability1) + ability_bit;
+        ability_bit = *(&pokemon_table->poke_stats[mega_species].ability1) + ability_bit;
         if (ability_bit == 0)
-            ability_bit = pokemon_table[mega_species].ability1;
+            ability_bit = pokemon_table->poke_stats[mega_species].ability1;
         attacker_struct->ability_id = ability_bit;
 
         attacker_struct->max_hp = get_attributes(poke_address, ATTR_TOTAL_HP, 0);
