@@ -719,4 +719,27 @@ struct poke_basestats{
     u8 padding2;
 };
 
+struct item_struct
+{
+    u8 name[14];
+    u16 index;
+    u16 price;
+    u8 held_effect;
+    u8 held_effect_quality;
+    void *desc_pointer;
+    u16 mystery_value;
+    u8 pocket_no;
+    u8 type_of_item;
+    void *field_usage_code;
+    u32 battle_usage;
+    void *battle_usage_code;
+    u32 extra_param;
+};
+
+extern struct item_struct *item_data_ptr_ptr;
+
+struct item_data{
+    struct item_struct items[0xFFFF];
+};
+
 #endif /* B_STRUCTS */
