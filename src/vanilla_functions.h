@@ -79,6 +79,7 @@ u8 checkitem(u16 itemID, u16 quantity);
 void prepare_fainting_cry(u8 bufferID);
 void bx_move_chosing_menu();
 s16 get_pingpong(s16 phase, s16 scale);
+u8 gpu_pal_tags_index_of(u16 tag);
 
 u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);
