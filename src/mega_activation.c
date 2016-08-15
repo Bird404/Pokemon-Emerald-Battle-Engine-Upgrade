@@ -8,11 +8,17 @@
 
 u16 get_mega_species(u16 species);
 
-#define PALLET_STATE 2
-#define REGULAR 0
-#define LIGHT_UP_TRIGGER 1
-#define TRIGGER_ON 2
-#define REVERT_COLORS 3
+void reset_indicators_height_except_bank(u8  bank)
+{
+    struct mega_related* mega = &new_battlestruct.ptr->mega_related;
+    for(u8 i = 0; i<no_of_all_banks ;i++)
+    {
+        if(i!=bank)
+        {
+            objects[mega->indicator_id_pbs[i]].pos2.y=0;
+        }
+    }
+}
 
 void clear_mega_triggers(u8 bank)
 {
@@ -21,6 +27,7 @@ void clear_mega_triggers(u8 bank)
     {
         trigger->private[PALLET_STATE]=REVERT_COLORS;
     }
+    reset_indicators_height_except_bank(bank);
     if(bank==0)
         new_battlestruct.ptr->mega_related.user_trigger=0;
     else if(bank==2)
