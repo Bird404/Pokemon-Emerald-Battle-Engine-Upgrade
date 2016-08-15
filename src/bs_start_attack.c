@@ -259,6 +259,15 @@ u8 mega_evolution_script[] = {0x83, 88, 0, 0x10, 0x05, 0x02, 0x45, 1, 0x1E, 0, 0
 
 u8 is_multi_battle();
 
+void reset_indicators_height()
+{
+    struct mega_related* mega = &new_battlestruct.ptr->mega_related;
+    for(u8 i = 0; i<no_of_all_banks ;i++)
+    {
+        objects[mega->indicator_id_pbs[i]].pos2.y=0;
+    }
+}
+
 u8 check_mega_evo(u8 bank)
 {
     struct battle_participant* attacker_struct = &battle_participants[bank];
@@ -278,6 +287,7 @@ u8 check_mega_evo(u8 bank)
             {
                 new_battlestruct.ptr->mega_related.evo_happened_pbs|=0x1;
             }
+            objects[new_battlestruct.ptr->mega_related.trigger_id].private[ANIM_STATE]=DISABLE;
         }
     }
     else if(bank==2 && !is_multi_battle())
@@ -286,6 +296,7 @@ u8 check_mega_evo(u8 bank)
         {
             can_mega_evolve=1;
             new_battlestruct.ptr->mega_related.evo_happened_pbs|=0x5;
+            objects[new_battlestruct.ptr->mega_related.trigger_id].private[ANIM_STATE]=DISABLE;
         }
     }
     else
@@ -467,9 +478,10 @@ s8 get_bracket_alteration_factor(u8 bank, u8 item_effect);
 void bc_preattacks()
 {
     u8 play_script=0;
+
     u8 *count = &(battle_stuff_ptr.ptr->pre_attacks_bank_counter);
     if(!(hitmarker&HITMARKER_FLEE))
-    {
+    {   reset_indicators_height();
         while(*count<no_of_all_banks)
         {   bank_attacker=*count;
             (*count)++;
