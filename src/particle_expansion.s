@@ -331,6 +331,8 @@ shiny_particle_image:
 .byte 0x00, 0x08, FOCUS_BLAST_particle_ID, 0x28
 .word PSYCHO_CUT_particle
 .byte 0x00, 0x02, PSYCHO_CUT_particle_ID, 0x28
+.word LEAF_STORM_particle
+.byte 0x00, 0x02, LEAF_STORM_particle_ID, 0x28
 
 .align 2
 
@@ -656,3 +658,5 @@ shiny_particle_pallet:
 .byte FOCUS_BLAST_particle_ID, 0x28, 0x00, 0x00
 .word PSYCHO_CUT_palette
 .byte PSYCHO_CUT_particle_ID, 0x28, 0x00, 0x00
+.word LEAF_STORM_palette
+.byte LEAF_STORM_particle_ID, 0x28, 0x00, 0x00
