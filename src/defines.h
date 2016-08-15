@@ -93,4 +93,37 @@
 #define y_ 0xED
 #define z_ 0xEE
 
+//Mega icons related
+#define BANK_TO_ATTACH_TRIGGER 0
+
+#define ANIM_STATE 1
+#define HIDE 0
+#define POS_BEHIND_HPBAR 1
+#define SLIDE_OUT 2
+#define SLIDE_IN 3
+#define DISABLE 4
+#define SLIDED_OUT 5
+#define HIDDEN 6
+#define DISABLED 7
+
+#define PALLET_STATE 2
+#define REGULAR 0
+#define LIGHT_UP_TRIGGER 1
+#define TRIGGER_ON 2
+#define REVERT_COLORS 3
+
+#define RELATIVE_X 3
+#define BASE_X 4
+#define SINGLES_HEALTHBOX_X 120
+#define DBL_HB_0_X 120
+#define DBL_HB_2_X 132
+#define SINGLES_HEALTHBOX_Y 90
+#define DBL_HB_0_Y 75
+#define DBL_HB_2_Y 100
+#define TRIGGER_NUM_IGNORED_COLORS 4
+
+#define DISABLED_INDICATOR 1
+#define UNHIDE_INDICATOR 2
+#define FIRED_UNHIDE 3
+
 #endif /* DEFINES_H */
