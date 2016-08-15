@@ -201,6 +201,7 @@ healthbox_obj_id_pbs = 0x3005D70;
 get_pingpong = 0x0806F534|1;
 palette_obj_faded = 0x02037D14;
 gpu_pal_tags_index_of = 0x8008804|1;
+obj_delete_and_free_tiles = 0x80070E8|1;
 item_data_ptr_ptr = 0x80001C8;
 evo_table_ptr_ptr = 0x806D140;
 poke_stat_table_ptr_ptr = 0x80001BC;
