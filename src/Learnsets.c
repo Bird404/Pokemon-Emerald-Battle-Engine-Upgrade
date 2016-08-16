@@ -7,10 +7,12 @@
 #include "battlescripts.h"
 #include "new_battle_struct.h"
 
+#pragma pack(push,1)
 struct learnset{
     u16 move;
     u8 level;
 };
+#pragma pack(pop)
 
 #define MOVE_BLANK 0x0000
 #define END 0xFF
@@ -1563,4 +1565,15 @@ u8 get_relearnable_moves(struct pokemon* poke, u16 moves_table[])
 u8 get_number_of_relearnable_moves(struct pokemon* poke)
 {
     return relearable_moves(poke, 0);
+}
+
+u8 learnsanydamagingmove(u16 poke)
+{
+    struct learnset* poke_moveset = learnset_table[poke];
+    for (u8 i = 0; poke_moveset[i].move != MOVE_BLANK && poke_moveset[i].level != 0xFF; i++)
+    {
+        if (move_table[poke_moveset[i].move].base_power)
+            return 1;
+    }
+    return 0;
 }
