@@ -2531,6 +2531,8 @@ void move_effect_setter(u8 primary, u8 certain)
     bank_partner_def = bank_to_apply;
     if (check_ability(bank_attacker, ABILITY_SHEER_FORCE) && bank_to_apply != bank_attacker && !primary && find_move_in_table(current_move, &sheerforce_moves_table[0]) && *move_effect < 0x30)
         *move_effect = 0; //move effects past 0x30 affect always the attacker
+    else if (!MOVE_WORKED)
+        *move_effect = 0;
 
     struct battle_participant* applier_bank = &battle_participants[bank_to_apply];
     u16 current_hp = applier_bank->current_hp;
