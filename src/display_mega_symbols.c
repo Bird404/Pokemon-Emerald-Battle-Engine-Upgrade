@@ -10,10 +10,10 @@
 //resource gfx_healthbar = {0x083EF524, 0x80, 0x1234};
 struct image_resource gfx_indicator = {indicatorsTiles, 0x80, 0x1234};
 struct image_resource pal_indicator = {indicatorsPal, 0x1234};
-struct image_resource gfx_trigger = {mega_triggerTiles, 0x1000, 0x1235};
-struct image_resource gfx_trigger_dbl = {mega_triggerTilesDbl, 0x1000, 0x1235};
-struct image_resource pal_trigger = {mega_triggerPal, 0x1235};
-struct image_resource pal_trigger_dbl = {mega_triggerPalDbl, 0x1235};
+struct image_resource gfx_trigger = {mega_triggerTiles, 0x400, 0x2345};
+struct image_resource gfx_trigger_dbl = {mega_triggerTilesDbl, 0x400, 0x2345};
+struct image_resource pal_trigger = {mega_triggerPal, 0x2345};
+struct image_resource pal_trigger_dbl = {mega_triggerPalDbl, 0x2345};
 // 083F6CBO - 32x32?
 
 struct sprite mega_indicator = {0, 0x0, 0x0, 0x00, 0x0};
@@ -28,7 +28,7 @@ u32 empty=0x0;
 struct template template_indicator = {0x1234, 0x1234, &mega_indicator, (struct frame **)0x82EC69C, (u32 *) &empty,
                                         (struct rotscale_frame**) 0x82EC6A8, healthbar_indicator_callback};
 
-struct template template_trigger = {0x1235, 0x1235, &mega_trigger, (struct frame **)0x82EC69C, &empty, (struct rotscale_frame**)0x82EC6A8,
+struct template template_trigger = {0x2345, 0x2345, &mega_trigger, (struct frame **)0x82EC69C, &empty, (struct rotscale_frame**)0x82EC6A8,
                                         healthbar_trigger_callback};
 
 
