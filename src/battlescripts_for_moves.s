@@ -5,10 +5,6 @@
 .include "asm_defines.s"
 .include "defines/bs_commands.s"
 
-@abilities
-.equ ABILITY_OWNTEMPO, 0x14
-.equ ABILITY_LIQUIDOOZE, 0x40
-
 .equ MOVE_FAILED, 0x082D9F1A
 .equ MOVE_MISSED, 0x082D8A5E
 .equ ENDTURN, 0x82D8A4E
@@ -26,9 +22,6 @@
 .equ HitMarkerHitsSubstitute, 0x100
 .equ HitMarkerHitsOnAir, 0x10000
 .equ StatChanger, 0x0202448E
-
-@status3
-.equ status3_charged_up, 0x200
 
 .macro jumpifmove jumpifmove_move jumpifmove_address
 jumpifhalfword 0x0 0x020241EA \jumpifmove_move \jumpifmove_address
@@ -1740,7 +1733,7 @@ CONFUSE_TARGET:
 	callasm_cmd 32 @this will try to change stats
 	jumpifsecondarystatus bank_target 7 CANTCONFUSE
 	jumpifhalverset 0x0 0x20 CANTCONFUSE
-	jumpifability bank_target ABILITY_OWNTEMPO CANT_CONFUSE_DUETOABILITY
+	jumpifability bank_target ABILITY_OWN_TEMPO CANT_CONFUSE_DUETOABILITY
 	setbyte EffectChooser 7
 	seteffectprimary
 	goto_cmd ENDTURN
