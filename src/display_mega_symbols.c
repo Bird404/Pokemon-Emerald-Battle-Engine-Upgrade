@@ -10,10 +10,10 @@
 //resource gfx_healthbar = {0x083EF524, 0x80, 0x1234};
 struct image_resource gfx_indicator = {indicatorsTiles, 0x80, 0x1234};
 struct image_resource pal_indicator = {indicatorsPal, 0x1234};
-struct image_resource gfx_trigger = {mega_triggerTiles, 0x1C00, 0x2345};
-struct image_resource gfx_trigger_dbl = {mega_triggerTilesDbl, 0x1C00, 0x2345};
-struct image_resource pal_trigger = {mega_triggerPal, 0x2345};
-struct image_resource pal_trigger_dbl = {mega_triggerPalDbl, 0x2345};
+struct image_resource gfx_trigger = {mega_triggerTiles, 0x1000, 0x1235};
+struct image_resource gfx_trigger_dbl = {mega_triggerTilesDbl, 0x1000, 0x1235};
+struct image_resource pal_trigger = {mega_triggerPal, 0x1235};
+struct image_resource pal_trigger_dbl = {mega_triggerPalDbl, 0x1235};
 // 083F6CBO - 32x32?
 
 struct sprite mega_indicator = {0, 0x0, 0x0, 0x00, 0x0};
@@ -28,7 +28,7 @@ u32 empty=0x0;
 struct template template_indicator = {0x1234, 0x1234, &mega_indicator, (struct frame **)0x82EC69C, (u32 *) &empty,
                                         (struct rotscale_frame**) 0x82EC6A8, healthbar_indicator_callback};
 
-struct template template_trigger = {0x2345, 0x2345, &mega_trigger, (struct frame **)0x82EC69C, &empty, (struct rotscale_frame**)0x82EC6A8,
+struct template template_trigger = {0x1235, 0x1235, &mega_trigger, (struct frame **)0x82EC69C, &empty, (struct rotscale_frame**)0x82EC6A8,
                                         healthbar_trigger_callback};
 
 
@@ -380,9 +380,12 @@ u8 template_instanciate_forward_search(struct template *template, u16 x, u8 y, u
 
 void healthbar_load_graphics(u8 state)
 {
+
     u8 objid;
     if (state == 2)
     {
+
+
     gpu_pal_obj_alloc_tag_and_apply(&pal_indicator);
     gpu_tile_obj_decompress_alloc_tag_and_upload(&gfx_indicator);
     if(battle_flags.double_battle)
@@ -397,15 +400,19 @@ void healthbar_load_graphics(u8 state)
     }
 
     // Create a Mega Indicator for every bank
+
     u8 bank;
     for (bank = 0; bank < no_of_all_banks; ++bank) {
-        objid = template_instanciate_forward_search(&template_indicator, -32, 0, 1);
+        objid = template_instanciate_forward_search(&template_indicator, 1, 0, 1);
       objects[objid].private[0] = bank;
       new_battlestruct.ptr->mega_related.indicator_id_pbs[bank]=objid;
     }
 
-    objid=template_instanciate_forward_search(&template_trigger, 140, 90, 1);
+
+    objid=template_instanciate_forward_search(&template_trigger, 10, 0, 1);
     new_battlestruct.ptr->mega_related.trigger_id=objid;
+
+
     }
 }
 
