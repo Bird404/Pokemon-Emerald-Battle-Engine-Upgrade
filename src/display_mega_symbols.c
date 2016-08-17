@@ -79,10 +79,7 @@ void healthbar_trigger_callback(struct object *self)
     case HIDE:
         self->pos1.x=-32;
         self->pos1.y=0;
-        if(!(new_battlestruct.ptr->mega_related.evo_happened_pbs&0x5) ||
-           (is_multi_battle() && !(new_battlestruct.ptr->mega_related.evo_happened_pbs&0x1)))
-            self->private[ANIM_STATE]=HIDDEN;
-
+        self->private[ANIM_STATE]=HIDDEN;
         break;
 
     case POS_BEHIND_HPBAR:
@@ -146,7 +143,6 @@ void healthbar_trigger_callback(struct object *self)
     case DISABLED:
         break;
     }
-
 
     switch(self->private[PALLET_STATE])
     {
@@ -219,8 +215,6 @@ void hide_trigger_on_pressing_A()
         objects[trigger_id].private[ANIM_STATE]=SLIDE_IN;
 }
 
-
-
 u8 hide_trigger()
 {
     u8 trigger_id=new_battlestruct.ptr->mega_related.trigger_id;
@@ -237,15 +231,6 @@ u8 hide_trigger()
     return can_b_button_work;
 }
 
-void unhide_indicators()
-{
-    struct mega_related* mega = &new_battlestruct.ptr->mega_related;
-    for(u8 i = 0; i<no_of_all_banks ;i++)
-    {
-        objects[mega->indicator_id_pbs[i]].private[UNHIDE_INDICATOR]=1;
-    }
-}
-
 void healthbar_indicator_callback(struct object *self)
 {
     if(!self->private[DISABLED_INDICATOR])
@@ -253,18 +238,7 @@ void healthbar_indicator_callback(struct object *self)
         u8 bank=self->private[0];
         struct object healthbox = objects[healthbox_obj_id_pbs[bank]];
 
-        u16 slide_dist=healthbox.pos2.x;
-        if(slide_dist!=0)
-        {
-            self->private[UNHIDE_INDICATOR]=1;
-        }
-
-        if(!self->private[FIRED_UNHIDE] && self->pos2.y!=0)
-        {
-            unhide_indicators();
-            self->private[FIRED_UNHIDE]=1;
-        }
-        if(!self->private[UNHIDE_INDICATOR] || ((bank&1) && !(new_battlestruct.ptr->mega_related.ai_party_mega_check&bits_table[battle_team_id_by_side[bank]]))
+        if((healthbox.invisible) || ((bank&1) && !(new_battlestruct.ptr->mega_related.ai_party_mega_check&bits_table[battle_team_id_by_side[bank]]))
            || (!(bank&1) && !(new_battlestruct.ptr->mega_related.party_mega_check&bits_table[battle_team_id_by_side[bank]])))
         {
             self->pos1.x=-8;
@@ -285,7 +259,7 @@ void healthbar_indicator_callback(struct object *self)
         {
             self->pos1.x=healthbox.pos1.x+44;
         }
-        self->pos2.x=slide_dist;
+        self->pos2.x=healthbox.pos2.x;
         self->pos1.y=healthbox.pos1.y-5;
         // Mirror healthbox priority
         u8 priority = ((healthbox.final_oam.attr2 >> 10) & 3);
@@ -327,12 +301,7 @@ void dp11_objects_pingpong(struct object *parent_object)
     }
     else if(child_object_id==healthbox_obj_id_pbs[1])
     {
-        u8 trigger_id=new_battlestruct.ptr->mega_related.trigger_id;
         u8 indi_id=new_battlestruct.ptr->mega_related.indicator_id_pbs[1];
-        if(objects[trigger_id].private[ANIM_STATE]!=DISABLED && objects[trigger_id].private[BANK_TO_ATTACH_TRIGGER]==1)
-        {
-            objects[trigger_id].pos2.y=ychange;
-        }
         if(!objects[indi_id].private[DISABLED_INDICATOR])
         {
             objects[indi_id].pos2.y=ychange;
@@ -340,12 +309,7 @@ void dp11_objects_pingpong(struct object *parent_object)
     }
     else if(child_object_id==healthbox_obj_id_pbs[3])
     {
-        u8 trigger_id=new_battlestruct.ptr->mega_related.trigger_id;
         u8 indi_id=new_battlestruct.ptr->mega_related.indicator_id_pbs[3];
-        if(objects[trigger_id].private[ANIM_STATE]!=DISABLED && objects[trigger_id].private[BANK_TO_ATTACH_TRIGGER]==3)
-        {
-            objects[trigger_id].pos2.y=ychange;
-        }
         if(!objects[indi_id].private[DISABLED_INDICATOR])
         {
             objects[indi_id].pos2.y=ychange;
@@ -390,7 +354,7 @@ void healthbar_shake(struct object *parent_object)
 
     if(is_hbar)
     {
-        is_hbar=(is_hbar)&&(!indi_obj->private[DISABLED_INDICATOR])&&(indi_obj->private[UNHIDE_INDICATOR]);
+        is_hbar=(is_hbar)&&(!indi_obj->private[DISABLED_INDICATOR]);
     }
     if(is_hbar)
     {
@@ -414,12 +378,10 @@ void gpu_pal_obj_alloc_tag_and_apply(void *);
 void gpu_tile_obj_decompress_alloc_tag_and_upload(void *);
 u8 template_instanciate_forward_search(struct template *template, u16 x, u8 y, u8 derp);
 
-
 void healthbar_load_graphics(u8 state)
 {
-  u8 objid;
-
-  if (state == 2)
+    u8 objid;
+    if (state == 2)
     {
     gpu_pal_obj_alloc_tag_and_apply(&pal_indicator);
     gpu_tile_obj_decompress_alloc_tag_and_upload(&gfx_indicator);
@@ -444,7 +406,6 @@ void healthbar_load_graphics(u8 state)
 
     objid=template_instanciate_forward_search(&template_trigger, 140, 90, 1);
     new_battlestruct.ptr->mega_related.trigger_id=objid;
-  }
-
+    }
 }
 
