@@ -389,11 +389,13 @@ struct tai_state{
     u8 curr_script;
 };
 
+struct used_moves{
+    u16 moves[4];
+    u16 unkown[4];
+};
+
 struct battle_history{
-    u16 poke1_used_moves[4];
-    u8 field_8[24];
-    u16 poke2_used_moves[4];
-    u8 field_28[24];
+    struct used_moves used_moves[4];
     u8 ability[4];
     u8 item[4];
 };
