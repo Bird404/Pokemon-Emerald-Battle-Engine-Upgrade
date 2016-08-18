@@ -34,13 +34,12 @@ void clear_mega_triggers(u8 bank)
         new_battlestruct.ptr->mega_related.ally_trigger=0;
 }
 
-void check_mega_conditions_and_set_triggers(u8 bank)
+void set_mega_triggers(u8 bank,u8 set_mode)
 {
-    // add mega stone condition here
     if(bank==0)
-        new_battlestruct.ptr->mega_related.user_trigger=1;
+        new_battlestruct.ptr->mega_related.user_trigger=set_mode;
     else if(bank==2)
-        new_battlestruct.ptr->mega_related.ally_trigger=1;
+        new_battlestruct.ptr->mega_related.ally_trigger=set_mode;
 }
 
 u8 is_multi_battle()
@@ -54,12 +53,42 @@ u32 get_item_extra_param(u16 item)
     return item_set->items[item].extra_param;
 }
 
-u8 check_megastone(u8 bank)
+u8 check_fervent_mega(u8 bank)
+{
+    u16 species = battle_participants[bank].poke_species;
+    u16 fervent_move = 0;
+    struct evolution_data *evolution_table= (void *)(evo_table_ptr_ptr);
+    for (u8 i = 0; i < NUM_OF_EVOS; i++)
+    {
+        u8 method = evolution_table->poke_evolutions[species].evos[i].method;
+        if (method == 0xFC)
+        {
+            fervent_move = evolution_table->poke_evolutions[species].evos[i].paramter;
+            break;
+        }
+    }
+    if(fervent_move)
+    {
+        for(u8 i=0; i<4; i++)
+        {
+            if(battle_participants[bank].moves[i]==fervent_move)
+            {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+u8 check_mega_condition(u8 bank)
 {
     u16 mega_species = get_mega_species(battle_participants[bank].poke_species);
     if (get_item_effect(bank, 0) == ITEM_EFFECT_MEGASTONE && mega_species &&
         ((u16)get_item_extra_param(battle_participants[bank].held_item)) == mega_species)
         return 1;
+
+    if (mega_species && check_fervent_mega(bank))
+        return 2;
     return 0;
 }
 
@@ -76,14 +105,19 @@ u8 can_set_mega_trigger(u8 bank)
     {
         res=1;
     }
-    return (res && check_megastone(bank) && checkitem(KEYSTONE, 1));
+    if(res && checkitem(KEYSTONE, 1))
+    {
+        return check_mega_condition(bank);
+    }
+    return 0;
 }
 
 void set_mega_triggers_for_user_team(u8 bank)
 {
-    if(can_set_mega_trigger(bank))
+    u8 set_mode=can_set_mega_trigger(bank);
+    if(set_mode)
     {
-        check_mega_conditions_and_set_triggers(bank);
+        set_mega_triggers(bank,set_mode);
         objects[new_battlestruct.ptr->mega_related.trigger_id].private[PALLET_STATE]=LIGHT_UP_TRIGGER;
         play_sound(2);
     }
