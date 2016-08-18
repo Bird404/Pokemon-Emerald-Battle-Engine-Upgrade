@@ -172,6 +172,7 @@ u8 mummy_text[] = {0xFD, 15, 0xB4, 0xE7, 0, 0xD5, 0xD6, 0xDD, 0xE0, 0xDD, 0xE8, 
 /*0x203*/ u8 let_it_move_first_text[] = {0xFD, 15, Apos, s_, Space, 0xFD, 0x16, Space, l_, e_, t_, s_, JumpLine, i_, t_, Space, m_, o_, v_, e_, Space, f_, i_, r_, s_, t_, Exclam, Termin };
 /*0x204*/ u8 mega_evolved_text[] = {0xFD, 15, Space, h_, a_, s_, Space, M_, e_, g_, a_, Space, E_, v_, o_, l_, v_, e_, d_, JumpLine, i_, n_, t_, o_, Space, M_, e_, g_, a_, Space, 0xFD, 0, Exclam, 0xFB, 0xFF};
 /*0x205*/ u8 mega_trigger_text[] = {0xFD, 15, Apos, s_, Space, 0xFD, 22, Space, i_, s_, Space, r_, e_, a_, c_, t_, i_, n_, g_, JumpLine, t_, o_, Space , 0xFD, 52, Apos, s_, Space, 0xFD, 1, Exclam, 0xFB, 0xFF};
+/*0x206*/ u8 fervent_trigger_text[] = {BuffCharac, 52, Apos, s_, Space, f_, e_, r_, v_, e_, n_, t_, Space, w_, i_, s_, h_, JumpLine, r_, e_, a_, c_, h_, e_, d_, Space, BuffCharac, 0xF, Exclam, Termin};
 
 void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activation_text, &heavyrain_activation_text, &mysticalaircurrent_activation_text, &forewarn_text, &slowstart_text, &anticipation_text, &dryskin_damage_text, &solarpower_text, &harvest_text, &healer_text, &pickup_text, &moldbreaker_text, &turboblaze_text, &terravolt_text, &downloadatk_text,
 &downloadspatk_text, &absorbabilityboost_text , &absorbabilityimmune_text, &userteam_text/*0x190*/, &foeteam_text/*0x191*/,
@@ -190,7 +191,7 @@ void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activ
 &rapidspinontoxicspikes_text, &rapidspinonstealthrock_text, &rapidspinonstickyweb_text, &powertrick_text, &soak_text, &defogspikes_text,
 &power_text, &guard_text, &psychosplit_text, &stockpileend_text, &geomancy_text, &powerherb_text, &iceburn_text, &freezeshock_text,
 &shadowforce_text, &mistyterrain_text, &grassyterrain_text, &electricterrain_text, &aquaring_text, &aquaringheal_text, &assaultvest_text,
-&gravityprevents2_text, &healblockprevents2_text , &let_it_move_first_text, &mega_evolved_text, &mega_trigger_text};
+&gravityprevents2_text, &healblockprevents2_text , &let_it_move_first_text, &mega_evolved_text, &mega_trigger_text, &fervent_trigger_text};
 
 void battle_string_loader(u16 string_id)
 {
