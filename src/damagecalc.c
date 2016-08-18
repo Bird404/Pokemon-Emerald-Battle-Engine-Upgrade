@@ -135,21 +135,21 @@ u8 count_stat_increases(u8 bank, u8 eva_acc)
     u8 increases = 0;
     for (u8 i = 0; i < 5; i++)
     {
-        stat_ptr += i;
         if (*stat_ptr > 6)
         {
             increases += *stat_ptr - 6;
         }
+        stat_ptr++;
     }
     if (eva_acc)
     {
         if (*stat_ptr > 6)
         {
-            increases += *stat_ptr - 6;
+            increases += (*stat_ptr - 6);
         }
         if (*(stat_ptr + 1) > 6)
         {
-            increases += *stat_ptr - 6;
+            increases += (*stat_ptr - 6);
         }
     }
     return increases;
