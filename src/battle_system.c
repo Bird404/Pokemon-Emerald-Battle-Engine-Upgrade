@@ -23,8 +23,6 @@ u8 get_attacking_move_type()
             move_type = TYPE_NORMAL;
         else
             move_type = move_table[current_move].type;
-        if(move_type==TYPE_NORMAL && (new_battlestruct.ptr->field_affecting.ion_deluge || new_battlestruct.ptr->bank_affecting[bank_target].electrify))
-            move_type = TYPE_ELECTRIC;
     }
     return move_type;
 }
