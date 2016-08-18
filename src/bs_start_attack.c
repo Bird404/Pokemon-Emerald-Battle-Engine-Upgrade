@@ -6,7 +6,7 @@
 #include "new_battle_struct.h"
 #include "static_references.h"
 
-u8 check_megastone(u8 bank);
+u8 check_mega_condition(u8 bank);
 
 u8 is_bank_present(u8 bank)
 {
@@ -247,7 +247,8 @@ u16 get_mega_species(u16 species) //0xFB = mega evo, 0xFC = primal reversion, 0x
     struct evolution_data *evolution_table= (void *)(evo_table_ptr_ptr);
     for (u8 i = 0; i < NUM_OF_EVOS; i++)
     {
-        if (evolution_table->poke_evolutions[species].evos[i].method == 0xFB)
+        u8 method = evolution_table->poke_evolutions[species].evos[i].method;
+        if (method == 0xFB ||  method == 0xFC)
         {
             return evolution_table->poke_evolutions[species].evos[i].poke;
         }
@@ -256,6 +257,7 @@ u16 get_mega_species(u16 species) //0xFB = mega evo, 0xFC = primal reversion, 0x
 }
 
 u8 mega_evolution_script[] = {0x83, 88, 0, 0x10, 0x05, 0x02, 0x45, 1, 0x1E, 0, 0, 0, 0, 0x3A, 0x83, 89, 0, 0x10, 0x04, 0x02, 0x83, 0x0, 0x0, 0x3F};
+u8 fervent_evolution_script[] = {0x83, 88, 0, 0x10, 0x06, 0x02, 0x45, 1, 0x1E, 0, 0, 0, 0, 0x3A, 0x83, 89, 0, 0x10, 0x04, 0x02, 0x83, 0x0, 0x0, 0x3F};
 
 u8 is_multi_battle();
 
@@ -276,9 +278,9 @@ u8 check_mega_evo(u8 bank)
     u8 can_mega_evolve=0;
     if(bank==0)
     {
-        if((new_battlestruct.ptr->mega_related.user_trigger)!=0)
+        can_mega_evolve=new_battlestruct.ptr->mega_related.user_trigger;
+        if(can_mega_evolve)
         {
-            can_mega_evolve=1;
             if(!is_multi_battle())
             {
                 new_battlestruct.ptr->mega_related.evo_happened_pbs|=0x5;
@@ -292,18 +294,18 @@ u8 check_mega_evo(u8 bank)
     }
     else if(bank==2 && !is_multi_battle())
     {
-        if((new_battlestruct.ptr->mega_related.ally_trigger)!=0)
+        can_mega_evolve=new_battlestruct.ptr->mega_related.ally_trigger;
+        if(can_mega_evolve)
         {
-            can_mega_evolve=1;
             new_battlestruct.ptr->mega_related.evo_happened_pbs|=0x5;
             objects[new_battlestruct.ptr->mega_related.trigger_id].private[ANIM_STATE]=DISABLE;
         }
     }
     else
     {
-        if(check_megastone(bank))
+        can_mega_evolve=check_mega_condition(bank);
+        if(can_mega_evolve)
         {
-            can_mega_evolve=1;
             (new_battlestruct.ptr->mega_related.evo_happened_pbs)|=bits_table[bank];
         }
     }
@@ -331,11 +333,9 @@ u8 check_mega_evo(u8 bank)
         struct basestat_data *pokemon_table = (void *)(poke_stat_table_ptr_ptr);
         attacker_struct->type1 = pokemon_table->poke_stats[mega_species].type1;
         attacker_struct->type2 = pokemon_table->poke_stats[mega_species].type2;
-        u8 ability_bit = get_attributes(poke_address, ATTR_ABILITY_BIT, 0);
-        ability_bit = *(&pokemon_table->poke_stats[mega_species].ability1) + ability_bit;
-        if (ability_bit == 0)
-            ability_bit = pokemon_table->poke_stats[mega_species].ability1;
-        attacker_struct->ability_id = ability_bit;
+        // The ability 1 and ability 2 of the species mega in the base stat table should both be set and
+        // have the same value.
+        attacker_struct->ability_id = pokemon_table->poke_stats[mega_species].ability1;
 
         attacker_struct->max_hp = get_attributes(poke_address, ATTR_TOTAL_HP, 0);
         attacker_struct->current_hp = get_attributes(poke_address, ATTR_CURRENT_HP, 0);
@@ -357,7 +357,15 @@ u8 check_mega_evo(u8 bank)
         battle_text_buff2[3] = MEGA_RING >> 8;
         battle_text_buff2[4] = 0xFF;
 
-        execute_battle_script(&mega_evolution_script);
+        if(can_mega_evolve==2)
+        {
+            execute_battle_script(&fervent_evolution_script);
+        }
+        else
+        {
+            execute_battle_script(&mega_evolution_script);
+        }
+
         new_battlestruct.ptr->various.active_bank = bank;
         return 1;
     }
@@ -367,17 +375,10 @@ u8 check_mega_evo(u8 bank)
 
 void bs_start_attack()
 {
-    /*if(START_EVENT_FLAG)
-    {
-        start_events();
-        return;
-    }*/
     u8 mode=0;  //mode 0 - get type with adjusting chosen target
                 //mode 1 - get type with calculating target from scratch
                 //mode 2 - don't get type and calculating target from scratch
 
-    //new_battlestruct.ptr->side_affecting[0].mega_evo_state = 1;
-    //new_battlestruct.ptr->side_affecting[1].mega_evo_state = 1;
     for (u8 i = 0; i < no_of_all_banks; i++)
     {
         bank_attacker = i;
