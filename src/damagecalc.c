@@ -157,10 +157,13 @@ u8 count_stat_increases(u8 bank, u8 eva_acc)
 
 u16 get_speed(u8 bank)
 {
-    u16 speed = battle_participants[bank].spd;
+    u32 speed = battle_participants[bank].spd << 16;
     //take items into account
     switch (get_item_effect(bank, 1))
     {
+    case ITEM_EFFECT_MACHOBRACE:
+        speed >>= 1;
+        break;
     case ITEM_EFFECT_IRONBALL:
         speed >>= 1;
         break;
@@ -219,7 +222,7 @@ u16 get_speed(u8 bank)
         speed <<=1;
     speed = __udivsi3(speed * stat_buffs[battle_participants[bank].spd_buff].dividend, stat_buffs[battle_participants[bank].spd_buff].divisor);
 
-    return speed;
+    return (u16)(speed >> 16);
 }
 
 u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
