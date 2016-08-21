@@ -1057,8 +1057,8 @@ SETDISABLE:
 
 SETENCOREE:
 	attackcanceler
-	setencore MOVE_FAILED
 	accuracycheck MOVE_MISSED 0x0
+	setencore MOVE_FAILED
 	attackstring
 	ppreduce
 	attackanimation
