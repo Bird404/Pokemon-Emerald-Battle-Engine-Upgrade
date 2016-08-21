@@ -7,6 +7,7 @@
 #include "static_references.h"
 
 u8 check_mega_condition(u8 bank);
+u8 find_move_in_table(u16 move, u16 table_ptr[]);
 
 u8 is_bank_present(u8 bank)
 {
@@ -377,6 +378,10 @@ u8 check_mega_evo(u8 bank)
         return 0;
 }
 
+u16 moveshitting_onair[] = {MOVE_TWISTER, MOVE_SKY_UPPERCUT, MOVE_WHIRLWIND, MOVE_GUST, MOVE_THUNDER, MOVE_HURRICANE, MOVE_SMACK_DOWN, MOVE_THOUSAND_ARROWS, 0xFFFF};
+u16 moveshitting_underground[] = {MOVE_MAGNITUDE, MOVE_EARTHQUAKE, MOVE_FISSURE, 0xFFFF};
+u16 moveshitting_underwater[] = {MOVE_SURF, MOVE_WHIRLPOOL, 0xFFFF};
+
 void bs_start_attack()
 {
     u8 mode=0;  //mode 0 - get type with adjusting chosen target
@@ -473,6 +478,13 @@ void bs_start_attack()
         }
         else
             new_battlestruct.ptr->bank_affecting[bank_attacker].same_move_used = 0;
+
+        if (find_move_in_table(current_move, &moveshitting_onair[0]))
+            hitmarker |= HITMARKER_IGNORE_ON_AIR;
+        else if (find_move_in_table(current_move, &moveshitting_underground[0]))
+            hitmarker |= HITMERKER_IGNORE_UNDERGROUND;
+        else if (find_move_in_table(current_move, &moveshitting_underwater[0]))
+            hitmarker |= HITMARKER_IGNORE_UNDERWATER;
     }
     else
         battle_state_mode=0xC;
