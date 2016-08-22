@@ -129,32 +129,44 @@ void accuracy_calc()
 {
     u32 jump_loc = read_word(battlescripts_curr_instruction + 1);
     s16 arg = read_hword(battlescripts_curr_instruction + 5);
+    u16 checked_move=current_move;
 
     if ((arg + 2) > 1)
     {
-        if (!does_protect_affect_move(current_move) && !accuracy_helper_replacement(current_move))
+        if(new_battlestruct.ptr->various.parental_bond_mode==PBOND_CHILD)
         {
-            u16 accuracy = accuracy_percent(current_move, bank_attacker, bank_target);
-            if (__umodsi3(rng(), 100) + 1 > accuracy)
+            battlescripts_curr_instruction += 7;
+        }
+        else
+        {
+            if(arg!=0)
             {
-                move_outcome.missed = 1;
-                if (battle_flags.double_battle)
-                {
-                    if (move_table[current_move].target == 0x8 || move_table[current_move].target == 0x20)
-                    {
-                        battle_communication_struct.field6 = 2;
-                    }
-                    else
-                    {
-                        battle_communication_struct.field6 = 0;
-                    }
-                }
-                check_wonderguard_levitate_damage();
+                checked_move=arg; //Used in doom desire.
             }
-            jump_if_move_has_no_effect(7, current_move);
+            if (!does_protect_affect_move(checked_move) && !accuracy_helper_replacement(checked_move))
+            {
+                u16 accuracy = accuracy_percent(checked_move, bank_attacker, bank_target);
+                if (__umodsi3(rng(), 100) + 1 > accuracy)
+                {
+                    move_outcome.missed = 1;
+                    if (battle_flags.double_battle)
+                    {
+                        if (move_table[checked_move].target == 0x8 || move_table[checked_move].target == 0x20)
+                        {
+                            battle_communication_struct.field6 = 2;
+                        }
+                        else
+                        {
+                            battle_communication_struct.field6 = 0;
+                        }
+                    }
+                    check_wonderguard_levitate_damage();
+                }
+                jump_if_move_has_no_effect(7, checked_move);
+            }
         }
     }
-    else
+    else //Guillotine
     {
         if (status3[bank_target].always_hits && arg == 0xFFFF && disable_structs[bank_target].always_hits_bank == bank_attacker)
         {
