@@ -220,7 +220,7 @@ void set_attacking_move_type()
             }
         }
         if(ate==1 && DAMAGING_MOVE)
-            new_battlestruct.ptr->bank_affecting[bank_attacker].ate_bonus=1;
+            new_battlestruct.ptr->various.ate_bonus=1;
     }
     if((new_battlestruct.ptr->field_affecting.ion_deluge)
        && (move_table[current_move].type==TYPE_NORMAL || check_ability(bank_attacker,ABILITY_NORMALIZE)))
