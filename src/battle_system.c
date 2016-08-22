@@ -1190,7 +1190,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     break;
                 case ABILITY_PICKPOCKET:
                     if (!contact || battle_participants[bank].held_item
-                        || (new_battlestruct.ptr->bank_affecting[bank_attacker].sheerforce_bonus)
+                        || (new_battlestruct.ptr->various.sheerforce_bonus)
                         || (multihit_counter != 1 && multihit_counter != 0)
                         || (battle_participants[bank_attacker].ability_id == ABILITY_STICKY_HOLD
                             && has_ability_effect(bank_attacker,0,1)))
@@ -1294,7 +1294,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     }
                     break;
                 case ABILITY_COLOR_CHANGE:
-                    if (curr_move != MOVE_STRUGGLE && !new_battlestruct.ptr->bank_affecting[bank_attacker].sheerforce_bonus && !is_of_type(bank, move_type) && (multihit_counter == 1 || multihit_counter == 0))
+                    if (curr_move != MOVE_STRUGGLE && !new_battlestruct.ptr->various.sheerforce_bonus && !is_of_type(bank, move_type) && (multihit_counter == 1 || multihit_counter == 0))
                     {
                         battle_text_buff1[0] = 0xFD;
                         battle_text_buff1[1] = 0x3;
@@ -2900,7 +2900,6 @@ u8 battle_turn_move_effects()
             {
                 case 0: //clear new turn stuff for banks
                     ptr_to_struct->electrify = 0;
-                    ptr_to_struct->gem_boost = 0;
                     ptr_to_struct->just_switched_in = 0;
                     ptr_to_struct->kings_shield = 0;
                     ptr_to_struct->me_first = 0;
