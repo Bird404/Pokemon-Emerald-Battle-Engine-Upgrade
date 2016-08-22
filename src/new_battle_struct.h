@@ -16,20 +16,16 @@ struct bank_affecting{
     u8 just_switched_in : 1;
     u8 ally_fainted_last_turn : 1;
     u8 miracle_eyed : 1;
-    u8 spiky_shield : 1;
-    u8 kings_shield : 1;
-    u8 life_orbed : 1;
-    u8 sheerforce_bonus : 1;
     u8 eaten_berry : 1;
     u8 sunshine_form : 1;
     u8 cherrim_transformed : 1;
     u8 gastro_acided : 1;
+    u8 spiky_shield : 1;
+    u8 kings_shield : 1;
     u8 sky_drop_attacker : 1;
     u8 sky_drop_target : 1;
-    u8 gem_boost : 1;
     u8 me_first : 1;
     u8 weakness2 : 1;
-    u8 ate_bonus : 1;
     u8 entry_message : 1;
     u8 powertrick : 1;
     u8 kingsshield_damage : 1;
@@ -103,7 +99,16 @@ struct various{
     u16 var2;
     u16 recently_used_item;
     u16 previous_move;
+    u8 parental_bond_mode: 2;
+    u8 life_orbed : 1;
+    u8 sheerforce_bonus : 1;
+    u8 ate_bonus : 1;
+    u8 gem_boost : 1;
 };
+
+#define PBOND_PARENT 2
+#define PBOND_CHILD 1
+#define PBOND_DONT_SET 3
 
 struct mega_related
 {
