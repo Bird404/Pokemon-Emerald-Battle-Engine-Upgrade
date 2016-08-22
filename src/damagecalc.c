@@ -135,21 +135,21 @@ u8 count_stat_increases(u8 bank, u8 eva_acc)
     u8 increases = 0;
     for (u8 i = 0; i < 5; i++)
     {
+        stat_ptr += i;
         if (*stat_ptr > 6)
         {
             increases += *stat_ptr - 6;
         }
-        stat_ptr++;
     }
     if (eva_acc)
     {
         if (*stat_ptr > 6)
         {
-            increases += (*stat_ptr - 6);
+            increases += *stat_ptr - 6;
         }
         if (*(stat_ptr + 1) > 6)
         {
-            increases += (*stat_ptr - 6);
+            increases += *stat_ptr - 6;
         }
     }
     return increases;
@@ -157,13 +157,10 @@ u8 count_stat_increases(u8 bank, u8 eva_acc)
 
 u16 get_speed(u8 bank)
 {
-    u32 speed = battle_participants[bank].spd << 16;
+    u16 speed = battle_participants[bank].spd;
     //take items into account
     switch (get_item_effect(bank, 1))
     {
-    case ITEM_EFFECT_MACHOBRACE:
-        speed >>= 1;
-        break;
     case ITEM_EFFECT_IRONBALL:
         speed >>= 1;
         break;
@@ -222,7 +219,7 @@ u16 get_speed(u8 bank)
         speed <<=1;
     speed = __udivsi3(speed * stat_buffs[battle_participants[bank].spd_buff].dividend, stat_buffs[battle_participants[bank].spd_buff].divisor);
 
-    return (u16)(speed >> 16);
+    return speed;
 }
 
 u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
@@ -560,7 +557,7 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
             if (find_move_in_table(move, &sheerforce_moves_table[0]))
             {
                 modifier = chain_modifier(modifier, 0x14CD);
-                new_battlestruct.ptr->bank_affecting[atk_bank].sheerforce_bonus = 1;
+                new_battlestruct.ptr->various.sheerforce_bonus = 1;
             }
             break;
         case ABILITY_SAND_FORCE:
@@ -647,9 +644,9 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
     switch (get_item_effect(atk_bank, 1))
     {
     case ITEM_EFFECT_NOEFFECT:
-        if (new_battlestruct.ptr->bank_affecting[atk_bank].gem_boost)
+        if (new_battlestruct.ptr->various.gem_boost)
         {
-            modifier = chain_modifier(modifier, percent_to_modifier(new_battlestruct.ptr->bank_affecting[atk_bank].gem_boost));
+            modifier = chain_modifier(modifier, 0x14CD);
         }
         break;
     case ITEM_EFFECT_MUSCLEBAND:
@@ -1156,6 +1153,7 @@ u16 get_def_stat(u16 move, u8 atk_bank, u8 def_bank)
 }
 
 u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8 effects_handling_and_recording);
+u8 does_move_target_multiple();
 
 void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
 {
@@ -1170,7 +1168,7 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
     u32 damage = ((((2 * battle_participants[atk_bank].level) / 5 + 2) * base_power * atk_stat) / def_stat) / 50 + 2;
 
     //apply multi target modifier
-    if ((move_table[move].target == move_target_both || move_table[move].target == move_target_foes_and_ally) && count_alive_pokes_on_side(2) == 2 && battle_flags.double_battle)
+    if (does_move_target_multiple())
     {
         damage = apply_modifier(0xC00, damage);
     }
@@ -1223,7 +1221,7 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
     u8 move_split = move_table[move].split;
     if ((side_affecting_halfword[def_bank & 1].reflect_on && move_split == MOVE_PHYSICAL) ||(side_affecting_halfword[def_bank & 1].light_screen_on && move_split == MOVE_SPECIAL))
     {
-        if (crit_loc != 2 && !(has_ability_effect(atk_bank, 0, 1) && battle_participants[atk_bank].ability_id == ABILITY_INFILTRATOR))
+        if (crit_loc != 2 && !((has_ability_effect(atk_bank, 0, 1) && battle_participants[atk_bank].ability_id == ABILITY_INFILTRATOR)))
         {
             if (count_alive_pokes_on_side(2) == 2 && battle_flags.double_battle)
                 final_modifier = chain_modifier(final_modifier, 0xA8F);
@@ -1268,10 +1266,9 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
     }
     else if (get_item_effect(atk_bank, 1) == ITEM_EFFECT_LIFEORB)
     {
-        final_modifier = chain_modifier(final_modifier, 0x14CC);
-        new_battlestruct.ptr->bank_affecting[atk_bank].life_orbed = 1;
+        final_modifier = chain_modifier(final_modifier, 0x14CD);
+        new_battlestruct.ptr->various.life_orbed = 1;
     }
-
 
     if ((move == MOVE_STEAMROLLER || move == MOVE_STOMP) && status3[def_bank].minimized)
     {
@@ -1297,6 +1294,10 @@ void damage_calc_cmd_05()
 {
     u8 move_type=get_attacking_move_type();
     damage_calc(current_move, move_type, bank_attacker, bank_target);
+    if(new_battlestruct.ptr->various.parental_bond_mode==PBOND_CHILD)
+    {
+        damage_loc=damage_loc>>1;
+    }
     battlescripts_curr_instruction++;
     return;
 }
