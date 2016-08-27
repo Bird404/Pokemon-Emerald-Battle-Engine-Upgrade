@@ -20,6 +20,10 @@ args = parser.parse_args()
 def getpointer(rom,offset):
         rom.seek(offset)
         byte=rom.read(3);
+        rom.seek(offset+3);
+        page=rom.read(1);
+        p=page[0]-8;
+        byte+=bytes(p.to_bytes(1,'little'));
         ps=''.join(format(x, '02x') for x in reversed(byte))
         return (ps.upper()+'\n')
 
