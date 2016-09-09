@@ -124,4 +124,10 @@
 
 #define DISABLED_INDICATOR 1
 
+enum call_mode
+{
+    BATTLE_TURN,
+    MOVE_TURN
+};
+
 #endif /* DEFINES_H */
