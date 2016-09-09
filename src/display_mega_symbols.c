@@ -238,7 +238,7 @@ void healthbar_indicator_callback(struct object *self)
         u8 bank=self->private[0];
         struct object healthbox = objects[healthbox_obj_id_pbs[bank]];
 
-        if((healthbox.invisible) || ((bank&1) && !(new_battlestruct.ptr->mega_related.ai_party_mega_check&bits_table[battle_team_id_by_side[bank]]))
+        if(battle_outcome || (healthbox.invisible) || ((bank&1) && !(new_battlestruct.ptr->mega_related.ai_party_mega_check&bits_table[battle_team_id_by_side[bank]]))
            || (!(bank&1) && !(new_battlestruct.ptr->mega_related.party_mega_check&bits_table[battle_team_id_by_side[bank]])))
         {
             self->pos1.x=-8;
