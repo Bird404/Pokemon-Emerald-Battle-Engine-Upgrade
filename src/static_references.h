@@ -65,6 +65,7 @@ extern void* balloonpops_bs;
 extern void* destinyknot_bs;
 extern void* statraise_bs;
 extern void* mentalherb_bs;
+extern void* mentalherb_endmove_bs;
 extern void* disable_end_bs;
 extern void* encore_end_bs;
 extern void* healblock_end_bs;
@@ -144,4 +145,8 @@ extern void* gravityprevents2_bs;
 extern void* cantselecthealblock_bs;
 extern void* quickclaw_bs;
 extern void* custapberry_bs;
+extern void* healberry_endmove_bs;
+extern void* healandconfuse_endmove_bs;
+extern void* statraise_berry_endmove_bs;
+extern void* lansat_endmove_bs;
 #endif /* static_references */
