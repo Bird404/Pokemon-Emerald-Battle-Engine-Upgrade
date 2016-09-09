@@ -1,14 +1,14 @@
 #ifndef DEFINES_H
 #define DEFINES_H
 
-#include "./Defines/poke_types.h"
-#include "./Defines/abilities.h"
-#include "./Defines/moves.h"
-#include "./Defines/get_attr.h"
-#include "./Defines/items.h"
-#include "./Defines/item_effects.h"
-#include "./Defines/pokes.h"
-#include "./Defines/flavours.h"
+#include "./defines/poke_types.h"
+#include "./defines/abilities.h"
+#include "./defines/moves.h"
+#include "./defines/get_attr.h"
+#include "./defines/items.h"
+#include "./defines/item_effects.h"
+#include "./defines/pokes.h"
+#include "./defines/flavours.h"
 #include "battle_structs.h"
 #include "battle_locations.h"
 
