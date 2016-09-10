@@ -99,11 +99,13 @@ struct various{
     u16 var2;
     u16 recently_used_item;
     u16 previous_move;
+    u8 move_primary_effect;
     u8 parental_bond_mode: 2;
     u8 life_orbed : 1;
     u8 sheerforce_bonus : 1;
     u8 ate_bonus : 1;
     u8 gem_boost : 1;
+    u16 accumulated_damage;
 };
 
 #define PBOND_PARENT 2
