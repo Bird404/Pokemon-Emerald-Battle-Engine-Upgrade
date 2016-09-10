@@ -1,4 +1,4 @@
-#include "types.h"
+ #include "types.h"
 #include "defines.h"
 #include "battle_locations.h"
 #include "battle_structs.h"
@@ -1267,7 +1267,6 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
     else if (get_item_effect(atk_bank, 1) == ITEM_EFFECT_LIFEORB)
     {
         final_modifier = chain_modifier(final_modifier, 0x14CD);
-        new_battlestruct.ptr->various.life_orbed = 1;
     }
 
     if ((move == MOVE_STEAMROLLER || move == MOVE_STOMP) && status3[def_bank].minimized)
