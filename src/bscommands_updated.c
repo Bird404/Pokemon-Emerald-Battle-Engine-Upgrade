@@ -501,7 +501,7 @@ void status_to_effect();
 
 u8 primary_effect_setter()
 {
-    u8 *move_effect = &battle_communication_struct.move_effect;
+    u8 *move_effect = &new_battlestruct.ptr->various.move_primary_effect;
     u8 affects_user = 0;
     u8 bank_to_apply;
     if (*move_effect & 0x40)
@@ -580,7 +580,7 @@ u8 primary_effect_setter()
             }
             break;
          case 13: //steal item
-            if(!substitute)
+            if(!substitute && battle_participants[bank_attacker].current_hp)
             {
                 u16* targets_item = &applier_bank->held_item;
                 u16* attackers_item = &battle_participants[bank_attacker].held_item;
@@ -623,7 +623,7 @@ u8 primary_effect_setter()
             }
             break;
         case 0x10: //knock off
-            if (!substitute && applier_bank->held_item && can_lose_item(bank_to_apply, 1, 1))
+            if (!substitute && applier_bank->held_item && can_lose_item(bank_to_apply, 1, 1) && battle_participants[bank_attacker].current_hp)
             {
                 last_used_item = applier_bank->held_item;
                 applier_bank->held_item = 0;
@@ -634,25 +634,23 @@ u8 primary_effect_setter()
             }
             break;
         case 0x30: //recoil
-            /*statustoeffect();
-            if (*move_effect && current_hp && !shield_dust && !substitute && calculate_effect_chance(bank_attacker, current_move))
-            {
-                battlescripts_curr_instruction--;
-                move_effect_setter(0, 0);
-            }*/
-            if (recoil_damage(bank_attacker))
+            if (current_hp && recoil_damage(bank_attacker))
             {
                 battlescript_push();
                 battlescripts_curr_instruction = (void*) 0x082DB3F4; //recoil battlescript
             }
             break;
         case 0x31: //recharge needed
-            applier_bank->status2.recharge = 1;
-            disable_structs[bank_to_apply].recharge_counter = 2;
-            locked_move[bank_to_apply] = current_move;
+            if (current_hp)
+            {
+                applier_bank->status2.recharge = 1;
+                disable_structs[bank_to_apply].recharge_counter = 2;
+                locked_move[bank_to_apply] = current_move;
+            }
             break;
         case 0x32: //rage setter
-            applier_bank->status2.raged = 1;
+            if(current_hp)
+                applier_bank->status2.raged = 1;
             break;
         case 0x33: //payday
             if (!is_bank_from_opponent_side(bank_to_apply))
@@ -669,7 +667,7 @@ u8 primary_effect_setter()
             }
             break;
         case 0x34: //uproar
-            if (applier_bank->status2.uproar == 0 && MOVE_WORKED)
+            if (applier_bank->status2.uproar == 0 && MOVE_WORKED && current_hp)
             {
                 applier_bank->status2.uproar = 3;
                 applier_bank->status2.multiple_turn_move = 1;
@@ -679,7 +677,7 @@ u8 primary_effect_setter()
             }
             break;
         case 0x35: //set thrash
-            if (applier_bank->status2.locked_and_confuse == 0 && MOVE_WORKED)
+            if (applier_bank->status2.locked_and_confuse == 0 && MOVE_WORKED && current_hp)
             {
                 applier_bank->status2.locked_and_confuse = 2 + (rng() & 1);
                 applier_bank->status2.multiple_turn_move = 1;
@@ -687,7 +685,7 @@ u8 primary_effect_setter()
             }
             break;
         case 0x36: //berry eating
-            if (!substitute && MOVE_WORKED && get_item_pocket_id(battle_participants[bank_to_apply].held_item == 4))
+            if (!substitute && MOVE_WORKED && get_item_pocket_id(battle_participants[bank_to_apply].held_item == 4) && current_hp)
             {
                 u8 arg = move_table[current_move].arg1 & 1;
                 new_battlestruct.ptr->bank_affecting[bank_attacker].bugbite = arg;
@@ -709,7 +707,7 @@ u8 primary_effect_setter()
             locked_move[bank_to_apply] = current_move;
             break;
     }
-    battle_communication_struct.move_effect = 0;
+    *move_effect = 0;
     if(matcher==battlescripts_curr_instruction)
         return 0;
     else
@@ -826,6 +824,7 @@ void atk49_move_end_turn()
                 }
             }
             INC_END_EVENTS;
+            break;
         case 10: //choice move update
         {
             u16 attacker_item = get_item_effect(bank_attacker, 1);
@@ -842,6 +841,7 @@ void atk49_move_end_turn()
             if (get_move_position(bank_attacker, *choice_move) == -1)
                 *choice_move = 0;
             INC_END_EVENTS
+            break;
         }
         case 11: //hide user sprite in a semi invulnerable state
             if(SEMI_INVULNERABLE(bank_attacker) && (hitmarker & 80))
@@ -878,10 +878,8 @@ void atk49_move_end_turn()
                 status3[bank_target].on_air=0;
                 status3[bank_target].phantomforce=0;
             }
-
             INC_END_EVENTS
             new_battlestruct.ptr->various.active_bank = bank_attacker;
-            break;
         case 14: //item move end turn
             if (multihit_counter!=0 && multihit_counter!=1 && item_battle_effects(3, 0, 0))
             {
@@ -924,6 +922,7 @@ void atk49_move_end_turn()
             new_battlestruct.ptr->various.magicbounce = 0;
             battle_stuff_ptr.ptr->synchronize_effect_chooser = 0;
             INC_END_EVENTS
+            break;
         case 19: //setup buffer for conversion, sketch etc.
             if(hitmarker & HITMARKER_PURSUIT_TRAP)
             {
@@ -957,6 +956,7 @@ void atk49_move_end_turn()
                     move_hit_with_pbs[bank_target]=0xFFFF;
             }
             INC_END_EVENTS
+            break;
         case 20: //setup mirror_move_buffers
             if (!(absent_bank_flags & bits_table[bank_attacker] & battle_stuff_ptr.ptr->absent_bank_flags_prev_turn) &&
                 move_table[current_move].move_flags.flags.affected_by_mirrormove && (hitmarker & HITMARKER_OBEYS) &&
@@ -966,6 +966,7 @@ void atk49_move_end_turn()
                     battle_stuff_ptr.ptr->mirror_move_set_pbs[bank_target].moves_per_target[bank_attacker]=last_used_move;
                 }
             INC_END_EVENTS
+            break;
         case 21: //parental bond
             {
                 if((new_battlestruct.ptr->various.parental_bond_mode==PBOND_PARENT) && MOVE_WORKED
@@ -992,13 +993,15 @@ void atk49_move_end_turn()
             if(primary_effect_setter())
             {
                 effect=1;
-                break;
             }
             INC_END_EVENTS;
-
-       /* case 24: //color change
-            effect*/
-        case 23: //dual target moves
+            break;
+        case 23: //color change
+            if (ability_battle_effects(21, bank_target, 0, 0, 0))
+                effect = 1;
+            INC_END_EVENTS
+            break;
+        case 24: //dual target moves
             if(!(hitmarker&HITMARKER_IMMOBILE_DUE_TO_STATUS) && move_table[current_move].target==move_target_both && battle_flags.double_battle &&
                !protect_structs[bank_attacker].flag0_onlystruggle && !(hitmarker&HITMARKER_NO_ATTACKSTRING)
                && battle_participants[bank_target^2].current_hp)
@@ -1015,7 +1018,7 @@ void atk49_move_end_turn()
             }
             INC_END_EVENTS
             break;
-        case 24: //triple target moves
+        case 25: //triple target moves
             if(!(hitmarker&HITMARKER_IMMOBILE_DUE_TO_STATUS) && move_table[current_move].target==move_target_foes_and_ally &&
                 battle_flags.double_battle &&!protect_structs[bank_attacker].flag0_onlystruggle)
             {
@@ -1037,26 +1040,43 @@ void atk49_move_end_turn()
             }
             INC_END_EVENTS
             break;
-        case 25: //life orb damage
-            if (attacker_struct->current_hp && new_battlestruct.ptr->various.life_orbed
-                && !new_battlestruct.ptr->various.sheerforce_bonus && not_magicguard(bank_attacker))
+        case 26: //life orb damage
+            if(attacker_struct->current_hp && !new_battlestruct.ptr->various.sheerforce_bonus)
             {
-                u32 damage = __udivsi3(attacker_struct->max_hp, 10);
-                if (damage == 0)
-                    damage = 1;
-                damage_loc = damage;
-                battlescript_push();
-                battlescripts_curr_instruction = &lifeorb_damage;
-                record_usage_of_item(bank_attacker, ITEM_EFFECT_LIFEORB);
-                effect = 1;
+                if (new_battlestruct.ptr->various.life_orbed && not_magicguard(bank_attacker))
+                {
+                    u32 damage = __udivsi3(attacker_struct->max_hp, 10);
+                    if (damage == 0)
+                        damage = 1;
+                    damage_loc = damage;
+                    battlescript_push();
+                    battlescripts_curr_instruction = &lifeorb_damage;
+                    record_usage_of_item(bank_attacker, ITEM_EFFECT_LIFEORB);
+                    effect = 1;
+                }
+                else if (new_battlestruct.ptr->various.accumulated_damage)
+                {
+                    u32 damage = new_battlestruct.ptr->various.accumulated_damage>>3;
+                    if (damage == 0)
+                        damage = 1;
+                    damage_loc = damage*-1;
+                    another_active_bank = bank_attacker;
+                    battle_scripting.active_bank = bank_attacker;
+                    battlescript_push();
+                    battlescripts_curr_instruction = (void*)0x82DB7F7;
+                    record_usage_of_item(bank_attacker, ITEM_EFFECT_SHELLBELL);
+                    effect = 1;
+                }
+
             }
             new_battlestruct.ptr->various.parental_bond_mode=0;
             new_battlestruct.ptr->various.gem_boost=0;
             new_battlestruct.ptr->various.life_orbed = 0;
             new_battlestruct.ptr->various.sheerforce_bonus = 0;
+            new_battlestruct.ptr->various.accumulated_damage=0;
             INC_END_EVENTS
             break;
-        case 26: //set this move as previous
+        case 27: //set this move as previous
             if (last_used_move)
                 new_battlestruct.ptr->various.previous_move = last_used_move;
             else
@@ -1065,26 +1085,26 @@ void atk49_move_end_turn()
             INC_END_EVENTS
         //put shell bell hp restored here and pickpocket
 
-        case 27: //item move end turn
+        case 28: //item move end turn
             if ((multihit_counter==0 || multihit_counter==1) && item_battle_effects(3, 0, 0))
             {
                 effect = 1;
                 break;
             }
             INC_END_EVENTS
-        case 28: //bank cheek pouch and berry adder
+        case 29: //bank cheek pouch and berry adder
             if (multihit_counter==0 || multihit_counter==1)
             {
                 for (u8 i = 0; i < no_of_all_banks; i++)
                 {
-                    if (berry_eaten(0, i))
+                    if (berry_eaten(MOVE_TURN, i))
                         effect = 1;
                 }
                 if(effect)
                     break;
             }
             INC_END_EVENTS
-        case 29: //status immunities
+        case 30: //status immunities
             bank_attacker = new_battlestruct.ptr->various.active_bank;
             if ((multihit_counter==0 || multihit_counter==1) && ability_battle_effects(5, 0, 0, 0, 0))
             {
@@ -1092,7 +1112,7 @@ void atk49_move_end_turn()
                 break;
             }
             INC_END_EVENTS
-        case 30: // clear substitute bits
+        case 31: // clear substitute bits
             if (multihit_counter==0 || multihit_counter==1)
             {
                 for (u8 i = 0; i < no_of_all_banks; i++)
@@ -1104,6 +1124,12 @@ void atk49_move_end_turn()
                 }
             }
             INC_END_EVENTS
+            break;
+        case 32: //pickpocket ability activation on strike
+            if (ability_battle_effects(22, bank_target, 0, 0, 0))
+                effect = 1;
+            INC_END_EVENTS
+            break;
         default:
             battle_scripting.cmd49_state_tracker = case_max;
         }
