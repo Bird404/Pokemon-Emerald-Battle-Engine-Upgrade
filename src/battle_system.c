@@ -504,10 +504,8 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         curr_move = move;
     else
         curr_move = current_move;
-    u8 move_type;
-    if (battle_stuff_ptr.ptr->dynamic_move_type)
-        move_type = battle_stuff_ptr.ptr->dynamic_move_type & 0x3F;
-    else
+    u8 move_type = get_attacking_move_type();
+    if (!move_type)
         move_type = move_table[curr_move].type;
 
     if (special_cases_argument)
@@ -1191,31 +1189,6 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                         battlescripts_curr_instruction = &aftermath_bs;
                     }
                     break;
-                case ABILITY_PICKPOCKET:
-                    if (!contact || battle_participants[bank].held_item
-                        || (new_battlestruct.ptr->various.sheerforce_bonus)
-                        || (multihit_counter != 1 && multihit_counter != 0)
-                        || (battle_participants[bank_attacker].ability_id == ABILITY_STICKY_HOLD
-                            && has_ability_effect(bank_attacker,0,1)))
-                        break;
-                    u16 *user_held_item=&battle_participants[bank_attacker].held_item;
-                    if((*user_held_item)!=0 && (*user_held_item)!=0xAF)
-                    {
-                        last_used_item = *user_held_item;
-                        battle_stuff_ptr.ptr->choiced_move[bank_attacker]=0;
-                        battle_participants[bank].held_item = last_used_item;
-                        *user_held_item = 0;
-                        battlescript_push();
-                        battlescripts_curr_instruction = &pickpocket_bs;
-                        effect = true;
-                        active_bank = bank;
-                        prepare_setattributes_in_battle(0, 2, 0, 2, &battle_participants[active_bank].held_item);
-                        mark_buffer_bank_for_execution(active_bank);
-                        active_bank = bank_attacker;
-                        prepare_setattributes_in_battle(0, 2, 0, 2, &battle_participants[active_bank].held_item);
-                        mark_buffer_bank_for_execution(active_bank);
-                    }
-                    break;
                 case ABILITY_MUMMY:
                     if (contact && battle_participants[bank_attacker].ability_id != ABILITY_MUMMY && battle_participants[bank_attacker].ability_id != ABILITY_STANCE_CHANGE && battle_participants[bank_attacker].ability_id != ABILITY_MULTITYPE)
                     {
@@ -1294,20 +1267,6 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                         battlescript_push();
                         battlescripts_curr_instruction = &angerpoint_bs;
                         battle_participants[bank].atk_buff=0xC;
-                    }
-                    break;
-                case ABILITY_COLOR_CHANGE:
-                    if (curr_move != MOVE_STRUGGLE && !new_battlestruct.ptr->various.sheerforce_bonus && !is_of_type(bank, move_type) && (multihit_counter == 1 || multihit_counter == 0))
-                    {
-                        battle_text_buff1[0] = 0xFD;
-                        battle_text_buff1[1] = 0x3;
-                        battle_text_buff1[2] = move_type;
-                        battle_text_buff1[3] = 0xFF;
-                        effect = true;
-                        battlescript_push();
-                        void* colorchange_bs = (void*) 0x082DB64D;
-                        battlescripts_curr_instruction = colorchange_bs;
-                        set_type(bank, move_type);
                     }
                     break;
                 case ABILITY_WEAK_ARMOR:
@@ -1603,6 +1562,50 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             }
             break;
         }
+    case 21: // color change
+        if (check_ability(bank,ABILITY_COLOR_CHANGE) && curr_move != MOVE_STRUGGLE &&
+            battle_participants[bank].current_hp && MOVE_WORKED && TARGET_TURN_DAMAGED &&
+            !new_battlestruct.ptr->various.sheerforce_bonus && !is_of_type(bank, move_type))
+        {
+            battle_text_buff1[0] = 0xFD;
+            battle_text_buff1[1] = 0x3;
+            battle_text_buff1[2] = move_type;
+            battle_text_buff1[3] = 0xFF;
+            effect = true;
+            battlescript_push();
+            void* colorchange_bs = (void*) 0x082DB64D;
+            battlescripts_curr_instruction = colorchange_bs;
+            set_type(bank, move_type);
+        }
+        break;
+    case 22:
+        if(check_ability(bank,ABILITY_PICKPOCKET) && MOVE_WORKED && TARGET_TURN_DAMAGED &&
+            battle_participants[bank].current_hp && battle_participants[bank_attacker].current_hp)
+        {
+            if (!contact || battle_participants[bank].held_item
+                || (new_battlestruct.ptr->various.sheerforce_bonus)
+                || (battle_participants[bank_attacker].ability_id == ABILITY_STICKY_HOLD
+                    && has_ability_effect(bank_attacker,0,1)))
+                break;
+            u16 *user_held_item=&battle_participants[bank_attacker].held_item;
+            if((*user_held_item)!=0 && (*user_held_item)!=0xAF)
+            {
+                last_used_item = *user_held_item;
+                battle_stuff_ptr.ptr->choiced_move[bank_attacker]=0;
+                battle_participants[bank].held_item = last_used_item;
+                *user_held_item = 0;
+                battlescript_push();
+                battlescripts_curr_instruction = &pickpocket_bs;
+                effect = true;
+                active_bank = bank;
+                prepare_setattributes_in_battle(0, 2, 0, 2, &battle_participants[active_bank].held_item);
+                mark_buffer_bank_for_execution(active_bank);
+                active_bank = bank_attacker;
+                prepare_setattributes_in_battle(0, 2, 0, 2, &battle_participants[active_bank].held_item);
+                mark_buffer_bank_for_execution(active_bank);
+            }
+        }
+        break;
     }
 
 
@@ -2134,12 +2137,16 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
     case 2: //having effect on target items
         active_bank = bank;
         battle_scripting.active_bank = bank;
-        u8 move_type=get_attacking_move_type();
-
+        u8 move_type = get_attacking_move_type();
+        u8 stat_to_compare = 0xC;
+        if(check_ability(bank,ABILITY_CONTRARY))
+        {
+            stat_to_compare = 0x0;
+        }
         switch (item_effect)
         {
         case ITEM_EFFECT_WEAKNESSPOLICY:
-            if (move_outcome.super_effective && battle_participants[bank].current_hp)
+            if (MOVE_WORKED && TARGET_TURN_DAMAGED && move_outcome.super_effective && battle_participants[bank].current_hp)
             {
                 if (battle_participants[bank].atk_buff != 0xC || battle_participants[bank].sp_atk_buff != 0xC)
                 {
@@ -2152,7 +2159,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
         case ITEM_EFFECT_REDCARD:
             battle_scripting.active_bank = bank_attacker;
         case ITEM_EFFECT_EJECTBUTTON:
-            if ((special_statuses[bank].moveturn_losthp_physical || special_statuses[bank].moveturn_losthp_special) && battle_participants[bank].current_hp)
+            if ((MOVE_WORKED && TARGET_TURN_DAMAGED) && battle_participants[bank].current_hp)
             {
                 void* current_instruction = battlescripts_curr_instruction;
                 battlescripts_curr_instruction = &can_switch_bs;
@@ -2168,7 +2175,8 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             }
             break;
         case ITEM_EFFECT_ROCKYHELMET:
-            if (move_table[current_move].move_flags.flags.makes_contact && (special_statuses[bank].moveturn_losthp_physical || special_statuses[bank].moveturn_losthp_special) && !(battle_participants[bank_attacker].status2.substitute) && battle_participants[bank_attacker].current_hp)
+            if (move_table[current_move].move_flags.flags.makes_contact && (MOVE_WORKED && TARGET_TURN_DAMAGED)
+                 && !(battle_participants[bank_attacker].status2.substitute) && battle_participants[bank_attacker].current_hp)
             {
                 damage_loc = __udivsi3(battle_participants[bank_attacker].max_hp, 6);
                 if (damage_loc == 0)
@@ -2179,7 +2187,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             }
             break;
         case ITEM_EFFECT_STICKYBARB:
-            if (move_table[current_move].move_flags.flags.makes_contact && TARGET_TURN_DAMAGED && !(battle_participants[bank_attacker].status2.substitute) && battle_participants[bank_attacker].current_hp && battle_participants[bank_attacker].held_item == 0)
+            if (move_table[current_move].move_flags.flags.makes_contact && (MOVE_WORKED && TARGET_TURN_DAMAGED) && !(battle_participants[bank_attacker].status2.substitute) && battle_participants[bank_attacker].current_hp && battle_participants[bank_attacker].held_item == 0)
             {
                 effect = 2;
                 u16* target_item = &battle_participants[bank].held_item;
@@ -2197,7 +2205,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             }
             break;
         case ITEM_EFFECT_AIRBALLOON:
-            if (special_statuses[bank].moveturn_losthp_physical || special_statuses[bank].moveturn_losthp_special)
+            if (MOVE_WORKED && TARGET_TURN_DAMAGED)
             {
                 effect = 8;
                 call_bc_move_exec(&balloonpops_bs);
@@ -2215,7 +2223,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             }
             break;
         case ITEM_EFFECT_LUMINOUSMOSS:
-            if (move_type == TYPE_WATER && battle_participants[bank].sp_def_buff != 0xC && !(move_outcome.missed || move_outcome.failed || move_outcome.not_affected) && battle_participants[bank].current_hp)
+            if (move_type == TYPE_WATER && battle_participants[bank].sp_def_buff != stat_to_compare && (MOVE_WORKED && TARGET_TURN_DAMAGED) && battle_participants[bank].current_hp)
             {
                 battle_scripting.stat_changer = 0x15;
                 battle_scripting.field10 = 0xF + 4;
@@ -2228,7 +2236,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 battle_scripting.field11 = 0;
             break;
         case ITEM_EFFECT_CELLBATTERY:
-            if (move_type == TYPE_ELECTRIC && battle_participants[bank].atk_buff != 0xC && !(move_outcome.missed || move_outcome.failed || move_outcome.not_affected) && battle_participants[bank].current_hp)
+            if (move_type == TYPE_ELECTRIC && battle_participants[bank].atk_buff != stat_to_compare && (MOVE_WORKED && TARGET_TURN_DAMAGED) && battle_participants[bank].current_hp)
             {
                 battle_scripting.stat_changer = 0x11;
                 battle_scripting.field10 = 0xF;
@@ -2236,7 +2244,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             }
             break;
         case ITEM_EFFECT_SNOWBALL:
-            if (move_type == TYPE_ICE && battle_participants[bank].atk_buff != 0xC && !(move_outcome.missed || move_outcome.failed || move_outcome.not_affected) && battle_participants[bank].current_hp)
+            if (move_type == TYPE_ICE && battle_participants[bank].atk_buff != stat_to_compare && (MOVE_WORKED && TARGET_TURN_DAMAGED) && battle_participants[bank].current_hp)
             {
                 battle_scripting.stat_changer = 0x11;
                 battle_scripting.field10 = 0xF;
@@ -2244,7 +2252,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             }
             break;
         case ITEM_EFFECT_ABSORBBULB:
-            if (move_type == TYPE_WATER && battle_participants[bank].sp_atk_buff != 0xC && !(move_outcome.missed || move_outcome.failed || move_outcome.not_affected) && battle_participants[bank].current_hp)
+            if (move_type == TYPE_WATER && battle_participants[bank].sp_atk_buff != stat_to_compare && (MOVE_WORKED && TARGET_TURN_DAMAGED) && battle_participants[bank].current_hp)
             {
                 battle_scripting.stat_changer = 0x14;
                 battle_scripting.field10 = 0xF + 3;
@@ -2420,20 +2428,19 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 }
                 break;
             case ITEM_EFFECT_SHELLBELL:
-                if (MOVE_WORKED && special_statuses[bank_target].moveturn_losthp && special_statuses[bank_target].moveturn_losthp != 0xFFFF && bank_target != bank_attacker && battle_participants[bank_attacker].current_hp && battle_participants[bank_attacker].current_hp <= battle_participants[bank_target].max_hp && !new_battlestruct.ptr->bank_affecting[bank_target].heal_block)
+                if (MOVE_WORKED && special_statuses[bank_target].moveturn_losthp && special_statuses[bank_target].moveturn_losthp != 0xFFFF && bank_target != bank_attacker
+                    && battle_participants[bank_attacker].current_hp && battle_participants[bank_attacker].current_hp <= battle_participants[bank_attacker].max_hp &&
+                    !new_battlestruct.ptr->bank_affecting[bank_target].heal_block)
                 {
-                    effect = 2;
-                    another_active_bank = bank_attacker;
-                    bank = bank_attacker;
-                    battle_scripting.active_bank = bank_attacker;
-                    u32 damage = __udivsi3(special_statuses[bank_target].moveturn_losthp, quality);
-                    if (damage == 0)
-                        damage = 1;
-                    damage_loc = damage * -1;
+                    new_battlestruct.ptr->various.accumulated_damage += special_statuses[bank_target].moveturn_losthp;
                     special_statuses[bank_target].moveturn_losthp = 0;
-                    battlescript_push();
-                    battlescripts_curr_instruction = (void*)0x82DB7F7;
-                    record_usage_of_item(bank, ITEM_EFFECT_SHELLBELL);
+                }
+                break;
+            case ITEM_EFFECT_LIFEORB:
+                if (MOVE_WORKED && special_statuses[bank_target].moveturn_losthp && special_statuses[bank_target].moveturn_losthp != 0xFFFF &&
+                     bank_target != bank_attacker)
+                {
+                    new_battlestruct.ptr->various.life_orbed = 1;
                 }
                 break;
             }
@@ -2487,7 +2494,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
 
 u8 not_magicguard(u8 bank);
 
-u8 berry_eaten(u8 how_to_call, u8 bank)
+u8 berry_eaten(enum call_mode how_to_call, u8 bank)
 {
     u8 cheek_pouch = 0;
     if (new_battlestruct.ptr->bank_affecting[bank].eaten_berry)
@@ -2500,17 +2507,17 @@ u8 berry_eaten(u8 how_to_call, u8 bank)
             if (damage == 0)
                 damage = 1;
             damage_loc = damage * -1;
-           /*
-            if (how_to_call == 0)
+
+            if (how_to_call == MOVE_TURN)
             {
                 battlescript_push();
                 battlescripts_curr_instruction = &cheekpouch_bs;
                 battle_scripting.active_bank = bank;
             }
             else
-            {*/
+            {
                 call_bc_move_exec(&cheekpouch2_bs);
-            //}
+            }
             record_usage_of_ability(bank, ABILITY_CHEEK_POUCH);
         }
     }
@@ -2617,7 +2624,6 @@ void move_effect_setter(u8 primary, u8 certain)
         *move_effect = 0; //move effects past 0x30 affect always the attacker
     else if (!MOVE_WORKED)
         *move_effect = 0;
-
     struct battle_participant* applier_bank = &battle_participants[bank_to_apply];
     u16 current_hp = applier_bank->current_hp;
     u8 substitute = 0;
@@ -2740,8 +2746,20 @@ void move_effect_setter(u8 primary, u8 certain)
             battlescript_push();
             battlescripts_curr_instruction = &attackingstatschange_bs;
             break;
-
+        default:
+            new_battlestruct.ptr->various.move_primary_effect = *move_effect;
+            if(affects_user)
+            {
+                new_battlestruct.ptr->various.move_primary_effect |= 0x40;
+            }
+            statustoeffect();
+            if (*move_effect && current_hp && !shield_dust && !substitute && calculate_effect_chance(bank_attacker, current_move))
+            {
+                battlescripts_curr_instruction--;
+                move_effect_setter(0, 0);
+            }
         }
+
     if (status_change != 8)
     {
         switch (status_change)
@@ -2783,6 +2801,7 @@ void move_effect_setter(u8 primary, u8 certain)
             break;
         }
     }
+    *move_effect = 0;
     return;
 }
 
@@ -2841,7 +2860,7 @@ u8 battle_turn_move_effects()
                         effect = 1;
                     break;
                 case 5: //cheeck pouch
-                    if (berry_eaten(1, active_bank))
+                    if (berry_eaten(BATTLE_TURN, active_bank))
                         effect = 1;
                     break;
                 case 6:
@@ -3137,7 +3156,7 @@ u8 battle_turn_move_effects()
                         effect = 1;
                     break;
                 case 27: //cheeck pouch again
-                    if (berry_eaten(1, active_bank))
+                    if (berry_eaten(BATTLE_TURN, active_bank))
                         effect = 1;
                     break;
                 case 28: //toxic/flame orb
