@@ -1484,7 +1484,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     effect = i + 1;
                     break;
                 }
-                else if (battle_participants[i].ability_id == ability_to_check && special_cases_argument == 0xFF && has_ability_effect(i, special_cases_argument, 1))
+                else if (battle_participants[i].ability_id == ability_to_check  && has_ability_effect(i, special_cases_argument, 1))
                 {
                     effect = i + 1;
                     last_used_ability = ability_to_check;
