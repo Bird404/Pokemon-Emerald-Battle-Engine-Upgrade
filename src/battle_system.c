@@ -1378,8 +1378,8 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
 		if(battle_participants[bank].ability_id==ABILITY_FORECAST && has_ability_effect(bank,0,1))
 		{
 			effect = prepare_castform_change(castform_change, bank);
-			if (effect == true) //very important, don't confuse '=' with '=='!
-                            break; //tip (effect == true) can be substituted to if (effect)
+			if (effect == true)
+                            break;
 		}
 	}
     break;
