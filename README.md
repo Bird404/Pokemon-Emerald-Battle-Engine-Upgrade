@@ -1,8 +1,10 @@
 # Pokemon-Emerald-Battle-Engine-Upgrade
 
 Installation instructions:
-- Download devkitpro
+- Download devkitpro.
+
 Follow the instructions.
+
 (Note: you can only install devkitARM)
 
 - Download the latest version of python(3.5).
