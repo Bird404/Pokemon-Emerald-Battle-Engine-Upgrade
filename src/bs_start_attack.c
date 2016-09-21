@@ -12,7 +12,7 @@ u8 find_move_in_table(u16 move, u16 table_ptr[]);
 
 u8 is_bank_present(u8 bank)
 {
-    if(absent_bank_flags & bits_table[bank])
+    if((absent_bank_flags & bits_table[bank]) || battle_participants[bank].current_hp == 0)
         return 0;
     return 1;
 }
@@ -479,6 +479,9 @@ void bs_start_attack()
         }
         else
             new_battlestruct.ptr->bank_affecting[bank_attacker].same_move_used = 0;
+
+        if (battle_flags.double_battle && !is_bank_present(bank_target))
+            bank_target = get_target_of_move(current_move, 0, 0);
 
         if (find_move_in_table(current_move, &moveshitting_onair[0]))
             hitmarker |= HITMARKER_IGNORE_ON_AIR;
