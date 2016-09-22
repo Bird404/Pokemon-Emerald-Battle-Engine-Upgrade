@@ -73,6 +73,12 @@ jumpifhalfword 0x1 0x020241EA \jumpifnotmove_move \jumpifnotmove_address
 .word \jumpifnoally_address
 .endm
 
+.macro jumpifuserhasnoHP jumpifuserhasnoHP_address
+.byte 0x83
+.hword 91
+.word \jumpifuserhasnoHP_address
+.endm
+
 battlescripts_table:
 .word ATTACKING_MOVE	@ 0	Just attacks target(Tackle)
 .word FIXED_DAMAGE		@1 Sonicboom, Dragon Rage, etc.
@@ -1562,8 +1568,36 @@ ALREADY_FULLHP:
 	goto_cmd 0x82D9EFB @already has full hp
 
 EXPLODE:
-	goto_cmd 0x82D8B79 @doesnt work at all
-	
+	attackcanceler
+	attackstring
+	ppreduce
+	jumpifuserhasnoHP EXPLODE_DAMAGE
+	faintifabilitynotdamp
+	setuserhptozero
+	waitstate
+EXPLODE_DAMAGE:
+	accuracycheck MOVE_MISSED 0x0
+	critcalc
+	damagecalc
+	damageadjustment
+	attackanimation
+	waitanimation
+	effectiveness_sound
+	hitanim bank_target
+	waitstate
+	graphicalhpupdate bank_target
+	datahpupdate bank_target
+	critmessage
+	waitmessage 0x40
+	resultmessage
+	waitmessage 0x40
+	seteffectwithchance
+	faintpokemon bank_target 0x0 0x0 @faint target
+	setbyte EndTurnTracker 0x0
+	cmd49 0x0 0x0
+	faintpokemon bank_attacker 0x0 0x0
+	end_cmd
+
 FAINTSTATCHANGE:
 	attackcanceler
 	jumpifsubstituteaffects MOVE_FAILED
