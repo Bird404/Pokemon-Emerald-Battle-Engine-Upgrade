@@ -14,6 +14,7 @@
 #define STAT_EVASION 7
 
 u8 is_of_type(u8 bank, u8 type);
+u8 protect_affecting_moves(u16 move);
 
 void ability_affects_stat_reduction(u8 bank, void* battlescript_to_set, void* battlescript_to_push, u8 ability_record)
 {
@@ -107,7 +108,7 @@ u8 change_stats(struct stat stat_change, u8 stat, struct failbank bank, void* ba
             }
             return 1;
         }
-        else if (does_protect_affect_move(0) && current_move != MOVE_CURSE && bank.ignore_opponent_protect == 0)
+        else if (protect_affecting_moves(0) && current_move != MOVE_CURSE && bank.ignore_opponent_protect == 0)
         {
             battlescripts_curr_instruction = (void*) 0x082D9F1C;
             return 1;
