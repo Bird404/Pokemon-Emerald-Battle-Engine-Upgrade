@@ -74,15 +74,6 @@ move_table 08033ce8
 move_table 0803a3f0
 move_table 0803a738
 move_table 0803d2a0
-move_table 0803e3f4
-move_table 0803e528
-move_table 0803e678
-move_table 0803e858
-move_table 0803fcf0
-move_table 080400c0
-move_table 08041cf4
-move_table 08041fa0
-move_table 080423d0
 move_table 08045784
 move_table 0804591c
 move_table 08045b20
@@ -90,19 +81,11 @@ move_table 080461d0
 move_table 0804626c
 move_table 0804632c
 move_table 0804648c
-move_table 08046508
-move_table 08046650
-move_table 08046798
-move_table 08046910
-move_table 080469b8
 move_table 08046a98
 move_table 08046ce8
-move_table 08046e70
 move_table 08046f58
 move_table 08046fe0
 move_table 08047020
-move_table 08047100
-move_table 0804728c
 move_table 080472ec
 move_table 08047520
 move_table 080475a4
@@ -116,17 +99,11 @@ move_table 08047cf8
 move_table 08047f90
 move_table 08049a08
 move_table 08049a40
-move_table 0804bd08
-move_table 0804be4c
-move_table 0804c2f8
-move_table 0804c4d0
-move_table 0804c5dc
 move_table 0804c658
 move_table 0804c828
 move_table 0804cad0
 move_table 0804e9f0
 move_table 0804edfc
-move_table 0804fe70
 move_table 0805028c
 move_table 080514c0
 move_table 08051564
@@ -139,10 +116,8 @@ move_table 08052f08
 move_table 08052f78
 move_table 08053004
 move_table 08053a88
-move_table 08053ba0
 move_table 08053bd8
 move_table 08054894
-move_table 08054c58
 move_table 08055478
 move_table 08055ee0
 move_table 08057aa0
@@ -237,12 +212,8 @@ shiny_particle_pallet 08172FBC
 battle_particle_table 080A3D74 -80000
 battle_particle_pallets 080A3D78 -80000
 ### move battlescript table
-battlescripts_table 0803E854
 battlescripts_table 0804E9EC
 battlescripts_table 08050288
-battlescripts_table 08052578
-battlescripts_table 08054C54
-battlescripts_table 0804BCE4
 ### New Animation Table
 NewPlayAnimationTable 0805DA3C
 ### Pursuit mega evolution
