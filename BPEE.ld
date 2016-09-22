@@ -125,7 +125,6 @@ itemid_to_berryid = 0x080E19E8|1;
 rng = 0x0806F5CC|1;
 battlescript_push = 0x0803FAFC|1;
 battlescript_custom_push = 0x0803FAD8|1;
-does_protect_affect_move = 0x080464AC|1;
 jump_if_move_has_no_effect = 0x080463AC|1;
 memset = 0x082E9434|1;
 memcpy = 0x082E93D4|1;
