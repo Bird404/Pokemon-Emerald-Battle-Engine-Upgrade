@@ -40,6 +40,7 @@ atkC8_set_hail 0831C030
 atkCC_nature_power 0831C040
 atkD0_set_taunt 0831C050
 atkD4_wish_effect 0831C060
+atkE1_intimidate_loop 0831C094
 atkE2_switchout_abilities 0831C098
 atkEB_set_type_to_terrain 0831C0BC
 ###start attack
