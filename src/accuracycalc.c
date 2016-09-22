@@ -9,9 +9,57 @@ extern struct move_info move_table[1024];
 u8 is_of_type(u8 bank, u8 type);
 u32 percent_boost(u32 number, u16 percent);
 u32 percent_lose(u32 number, u16 percent);
+s8 get_priority(u16 move, u8 bank);
+
 #define MOVE_PHYSICAL 0
 #define MOVE_SPECIAL 1
 #define MOVE_STATUS 2
+
+u8 protect_affects(u16 move, u8 set)
+{
+    u8 effect = 0;
+    u8 protect_flag = move_table[move].move_flags.flags.affected_by_protect;
+    u8 split = move_table[move].split;
+    u8 contact = move_table[move].move_flags.flags.makes_contact;
+    u8 target = move_table[move].target;
+    u8 targets_side = is_bank_from_opponent_side(bank_target);
+    if (protect_structs[bank_target].flag0_protect && protect_flag)
+        effect = 1;
+    else if (new_battlestruct.ptr->bank_affecting[bank_target].kings_shield && protect_flag && split != 2)
+    {
+        effect = 1;
+        if (contact && set)
+            new_battlestruct.ptr->bank_affecting[bank_attacker].kingsshield_damage = 1;
+    }
+    else if (new_battlestruct.ptr->bank_affecting[bank_target].spiky_shield && protect_flag)
+    {
+        effect = 1;
+        if (contact && set)
+            new_battlestruct.ptr->bank_affecting[bank_attacker].spikyshield_damage = 1;
+    }
+    else if (new_battlestruct.ptr->side_affecting[targets_side].crafty_shield && protect_flag && split == 2)
+        effect = 1;
+    else if (new_battlestruct.ptr->side_affecting[targets_side].quick_guard && protect_flag && get_priority(current_move, bank_attacker) > 0)
+        effect = 1;
+    else if (new_battlestruct.ptr->side_affecting[targets_side].mat_block && protect_flag && split != 2)
+        effect = 1;
+    else if (new_battlestruct.ptr->side_affecting[targets_side].wide_guard && protect_flag && (target == 8 || target == 0x20))
+        effect = 1;
+
+    return effect;
+}
+
+u8 protect_affecting_moves(u16 move)
+{
+    u8 effect = protect_affects(move, 1);
+    if (effect)
+    {
+        move_outcome.missed = 1;
+        jump_if_move_has_no_effect(7, move);
+        battle_communication_struct.field6 = 1;
+    }
+    return effect;
+}
 
 u8 accuracy_helper_replacement(u16 move)
 {
@@ -143,7 +191,7 @@ void accuracy_calc()
             {
                 checked_move=arg; //Used in doom desire.
             }
-            if (!does_protect_affect_move(checked_move) && !accuracy_helper_replacement(checked_move))
+            if (!protect_affecting_moves(checked_move) && !accuracy_helper_replacement(checked_move))
             {
                 u16 accuracy = accuracy_percent(checked_move, bank_attacker, bank_target);
                 if (__umodsi3(rng(), 100) + 1 > accuracy)
@@ -166,7 +214,7 @@ void accuracy_calc()
             }
         }
     }
-    else //Guillotine
+    else //not checking accuracy
     {
         if (status3[bank_target].always_hits && arg == 0xFFFF && disable_structs[bank_target].always_hits_bank == bank_attacker)
         {
@@ -180,7 +228,7 @@ void accuracy_calc()
             }
             else
             {
-                if (!does_protect_affect_move(0))
+                if (!protect_affecting_moves(0))
                 {
                     battlescripts_curr_instruction += 7;
                 }
@@ -188,52 +236,4 @@ void accuracy_calc()
         }
     }
     return;
-}
-
-s8 get_priority(u16 move, u8 bank);
-
-u8 protect_affects(u16 move, u8 set)
-{
-    u8 effect = 0;
-    u8 protect_flag = move_table[move].move_flags.flags.affected_by_protect;
-    u8 split = move_table[move].split;
-    u8 contact = move_table[move].move_flags.flags.makes_contact;
-    u8 target = move_table[move].target;
-    u8 targets_side = is_bank_from_opponent_side(bank_target);
-    if (protect_structs[bank_target].flag0_protect && protect_flag)
-        effect = 1;
-    else if (new_battlestruct.ptr->bank_affecting[bank_target].kings_shield && protect_flag && split != 2)
-    {
-        effect = 1;
-        if (contact && set)
-            new_battlestruct.ptr->bank_affecting[bank_attacker].kingsshield_damage = 1;
-    }
-    else if (new_battlestruct.ptr->bank_affecting[bank_target].spiky_shield && protect_flag)
-    {
-        effect = 1;
-        if (contact && set)
-            new_battlestruct.ptr->bank_affecting[bank_attacker].spikyshield_damage = 1;
-    }
-    else if (new_battlestruct.ptr->side_affecting[targets_side].crafty_shield && protect_flag && split == 2)
-        effect = 1;
-    else if (new_battlestruct.ptr->side_affecting[targets_side].quick_guard && protect_flag && get_priority(current_move, bank_attacker) > 0)
-        effect = 1;
-    else if (new_battlestruct.ptr->side_affecting[targets_side].mat_block && protect_flag && split != 2)
-        effect = 1;
-    else if (new_battlestruct.ptr->side_affecting[targets_side].wide_guard && protect_flag && (target == 8 || target == 0x20))
-        effect = 1;
-
-    return effect;
-}
-
-u8 protect_affecting_moves(u16 move)
-{
-    u8 effect = protect_affects(move, 1);
-    if (effect)
-    {
-        move_outcome.missed = 1;
-        jump_if_move_has_no_effect(7, move);
-        battle_communication_struct.field6 = 1;
-    }
-    return effect;
 }
