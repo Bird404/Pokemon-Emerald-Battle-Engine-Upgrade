@@ -10,7 +10,6 @@ free_new_struct_hook 08057044 2
 cleanstructhook	0803A700	0
 hazards_hook	0804DAFC	0
 get_first_to_strike	0803CF10	3
-protect_affecting_moves	080464AC	1
 battle_turn_move_effects	08040924	0
 move_effect_setter	08048760	3
 update_turn_counters	080401D0	0
