@@ -23,6 +23,7 @@ get_relearnable_moves 0806E0B4 2
 get_number_of_relearnable_moves 0806E25C 1
 POWER_SWAP_animation_hook 0810FD70 0
 FLASH_CANNON_animation_hook 0810ABA8 0
+DEFOG_animation_hook 0810AA42 0
 mega_trigger_hook 08057E04 0
 reset_mega_trigger_hook 08057588 0
 load_graphics_hook 0805E1B0 1
