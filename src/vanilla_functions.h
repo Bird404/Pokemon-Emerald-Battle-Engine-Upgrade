@@ -28,7 +28,6 @@ void call_bc_move_exec(void* bs_ptr);
 void b_std_message(u16 stringID, u8 bank);
 u8 gender_from_pid(u16 species, u32 PID);
 u8 get_battle_side(u8 bank);
-u8 does_protect_affect_move(u16 move);
 s8 itemid_to_berryid(u16 itemID);
 u16 species_to_national_dex(u16 species);
 u16 get_height_or_weight(u16 national_dex_index, u8 which_one);
