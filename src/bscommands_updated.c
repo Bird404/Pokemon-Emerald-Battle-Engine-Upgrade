@@ -30,6 +30,7 @@ u8 affected_by_substitute(u8 bank);
 u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8 effects_handling_and_recording);
 void set_attacking_move_type();
 void revert_mega_to_normalform(u8 teamID, u8 opponent_side);
+u8 is_bank_present(u8 bank);
 
 void atk7D_set_rain()
 {
@@ -1067,7 +1068,6 @@ void atk49_move_end_turn()
                     record_usage_of_item(bank_attacker, ITEM_EFFECT_SHELLBELL);
                     effect = 1;
                 }
-
             }
             new_battlestruct.ptr->various.parental_bond_mode=0;
             new_battlestruct.ptr->various.gem_boost=0;
@@ -2356,4 +2356,26 @@ void atk56_prepare_fainting_cry()
     {
         revert_mega_to_normalform(id_by_side, side);
     }
+}
+
+void atkE1_intimidate_loop()
+{
+    u8 bank = battle_stuff_ptr.ptr->intimidate_user;
+    battle_scripting.active_bank = bank;
+    u8 side = is_bank_from_opponent_side(bank);
+    battle_text_buff1[0] = 0xFD;
+    battle_text_buff1[1] = 9;
+    battle_text_buff1[2] = battle_participants[bank].ability_id;
+    battle_text_buff1[3] = 0xFF;
+    while (bank_target < no_of_all_banks)
+    {
+        if (side != is_bank_from_opponent_side(bank_target) && is_bank_present(bank_target))
+        {
+            battlescripts_curr_instruction += 5;
+            return;
+        }
+        bank_target++;
+    }
+    battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction + 1);
+    return;
 }
