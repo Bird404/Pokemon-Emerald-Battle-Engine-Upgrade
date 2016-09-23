@@ -243,7 +243,7 @@ void clear_move_outcome()
 
 void* get_move_battlescript_ptr(u16 move)
 {
-    u32* ptr_to_movesciprts_table = (void*) 0x0803E854;
+    u32* ptr_to_movesciprts_table = (void*) 0x0804E9EC;
     u32* ptr_to_movescript = (void*) *ptr_to_movesciprts_table + move_table[move].script_id * 4;
     return (void*) *ptr_to_movescript;
 }
