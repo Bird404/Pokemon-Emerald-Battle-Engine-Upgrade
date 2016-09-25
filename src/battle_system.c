@@ -1373,19 +1373,30 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         }
         break;
     case 6: //check castform and cherrim
-        {
-            for (u8 i = 0; i < no_of_all_banks; i++)
-            {
-                if(battle_participants[bank].ability_id==ABILITY_FORECAST && has_ability_effect(bank,0,1))
-                {
-                    effect = prepare_castform_switch(castform_switch(bank), bank);
-                    if (effect == true)
-                        break;
-                }
-            }
-            break;
-        }
-    case 7: //user's synchronize
+         {
++            for (u8 i = 0; i < no_of_all_banks; i++)
++            {
++                if(battle_participants[i].ability_id==ABILITY_FORECAST && has_ability_effect(i,0,1))
++                {
++                    effect = prepare_castform_switch(castform_switch(i), i);
++                    if (effect == true)
++                        break;
++                }
++                else if(battle_participants[i].ability_id==ABILITY_FLOWER_GIFT && has_ability_effect(i,0,1))
++                {
++                    effect = should_cherrim_change(i);
++                    if (effect)
++                    {
++                      execute_battle_script(&cherrimswitch_bs);
++                      battle_scripting.active_bank = i;
++                      battle_stuff_ptr.ptr->castform_switch_form = effect - 1;
++                      break;
++                    }
++                }
++            }
+             break;
+         }
+     case 7: //user's synchronize
         adder=0x40;
     case 8: //target's synchronize after static etc.
         if(battle_participants[bank].ability_id==ABILITY_SYNCHRONIZE && has_ability_effect(bank,0,1))
