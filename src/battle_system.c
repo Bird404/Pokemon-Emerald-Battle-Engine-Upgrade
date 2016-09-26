@@ -13,6 +13,8 @@ u8 find_move_in_table(u16 move, u16 table_ptr[]);
 u8 healblock_forbidden_moves(u16 move, u8 with_leechseed);
 u8 gravity_forbidden_move(u16 move);
 u8 embargo_forbidden_move(u16 move);
+u16 get_item_extra_param(u16 item);
+u16 get_mega_species(u16 species);
 
 u8 get_attacking_move_type()
 {
@@ -1399,7 +1401,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
      case 7: //user's synchronize
         adder=0x40;
     case 8: //target's synchronize after static etc.
-        if(battle_participants[bank].ability_id==ABILITY_SYNCHRONIZE && has_ability_effect(bank,0,1))
+        if(battle_participants[bank].ability_id==ABILITY_SYNCHRONIZE && has_ability_effect(bank,0,1) && battle_stuff_ptr.ptr->synchronize_effect_chooser)
         {
             effect=true;
             hitmarker &= 0xFFFFBFFF;
@@ -1407,7 +1409,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             battle_communication_struct.move_effect=adder+battle_stuff_ptr.ptr->synchronize_effect_chooser;
             battle_scripting.active_bank=bank;
             battlescript_push();
-            battlescripts_curr_instruction=(void *)(0x82DB67F);
+            battlescripts_curr_instruction=(void *)(0x82DB680);
             hitmarker |= 0x2000;
         }
         break;
@@ -2590,10 +2592,24 @@ void effect_stat_change(void* pointer)
     battlescripts_curr_instruction = pointer;
 }
 
+u8 canlose_megastone(u8 bank, u16 item)
+{
+    if (get_item_x12_battle_function(item) == ITEM_EFFECT_MEGASTONE && get_item_extra_param(item) == get_mega_species(battle_participants[bank].poke_species))
+        return 1;
+    return 0;
+}
+
+u8 is_item_a_plate(u16 item)
+{
+    return 0;
+}
+
 u8 can_lose_item(u8 bank, u8 stickyhold_check, u8 sticky_message)
 {
     u8 can_lose = 1;
     u16 item = battle_participants[bank].held_item;
+    u8 item_effect = get_item_effect(bank, 0);
+    u16 species = battle_participants[bank].poke_species;
     if (stickyhold_check && battle_participants[bank].ability_id == ABILITY_STICKY_HOLD && has_ability_effect(bank, 1, 1))
     {
         can_lose = 0;
@@ -2607,7 +2623,14 @@ u8 can_lose_item(u8 bank, u8 stickyhold_check, u8 sticky_message)
     }
     else if (item == ITEM_ENIGMABERRY || item_is_mail(item))
         can_lose = 0;
-    //mega stones, drives for genesects and plates for Arceus else if ()
+    else if (canlose_megastone(bank, item))
+        can_lose = 0;
+    else if (item_effect == ITEM_EFFECT_GRISEOUSORB && species == POKE_GIRATINA)
+        can_lose = 0;
+    else if ((item_effect == ITEM_EFFECT_BURNDRIVE || item_effect == ITEM_EFFECT_CHILLDRIVE || item_effect == ITEM_EFFECT_DOUSEDRIVE || item_effect == ITEM_EFFECT_SHOCKDRIVE) && species == POKE_GENESECT)
+        can_lose = 0;
+    else if (species == POKE_ARCEUS && is_item_a_plate(item))
+        can_lose = 0;
     return can_lose;
 }
 
@@ -3566,7 +3589,18 @@ u8 update_turn_counters()
             *sidebank = 0;
             *statetracker += 1;
             break;
-        case 17: //sun
+        case 17: //new struct
+            while (*sidebank >= 1)
+            {
+                if (new_battlestruct.ptr->side_affecting[*sidebank].ally_fainted_last_turn)
+                {
+                    new_battlestruct.ptr->side_affecting[*sidebank].ally_fainted_last_turn--;
+                }
+                *sidebank += 1;
+            }
+            *sidebank = 0;
+            *statetracker += 1;
+        case 18: //sun
             if (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)
             {
                 effect = 1;
@@ -3581,7 +3615,7 @@ u8 update_turn_counters()
             }
             *statetracker += 1;
             break;
-        case 18: //darude
+        case 19: //darude
             if (battle_weather.flags.sandstorm || battle_weather.flags.permament_sandstorm)
             {
                 effect = 1;
@@ -3598,7 +3632,7 @@ u8 update_turn_counters()
             }
             *statetracker += 1;
             break;
-        case 19: //hail
+        case 20: //hail
             if (battle_weather.flags.hail || battle_weather.flags.permament_hail)
             {
                 effect = 1;
@@ -3615,7 +3649,7 @@ u8 update_turn_counters()
             }
             *statetracker += 1;
             break;
-        case 20: //fog
+        case 21: //fog
             if (battle_weather.flags.fog || battle_weather.flags.permament_fog)
             {
                 effect = 1;
@@ -3633,8 +3667,10 @@ u8 update_turn_counters()
             }
             *statetracker += 1;
             break;
+        default:
+            *statetracker += 1;
         }
-        if (*statetracker > 20 && effect == 0)
+        if (*statetracker > 22 && effect == 0)
             break;
     }
     return effect;
