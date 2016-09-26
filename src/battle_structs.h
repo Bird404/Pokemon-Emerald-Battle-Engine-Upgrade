@@ -192,6 +192,12 @@ struct b_scripting{
     u8 stat_changer;
     u8 field1B;
     u8 cmd23_state_tracker;
+    u8 field1D;
+    u8 field1E;
+    u8 field1F;
+    u8 field20;
+    u8 field21;
+    u8 field22;
 };
 
 extern struct b_scripting battle_scripting;
