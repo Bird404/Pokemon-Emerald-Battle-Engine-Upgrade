@@ -2595,8 +2595,8 @@ void effect_stat_change(void* pointer)
 u8 canlose_megastone(u8 bank, u16 item)
 {
     if (get_item_x12_battle_function(item) == ITEM_EFFECT_MEGASTONE && get_item_extra_param(item) == get_mega_species(battle_participants[bank].poke_species))
-        return 1;
-    return 0;
+        return 0;
+    return 1;
 }
 
 u8 is_item_a_plate(u16 item)
@@ -2623,7 +2623,7 @@ u8 can_lose_item(u8 bank, u8 stickyhold_check, u8 sticky_message)
     }
     else if (item == ITEM_ENIGMABERRY || item_is_mail(item))
         can_lose = 0;
-    else if (canlose_megastone(bank, item))
+    else if (!canlose_megastone(bank, item))
         can_lose = 0;
     else if (item_effect == ITEM_EFFECT_GRISEOUSORB && species == POKE_GIRATINA)
         can_lose = 0;
