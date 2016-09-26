@@ -14,7 +14,6 @@ struct bank_affecting{
     u8 smacked_down : 1;
     u8 quashed : 1;
     u8 just_switched_in : 1;
-    u8 ally_fainted_last_turn : 1;
     u8 miracle_eyed : 1;
     u8 eaten_berry : 1;
     u8 sunshine_form : 1;
@@ -42,6 +41,7 @@ struct bank_affecting{
     u8 stat_lowered : 1;
     u8 roost : 3;
     u8 bugbite : 1;
+    u8 usedmoves : 4;
     s8 stockpile_def_changes;
     s8 stockpile_sp_def_changes;
     u8 autonomize_uses;
@@ -73,6 +73,7 @@ struct side_affecting{
     u8 lunardance : 1;
     u8 lunardance_done : 1;
     u8 echo_voice_counter : 3;
+    u8 ally_fainted_last_turn : 2;
 };
 
 struct field_affecting{
