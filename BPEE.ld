@@ -92,6 +92,9 @@ var_8015_trainer_opponent_A = 0x02038BCA;
 trainer_opponent_B = 0x02038BCC;
 tasks_for_banks = 0x03005D60;
 graphical_elements_pbs = 0x03005D70;
+move_selection_chosen_target_pbs = 0x03005D74;
+moves_to_choose_pbs = 0x03005D78;
+move_selection_cursor_pbs = 0x020244B0;
 
 b_c = 0x3005D04;
 
@@ -185,6 +188,13 @@ update_bank_graphical_elements = 0x08074860|1;
 get_item_lastword = 0x080D7644|1;
 checkitem = 0x080D6724|1;
 prepare_fainting_cry = 0x0803432C|1;
+set_callback2 = 0x08000540|1;
+set_obj_pos = 0x08072A24|1;
+c2_80777E8 = 0x080A933C|1;
+obj_delete = 0x08007244|1;
+b_load_sprite = 0x080A9614|1;
+update_bank_sprite = 0x080A9708|1;
+bank_sprite_sth = 0x080A9ADC|1;
 
 attack_iteration_cleanup = 0x804AF30|1;
 prepare_pokemon_battle_sprite_manipulation_buffer = 0x08034414|1;
