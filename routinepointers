@@ -13,6 +13,7 @@ atk0C_datahpupdate 0831BD40
 atk0F_resultmessage 0831BD4C
 atk13_printfromtable 0831BD5C
 atk42_jump_if_type 0831BE18
+atk47_graphical_statchange 0831BE2C
 atk49_move_end_turn 0831BE34
 atk56_prepare_fainting_cry 0831BE68
 atk6A_remove_item 0831BEB8
