@@ -1076,15 +1076,18 @@ void atk49_move_end_turn()
             new_battlestruct.ptr->various.accumulated_damage=0;
             INC_END_EVENTS
             break;
-        case 27: //set this move as previous
+        case 27: //set this move as previous and mark move as used
             if (last_used_move)
                 new_battlestruct.ptr->various.previous_move = last_used_move;
             else
                 new_battlestruct.ptr->various.previous_move = current_move;
+            s8 pos = get_move_position(bank_attacker, current_move);
+            if (pos == -1)
+                pos = get_move_position(bank_attacker, last_used_move);
+            if (pos != -1)
+                new_battlestruct.ptr->bank_affecting[bank_attacker].usedmoves |= bits_table[pos];
             new_battlestruct.ptr->various.active_bank = bank_attacker;
             INC_END_EVENTS
-        //put shell bell hp restored here and pickpocket
-
         case 28: //item move end turn
             if ((multihit_counter==0 || multihit_counter==1) && item_battle_effects(3, 0, 0))
             {
@@ -2356,6 +2359,7 @@ void atk56_prepare_fainting_cry()
     {
         revert_mega_to_normalform(id_by_side, side);
     }
+    new_battlestruct.ptr->side_affecting[side].ally_fainted_last_turn = 2;
 }
 
 void atkE1_intimidate_loop()
