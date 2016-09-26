@@ -3,7 +3,6 @@ nature_color_display_one 081C37A0 2
 nature_color_display_two 081C3864 2
 change_stats	08050A1C	6
 battlestringhook	0814F6B6	0
-graphic_triple_statchange	0804B99C	0
 item_battle_effects	080444DC	3
 alloc_new_struct_hook 08056F3E 2
 free_new_struct_hook 08057044 2
