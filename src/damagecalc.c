@@ -498,6 +498,27 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
                 base_power *= 2;
             }
             break;
+        case MOVE_BEAT_UP:
+            {
+                struct pokemon* poke;
+                if (is_bank_from_opponent_side(bank_attacker))
+                    poke = &party_opponent[0];
+                else
+                    poke = &party_player[0];
+                u8 poke_index = (u8) (0x02024480);
+                if (get_attributes(&poke[poke_index], ATTR_CURRENT_HP, 0) == 0)
+                {
+                    for (u8 i = 0; i < 6; i ++)
+                    {
+                        if (i > poke_index && get_attributes(&poke[i], ATTR_CURRENT_HP, 0))
+                            poke_index = i;
+                    }
+                }
+                u16 species = get_attributes(&poke[poke_index], ATTR_SPECIES, 0);
+                struct basestat_data *pokemon_table = (void *)(poke_stat_table_ptr_ptr);
+                base_power = pokemon_table->poke_stats[species].base_atk / 10 + 5;
+            }
+            break;
     }
     return base_power;
 }
@@ -810,7 +831,7 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
         }
         break;
     case MOVE_RETALIATE:
-        if (new_battlestruct.ptr->bank_affecting[atk_bank].ally_fainted_last_turn)
+        if (new_battlestruct.ptr->side_affecting[is_bank_from_opponent_side(atk_bank)].ally_fainted_last_turn)
         {
             modifier = chain_modifier(modifier, 0x2000);
         }
