@@ -31,6 +31,8 @@ u8 get_target_of_move(u16 move, u8 target_given, u8 adjust);
 void move_to_buffer(u16 move);
 u8 check_mega_evo(u8 bank);
 u8 is_bank_present(u8 bank);
+u8 can_lose_item(u8 bank, u8 stickyhold_check, u8 sticky_message);
+u8 canlose_megastone(u8 bank, u16 item);
 
 u8 sample_text[] = {0xDD, 0xFF};
 u8 snowwarning_text[] = {0xFD, 0x13, 0xB4, 0xE7, 0, 0xFD, 0x1A, 0xFE, 0xEB, 0xDC, 0xDD, 0xE4, 0xE4, 0xD9, 0xD8, 0x00, 0xE9, 0xE4, 0x00, 0xD5, 0x00, 0xDC, 0xD5, 0xDD, 0xE0, 0xE7, 0xE8, 0xE3, 0xE6, 0xE1, 0xAB, 0xFF};
@@ -177,6 +179,7 @@ u8 mummy_text[] = {0xFD, 15, 0xB4, 0xE7, 0, 0xD5, 0xD6, 0xDD, 0xE0, 0xDD, 0xE8, 
 /*0x207*/ u8 quash_text[] = {0xFD, 16, Apos, s_, Space, m_, o_, v_, e_, JumpLine, w_, a_, s_, Space, p_, o_, s_, t_, p_, o_, n_, e_, d_, Exclam, 0xFF};
 /*0x208*/ u8 allyswitch_text[] = {0xFD, 19, Space, a_, n_, d_, Space, 0xFD, 15, JumpLine, s_, w_, i_, t_, c_, h_, e_, d_, Space, p_, l_, a_, c_, e_, s_, Exclam, 0xFF};
 /*0x209*/ u8 topsyturvy_text[] = {0xFD, 16, Apos, s_, Space, s_, t_, a_, t_, Space, c_, h_, a_, n_, g_, e_, s_, JumpLine, w_, e_, r_, e_, Space, a_, l_, l_, Space, r_, e_, v_, e_, r_, s_, e_, d_, Exclam, 0xFF};
+/*0x20A*/ u8 bestow_text[] = {0xFD, 16, Space, r_, e_, c_, e_, v_, i_, e_, d_, Space, o_, n_, e_, JumpLine, 0xFD, 22, Space, f_, r_, o_, m_, Space, 0xFD, 15, Exclam, 0xFF};
 
 void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activation_text, &heavyrain_activation_text, &mysticalaircurrent_activation_text, &forewarn_text, &slowstart_text, &anticipation_text, &dryskin_damage_text, &solarpower_text, &harvest_text, &healer_text, &pickup_text, &moldbreaker_text, &turboblaze_text, &terravolt_text, &downloadatk_text,
 &downloadspatk_text, &absorbabilityboost_text , &absorbabilityimmune_text, &userteam_text/*0x190*/, &foeteam_text/*0x191*/,
@@ -196,7 +199,7 @@ void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activ
 &power_text, &guard_text, &psychosplit_text, &stockpileend_text, &geomancy_text, &powerherb_text, &iceburn_text, &freezeshock_text,
 &shadowforce_text, &mistyterrain_text, &grassyterrain_text, &electricterrain_text, &aquaring_text, &aquaringheal_text, &assaultvest_text,
 &gravityprevents2_text, &healblockprevents2_text , &let_it_move_first_text, &mega_evolved_text, &mega_trigger_text, &fervent_trigger_text,
-&quash_text, &allyswitch_text, &topsyturvy_text};
+&quash_text, &allyswitch_text, &topsyturvy_text, &bestow_text};
 
 void battle_string_loader(u16 string_id)
 {
@@ -2387,6 +2390,29 @@ void topsyturvy_effect()
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
 }
 
+void bestow_effect()
+{
+    u16* user_item = &battle_participants[bank_attacker].held_item;
+    u16* target_item = &battle_participants[bank_target].held_item;
+    if (*user_item && (can_lose_item(bank_attacker, 1, 0)) && !(*target_item) && canlose_megastone(bank_target, *user_item))
+    {
+        battlescripts_curr_instruction += 4;
+        *target_item = *user_item;
+        last_used_item = *user_item;
+        *user_item = 0;
+        active_bank = bank_attacker;
+        prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, user_item);
+        mark_buffer_bank_for_execution(active_bank);
+        active_bank = bank_target;
+        prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, target_item);
+        mark_buffer_bank_for_execution(active_bank);
+    }
+    else
+    {
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    }
+}
+
 void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*/, &change_attacker_item /*2*/, &try_to_lower_def /*3*/, &try_to_raise_spd /*4*/,
 &changestatvar1 /*5*/, &changestatvar2 /*6*/, &frisk_target_item /*7*/, &set_stat_msg_buffer /*8*/, &set_type_msg_buffer /*9*/, &set_team_msg_buffer /*10*/, &bad_dreams_damage_calc /*11*/,
 &weaknesspolicy /*12*/, &mentalherb /*13*/, &placeholder0x14 /*14*/, &hazards_bank_switcher /*15*/, &hazards_bank_return /*16*/, &leechseed_update /*17*/,
@@ -2406,7 +2432,7 @@ void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*
 &setaquaring /*87*/, &get_trainer_name_for_mega /*88*/, &mega_evo_updatehpbar /*89*/, &mega_evo_pursuit_check /*90*/,
 &jumpifuserhasnoHP /*91*/, &quash_setter /*92*/, &beatup_getloopcounter /*93*/, &canuse_allyswitch /*94*/, &allyswitch_dataswitch /*95*/,
 &can_magneticflux_work /*96*/, &magnetic_flux_effect /*97*/, &canuse_flowershield /*98*/, &flowershield_effect /*99*/, &canuselastresort /*100*/,
-&topsyturvy_effect /*101*/};
+&topsyturvy_effect /*101*/, &bestow_effect /*102*/};
 
 void callasm_cmd()
 {
