@@ -13,6 +13,8 @@
 #define POKE_CHERRIM 0x200
 #define POKE_DIALGA 0x218
 #define POKE_PALKIA 0x219
-#define POKE_GIRATINA 0x21C || 0x21C //for that another form
+#define POKE_GIRATINA 0x21C
+#define POKE_ARCEUS 0x21C + 6
+#define POKE_GENESECT 0x2BE
 
 #endif /* POKE_INDICES_H */
