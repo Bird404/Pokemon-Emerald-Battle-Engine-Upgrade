@@ -153,7 +153,7 @@ battlescripts_table:
 .word ONEHITKO			@70 Sheer Cold, Fissure, etc.
 .word TWOTURNMOVE		@71 if it's a status move it acts like multiple stat change user; else based on arg2: if 1 flinch + status chance(Sky Attack); if 2 single stat raise in first turn(Skull Bash); if 3 performs in one turn in weather in arg1(Solarbeam); if 4 status chance(Bounce); if 5 protection break(Phantom Force )
 .word FORCETOSWITCH		@72 Roar, Whirlwind, etc.
-.word ATTACKING_MOVE	@73 currently nothing
+.word ALLYSWITCH		@73 Ally Switch
 .word 0x082D8D9A 		@74 Thrash, Outrage, Petal Dance
 .word SETDISABLE		@75 Disable
 .word SETENCOREE		@76 Encore
@@ -196,7 +196,7 @@ battlescripts_table:
 .word RAPID_SPIN        @113 Rapid Spin
 .word 0x082D9BA1        @114 Psych Up
 .word 0x082D9CC4		@115 Future Sight
-.word ATTACKING_MOVE @	.word BEAT_UP               	116
+.word BEAT_UP           @116 Beat Up
 .word UPROAR            @117 Uproar
 .word STOCKPILE_STUFF   @118 Stockpile, Swallow, Spit Up
 .word MAGNITUDE			@119 Magnitude
@@ -206,7 +206,7 @@ battlescripts_table:
 .word ITEMSWAP			@123 Trick/Switcheroo
 .word 0x082DA26F 		@124 Wish
 .word 0x082DA27F		@125 Assist
-.word 0x082DA296		@125 Ingrain
+.word 0x082DA296		@126 Ingrain
 .word 0x082DA2B6 		@127 Magic Coat
 .word 0x082DA2CB		@128 Recycle
 .word SNORE				@129 Snore ;arg1 status flag to be applied
@@ -239,13 +239,100 @@ battlescripts_table:
 .word SHELLSMASH		@156 Shell Smash
 .word ATTACKING_MOVE @	".word SKYDROP				"	157
 .word SHIFTGEAR			@158 Shift Gear; arg1 stats to raise + 2; arg2 stats to raise + 1
-.word ATTACKING_MOVE @	".word QUASHH				"	159
+.word QUASHH			@159 Quash
 .word FAKEOUT			@160 Fake Out
 .word 0x082D99B7		@161 Sandstorm
 .word 0x082D9B3D		@162 Rain Dance
 .word 0x082D9B55		@163 Sunny Day
 .word 0x082D9FD2		@164 Hail
-	
+.word MAGNETICFLUX		@165 Magnetic Flux @arg1 bitfield for stats to raise; arg 2 by how much
+.word VENOMDRENCH		@166 Venom Drench
+.word FLOWERSHIELD		@167 Flower Shield @arg1 bitfield for stats to raise; arg 2 by how much
+.word LASTRESORT		@168 Last Resort
+.word TOPSYTURVY		@169 Topsy Turvy
+
+TOPSYTURVY:
+	attackcanceler
+	callasm_cmd 101
+	.word MOVE_FAILED
+	attackstring
+	ppreduce
+	attackanimation
+	waitanimation
+	printstring 0x209
+	waitmessage 0x40
+	goto_cmd ENDTURN
+
+LASTRESORT:
+	attackcanceler
+	callasm_cmd 100
+	.word MOVE_FAILED
+	goto_cmd ATTACKING_MOVE + 1
+
+FLOWERSHIELD:
+	attackcanceler
+	setbyte 0x02024211 0x0
+	callasm_cmd 98
+	.word MOVE_FAILED
+	attackstring
+	ppreduce
+	attackanimation
+	waitanimation
+	callasm_cmd 99
+	goto_cmd ENDTURN
+
+VENOMDRENCH:
+	jumpifstatus bank_target STATUS_POISON | STATUS_BAD_POISON MULTIPLE_STAT_CHANGE_TARGET
+	attackcanceler
+	goto_cmd MOVE_FAILED	
+
+MAGNETICFLUX:
+	attackcanceler
+	callasm_cmd 96
+	.word MOVE_FAILED
+	attackstring
+	ppreduce
+	attackanimation
+	waitanimation
+	callasm_cmd 97
+	goto_cmd ENDTURN
+
+ALLYSWITCH:
+	attackcanceler
+	callasm_cmd 94
+	.word MOVE_FAILED
+	attackstring
+	ppreduce
+	attackanimation
+	callasm_cmd 95
+	waitanimation
+	printstring 0x208
+	waitmessage 0x40
+	goto_cmd ENDTURN
+
+BEAT_UP:
+	attackcanceler
+	accuracycheck MOVE_MISSED 0x0
+	attackstring
+	ppreduce
+	callasm_cmd 93 @sets multihit counter
+	preparemultihit
+	setbyte 0x202448A 0x0
+	goto_cmd MULTIHIT_LOOP_START
+
+QUASHH:
+	attackcanceler
+	callasm_cmd 92
+	.word MOVE_FAILED
+	accuracycheck MOVE_MISSED 0x0
+	attackstring
+	ppreduce
+	attackanimation
+	waitanimation
+	printstring 0x207
+	waitmessage 0x40
+	goto_cmd ENDTURN
+
 PRESENTT:
 	attackcanceler
 	accuracycheck MOVE_MISSED 0x0
