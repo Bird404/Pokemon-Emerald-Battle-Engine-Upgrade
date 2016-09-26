@@ -30,6 +30,7 @@ void* get_move_battlescript_ptr(u16 move);
 u8 get_target_of_move(u16 move, u8 target_given, u8 adjust);
 void move_to_buffer(u16 move);
 u8 check_mega_evo(u8 bank);
+u8 is_bank_present(u8 bank);
 
 u8 sample_text[] = {0xDD, 0xFF};
 u8 snowwarning_text[] = {0xFD, 0x13, 0xB4, 0xE7, 0, 0xFD, 0x1A, 0xFE, 0xEB, 0xDC, 0xDD, 0xE4, 0xE4, 0xD9, 0xD8, 0x00, 0xE9, 0xE4, 0x00, 0xD5, 0x00, 0xDC, 0xD5, 0xDD, 0xE0, 0xE7, 0xE8, 0xE3, 0xE6, 0xE1, 0xAB, 0xFF};
@@ -173,6 +174,9 @@ u8 mummy_text[] = {0xFD, 15, 0xB4, 0xE7, 0, 0xD5, 0xD6, 0xDD, 0xE0, 0xDD, 0xE8, 
 /*0x204*/ u8 mega_evolved_text[] = {0xFD, 15, Space, h_, a_, s_, Space, M_, e_, g_, a_, Space, E_, v_, o_, l_, v_, e_, d_, JumpLine, i_, n_, t_, o_, Space, M_, e_, g_, a_, Space, 0xFD, 0, Exclam, 0xFB, 0xFF};
 /*0x205*/ u8 mega_trigger_text[] = {0xFD, 15, Apos, s_, Space, 0xFD, 22, Space, i_, s_, Space, r_, e_, a_, c_, t_, i_, n_, g_, JumpLine, t_, o_, Space , 0xFD, 52, Apos, s_, Space, 0xFD, 1, Exclam, 0xFB, 0xFF};
 /*0x206*/ u8 fervent_trigger_text[] = {BuffCharac, 52, Apos, s_, Space, f_, e_, r_, v_, e_, n_, t_, Space, w_, i_, s_, h_, JumpLine, r_, e_, a_, c_, h_, e_, d_, Space, BuffCharac, 0xF, Exclam, Termin};
+/*0x207*/ u8 quash_text[] = {0xFD, 16, Apos, s_, Space, m_, o_, v_, e_, JumpLine, w_, a_, s_, Space, p_, o_, s_, t_, p_, o_, n_, e_, d_, Exclam, 0xFF};
+/*0x208*/ u8 allyswitch_text[] = {0xFD, 19, Space, a_, n_, d_, Space, 0xFD, 15, JumpLine, s_, w_, i_, t_, c_, h_, e_, d_, Space, p_, l_, a_, c_, e_, s_, Exclam, 0xFF};
+/*0x209*/ u8 topsyturvy_text[] = {0xFD, 16, Apos, s_, Space, s_, t_, a_, t_, Space, c_, h_, a_, n_, g_, e_, s_, JumpLine, w_, e_, r_, e_, Space, a_, l_, l_, Space, r_, e_, v_, e_, r_, s_, e_, d_, Exclam, 0xFF};
 
 void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activation_text, &heavyrain_activation_text, &mysticalaircurrent_activation_text, &forewarn_text, &slowstart_text, &anticipation_text, &dryskin_damage_text, &solarpower_text, &harvest_text, &healer_text, &pickup_text, &moldbreaker_text, &turboblaze_text, &terravolt_text, &downloadatk_text,
 &downloadspatk_text, &absorbabilityboost_text , &absorbabilityimmune_text, &userteam_text/*0x190*/, &foeteam_text/*0x191*/,
@@ -191,7 +195,8 @@ void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activ
 &rapidspinontoxicspikes_text, &rapidspinonstealthrock_text, &rapidspinonstickyweb_text, &powertrick_text, &soak_text, &defogspikes_text,
 &power_text, &guard_text, &psychosplit_text, &stockpileend_text, &geomancy_text, &powerherb_text, &iceburn_text, &freezeshock_text,
 &shadowforce_text, &mistyterrain_text, &grassyterrain_text, &electricterrain_text, &aquaring_text, &aquaringheal_text, &assaultvest_text,
-&gravityprevents2_text, &healblockprevents2_text , &let_it_move_first_text, &mega_evolved_text, &mega_trigger_text, &fervent_trigger_text};
+&gravityprevents2_text, &healblockprevents2_text , &let_it_move_first_text, &mega_evolved_text, &mega_trigger_text, &fervent_trigger_text,
+&quash_text, &allyswitch_text, &topsyturvy_text};
 
 void battle_string_loader(u16 string_id)
 {
@@ -2093,6 +2098,295 @@ void jumpifuserhasnoHP()
     return;
 }
 
+void quash_setter() //0 - first, 1 - second, 2 - third, 3 - fourth
+{
+    u8 target_turn = get_bank_turn_order(bank_target);
+    u8 attacker_turn = get_bank_turn_order(bank_attacker);
+    if (target_turn < attacker_turn)
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else
+    {
+        new_battlestruct.ptr->bank_affecting[bank_attacker].quashed = 1;
+        battlescripts_curr_instruction += 4;
+        if (battle_flags.double_battle)
+        {
+            switch (target_turn)
+            {
+            case 1:
+                turn_order[1] = turn_order[2];
+            case 2:
+                turn_order[2] = turn_order[3];
+            case 3:
+                turn_order[3] = bank_target;
+            }
+        }
+    }
+    return;
+}
+
+void beatup_getloopcounter()
+{
+    struct pokemon* poke;
+    if (is_bank_from_opponent_side(bank_attacker))
+        poke = &party_opponent[0];
+    else
+        poke = &party_player[0];
+    u8 counter = 0;
+    for (u8 i = 0; i < 6; i++)
+    {
+        u16 species = get_attributes(&poke[i], ATTR_SPECIES, 0);
+        if (species != 0 && species != 412 && get_attributes(&poke[i], ATTR_CURRENT_HP, 0))
+            counter++;
+    }
+    multihit_counter = counter;
+}
+
+void canuse_allyswitch()
+{
+    u8 ally_bank = bank_attacker ^ 2;
+    if (is_bank_present(ally_bank) && battle_flags.double_battle)
+    {
+        battlescripts_curr_instruction += 4;
+    }
+    else
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+}
+
+void allyswitch_dataswitch()
+{
+    u8 ally_bank = bank_attacker ^ 2;
+    // paritcipant struct
+    struct battle_participant attacker1 = battle_participants[bank_attacker];
+    battle_participants[bank_attacker] = battle_participants[ally_bank];
+    battle_participants[ally_bank] = attacker1;
+
+    //disable struct
+    struct disable_struct attacker2 = disable_structs[bank_attacker];
+    disable_structs[bank_attacker] = disable_structs[ally_bank];
+    disable_structs[ally_bank] = attacker2;
+
+    //protect struct
+    struct protect_struct attacker3 = protect_structs[bank_attacker];
+    protect_structs[bank_attacker] = protect_structs[ally_bank];
+    protect_structs[ally_bank] = attacker3;
+
+    //status3
+    struct status_3 attacker4 = status3[bank_attacker];
+    status3[bank_attacker] = status3[ally_bank];
+    status3[ally_bank] = attacker4;
+
+    //special status
+    struct special_status attacker5 = special_statuses[bank_attacker];
+    special_statuses[bank_attacker] = special_statuses[ally_bank];
+    special_statuses[ally_bank] = attacker5;
+
+    //new battle struct
+    struct bank_affecting attacker6 = new_battlestruct.ptr->bank_affecting[bank_attacker];
+    new_battlestruct.ptr->bank_affecting[bank_attacker] = new_battlestruct.ptr->bank_affecting[ally_bank];
+    new_battlestruct.ptr->bank_affecting[ally_bank] = attacker6;
+
+    //tai move history
+    struct used_moves attacker7 = battle_resources.ptr->battle_history->used_moves[bank_attacker];
+    battle_resources.ptr->battle_history->used_moves[bank_attacker] = battle_resources.ptr->battle_history->used_moves[ally_bank];
+    battle_resources.ptr->battle_history->used_moves[ally_bank] = attacker7;
+
+    //abilities in RAM
+    u8 attackerability = abilities_by_banks[bank_attacker];
+    abilities_by_banks[bank_attacker] = abilities_by_banks[ally_bank];
+    abilities_by_banks[ally_bank] = attackerability;
+
+    //in-party position
+    u16* partyAttacker = &battle_team_id_by_side[bank_attacker];
+    u16* partyAlly = &battle_team_id_by_side[ally_bank];
+    struct pokemon* poke;
+    if (is_bank_from_opponent_side(bank_attacker))
+        poke = &party_opponent[0];
+    else
+        poke = &party_player[0];
+
+    struct pokemon attacker8 = poke[*partyAttacker];
+    poke[*partyAttacker] = poke[*partyAlly];
+    poke[*partyAlly] = attacker8;
+
+    //selected move
+    u16 attacker9 = chosen_move_by_banks[bank_attacker];
+    chosen_move_by_banks[bank_attacker] = chosen_move_by_banks[ally_bank];
+    chosen_move_by_banks[ally_bank] = attacker9;
+
+    u8 attacker10 = battle_stuff_ptr.ptr->chosen_move_position[bank_attacker];
+    battle_stuff_ptr.ptr->chosen_move_position[bank_attacker] = battle_stuff_ptr.ptr->chosen_move_position[ally_bank];
+    battle_stuff_ptr.ptr->chosen_move_position[ally_bank] = attacker10;
+
+    u8 attacker11 = battle_stuff_ptr.ptr->move_target[bank_attacker];
+    battle_stuff_ptr.ptr->move_target[bank_attacker] = battle_stuff_ptr.ptr->move_target[ally_bank];
+    battle_stuff_ptr.ptr->move_target[ally_bank] = attacker11;
+
+    if (!is_bank_from_opponent_side(ally_bank))
+    {
+        u8 attacker13 = move_selection_cursor_pbs[bank_attacker];
+        move_selection_cursor_pbs[bank_attacker] = move_selection_cursor_pbs[ally_bank];
+        move_selection_cursor_pbs[ally_bank] = attacker13;
+    }
+
+    u16 attacker14 = last_used_moves[bank_attacker];
+    last_used_moves[bank_attacker] = last_used_moves[ally_bank];
+    last_used_moves[ally_bank] = attacker14;
+
+    //objects
+    u8* objCase = &battle_scripting.field21;
+    battle_scripting.field22 = 0;
+
+     *objCase = 21;
+     c2_80777E8(); //fade screen
+
+    *objCase = 3;
+    while (*objCase < 21)
+    {
+        c2_80777E8(); //load everything
+    }
+
+    //turn order
+    u16 atk_order = get_bank_turn_order(bank_attacker);
+    u16 ally_order = get_bank_turn_order(ally_bank);
+    turn_order[atk_order] = ally_bank;
+    turn_order[ally_order] = bank_attacker;
+
+    battle_scripting.active_bank = ally_bank;
+}
+
+u8 check_magneticflux_bank(u8 bank)
+{
+    if (is_bank_present(bank) && (check_ability(bank, ABILITY_PLUS) || check_ability(bank, ABILITY_MINUS)) && !(battle_participants[bank].def_buff == 0xC && battle_participants[bank].sp_def_buff == 0xC))
+    {
+        return 1;
+    }
+    return 0;
+}
+
+void can_magneticflux_work()
+{
+    u8 effect = 0;
+    u8 side = is_bank_from_opponent_side(bank_attacker);
+    for (u8 i = 0; i < no_of_all_banks; i++)
+    {
+        if (side == is_bank_from_opponent_side(i) && check_magneticflux_bank(i))
+        {
+            effect = 1;
+            new_battlestruct.ptr->various.var1 = 0;
+            new_battlestruct.ptr->various.var2 = 0;
+            another_active_bank = bank_attacker;
+            break;
+        }
+    }
+    if (effect)
+        battlescripts_curr_instruction += 4;
+    else
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+}
+
+void magnetic_flux_effect()
+{
+    u8 side = is_bank_from_opponent_side(bank_attacker);
+    for (u8 i = 0; i < no_of_all_banks; i++)
+    {
+        if (side == is_bank_from_opponent_side(i) && ((new_battlestruct.ptr->various.var2 & bits_table[i]) == 0) && check_magneticflux_bank(i))
+        {
+            if (new_battlestruct.ptr->various.var1 == move_table[current_move].arg1)
+            {
+                new_battlestruct.ptr->various.var1 = 0;
+                new_battlestruct.ptr->various.var2 |= bits_table[i];
+                battlescripts_curr_instruction -= 3;
+                break;
+            }
+            bank_attacker = i;
+            dostatchanges();
+            return;
+        }
+    }
+    bank_attacker = another_active_bank;
+}
+
+u8 get_flowershieldbank()
+{
+    for (u8 i = 0; i < no_of_all_banks; i++)
+    {
+        u8* stat_ptr = &battle_participants[i].hp_buff + bit_to_stat(move_table[current_move].arg1);
+        if (is_bank_present(i) && !(crit_loc & bits_table[i]) && is_of_type(i, TYPE_GRASS) && *stat_ptr != 0xC)
+        {
+            return i;
+        }
+    }
+    return 0xFF;
+}
+
+void canuse_flowershield()
+{
+    if (get_flowershieldbank() == 0xFF)
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else
+    {
+        battlescripts_curr_instruction += 4;
+        new_battlestruct.ptr->various.var2 = bank_attacker;
+    }
+}
+
+void flowershield_effect()
+{
+    u8 bank = get_flowershieldbank();
+    if (bank != 0xFF)
+    {
+        crit_loc |= bits_table[bank];
+        bank_attacker = bank;
+        dostatchanges();
+        return;
+    }
+    bank_attacker = new_battlestruct.ptr->various.var2;
+    return;
+}
+
+void canuselastresort()
+{
+    s8 lastresort_pos = get_move_position(bank_attacker, current_move);
+    if (lastresort_pos != -1)
+    {
+        for (u8 i = 0; i < 4; i++)
+        {
+            u16* move_ptr = &battle_participants[bank_attacker].moves[0];
+            if (*move_ptr && i != lastresort_pos && (new_battlestruct.ptr->bank_affecting[bank_attacker].usedmoves & bits_table[i]))
+            {
+                battlescripts_curr_instruction += 4;
+                return;
+            }
+        }
+    }
+    battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+}
+
+void topsyturvy_effect()
+{
+    u8 reversed_stats = 0;
+    for (u8 i = 0; i < 7; i++)
+    {
+        u8* stat = &battle_participants[bank_target].atk_buff + i;
+        if (*stat != 6)
+        {
+            reversed_stats++;
+            if (*stat < 6)
+            {
+                *stat += (6 - *stat) * 2;
+            }
+            else //*stat > 6
+            {
+                *stat -= (*stat - 6) * 2;
+            }
+        }
+    }
+    if (reversed_stats)
+        battlescripts_curr_instruction += 4;
+    else
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+}
+
 void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*/, &change_attacker_item /*2*/, &try_to_lower_def /*3*/, &try_to_raise_spd /*4*/,
 &changestatvar1 /*5*/, &changestatvar2 /*6*/, &frisk_target_item /*7*/, &set_stat_msg_buffer /*8*/, &set_type_msg_buffer /*9*/, &set_team_msg_buffer /*10*/, &bad_dreams_damage_calc /*11*/,
 &weaknesspolicy /*12*/, &mentalherb /*13*/, &placeholder0x14 /*14*/, &hazards_bank_switcher /*15*/, &hazards_bank_return /*16*/, &leechseed_update /*17*/,
@@ -2110,7 +2404,9 @@ void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*
 &settelekinesis /*76*/, &setpowertrick /*77*/, &make_pokemon_one_type /*78*/, &defog_effect /*79*/, &copycat_move /*80*/,
 &psycho_swaps /*81*/, &psychosplits /*82*/, &stockpile_record /*83*/, &twoturn_moves /*84*/, &powerherb_check /*85*/, &set_terrain /*86*/,
 &setaquaring /*87*/, &get_trainer_name_for_mega /*88*/, &mega_evo_updatehpbar /*89*/, &mega_evo_pursuit_check /*90*/,
-&jumpifuserhasnoHP /*91*/};
+&jumpifuserhasnoHP /*91*/, &quash_setter /*92*/, &beatup_getloopcounter /*93*/, &canuse_allyswitch /*94*/, &allyswitch_dataswitch /*95*/,
+&can_magneticflux_work /*96*/, &magnetic_flux_effect /*97*/, &canuse_flowershield /*98*/, &flowershield_effect /*99*/, &canuselastresort /*100*/,
+&topsyturvy_effect /*101*/};
 
 void callasm_cmd()
 {
