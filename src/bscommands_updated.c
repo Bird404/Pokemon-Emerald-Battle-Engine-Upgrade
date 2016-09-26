@@ -2383,3 +2383,27 @@ void atkE1_intimidate_loop()
     battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction + 1);
     return;
 }
+
+void atk47_graphical_statchange()
+{
+    battlescripts_curr_instruction++;
+    battle_scripting.field11 = 0;
+    u8 statchanger_value = battle_scripting.stat_changer & 0xF0;
+    if (statchanger_value == 0x20) //double raise
+        statchanger_value = 0x27;
+    else if (statchanger_value == 0x10) //single raise
+        statchanger_value = 0xF;
+    else if (statchanger_value == 0x90) //single lower
+        statchanger_value = 0x16;
+    else if (statchanger_value == 0xA0) //double lower
+        statchanger_value = 0x2E;
+    else if (statchanger_value > 0xA0) //triple lower
+        statchanger_value = 0x37;
+    else //triple raise
+    {
+        battle_scripting.field10 = 0x38;
+        return;
+    }
+    battle_scripting.field10 = (battle_scripting.stat_changer & 0xF) + statchanger_value - 1;
+    return;
+}
