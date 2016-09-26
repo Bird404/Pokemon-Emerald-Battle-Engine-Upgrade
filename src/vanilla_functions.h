@@ -79,6 +79,13 @@ void prepare_fainting_cry(u8 bufferID);
 void bx_move_chosing_menu();
 s16 get_pingpong(s16 phase, s16 scale);
 u8 gpu_pal_tags_index_of(u16 tag);
+void set_callback2(void* ptr);
+void set_obj_pos(u8 ID, u16 x, u16 y);
+void c2_80777E8();
+void obj_delete(struct object*);
+u8 b_load_sprite(u8 bank);
+void update_bank_sprite(u8 bank);
+void bank_sprite_sth(u8 bank);
 
 u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);
