@@ -250,6 +250,20 @@ battlescripts_table:
 .word FLOWERSHIELD		@167 Flower Shield @arg1 bitfield for stats to raise; arg 2 by how much
 .word LASTRESORT		@168 Last Resort
 .word TOPSYTURVY		@169 Topsy Turvy
+.word BESTOW			@170 Bestow
+
+BESTOW:
+	attackcanceler
+	callasm_cmd 102
+	.word MOVE_FAILED
+	accuracycheck MOVE_FAILED 0xFFFF
+	attackstring
+	ppreduce
+	attackanimation
+	waitanimation
+	printstring 0x20A
+	waitmessage 0x40
+	goto_cmd ENDTURN
 
 TOPSYTURVY:
 	attackcanceler
