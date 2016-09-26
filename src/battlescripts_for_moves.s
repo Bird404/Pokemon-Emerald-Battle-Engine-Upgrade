@@ -1244,9 +1244,9 @@ REFLECTTYPE:
 
 CAMOUFLAGE:
 	attackcanceler
-	settypetoterrain MOVE_FAILED
 	attackstring
 	ppreduce
+	settypetoterrain MOVE_FAILED + 2
 	goto_cmd 0x82DA79D
 	
 IONDELUGE:
