@@ -269,6 +269,10 @@ void set_attacking_move_type()
                         case ITEM_EFFECT_ZAP_PLATE: 
                             move_type=TYPE_ELECTRIC;
                             break;
+                    
+                        default:
+                            move_type=TYPE_NORMAL;
+                            break;
                     }
             }
         default:
