@@ -198,6 +198,79 @@ void set_attacking_move_type()
                 move_type=__udivsi3(sum*15,63);
             }
             break;
+        case MOVE_JUDGEMENT:
+            {   
+                switch (get_item_effect(atk_bank,1)) 
+                    {   
+                        case ITEM_EFFECT_DRACO_PLATE: 
+                            move_type=TYPE_DRAGON;
+                            break;
+                                
+                        case ITEM_EFFECT_DREAD_PLATE: 
+                            move_type=TYPE_DARK;
+                            break;
+                                
+                        case ITEM_EFFECT_EARTH_PLATE: 
+                            move_type=TYPE_GROUND;
+                            break;
+                                
+                        case ITEM_EFFECT_FIST_PLATE: 
+                            move_type=TYPE_FIGHTING;
+                            break;
+                                
+                        case ITEM_EFFECT_FLAME_PLATE: 
+                            move_type=TYPE_FIRE;
+                            break;
+                                
+                        case ITEM_EFFECT_ICICLE_PLATE: 
+                            move_type=TYPE_ICE;
+                            break;
+                                
+                        case ITEM_EFFECT_INSECT_PLATE:
+                            move_type=TYPE_BUG;
+                            break;
+                               
+                        case ITEM_EFFECT_IRON_PLATE: 
+                            move_type=TYPE_STEEL;
+                            break;
+                                
+                        case ITEM_EFFECT_MEADOW_PLATE: 
+                            move_type=TYPE_GRASS;
+                            break;
+                                
+                        case ITEM_EFFECT_MIND_PLATE: 
+                            move_type=TYPE_PSYCHIC;
+                            break;
+                               
+                        case ITEM_EFFECT_PIXIE_PLATE: 
+                            move_type=TYPE_FAIRY;
+                            break;
+                                
+                        case ITEM_EFFECT_SKY_PLATE: 
+                            move_type=TYPE_FLYING;
+                            break;
+                                
+                        case ITEM_EFFECT_SPLASH_PLATE: 
+                            move_type=TYPE_WATER;
+                            break;
+                                
+                        case ITEM_EFFECT_SPOOKY_PLATE: 
+                            move_type=TYPE_GHOST;
+                            break;
+                                
+                        case ITEM_EFFECT_STONE_PLATE: 
+                            move_type=TYPE_ROCK;
+                            break;
+                                
+                        case ITEM_EFFECT_TOXIC_PLATE: 
+                            move_type=TYPE_POISON;
+                            break;
+                                
+                        case ITEM_EFFECT_ZAP_PLATE: 
+                            move_type=TYPE_ELECTRIC;
+                            break;
+                    }
+            }
         default:
             break;
         }
