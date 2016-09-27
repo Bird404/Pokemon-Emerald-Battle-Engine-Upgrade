@@ -43,6 +43,8 @@
 080008AC 00 B5 05 4A 13 88 01 20 83 43 13 80 02 DF 13 88 03 42 FB D0 00 BD 00 00 DC 22 00 03
 ## Trick usable for wild/trainer Pokemon
 08054EDA 02
+## undo disable resetting effect byte
+08049AA2 05 48 00 21 C1 70
 ## air lock cacophony index fix
 08042700 4C
 08042752 4C
