@@ -202,71 +202,71 @@ void set_attacking_move_type()
             {   
                 switch (get_item_effect(atk_bank,1)) 
                     {   
-                        case ITEM_EFFECT_DRACO_PLATE: 
+                        case ITEM_EFFECT_DRACOPLATE: 
                             move_type=TYPE_DRAGON;
                             break;
                                 
-                        case ITEM_EFFECT_DREAD_PLATE: 
+                        case ITEM_EFFECT_DREADPLATE: 
                             move_type=TYPE_DARK;
                             break;
                                 
-                        case ITEM_EFFECT_EARTH_PLATE: 
+                        case ITEM_EFFECT_EARTHPLATE: 
                             move_type=TYPE_GROUND;
                             break;
                                 
-                        case ITEM_EFFECT_FIST_PLATE: 
+                        case ITEM_EFFECT_FISTPLATE: 
                             move_type=TYPE_FIGHTING;
                             break;
                                 
-                        case ITEM_EFFECT_FLAME_PLATE: 
+                        case ITEM_EFFECT_FLAMEPLATE: 
                             move_type=TYPE_FIRE;
                             break;
                                 
-                        case ITEM_EFFECT_ICICLE_PLATE: 
+                        case ITEM_EFFECT_ICICLEPLATE: 
                             move_type=TYPE_ICE;
                             break;
                                 
-                        case ITEM_EFFECT_INSECT_PLATE:
+                        case ITEM_EFFECT_INSECTPLATE:
                             move_type=TYPE_BUG;
                             break;
                                
-                        case ITEM_EFFECT_IRON_PLATE: 
+                        case ITEM_EFFECT_IRONPLATE: 
                             move_type=TYPE_STEEL;
                             break;
                                 
-                        case ITEM_EFFECT_MEADOW_PLATE: 
+                        case ITEM_EFFECT_MEADOWPLATE: 
                             move_type=TYPE_GRASS;
                             break;
                                 
-                        case ITEM_EFFECT_MIND_PLATE: 
+                        case ITEM_EFFECT_MINDPLATE: 
                             move_type=TYPE_PSYCHIC;
                             break;
                                
-                        case ITEM_EFFECT_PIXIE_PLATE: 
+                        case ITEM_EFFECT_PIXIEPLATE: 
                             move_type=TYPE_FAIRY;
                             break;
                                 
-                        case ITEM_EFFECT_SKY_PLATE: 
+                        case ITEM_EFFECT_SKYPLATE: 
                             move_type=TYPE_FLYING;
                             break;
                                 
-                        case ITEM_EFFECT_SPLASH_PLATE: 
+                        case ITEM_EFFECT_SPLASHPLATE: 
                             move_type=TYPE_WATER;
                             break;
                                 
-                        case ITEM_EFFECT_SPOOKY_PLATE: 
+                        case ITEM_EFFECT_SPOOKYPLATE: 
                             move_type=TYPE_GHOST;
                             break;
                                 
-                        case ITEM_EFFECT_STONE_PLATE: 
+                        case ITEM_EFFECT_STONEPLATE: 
                             move_type=TYPE_ROCK;
                             break;
                                 
-                        case ITEM_EFFECT_TOXIC_PLATE: 
+                        case ITEM_EFFECT_TOXICPLATE: 
                             move_type=TYPE_POISON;
                             break;
                                 
-                        case ITEM_EFFECT_ZAP_PLATE: 
+                        case ITEM_EFFECT_ZAPPLATE: 
                             move_type=TYPE_ELECTRIC;
                             break;
                     
@@ -275,6 +275,33 @@ void set_attacking_move_type()
                             break;
                     }
             }
+            break;
+        case MOVE_TECHNO_BLAST: 
+                {
+                    switch(get_item_effect(atk_bank,1))
+                    {
+                        case ITEM_EFFECT_DOUSEDRIVE:
+                            move_type=TYPE_WATER;
+                            break;
+                            
+                        case ITEM_EFFECT_BURNDRIVE:
+                            move_type=TYPE_FIRE;
+                            break;
+                            
+                        case ITEM_EFFECT_CHILLDRIVE:
+                            move_type=TYPE_ICE;
+                            break;
+                            
+                        case ITEM_EFFECT_SHOCKDRIVE:
+                            move_type=TYPE_ELECTRIC;
+                            break;
+                            
+                        default:
+                            move_type = TYPE_NORMAL;
+                            break;
+                    }
+            } 
+            break;      
         default:
             break;
         }
