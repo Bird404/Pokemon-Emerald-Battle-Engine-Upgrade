@@ -198,7 +198,7 @@ void set_attacking_move_type()
                 move_type=__udivsi3(sum*15,63);
             }
             break;
-        case MOVE_JUDGEMENT:
+        case MOVE_JUDGMENT:
             {
                 switch (get_item_effect(bank_attacker,1))
                     {
