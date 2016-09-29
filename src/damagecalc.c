@@ -1,4 +1,4 @@
- #include "types.h"
+#include "types.h"
 #include "defines.h"
 #include "battle_locations.h"
 #include "battle_structs.h"
@@ -700,7 +700,7 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
             modifier = chain_modifier(modifier, 0x1333);
         }
         break;
-    case ITEM_EFFECT_FAIRYPLATE:
+    case ITEM_EFFECT_PIXIEPLATE:
         if (move_type == TYPE_FAIRY)
         {
             modifier = chain_modifier(modifier, quality_atk_modifier);
