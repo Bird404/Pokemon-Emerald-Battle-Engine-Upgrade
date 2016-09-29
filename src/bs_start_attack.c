@@ -199,109 +199,109 @@ void set_attacking_move_type()
             }
             break;
         case MOVE_JUDGEMENT:
-            {   
-                switch (get_item_effect(atk_bank,1)) 
-                    {   
-                        case ITEM_EFFECT_DRACOPLATE: 
+            {
+                switch (get_item_effect(bank_attacker,1))
+                    {
+                        case ITEM_EFFECT_DRACOPLATE:
                             move_type=TYPE_DRAGON;
                             break;
-                                
-                        case ITEM_EFFECT_DREADPLATE: 
+
+                        case ITEM_EFFECT_DREADPLATE:
                             move_type=TYPE_DARK;
                             break;
-                                
-                        case ITEM_EFFECT_EARTHPLATE: 
+
+                        case ITEM_EFFECT_EARTHPLATE:
                             move_type=TYPE_GROUND;
                             break;
-                                
-                        case ITEM_EFFECT_FISTPLATE: 
+
+                        case ITEM_EFFECT_FISTPLATE:
                             move_type=TYPE_FIGHTING;
                             break;
-                                
-                        case ITEM_EFFECT_FLAMEPLATE: 
+
+                        case ITEM_EFFECT_FLAMEPLATE:
                             move_type=TYPE_FIRE;
                             break;
-                                
-                        case ITEM_EFFECT_ICICLEPLATE: 
+
+                        case ITEM_EFFECT_ICICLEPLATE:
                             move_type=TYPE_ICE;
                             break;
-                                
+
                         case ITEM_EFFECT_INSECTPLATE:
                             move_type=TYPE_BUG;
                             break;
-                               
-                        case ITEM_EFFECT_IRONPLATE: 
+
+                        case ITEM_EFFECT_IRONPLATE:
                             move_type=TYPE_STEEL;
                             break;
-                                
-                        case ITEM_EFFECT_MEADOWPLATE: 
+
+                        case ITEM_EFFECT_MEADOWPLATE:
                             move_type=TYPE_GRASS;
                             break;
-                                
-                        case ITEM_EFFECT_MINDPLATE: 
+
+                        case ITEM_EFFECT_MINDPLATE:
                             move_type=TYPE_PSYCHIC;
                             break;
-                               
-                        case ITEM_EFFECT_PIXIEPLATE: 
+
+                        case ITEM_EFFECT_PIXIEPLATE:
                             move_type=TYPE_FAIRY;
                             break;
-                                
-                        case ITEM_EFFECT_SKYPLATE: 
+
+                        case ITEM_EFFECT_SKYPLATE:
                             move_type=TYPE_FLYING;
                             break;
-                                
-                        case ITEM_EFFECT_SPLASHPLATE: 
+
+                        case ITEM_EFFECT_SPLASHPLATE:
                             move_type=TYPE_WATER;
                             break;
-                                
-                        case ITEM_EFFECT_SPOOKYPLATE: 
+
+                        case ITEM_EFFECT_SPOOKYPLATE:
                             move_type=TYPE_GHOST;
                             break;
-                                
-                        case ITEM_EFFECT_STONEPLATE: 
+
+                        case ITEM_EFFECT_STONEPLATE:
                             move_type=TYPE_ROCK;
                             break;
-                                
-                        case ITEM_EFFECT_TOXICPLATE: 
+
+                        case ITEM_EFFECT_TOXICPLATE:
                             move_type=TYPE_POISON;
                             break;
-                                
-                        case ITEM_EFFECT_ZAPPLATE: 
+
+                        case ITEM_EFFECT_ZAPPLATE:
                             move_type=TYPE_ELECTRIC;
                             break;
-                    
+
                         default:
                             move_type=TYPE_NORMAL;
                             break;
                     }
             }
             break;
-        case MOVE_TECHNO_BLAST: 
+        case MOVE_TECHNO_BLAST:
                 {
-                    switch(get_item_effect(atk_bank,1))
+                    switch(get_item_effect(bank_attacker,1))
                     {
                         case ITEM_EFFECT_DOUSEDRIVE:
                             move_type=TYPE_WATER;
                             break;
-                            
+
                         case ITEM_EFFECT_BURNDRIVE:
                             move_type=TYPE_FIRE;
                             break;
-                            
+
                         case ITEM_EFFECT_CHILLDRIVE:
                             move_type=TYPE_ICE;
                             break;
-                            
+
                         case ITEM_EFFECT_SHOCKDRIVE:
                             move_type=TYPE_ELECTRIC;
                             break;
-                            
+
                         default:
                             move_type = TYPE_NORMAL;
                             break;
                     }
-            } 
-            break;      
+            }
+            break;
         default:
             break;
         }
