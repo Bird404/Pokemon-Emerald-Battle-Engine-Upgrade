@@ -662,7 +662,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 dontlock=1;
             }
             break;
-        case ABILITY_PRIMORDIA_SEA:
+        case ABILITY_PRIMORDIAL_SEA:
             if (!(battle_weather.flags.heavy_rain))
             {
                 effect = true;
