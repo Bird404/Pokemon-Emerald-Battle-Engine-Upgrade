@@ -28,3 +28,6 @@ load_graphics_hook 0805E1B0 1
 position_trigger_hook 08057C04 0
 slide_out_on_pressing_A_hook1 08057D6C 1
 slide_out_on_pressing_A_hook2 080578D8 1
+target_self_ally 08057CAE 0
+choose_self_or_ally_left 08057A14 1
+choose_self_or_ally_right 08057B38 1

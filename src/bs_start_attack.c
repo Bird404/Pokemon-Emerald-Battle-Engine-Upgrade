@@ -12,7 +12,7 @@ u8 find_move_in_table(u16 move, u16 table_ptr[]);
 
 u8 is_bank_present(u8 bank)
 {
-    if((absent_bank_flags & bits_table[bank]) || battle_participants[bank].current_hp == 0)
+    if((absent_bank_flags & bits_table[bank]) || battle_participants[bank].current_hp == 0 || bank >= no_of_all_banks)
         return 0;
     return 1;
 }
