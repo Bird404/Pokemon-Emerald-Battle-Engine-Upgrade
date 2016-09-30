@@ -8,6 +8,7 @@
 
 u8 weather_abilities_effect();
 u8 check_mega_condition(u8 bank);
+u32 get_item_extra_param(u16 item);
 u8 find_move_in_table(u16 move, u16 table_ptr[]);
 
 u8 is_bank_present(u8 bank)
@@ -200,106 +201,120 @@ void set_attacking_move_type()
             break;
         case MOVE_JUDGMENT:
             {
-                switch (get_item_effect(bank_attacker,1))
-                    {
-                        case ITEM_EFFECT_DRACOPLATE:
-                            move_type=TYPE_DRAGON;
-                            break;
+		if((u16)get_item_extra_param(battle_participants[bank_attacker].held_item) == 1)//PLATE CHECK
+		    {
+                	switch (get_item_effect(bank_attacker,1))
+	                    {
+	                        case ITEM_EFFECT_DRAGONFANG://DRACOPLATE
+        	                    move_type=TYPE_DRAGON;
+                	            break;
 
-                        case ITEM_EFFECT_DREADPLATE:
-                            move_type=TYPE_DARK;
-                            break;
+	                        case ITEM_EFFECT_BLACKGLASSES://DREADPLATE
+	                            move_type=TYPE_DARK;
+	                            break;
 
-                        case ITEM_EFFECT_EARTHPLATE:
-                            move_type=TYPE_GROUND;
-                            break;
+	                        case ITEM_EFFECT_SOFTSAND://EARTHPLATE
+	                            move_type=TYPE_GROUND;
+	                            break;
 
-                        case ITEM_EFFECT_FISTPLATE:
-                            move_type=TYPE_FIGHTING;
-                            break;
+	                        case ITEM_EFFECT_BLACKBELT://FISTPLATE
+	                            move_type=TYPE_FIGHTING;
+	                            break;
 
-                        case ITEM_EFFECT_FLAMEPLATE:
-                            move_type=TYPE_FIRE;
-                            break;
+	                        case ITEM_EFFECT_CHARCOAL://FLAMEPLATE
+	                            move_type=TYPE_FIRE;
+	                            break;
 
-                        case ITEM_EFFECT_ICICLEPLATE:
-                            move_type=TYPE_ICE;
-                            break;
+	                        case ITEM_EFFECT_NEVERMELTICE://ICICLEPLATE
+	                            move_type=TYPE_ICE;
+	                            break;
 
-                        case ITEM_EFFECT_INSECTPLATE:
-                            move_type=TYPE_BUG;
-                            break;
+	                        case ITEM_EFFECT_SILVERPOWDER://INSECTPLATE
+	                            move_type=TYPE_BUG;
+	                            break;
 
-                        case ITEM_EFFECT_IRONPLATE:
-                            move_type=TYPE_STEEL;
-                            break;
+	                        case ITEM_EFFECT_METALCOAT://IRONPLATE
+	                            move_type=TYPE_STEEL;
+	                            break;
 
-                        case ITEM_EFFECT_MEADOWPLATE:
-                            move_type=TYPE_GRASS;
-                            break;
+	                        case ITEM_EFFECT_MIRACLESEED://MEADOWPLATE
+	                            move_type=TYPE_GRASS;
+	                            break;
 
-                        case ITEM_EFFECT_MINDPLATE:
-                            move_type=TYPE_PSYCHIC;
-                            break;
+	                        case ITEM_EFFECT_TWISTEDSPOON://MINDPLATE
+	                            move_type=TYPE_PSYCHIC;
+	                            break;
 
-                        case ITEM_EFFECT_PIXIEPLATE:
-                            move_type=TYPE_FAIRY;
-                            break;
+	                        case ITEM_EFFECT_PIXIEPLATE:
+	                            move_type=TYPE_FAIRY;
+	                            break;
 
-                        case ITEM_EFFECT_SKYPLATE:
-                            move_type=TYPE_FLYING;
-                            break;
+	                        case ITEM_EFFECT_SHARPBEAK://SKYPLATE
+	                            move_type=TYPE_FLYING;
+	                            break;
 
-                        case ITEM_EFFECT_SPLASHPLATE:
-                            move_type=TYPE_WATER;
-                            break;
+	                        case ITEM_EFFECT_MYSTICWATER://SPLASHPLATE
+	                            move_type=TYPE_WATER;
+	                            break;
 
-                        case ITEM_EFFECT_SPOOKYPLATE:
-                            move_type=TYPE_GHOST;
-                            break;
+	                        case ITEM_EFFECT_SPELLTAG://SPOOKYPLATE
+	                            move_type=TYPE_GHOST;
+	                            break;
 
-                        case ITEM_EFFECT_STONEPLATE:
-                            move_type=TYPE_ROCK;
-                            break;
+	                        case ITEM_EFFECT_HARDSTONE://STONEPLATE
+	                            move_type=TYPE_ROCK;
+	                            break;
 
-                        case ITEM_EFFECT_TOXICPLATE:
-                            move_type=TYPE_POISON;
-                            break;
+	                        case ITEM_EFFECT_POISONBARB://TOXICPLATE
+	                            move_type=TYPE_POISON;
+	                            break;
 
-                        case ITEM_EFFECT_ZAPPLATE:
-                            move_type=TYPE_ELECTRIC;
-                            break;
+	                        case ITEM_EFFECT_MAGNET://ZAPPLATE
+	                            move_type=TYPE_ELECTRIC;
+	                            break;
 
-                        default:
-                            move_type=TYPE_NORMAL;
-                            break;
-                    }
+	                        default:
+	                            move_type=TYPE_NORMAL;
+	                            break;
+	                    }
+		    }
+		else
+		    {
+                	move_type=TYPE_NORMAL;
+		    }
             }
             break;
         case MOVE_TECHNO_BLAST:
                 {
-                    switch(get_item_effect(bank_attacker,1))
-                    {
-                        case ITEM_EFFECT_DOUSEDRIVE:
-                            move_type=TYPE_WATER;
-                            break;
+		if(get_item_effect(bank_attacker,1) == ITEM_EFFECT_DRIVES)
+		    {
+                	switch ((u16)get_item_extra_param(battle_participants[bank_attacker].held_item))
+	                    {
+	                        case 1://DOUSEDRIVE
+        	                    move_type=TYPE_WATER;
+                	            break;
 
-                        case ITEM_EFFECT_BURNDRIVE:
-                            move_type=TYPE_FIRE;
-                            break;
+	                        case 2://BURNDRIVE
+	                            move_type=TYPE_FIRE;
+	                            break;
 
-                        case ITEM_EFFECT_CHILLDRIVE:
-                            move_type=TYPE_ICE;
-                            break;
+	                        case 3://CHILLDRIVE
+	                            move_type=TYPE_ICE;
+	                            break;
 
-                        case ITEM_EFFECT_SHOCKDRIVE:
-                            move_type=TYPE_ELECTRIC;
-                            break;
+	                        case 4://SHOCKDRIVE
+	                            move_type=TYPE_ELECTRIC;
+	                            break;
 
-                        default:
-                            move_type = TYPE_NORMAL;
-                            break;
-                    }
+	                        default:
+	                            move_type=TYPE_NORMAL;
+	                            break;
+	                    }
+		    }
+		else
+		    {
+                	move_type=TYPE_NORMAL;
+		    }
             }
             break;
         default:
