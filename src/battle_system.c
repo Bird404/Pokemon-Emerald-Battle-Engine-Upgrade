@@ -6,6 +6,7 @@
 #include "static_references.h"
 #include "new_battle_struct.h"
 
+bool load_weather_from_overworld();
 bool handle_primal_reversion(u8 bank);
 u8 check_ability(u8 bank, u8 ability);
 u8 change_stats(s8 arg1, s8 arg2, s8 arg3, void* battlescript_if_fails);
@@ -525,6 +526,11 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
     switch (switch_id)
     {
     case 0: //switch-in abilities
+        if(special_cases_argument==0xFF)
+        {
+            effect=load_weather_from_overworld();
+            break;
+        }
         if(status3[bank].switchinlock)
             break;
         if(handle_primal_reversion(bank))

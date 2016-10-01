@@ -87,6 +87,7 @@ u8 b_load_sprite(u8 bank);
 void update_bank_sprite(u8 bank);
 void bank_sprite_sth(u8 bank);
 u8 get_poke_ability(struct pokemon* poke);
+u8 get_overworld_weather();
 
 u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);

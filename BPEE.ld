@@ -110,6 +110,7 @@ terrain_to_type_table = 0x0831C483;
 some_strings_table =  0x085CC834;
 protect_chance_table = 0x0831C3D8;
 
+get_overworld_weather = 0x80AC30C|1;
 play_sound = 0x080A37A4|1;
 bc_bs_executer = 0x0803D818|1;
 prepare_setattributes_in_battle = 0x08033900|1;
