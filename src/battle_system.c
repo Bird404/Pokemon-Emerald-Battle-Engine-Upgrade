@@ -6,6 +6,7 @@
 #include "static_references.h"
 #include "new_battle_struct.h"
 
+bool handle_primal_reversion(u8 bank);
 u8 check_ability(u8 bank, u8 ability);
 u8 change_stats(s8 arg1, s8 arg2, s8 arg3, void* battlescript_if_fails);
 void statustoeffect();
@@ -526,6 +527,11 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
     case 0: //switch-in abilities
         if(status3[bank].switchinlock)
             break;
+        if(handle_primal_reversion(bank))
+        {
+            effect=1;
+            break;
+        }
         u8 dontlock=0;
         switch (last_used_ability)
         {

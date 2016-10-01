@@ -186,6 +186,8 @@ u8 mummy_text[] = {0xFD, 15, 0xB4, 0xE7, 0, 0xD5, 0xD6, 0xDD, 0xE0, 0xDD, 0xE8, 
 /*0x20D*/ u8 statushealpar_text[] = {0xFD, 0, Space, w_, a_, s_, Space, c_, u_, r_, e_, d_, Space, o_, f_, JumpLine, p_, a_, r_, a_, l_, y_, s_, i_, s_, Exclam, 0xFF};
 /*0x20E*/ u8 statushealslp_text[] = {0xFD, 0, Space, w_, o_, k_, e_, Space, u_, p_, Exclam, 0xFF};
 /*0x20F*/ u8 statushealfrz_text[] = {0xFD, 0, Space, t_, h_, a_, w_, e_, d_, Space, o_, u_, t_, Exclam, 0xFF};
+/*0x210*/ u8 primal_reversion_text[] = {BuffCharac, 0x13, Apos, s_, Space, P_, r_, i_, m_, a_, l_, Space, R_, e_, v_, e_, r_, s_, i_, o_, n_, Exclam, JumpLine, I_, t_,
+                                Space, r_, e_, v_, e_, r_, t_, e_, d_, Space, t_, o_, Space, i_, t_, s_, Space, p_, r_, i_, m_, a_, l_, Space, f_, o_, r_, m_, Exclam, Termin};
 
 void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activation_text, &heavyrain_activation_text, &mysticalaircurrent_activation_text, &forewarn_text, &slowstart_text, &anticipation_text, &dryskin_damage_text, &solarpower_text, &harvest_text, &healer_text, &pickup_text, &moldbreaker_text, &turboblaze_text, &terravolt_text, &downloadatk_text,
 &downloadspatk_text, &absorbabilityboost_text , &absorbabilityimmune_text, &userteam_text/*0x190*/, &foeteam_text/*0x191*/,
@@ -206,7 +208,7 @@ void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activ
 &shadowforce_text, &mistyterrain_text, &grassyterrain_text, &electricterrain_text, &aquaring_text, &aquaringheal_text, &assaultvest_text,
 &gravityprevents2_text, &healblockprevents2_text , &let_it_move_first_text, &mega_evolved_text, &mega_trigger_text, &fervent_trigger_text,
 &quash_text, &allyswitch_text, &topsyturvy_text, &bestow_text, &statushealpoison_text, &statushealburn_text, &statushealpar_text,
-&statushealslp_text, &statushealfrz_text};
+&statushealslp_text, &statushealfrz_text, &primal_reversion_text};
 
 void battle_string_loader(u16 string_id)
 {

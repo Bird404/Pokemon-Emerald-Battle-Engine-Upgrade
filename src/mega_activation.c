@@ -76,7 +76,16 @@ u16 get_mega_species(u8 bank, u8 chosen_method)
                 }
                 break;
             case 0xFD: //primal
-                target_species = evolution_table->poke_evolutions[species].evos[i].poke;
+                {
+                    if(get_item_effect(bank, 0) == ITEM_EFFECT_PRIMALORB)
+                    {
+                        u16 orb_target_species = (u16) get_item_extra_param(battle_participants[bank].held_item);
+                        if(evolution_table->poke_evolutions[species].evos[i].poke==orb_target_species)
+                        {
+                            target_species = orb_target_species;
+                        }
+                    }
+                }
                 break;
             case 0xFC: //fervent wish mega
                 {

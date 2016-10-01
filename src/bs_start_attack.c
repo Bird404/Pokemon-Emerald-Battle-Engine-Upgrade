@@ -201,123 +201,105 @@ void set_attacking_move_type()
             break;
         case MOVE_JUDGMENT:
             {
-		if((u16)get_item_extra_param(battle_participants[bank_attacker].held_item) == 1)//PLATE CHECK
-		    {
+                if((u16)get_item_extra_param(battle_participants[bank_attacker].held_item) == 1)//PLATE CHECK
+                {
                 	switch (get_item_effect(bank_attacker,1))
-	                    {
-	                        case ITEM_EFFECT_DRAGONFANG://DRACOPLATE
-        	                    move_type=TYPE_DRAGON;
-                	            break;
+                    {
+                    case ITEM_EFFECT_DRAGONFANG://DRACOPLATE
+                        move_type=TYPE_DRAGON;
+                        break;
 
-	                        case ITEM_EFFECT_BLACKGLASSES://DREADPLATE
-	                            move_type=TYPE_DARK;
-	                            break;
+                    case ITEM_EFFECT_BLACKGLASSES://DREADPLATE
+                        move_type=TYPE_DARK;
+                        break;
 
-	                        case ITEM_EFFECT_SOFTSAND://EARTHPLATE
-	                            move_type=TYPE_GROUND;
-	                            break;
+                    case ITEM_EFFECT_SOFTSAND://EARTHPLATE
+                        move_type=TYPE_GROUND;
+                        break;
 
-	                        case ITEM_EFFECT_BLACKBELT://FISTPLATE
-	                            move_type=TYPE_FIGHTING;
-	                            break;
+                    case ITEM_EFFECT_BLACKBELT://FISTPLATE
+                        move_type=TYPE_FIGHTING;
+                        break;
 
-	                        case ITEM_EFFECT_CHARCOAL://FLAMEPLATE
-	                            move_type=TYPE_FIRE;
-	                            break;
+                    case ITEM_EFFECT_CHARCOAL://FLAMEPLATE
+                        move_type=TYPE_FIRE;
+                        break;
 
-	                        case ITEM_EFFECT_NEVERMELTICE://ICICLEPLATE
-	                            move_type=TYPE_ICE;
-	                            break;
+                    case ITEM_EFFECT_NEVERMELTICE://ICICLEPLATE
+                        move_type=TYPE_ICE;
+                        break;
 
-	                        case ITEM_EFFECT_SILVERPOWDER://INSECTPLATE
-	                            move_type=TYPE_BUG;
-	                            break;
+                    case ITEM_EFFECT_SILVERPOWDER://INSECTPLATE
+                        move_type=TYPE_BUG;
+                        break;
 
-	                        case ITEM_EFFECT_METALCOAT://IRONPLATE
-	                            move_type=TYPE_STEEL;
-	                            break;
+                    case ITEM_EFFECT_METALCOAT://IRONPLATE
+                        move_type=TYPE_STEEL;
+                        break;
 
-	                        case ITEM_EFFECT_MIRACLESEED://MEADOWPLATE
-	                            move_type=TYPE_GRASS;
-	                            break;
+                    case ITEM_EFFECT_MIRACLESEED://MEADOWPLATE
+                        move_type=TYPE_GRASS;
+                        break;
 
-	                        case ITEM_EFFECT_TWISTEDSPOON://MINDPLATE
-	                            move_type=TYPE_PSYCHIC;
-	                            break;
+                    case ITEM_EFFECT_TWISTEDSPOON://MINDPLATE
+                        move_type=TYPE_PSYCHIC;
+                        break;
 
-	                        case ITEM_EFFECT_PIXIEPLATE:
-	                            move_type=TYPE_FAIRY;
-	                            break;
+                    case ITEM_EFFECT_PIXIEPLATE:
+                        move_type=TYPE_FAIRY;
+                        break;
 
-	                        case ITEM_EFFECT_SHARPBEAK://SKYPLATE
-	                            move_type=TYPE_FLYING;
-	                            break;
+                    case ITEM_EFFECT_SHARPBEAK://SKYPLATE
+                        move_type=TYPE_FLYING;
+                        break;
 
-	                        case ITEM_EFFECT_MYSTICWATER://SPLASHPLATE
-	                            move_type=TYPE_WATER;
-	                            break;
+                    case ITEM_EFFECT_MYSTICWATER://SPLASHPLATE
+                        move_type=TYPE_WATER;
+                        break;
 
-	                        case ITEM_EFFECT_SPELLTAG://SPOOKYPLATE
-	                            move_type=TYPE_GHOST;
-	                            break;
+                    case ITEM_EFFECT_SPELLTAG://SPOOKYPLATE
+                        move_type=TYPE_GHOST;
+                        break;
 
-	                        case ITEM_EFFECT_HARDSTONE://STONEPLATE
-	                            move_type=TYPE_ROCK;
-	                            break;
+                    case ITEM_EFFECT_HARDSTONE://STONEPLATE
+                        move_type=TYPE_ROCK;
+                        break;
 
-	                        case ITEM_EFFECT_POISONBARB://TOXICPLATE
-	                            move_type=TYPE_POISON;
-	                            break;
+                    case ITEM_EFFECT_POISONBARB://TOXICPLATE
+                        move_type=TYPE_POISON;
+                        break;
 
-	                        case ITEM_EFFECT_MAGNET://ZAPPLATE
-	                            move_type=TYPE_ELECTRIC;
-	                            break;
-
-	                        default:
-	                            move_type=TYPE_NORMAL;
-	                            break;
-	                    }
+                    case ITEM_EFFECT_MAGNET://ZAPPLATE
+                        move_type=TYPE_ELECTRIC;
+                        break;
+                    }
+                }
 		    }
-		else
-		    {
-                	move_type=TYPE_NORMAL;
-		    }
-            }
             break;
         case MOVE_TECHNO_BLAST:
+            {
+                if(get_item_effect(bank_attacker,1) == ITEM_EFFECT_DRIVES)
                 {
-		if(get_item_effect(bank_attacker,1) == ITEM_EFFECT_DRIVES)
-		    {
                 	switch ((u16)get_item_extra_param(battle_participants[bank_attacker].held_item))
-	                    {
-	                        case 1://DOUSEDRIVE
-        	                    move_type=TYPE_WATER;
-                	            break;
+                    {
+                    case 1://DOUSEDRIVE
+                        move_type=TYPE_WATER;
+                        break;
 
-	                        case 2://BURNDRIVE
-	                            move_type=TYPE_FIRE;
-	                            break;
+                    case 2://BURNDRIVE
+                        move_type=TYPE_FIRE;
+                        break;
 
-	                        case 3://CHILLDRIVE
-	                            move_type=TYPE_ICE;
-	                            break;
+                    case 3://CHILLDRIVE
+                        move_type=TYPE_ICE;
+                        break;
 
-	                        case 4://SHOCKDRIVE
-	                            move_type=TYPE_ELECTRIC;
-	                            break;
-
-	                        default:
-	                            move_type=TYPE_NORMAL;
-	                            break;
-	                    }
-		    }
-		else
-		    {
-                	move_type=TYPE_NORMAL;
-		    }
+                    case 4://SHOCKDRIVE
+                        move_type=TYPE_ELECTRIC;
+                        break;
+                    }
+                }
             }
-            break;
-        default:
             break;
         }
         u8 ate=0;
@@ -400,37 +382,40 @@ u8 check_mega_evo(u8 bank)
     }
     u8 banks_side = is_bank_from_opponent_side(bank);
     u8 bank_mega_mode=0;
-    if(bank==0)
+    if(mega_species)
     {
-        bank_mega_mode=new_battlestruct.ptr->mega_related.user_trigger;
-        if(bank_mega_mode)
+        if(bank==0)
         {
-            if(!is_multi_battle())
+            bank_mega_mode=new_battlestruct.ptr->mega_related.user_trigger;
+            if(bank_mega_mode)
+            {
+                if(!is_multi_battle())
+                {
+                    new_battlestruct.ptr->mega_related.evo_happened_pbs|=0x5;
+                }
+                else
+                {
+                    new_battlestruct.ptr->mega_related.evo_happened_pbs|=0x1;
+                }
+                objects[new_battlestruct.ptr->mega_related.trigger_id].private[ANIM_STATE]=DISABLE;
+            }
+        }
+        else if(bank==2 && !is_multi_battle())
+        {
+            bank_mega_mode=new_battlestruct.ptr->mega_related.ally_trigger;
+            if(bank_mega_mode)
             {
                 new_battlestruct.ptr->mega_related.evo_happened_pbs|=0x5;
+                objects[new_battlestruct.ptr->mega_related.trigger_id].private[ANIM_STATE]=DISABLE;
             }
-            else
+        }
+        else
+        {
+            bank_mega_mode=ai_mega_mode;
+            if(bank_mega_mode)
             {
-                new_battlestruct.ptr->mega_related.evo_happened_pbs|=0x1;
+                (new_battlestruct.ptr->mega_related.evo_happened_pbs)|=bits_table[bank];
             }
-            objects[new_battlestruct.ptr->mega_related.trigger_id].private[ANIM_STATE]=DISABLE;
-        }
-    }
-    else if(bank==2 && !is_multi_battle())
-    {
-        bank_mega_mode=new_battlestruct.ptr->mega_related.ally_trigger;
-        if(bank_mega_mode)
-        {
-            new_battlestruct.ptr->mega_related.evo_happened_pbs|=0x5;
-            objects[new_battlestruct.ptr->mega_related.trigger_id].private[ANIM_STATE]=DISABLE;
-        }
-    }
-    else
-    {
-        bank_mega_mode=ai_mega_mode;
-        if(bank_mega_mode)
-        {
-            (new_battlestruct.ptr->mega_related.evo_happened_pbs)|=bits_table[bank];
         }
     }
     if(mega_species && bank_mega_mode)
@@ -457,7 +442,7 @@ u8 check_mega_evo(u8 bank)
         struct basestat_data *pokemon_table = (void *)(poke_stat_table_ptr_ptr);
         attacker_struct->type1 = pokemon_table->poke_stats[mega_species].type1;
         attacker_struct->type2 = pokemon_table->poke_stats[mega_species].type2;
-        // The ability 1 and ability 2 of the species mega in the base stat table should both be set and
+        // The ability 1 and ability 2 of the mega species in the base stat table should both be set and
         // have the same value.
         attacker_struct->ability_id = pokemon_table->poke_stats[mega_species].ability1;
 
@@ -471,7 +456,6 @@ u8 check_mega_evo(u8 bank)
         battle_text_buff1[2] = mega_species;
         battle_text_buff1[3] = mega_species >> 8;
         battle_text_buff1[4] = 0xFF;
-        //buffer for mega ring
 
         if(bank_mega_mode==2)
         {
@@ -479,6 +463,7 @@ u8 check_mega_evo(u8 bank)
         }
         else
         {
+            //buffer for mega ring
             last_used_item = attacker_struct->held_item;
             u16 MEGA_RING = KEYSTONE;
             battle_text_buff2[0] = 0xFD;
