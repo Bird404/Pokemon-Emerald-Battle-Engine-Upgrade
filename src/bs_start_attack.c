@@ -6,9 +6,9 @@
 #include "new_battle_struct.h"
 #include "static_references.h"
 
-u8 weather_abilities_effect();
-u8 check_mega_condition(u8 bank);
 u32 get_item_extra_param(u16 item);
+u16 get_mega_species(u8 bank, u8 chosen_method);
+u8 weather_abilities_effect();
 u8 find_move_in_table(u16 move, u16 table_ptr[]);
 
 u8 is_bank_present(u8 bank)
@@ -367,20 +367,6 @@ void* get_move_battlescript_ptr(u16 move)
     return (void*) *ptr_to_movescript;
 }
 
-u16 get_mega_species(u16 species) //0xFB = mega evo, 0xFC = primal reversion, 0xFD = raquaza mego evo, 0xFF = revert to normal state
-{
-    struct evolution_data *evolution_table= (void *)(evo_table_ptr_ptr);
-    for (u8 i = 0; i < NUM_OF_EVOS; i++)
-    {
-        u8 method = evolution_table->poke_evolutions[species].evos[i].method;
-        if (method == 0xFB ||  method == 0xFC)
-        {
-            return evolution_table->poke_evolutions[species].evos[i].poke;
-        }
-    }
-    return 0;
-}
-
 u8 mega_evolution_script[] = {0x83, 88, 0, 0x10, 0x05, 0x02, 0x45, 1, 0x1E, 0, 0, 0, 0, 0x3A, 0x83, 89, 0, 0x10, 0x04, 0x02, 0x83, 0x0, 0x0, 0x3F};
 u8 fervent_evolution_script[] = {0x83, 88, 0, 0x10, 0x06, 0x02, 0x45, 1, 0x1E, 0, 0, 0, 0, 0x3A, 0x83, 89, 0, 0x10, 0x04, 0x02, 0x83, 0x0, 0x0, 0x3F};
 
@@ -398,13 +384,26 @@ void reset_indicators_height()
 u8 check_mega_evo(u8 bank)
 {
     struct battle_participant* attacker_struct = &battle_participants[bank];
-    u16 mega_species = get_mega_species(attacker_struct->poke_species);
+    u8 ai_mega_mode=0;
+    u16 mega_species = get_mega_species(bank,0xFB);
+    if (mega_species)
+    {
+        ai_mega_mode=1;
+    }
+    else
+    {
+        mega_species = get_mega_species(bank,0xFC);
+        if(mega_species)
+        {
+            ai_mega_mode = 2;
+        }
+    }
     u8 banks_side = is_bank_from_opponent_side(bank);
-    u8 can_mega_evolve=0;
+    u8 bank_mega_mode=0;
     if(bank==0)
     {
-        can_mega_evolve=new_battlestruct.ptr->mega_related.user_trigger;
-        if(can_mega_evolve)
+        bank_mega_mode=new_battlestruct.ptr->mega_related.user_trigger;
+        if(bank_mega_mode)
         {
             if(!is_multi_battle())
             {
@@ -419,8 +418,8 @@ u8 check_mega_evo(u8 bank)
     }
     else if(bank==2 && !is_multi_battle())
     {
-        can_mega_evolve=new_battlestruct.ptr->mega_related.ally_trigger;
-        if(can_mega_evolve)
+        bank_mega_mode=new_battlestruct.ptr->mega_related.ally_trigger;
+        if(bank_mega_mode)
         {
             new_battlestruct.ptr->mega_related.evo_happened_pbs|=0x5;
             objects[new_battlestruct.ptr->mega_related.trigger_id].private[ANIM_STATE]=DISABLE;
@@ -428,13 +427,13 @@ u8 check_mega_evo(u8 bank)
     }
     else
     {
-        can_mega_evolve=check_mega_condition(bank);
-        if(can_mega_evolve)
+        bank_mega_mode=ai_mega_mode;
+        if(bank_mega_mode)
         {
             (new_battlestruct.ptr->mega_related.evo_happened_pbs)|=bits_table[bank];
         }
     }
-    if(mega_species && can_mega_evolve)
+    if(mega_species && bank_mega_mode)
     {
         struct pokemon* poke_address;
         if (banks_side == 1)
@@ -472,22 +471,21 @@ u8 check_mega_evo(u8 bank)
         battle_text_buff1[2] = mega_species;
         battle_text_buff1[3] = mega_species >> 8;
         battle_text_buff1[4] = 0xFF;
-        last_used_item = attacker_struct->held_item;
-
         //buffer for mega ring
-        u16 MEGA_RING = KEYSTONE;
-        battle_text_buff2[0] = 0xFD;
-        battle_text_buff2[1] = 10;
-        battle_text_buff2[2] = MEGA_RING;
-        battle_text_buff2[3] = MEGA_RING >> 8;
-        battle_text_buff2[4] = 0xFF;
 
-        if(can_mega_evolve==2)
+        if(bank_mega_mode==2)
         {
             execute_battle_script(&fervent_evolution_script);
         }
         else
         {
+            last_used_item = attacker_struct->held_item;
+            u16 MEGA_RING = KEYSTONE;
+            battle_text_buff2[0] = 0xFD;
+            battle_text_buff2[1] = 10;
+            battle_text_buff2[2] = MEGA_RING;
+            battle_text_buff2[3] = MEGA_RING >> 8;
+            battle_text_buff2[4] = 0xFF;
             execute_battle_script(&mega_evolution_script);
         }
 
@@ -587,6 +585,14 @@ void bs_start_attack()
             if (mode==1)
                 set_attacking_move_type();
             bank_target=get_target_of_move(current_move,0,0);
+        }
+        if(!is_bank_from_opponent_side(bank_attacker))
+        {
+            battle_trace.user_team_move = current_move;
+        }
+        else
+        {
+            battle_trace.ai_team_move = current_move;
         }
 
         battlescripts_curr_instruction = get_move_battlescript_ptr(current_move);

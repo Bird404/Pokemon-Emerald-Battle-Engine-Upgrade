@@ -727,6 +727,28 @@ struct poke_basestats{
     u8 padding2;
 };
 
+struct battle_info_struct
+{
+    u8 user_team_faint_counter;
+    u8 ai_team_faint_counter;
+    u8 field2;
+    u8 field3;
+    u8 field4;
+    u8 field5;
+    u16 user_team_species;
+    u8 pokemon_name_string_1[11];
+    u8 battle_turn_counter;
+    u8 pokemon_name_string_2[11];
+    u8 pad;
+    u16 logged;
+    u16 user_team_move;
+    u16 ai_team_move;
+    u16 ai_team_species;
+    u16 caught_species;
+};
+
+extern struct battle_info_struct battle_trace;
+
 struct item_struct
 {
     u8 name[14];

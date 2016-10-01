@@ -97,6 +97,7 @@ moves_to_choose_pbs = 0x03005D78;
 move_selection_cursor_pbs = 0x020244B0;
 
 b_c = 0x3005D04;
+battle_trace = 0x3005D10;
 
 poison_status_flag = 0x0831BC70;
 sleep_status_flag = 0x0831BC78;

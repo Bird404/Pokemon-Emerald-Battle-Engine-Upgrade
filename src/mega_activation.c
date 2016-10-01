@@ -6,8 +6,6 @@
 #include "new_battle_struct.h"
 #include "static_references.h"
 
-u16 get_mega_species(u16 species);
-
 void reset_indicators_height_except_bank(u8  bank)
 {
     struct mega_related* mega = &new_battlestruct.ptr->mega_related;
@@ -53,63 +51,83 @@ u32 get_item_extra_param(u16 item)
     return item_set->items[item].extra_param;
 }
 
-u8 check_fervent_mega(u8 bank)
+u16 get_mega_species(u8 bank, u8 chosen_method)
 {
     u16 species = battle_participants[bank].poke_species;
-    u16 fervent_move = 0;
+    u16 target_species=0;
     struct evolution_data *evolution_table= (void *)(evo_table_ptr_ptr);
     for (u8 i = 0; i < NUM_OF_EVOS; i++)
     {
         u8 method = evolution_table->poke_evolutions[species].evos[i].method;
-        if (method == 0xFC)
+        if (method == chosen_method)
         {
-            fervent_move = evolution_table->poke_evolutions[species].evos[i].paramter;
-            break;
-        }
-    }
-    if(fervent_move)
-    {
-        for(u8 i=0; i<4; i++)
-        {
-            if(battle_participants[bank].moves[i]==fervent_move)
+            switch(method)
             {
-                return 1;
+            case 0xFB: // regular mega
+                {
+                    if(get_item_effect(bank, 0) == ITEM_EFFECT_MEGASTONE)
+                    {
+                        u16 stone_target_species = (u16) get_item_extra_param(battle_participants[bank].held_item);
+                        if(evolution_table->poke_evolutions[species].evos[i].poke==stone_target_species)
+                        {
+                            target_species = stone_target_species;
+                        }
+                    }
+                }
+                break;
+            case 0xFD: //primal
+                target_species = evolution_table->poke_evolutions[species].evos[i].poke;
+                break;
+            case 0xFC: //fervent wish mega
+                {
+                    u8 fervent_move = evolution_table->poke_evolutions[species].evos[i].paramter;
+                    if (fervent_move)
+                    {
+                        for(u8 j=0; j<4; j++)
+                        {
+                            if(battle_participants[bank].moves[j]==fervent_move)
+                            {
+                                target_species = evolution_table->poke_evolutions[species].evos[i].poke;
+                                break;
+                            }
+                        }
+                    }
+                }
+                break;
             }
         }
+        if(target_species)
+            break;
     }
-    return 0;
-}
-
-u8 check_mega_condition(u8 bank)
-{
-    u16 mega_species = get_mega_species(battle_participants[bank].poke_species);
-    if (get_item_effect(bank, 0) == ITEM_EFFECT_MEGASTONE && mega_species &&
-        ((u16)get_item_extra_param(battle_participants[bank].held_item)) == mega_species)
-        return 1;
-
-    if (mega_species && check_fervent_mega(bank))
-        return 2;
-    return 0;
+    return target_species;
 }
 
 u8 can_set_mega_trigger(u8 bank)
 {
     struct mega_related* mega=&new_battlestruct.ptr->mega_related;
-    u8 res=0;
+    bool res=0;
+    int mega_mode=0;
     if(bank==0 && !(mega->user_trigger) &&
        ((is_multi_battle() && !(mega->evo_happened_pbs&0x1)) || !(mega->evo_happened_pbs&0x5)))
     {
-        res=1;
+        res=true;
     }
     else if(bank==2 && !(mega->user_trigger) && !(mega->ally_trigger) && !(mega->evo_happened_pbs&0x5))
     {
-        res=1;
+        res=true;
     }
-    if(res && checkitem(KEYSTONE, 1))
+    if(res &&/*checkitem(KEYSTONE, 1) &&*/ (get_mega_species(bank,0xFB) || get_mega_species(bank,0xFC)))
     {
-        return check_mega_condition(bank);
+        if (get_mega_species(bank,0xFB))
+        {
+            mega_mode=1;
+        }
+        else if (get_mega_species(bank,0xFC))
+        {
+            mega_mode=2;
+        }
     }
-    return 0;
+    return mega_mode;
 }
 
 void set_mega_triggers_for_user_team(u8 bank)
@@ -122,6 +140,7 @@ void set_mega_triggers_for_user_team(u8 bank)
         play_sound(2);
     }
 }
+
 
 void revert_mega_to_normalform(u8 teamID, u8 opponent_side)
 {

@@ -30,8 +30,7 @@ void free_new_struct()
     {
         for (u8 i = 0; i < 6; i++)
         {
-            if((new_battlestruct.ptr->mega_related.party_mega_check)&bits_table[i])
-                revert_mega_to_normalform(i, 0);
+            revert_mega_to_normalform(i, 0);
         }
     }
     u32 *ptr;

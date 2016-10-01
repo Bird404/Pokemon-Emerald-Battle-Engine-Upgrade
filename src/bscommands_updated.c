@@ -2355,11 +2355,7 @@ void atk56_prepare_fainting_cry()
     mark_buffer_bank_for_execution(bank);
     u8 side = is_bank_from_opponent_side(bank);
     u8 id_by_side=battle_team_id_by_side[bank];
-    if ((side==0 && (new_battlestruct.ptr->mega_related.party_mega_check&bits_table[id_by_side]))
-        || (side==1 && (new_battlestruct.ptr->mega_related.ai_party_mega_check&bits_table[id_by_side])))
-    {
-        revert_mega_to_normalform(id_by_side, side);
-    }
+    revert_mega_to_normalform(id_by_side, side);
     new_battlestruct.ptr->side_affecting[side].ally_fainted_last_turn = 2;
 }
 
