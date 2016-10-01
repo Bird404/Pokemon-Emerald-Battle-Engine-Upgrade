@@ -15,6 +15,7 @@
 
 u8 is_of_type(u8 bank, u8 type);
 u8 protect_affecting_moves(u16 move);
+u8 weather_abilities_effect();
 
 void ability_affects_stat_reduction(u8 bank, void* battlescript_to_set, void* battlescript_to_push, u8 ability_record)
 {
@@ -63,6 +64,9 @@ u8 change_stats(struct stat stat_change, u8 stat, struct failbank bank, void* ba
         active_bank = bank_target;
         battle_scripting.active_bank = bank_target;
     }
+    if (current_move == MOVE_GROWTH && (battle_weather.flags.harsh_sun || battle_weather.flags.sun || battle_weather.flags.permament_sun) && weather_abilities_effect())
+        stat_change.how_much *= 2;
+
     battle_text_buff1[0] = 0xFD;
     battle_text_buff1[1] = 5;
     battle_text_buff1[2] = stat;
