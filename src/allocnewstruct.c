@@ -26,12 +26,9 @@ void free(u32 address);
 void free_new_struct()
 {
     //revert player's megas to normal form
-    if(new_battlestruct.ptr->mega_related.evo_happened_pbs&0x5)
+    for (u8 i = 0; i < 6; i++)
     {
-        for (u8 i = 0; i < 6; i++)
-        {
-            revert_mega_to_normalform(i, 0);
-        }
+        revert_mega_to_normalform(i, 0);
     }
     u32 *ptr;
     ptr=(u32 *)(&battle_stuff_ptr);

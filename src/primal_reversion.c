@@ -18,6 +18,7 @@ bool handle_primal_reversion(u8 bank)
     if(primal_species)
     {
         perform_reversion = true;
+        battle_scripting.active_bank = bank;
         struct battle_participant* bank_struct = &battle_participants[bank];
         u8 banks_side = is_bank_from_opponent_side(bank);
         struct pokemon* poke_address;
