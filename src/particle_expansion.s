@@ -307,6 +307,18 @@ shiny_particle_image:
 .byte 0x00, 0x08, MEGA_EVOLUTION_STONE_particle_ID, 0x28
 .word MEGA_EVOLUTION_SYMBOL_particle
 .byte 0x00, 0x02, MEGA_EVOLUTION_SYMBOL_particle_ID, 0x28
+.word PRIMAL_REVERSION_CHARGE_particle
+.byte 0x80, 0x01, ALPHA_REVERSION_CHARGE_particle_ID, 0x28
+.word PRIMAL_REVERSION_STONE_particle
+.byte 0x00, 0x08, ALPHA_REVERSION_STONE_particle_ID, 0x28
+.word ALPHA_REVERSION_SYMBOL_particle
+.byte 0x00, 0x02, ALPHA_REVERSION_SYMBOL_particle_ID, 0x28
+.word PRIMAL_REVERSION_CHARGE_particle
+.byte 0x80, 0x01, OMEGA_REVERSION_CHARGE_particle_ID, 0x28
+.word PRIMAL_REVERSION_STONE_particle
+.byte 0x00, 0x08, OMEGA_REVERSION_STONE_particle_ID, 0x28
+.word OMEGA_REVERSION_SYMBOL_particle
+.byte 0x00, 0x02, OMEGA_REVERSION_SYMBOL_particle_ID, 0x28
 .word HAMMER_ARM_particle
 .byte 0x00, 0x02, HAMMER_ARM_particle_ID, 0x28
 .word BRINE_particle
@@ -639,6 +651,18 @@ shiny_particle_pallet:
 .byte MEGA_EVOLUTION_STONE_particle_ID, 0x28, 0x00, 0x00
 .word MEGA_EVOLUTION_SYMBOL_palette
 .byte MEGA_EVOLUTION_SYMBOL_particle_ID, 0x28, 0x00, 0x00
+.word ALPHA_REVERSION_CHARGE_palette
+.byte ALPHA_REVERSION_CHARGE_particle_ID, 0x28, 0x00, 0x00
+.word ALPHA_REVERSION_STONE_palette
+.byte ALPHA_REVERSION_STONE_particle_ID, 0x28, 0x00, 0x00
+.word ALPHA_REVERSION_SYMBOL_palette
+.byte ALPHA_REVERSION_SYMBOL_particle_ID, 0x28, 0x00, 0x00
+.word OMEGA_REVERSION_CHARGE_palette
+.byte OMEGA_REVERSION_CHARGE_particle_ID, 0x28, 0x00, 0x00
+.word OMEGA_REVERSION_STONE_palette
+.byte OMEGA_REVERSION_STONE_particle_ID, 0x28, 0x00, 0x00
+.word OMEGA_REVERSION_SYMBOL_palette
+.byte OMEGA_REVERSION_SYMBOL_particle_ID, 0x28, 0x00, 0x00
 .byte 0xDC, 0xCD, 0xC2, 0x08, HAMMER_ARM_particle_ID, 0x28, 0x00, 0x00
 .byte 0x28, 0xB7, 0xC1, 0x08, BRINE_particle_ID, 0x28, 0x00, 0x00
 .byte 0xF4, 0x31, 0xC2, 0x08, ACUPRESSURE_particle_ID, 0x28, 0x00, 0x00
