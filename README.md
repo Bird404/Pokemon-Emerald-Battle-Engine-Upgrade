@@ -14,6 +14,8 @@ After downloading and before proceeding to install make sure that the 'add to pa
 
 - To decide the offsets where you want to insert the code:
 
+* make sure that value of PATH variable set in line 10 of the 'build' file matches that path of bin folder of devkitarm (important for non windows users).
+
 * in the 'linker.ld' file change 'ORIGIN = 0x08F00000' to whatever location you want
 
 * in the 'insert' file in the folder 'scripts' change default=0xF00000 to the same location you used before but without the bus(08-prefix)
