@@ -2639,7 +2639,7 @@ u8 can_lose_item(u8 bank, u8 stickyhold_check, u8 sticky_message)
         can_lose = 0;
     else if (item_effect == ITEM_EFFECT_GRISEOUSORB && species == POKE_GIRATINA)
         can_lose = 0;
-    else if ((item_effect == ITEM_EFFECT_BURNDRIVE || item_effect == ITEM_EFFECT_CHILLDRIVE || item_effect == ITEM_EFFECT_DOUSEDRIVE || item_effect == ITEM_EFFECT_SHOCKDRIVE) && species == POKE_GENESECT)
+    else if ((item_effect == ITEM_EFFECT_DRIVES) && species == POKE_GENESECT)
         can_lose = 0;
     else if (species == POKE_ARCEUS && is_item_a_plate(item))
         can_lose = 0;

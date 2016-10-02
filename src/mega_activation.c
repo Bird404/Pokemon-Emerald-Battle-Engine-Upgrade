@@ -40,9 +40,14 @@ void set_mega_triggers(u8 bank,u8 set_mode)
         new_battlestruct.ptr->mega_related.ally_trigger=set_mode;
 }
 
-u8 is_multi_battle()
+bool is_multi_battle()
 {
-    return 0;
+    bool is_multi=false;
+    if(battle_flags.multibattle)
+    {
+        is_multi = true;
+    }
+    return is_multi;
 }
 
 u32 get_item_extra_param(u16 item)
@@ -125,7 +130,7 @@ u8 can_set_mega_trigger(u8 bank)
     {
         res=true;
     }
-    if(res &&/*checkitem(KEYSTONE, 1) &&*/ (get_mega_species(bank,0xFB) || get_mega_species(bank,0xFC)))
+    if(res && checkitem(KEYSTONE, 1) && (get_mega_species(bank,0xFB) || get_mega_species(bank,0xFC)))
     {
         if (get_mega_species(bank,0xFB))
         {
@@ -168,6 +173,7 @@ void revert_mega_to_normalform(u8 teamID, u8 opponent_side)
         {
             can_revert = 1;
             species_to_revert = evolution_table->poke_evolutions[mega_current_species].evos[i].poke;
+            break;
         }
     }
     if (can_revert && species_to_revert)

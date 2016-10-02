@@ -8,7 +8,7 @@
 
 u16 get_mega_species(u8 bank, u8 chosen_method);
 
-u8 primal_reversion_script[] = {0x39, 0x20, 0x0, 0x45, 1, 0x1E, 0, 0, 0, 0, 0x3A, 0x83, 89, 0, 0x10, 0x10, 0x02, 0x12, 0x40, 0x0, 0x3F};
+u8 primal_reversion_script[] = {0x39, 0x20, 0x0, 0x45, 1, 0x1E, 0, 0, 0, 0, 0x3A, 0x83, 106, 0, 0x83, 89, 0, 0x10, 0x10, 0x02, 0x12, 0x40, 0x0, 0x3F};
 
 bool handle_primal_reversion(u8 bank)
 {
@@ -50,6 +50,7 @@ bool handle_primal_reversion(u8 bank)
         bank_struct->level = get_attributes(poke_address, ATTR_LEVEL, 0);
 
         execute_battle_script(&primal_reversion_script);
+        new_battlestruct.ptr->various.active_bank = bank;
     }
     return perform_reversion;
 }

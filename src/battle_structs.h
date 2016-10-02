@@ -312,6 +312,7 @@ struct status_3{
     u32 switchinlock : 1; //x80 000
     u32 unburden : 1; //x100 000 (previously trace)
     u32 phantomforce : 1; //x200 000
+    u32 focus_punch_charge : 1; //x400 000
 };
 
 extern struct status_3 status3[4];
@@ -560,6 +561,11 @@ struct battle_flags{
     u32 flagx100 : 1; //0x100
     u32 wally : 1; //0x200
     u32 roaming : 1; //0x400
+    u32 flagx800 : 1;
+    u32 flagx1000 : 1;
+    u32 flagx2000 : 1;
+    u32 flagx4000 : 1;
+    u32 multibattle : 1; //0x8000
     //more to come if needed
 };
 

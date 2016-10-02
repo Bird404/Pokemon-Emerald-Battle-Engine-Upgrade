@@ -349,8 +349,8 @@ void* get_move_battlescript_ptr(u16 move)
     return (void*) *ptr_to_movescript;
 }
 
-u8 mega_evolution_script[] = {0x83, 88, 0, 0x10, 0x05, 0x02, 0x45, 1, 0x1E, 0, 0, 0, 0, 0x3A, 0x83, 89, 0, 0x10, 0x04, 0x02, 0x83, 0x0, 0x0, 0x3F};
-u8 fervent_evolution_script[] = {0x83, 88, 0, 0x10, 0x06, 0x02, 0x45, 1, 0x1E, 0, 0, 0, 0, 0x3A, 0x83, 89, 0, 0x10, 0x04, 0x02, 0x83, 0x0, 0x0, 0x3F};
+u8 mega_evolution_script[] = {0x83, 88, 0, 0x10, 0x05, 0x02, 0x45, 1, 0x1E, 0, 0, 0, 0, 0x3A, 0x83, 106, 0, 0x83, 89, 0, 0x10, 0x04, 0x02, 0x83, 0x0, 0x0, 0x3F};
+u8 fervent_evolution_script[] = {0x83, 88, 0, 0x10, 0x06, 0x02, 0x45, 1, 0x1E, 0, 0, 0, 0, 0x3A, 0x83, 106, 0, 0x83, 89, 0, 0x10, 0x04, 0x02, 0x83, 0x0, 0x0, 0x3F};
 
 u8 is_multi_battle();
 
@@ -409,12 +409,12 @@ u8 check_mega_evo(u8 bank)
                 objects[new_battlestruct.ptr->mega_related.trigger_id].private[ANIM_STATE]=DISABLE;
             }
         }
-        else
+        else if (!(new_battlestruct.ptr->mega_related.evo_happened_pbs & bits_table[bank]))
         {
             bank_mega_mode=ai_mega_mode;
             if(bank_mega_mode)
             {
-                (new_battlestruct.ptr->mega_related.evo_happened_pbs)|=bits_table[bank];
+                (new_battlestruct.ptr->mega_related.evo_happened_pbs) |= bits_table[bank];
             }
         }
     }
@@ -485,6 +485,18 @@ u16 moveshitting_onair[] = {MOVE_TWISTER, MOVE_SKY_UPPERCUT, MOVE_WHIRLWIND, MOV
 u16 moveshitting_underground[] = {MOVE_MAGNITUDE, MOVE_EARTHQUAKE, MOVE_FISSURE, 0xFFFF};
 u16 moveshitting_underwater[] = {MOVE_SURF, MOVE_WHIRLPOOL, 0xFFFF};
 
+bool check_focus(u8 bank)
+{
+    bool is_bank_focusing = false;
+    if(status3[bank].focus_punch_charge)
+    {
+        is_bank_focusing = true;
+        status3[bank].focus_punch_charge = 0;
+        execute_battle_script((void *)0x82DB1FF);
+    }
+    return is_bank_focusing;
+}
+
 void bs_start_attack()
 {
     u8 mode=0;  //mode 0 - get type with adjusting chosen target
@@ -496,7 +508,7 @@ void bs_start_attack()
         bank_attacker = i;
         if (menu_choice_pbs[i] == 0)
         {
-            if (check_mega_evo(i))
+            if (check_mega_evo(i) || check_focus(i))
                 return;
         }
     }
@@ -568,9 +580,12 @@ void bs_start_attack()
         else
         {
             if (mode==1)
+            {
                 set_attacking_move_type();
+            }
             bank_target=get_target_of_move(current_move,0,0);
         }
+
         if(!is_bank_from_opponent_side(bank_attacker))
         {
             battle_trace.user_team_move = current_move;
@@ -606,10 +621,21 @@ void bs_start_attack()
 
 s8 get_bracket_alteration_factor(u8 bank, u8 item_effect);
 
+void set_focus_charge()
+{
+    for(u8 i=0; i<4; i++)
+    {
+        if(menu_choice_pbs[i]==0 && chosen_move_by_banks[i]==MOVE_FOCUS_PUNCH && !battle_participants[i].status.flags.sleep
+            && !(disable_structs[i].truant_counter & 1) && !(protect_structs[i].flag0_onlystruggle))
+        {
+            status3[i].focus_punch_charge = 1;
+        }
+    }
+}
+
 void bc_preattacks()
 {
     u8 play_script=0;
-
     u8 *count = &(battle_stuff_ptr.ptr->pre_attacks_bank_counter);
     if(!(hitmarker&HITMARKER_FLEE))
     {   reset_indicators_height();
@@ -635,6 +661,7 @@ void bc_preattacks()
     }
     if(!play_script)
     {
+        set_focus_charge();
         clear_atk_up_if_hit_flag_unless_enraged();
         current_move_turn=0;
         battle_state_mode=battle_state_mode_first_assigned;
@@ -647,3 +674,5 @@ void bc_preattacks()
         battle_resources.ptr->battlescript_stack->stack_height=0;
     }
 }
+
+

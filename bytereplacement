@@ -51,3 +51,5 @@
 08033B84 4C
 ## item effect delimiter
 080D7508 C0 46 C0 46 C0 46 C0 46
+## adjust focus turn script
+082DB212 3F

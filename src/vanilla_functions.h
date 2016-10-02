@@ -73,6 +73,7 @@ char* get_trainername_address(u16 trainerID);
 void decompress_battle_healthbar_and_font();
 void update_bank_graphical_elements(u8 objID, struct pokemon* poke, u8 element);
 void play_sound(u16 songID);
+void play_cry(u16 species, u8 param1, u8 param2);
 u32 get_item_lastword(u16 itemID);
 u8 checkitem(u16 itemID, u16 quantity);
 void prepare_fainting_cry(u8 bufferID);
