@@ -535,6 +535,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             break;
         if(handle_primal_reversion(bank))
         {
+            battle_stuff_ptr.ptr->switch_in_ability_bank_counter--;
             effect=1;
             break;
         }
