@@ -303,7 +303,7 @@ void set_attacking_move_type()
             break;
         }
         u8 ate=0;
-        if(move_type == TYPE_EGG && (DAMAGING_MOVE) && has_ability_effect(bank_attacker,0,1))
+        if(move_type == TYPE_EGG && (DAMAGING_MOVE) && has_ability_effect(bank_attacker,0,1) && move_table[current_move].type==TYPE_NORMAL)
         {
             switch(ability)
             {
@@ -321,7 +321,7 @@ void set_attacking_move_type()
                 break;
             }
         }
-        if(ate==1 && DAMAGING_MOVE)
+        if(ate)
             new_battlestruct.ptr->various.ate_bonus=1;
     }
     if((new_battlestruct.ptr->field_affecting.ion_deluge)
