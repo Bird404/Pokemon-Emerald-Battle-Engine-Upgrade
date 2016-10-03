@@ -645,6 +645,7 @@ void dostatchanges()
         {
             void* stat_msg = 0;
             *done_stats |= bits_table[i];
+            battle_scripting.stat_changer = by_how_much | bit_to_stat(bits_table[i]);
             if (change_stats(by_how_much, bit_to_stat(bits_table[i]), affects_user, 0) == 0) //it worked
             {
                 if (battle_scripting.stat_changer & 0x80)
