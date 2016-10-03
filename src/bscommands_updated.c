@@ -1159,7 +1159,7 @@ u8 move_thaws_user(u16 move)
 
 u8 healblock_forbidden_moves(u16 move, u8 with_leechseed)
 {
-    if (move == MOVE_ABSORB || move == MOVE_MEGA_DRAIN || move == MOVE_GIGA_DRAIN|| move == MOVE_LEECH_LIFE || move == MOVE_DRAINING_KISS || move == MOVE_DRAIN_PUNCH || move == MOVE_DREAM_EATER || move == MOVE_HORN_LEECH || move == MOVE_OBLIVION_WING || move == MOVE_PARABOLIC_CHARGE || move == MOVE_MILK_DRINK || move == MOVE_HEAL_BLOCK || move == MOVE_REST || move == MOVE_RECOVER || move == MOVE_MOONLIGHT || move == MOVE_MORNING_SUN || move == MOVE_SLACK_OFF || move == MOVE_SYNTHESIS || move == MOVE_ROOST || move == MOVE_SOFTBOILED)
+    if (move == MOVE_ABSORB || move == MOVE_MEGA_DRAIN || move == MOVE_GIGA_DRAIN|| move == MOVE_LEECH_LIFE || move == MOVE_DRAINING_KISS || move == MOVE_DRAIN_PUNCH || move == MOVE_DREAM_EATER || move == MOVE_HORN_LEECH || move == MOVE_OBLIVION_WING || move == MOVE_PARABOLIC_CHARGE || move == MOVE_MILK_DRINK || move == MOVE_HEAL_PULSE || move == MOVE_REST || move == MOVE_RECOVER || move == MOVE_MOONLIGHT || move == MOVE_MORNING_SUN || move == MOVE_SLACK_OFF || move == MOVE_SYNTHESIS || move == MOVE_ROOST || move == MOVE_SOFTBOILED)
         return 1;
     else if (move == MOVE_LEECH_SEED && with_leechseed)
         return 1;
@@ -1471,7 +1471,7 @@ u8 check_if_cannot_attack()
             }
         }
         *state_tracker += 1;
-        if (*state_tracker >= 19 && effect == 0)
+        if (*state_tracker >= 20 && effect == 0)
             break;
     }
     return effect;
