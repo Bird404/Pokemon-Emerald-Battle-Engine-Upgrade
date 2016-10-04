@@ -114,18 +114,11 @@ u8 get_target_of_move(u16 move, u8 target_given, u8 adjust)
                 while((result_target==bank_attacker || !is_bank_present(result_target)) && result_target<no_of_all_banks)
                     result_target++;
                 break;
-            case 2: //user
-                if(current_move==MOVE_ACUPRESSURE && is_bank_present(bank_attacker^2))
-                {
-                    if(adjust)
-                        break;
-                    if(rng()&2)
-                    {
-                        result_target = bank_attacker^2;
-                        break;
-                    }
-                }
-            case 16:
+            case 18: //acupressure
+                if (!(old_target == (bank_attacker ^ 2) && !is_bank_present(bank_attacker ^ 2)))
+                    break;
+            case 2: //can be everyone
+            case 16: //user
                 result_target = bank_attacker;
                 break;
         }
