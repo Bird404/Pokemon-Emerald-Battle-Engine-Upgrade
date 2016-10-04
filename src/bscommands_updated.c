@@ -31,6 +31,8 @@ u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8
 void set_attacking_move_type();
 void revert_mega_to_normalform(u8 teamID, u8 opponent_side);
 u8 is_bank_present(u8 bank);
+u8 calculate_effect_chance(u8 bank, u16 move);
+void move_effect_setter(u8 primary, u8 certain);
 
 void atk7D_set_rain()
 {
@@ -2403,4 +2405,75 @@ void atk47_graphical_statchange()
     }
     battle_scripting.field10 = (battle_scripting.stat_changer & 0xF) + statchanger_value - 1;
     return;
+}
+
+void atkE4_secretpowereffect()
+{
+    struct field_affecting* terrains = &new_battlestruct.ptr->field_affecting;
+    u8* effect = &battle_communication_struct.move_effect;
+    if (terrains->electic_terrain) //paralysis
+        *effect = 5;
+    else if (terrains->grassy_terrain) //sleep
+        *effect = 1;
+    else if (terrains->misty_terrain) //sp atk by one down
+        *effect = 0x1B;
+    else
+    {
+        switch (battle_background)
+        {
+        case 0: //normal grass; sleep
+            *effect = 1;
+            break;
+        case 1: //tall grass; poison
+            *effect = 2;
+            break;
+        case 2: //sand; acc by one down
+            *effect = 0x1D;
+            break;
+        case 3: //underwater; def by one down
+            *effect = 0x19;
+            break;
+        case 4: //surf water; atk by one down
+            *effect = 0x18;
+            break;
+        case 5: //pond water; spd by one down
+            *effect = 0x1A;
+            break;
+        case 6: //rocky area; confusion
+            *effect = 7;
+            break;
+        case 7: //cave; flinching
+            *effect = 8;
+            break;
+        case 8: //plain building; paralysis
+        case 9: //strange grass; paralysis
+            *effect = 5;
+            break;
+        }
+    }
+    battlescripts_curr_instruction++;
+    return;
+}
+
+void atk15_setmoveeffectchance()
+{
+    u8 percent = move_table[current_move].effect_chance;
+    u8 chance;
+    if (current_move == MOVE_SECRET_POWER)
+        chance = percent_chance(percent);
+    else
+        chance = calculate_effect_chance(bank_attacker, current_move);
+    u8 worked = MOVE_WORKED;
+    u8* effect = &battle_communication_struct.move_effect;
+    if (worked && (percent == 100 || *effect & 0x80))
+    {
+        *effect &= 0x7F;
+        move_effect_setter(0, 0x80);
+    }
+    else if (worked && chance && *effect)
+        move_effect_setter(0, 0);
+    else
+        battlescripts_curr_instruction++;
+    *effect = 0;
+    battle_scripting.field16 = 0;
 }

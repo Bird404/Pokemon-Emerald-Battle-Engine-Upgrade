@@ -17,6 +17,7 @@ extern u16 biting_moves_table[];
 extern u16 megalauncher_moves_table[];
 u8 get_airborne_state(u8 bank, u8 mode, u8 check_levitate);
 u8 can_lose_item(u8 bank, u8 stickyholdcheck, u8 sticky_message);
+u8 is_item_a_plate(u16 item);
 
 #define MOVE_PHYSICAL 0
 #define MOVE_SPECIAL 1
@@ -248,14 +249,28 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
             }
             break;
         case MOVE_FLING: //make fling table; before calling damage calc should check if can use this, move effect is applied here
-            {            //item deletion should happen elsewhere
-                for (u16 i = 0; fling_table[i].item_id != 0xFFFF; i++)
+            {            //item deletion happens after damage calculation
+                u8* effect = &battle_communication_struct.move_effect;
+                u16 item = battle_participants[atk_bank].held_item;
+                //check if it's a berry
+                if (get_item_pocket_id(item) == 4)
                 {
-                    if (fling_table[i].item_id == battle_participants[atk_bank].held_item)
+                    base_power = 10;
+                    *effect = 0x38; //target gets the berry effect
+                }
+                //check if it's a plate
+                else if (is_item_a_plate(item))
+                    base_power = 90;
+                else
+                {
+                    for (u16 i = 0; fling_table[i].item_id != 0xFFFF; i++)
                     {
-                        base_power = fling_table[i].move_power;
-                        battle_communication_struct.move_effect = fling_table[i].move_effect;
-                        break;
+                        if (fling_table[i].item_id == item)
+                        {
+                            base_power = fling_table[i].move_power;
+                            *effect = fling_table[i].move_effect;
+                            break;
+                        }
                     }
                 }
                 break;

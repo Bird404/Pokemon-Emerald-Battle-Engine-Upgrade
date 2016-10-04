@@ -217,12 +217,12 @@ battlescripts_table:
 .word 0x082DA40D 		@134 Refresh
 .word 0x082DA424		@135 Grudge
 .word 0x082DA439		@136 Snatch
-.word ATTACKING_MOVE @	".word SECRETPOWER			"	137
+.word SECRETPOWER		@137 Secret Power
 .word 0x082DA529		@138 Water/Mud Sport
 .word BERRYDESTROY		@139 Incinerate, Pluck, Bug Bite; arg1 is 1 if berry is stolen and eaten, 0 if only destroyed
 .word SETTAILWIND		@140 Tailwind
 .word ACUPRESSURE		@141 Acupressure
-.word ATTACKING_MOVE @	".word FLINGG				"	142
+.word FLINGG			@142 Fling
 .word POWERTRICK		@143 Power Trick
 .word SETLUCKYCHANT		@144 Lucky Chant
 .word PSYCHIC_SWAPS		@145 arg1 stat to swap, arg2 stat to swap, if arg1 is 0 it acts like hearts swap
@@ -252,6 +252,27 @@ battlescripts_table:
 .word TOPSYTURVY		@169 Topsy Turvy
 .word BESTOW			@170 Bestow
 .word TARGETSTATSWITCH	@171 Parting Shot; @arg1 bitfield for stats to raise; arg 2 by how much
+
+FLINGG:
+	attackcanceler
+	callasm_cmd 107
+	.word MOVE_FAILED
+	accuracycheck FLING_MISS 0x0
+	attackstring
+	ppreduce
+	critcalc
+	damagecalc
+	damageadjustment
+	removeitem bank_attacker
+	goto_cmd ATTACK_ANIM
+	
+FLING_MISS:
+	removeitem bank_attacker
+	goto_cmd MOVE_MISSED
+
+SECRETPOWER:
+	secretpowereffect
+	goto_cmd ATTACKING_MOVE
 
 ACUPRESSURE:
 	attackcanceler

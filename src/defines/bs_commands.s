@@ -1187,7 +1187,7 @@ jumpifbyte 0x4 0x202427C 0x29 \jumpiftypenotaffected_address
 .word \jumpiffainted_address
 .endm
 
-.macro naturepowereffect
+.macro secretpowereffect
 .byte 0xE4
 .endm
 

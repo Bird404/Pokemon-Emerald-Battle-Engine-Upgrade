@@ -2649,10 +2649,10 @@ u8 can_lose_item(u8 bank, u8 stickyhold_check, u8 sticky_message)
 
 u8 calculate_effect_chance(u8 bank, u16 move)
 {
-    u8 effect = move_table[current_move].effect_chance;
+    u8 effect = move_table[move].effect_chance;
     if (check_ability(bank, ABILITY_SERENE_GRACE))
         effect *= 2;
-    if (effect >= 100)
+    if (effect >= 100 || move == MOVE_SECRET_POWER)
         return 1;
     return percent_chance(effect);
 }
@@ -2773,8 +2773,8 @@ void move_effect_setter(u8 primary, u8 certain)
         case 0x1A: //spd - 1
         case 0x1B: //sp atk - 1
         case 0x1C: //sp def - 1
-        case 0x1D: // evasion - 1
-        case 0x1E: //accuracy - 1
+        case 0x1D: //accuracy - 1
+        case 0x1E: //evasion - 1
             if (change_stats(0x90, (*move_effect - 7) &7, affects_user, 0) == 0 && current_hp)
                 effect_stat_change(&stat_lower);
             break;
@@ -2793,8 +2793,8 @@ void move_effect_setter(u8 primary, u8 certain)
         case 0x2A: //spd - 2
         case 0x2B: //sp atk - 2
         case 0x2C: //sp def - 2
-        case 0x2D: // evasion - 2
-        case 0x2E: //accuracy - 2
+        case 0x2D: //accuracy - 2
+        case 0x2E: //evasion - 2
             if (change_stats(0xA0, (*move_effect - 7) &7 , affects_user, 0) == 0 && current_hp)
                 effect_stat_change(&stat_lower);
             break;
