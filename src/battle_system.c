@@ -17,6 +17,9 @@ u8 gravity_forbidden_move(u16 move);
 u8 embargo_forbidden_move(u16 move);
 u16 get_item_extra_param(u16 item);
 u16 get_mega_species(u16 species);
+struct pokemon* get_party_ptr(u8 bank);
+u8 is_poke_valid(struct pokemon* poke);
+u8 is_bank_present(u8 bank);
 
 u8 get_attacking_move_type()
 {
@@ -1070,7 +1073,6 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             }
         }
         break;
-
     case 3: //abilities that affect type
             if (curr_move && has_ability_effect(bank, 1, 1))
             {
@@ -1160,7 +1162,6 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     battlescripts_curr_instruction = script_ptr;
                 }
             }
-
             break;
     case 4: //move end turn abilities
         {
@@ -3289,7 +3290,7 @@ u8 update_turn_counters()
     {
         switch (*statetracker)
         {
-        case 0:
+        case 0: //trick room
             if (new_battlestruct.ptr->field_affecting.trick_room)
             {
                 new_battlestruct.ptr->field_affecting.trick_room--;
@@ -3301,7 +3302,7 @@ u8 update_turn_counters()
             }
             *statetracker +=1;
             break;
-        case 1:
+        case 1: //magic room
             if (new_battlestruct.ptr->field_affecting.magic_room)
             {
                 new_battlestruct.ptr->field_affecting.magic_room--;
@@ -3313,7 +3314,7 @@ u8 update_turn_counters()
             }
             *statetracker +=1;
             break;
-        case 2:
+        case 2: //wonder room
             if (new_battlestruct.ptr->field_affecting.wonder_room)
             {
                 new_battlestruct.ptr->field_affecting.wonder_room--;
@@ -3325,7 +3326,7 @@ u8 update_turn_counters()
             }
             *statetracker +=1;
             break;
-        case 3:
+        case 3: //gravity
             if (new_battlestruct.ptr->field_affecting.gravity)
             {
                 new_battlestruct.ptr->field_affecting.gravity--;
@@ -3337,7 +3338,7 @@ u8 update_turn_counters()
             }
             *statetracker +=1;
             break;
-        case 4:
+        case 4: //grassy terrain
             if (new_battlestruct.ptr->field_affecting.grassy_terrain)
             {
                 new_battlestruct.ptr->field_affecting.grassy_terrain--;
@@ -3358,7 +3359,7 @@ u8 update_turn_counters()
             }
             *statetracker +=1;
             break;
-        case 5:
+        case 5: //misty terrain
             if (new_battlestruct.ptr->field_affecting.misty_terrain)
             {
                 new_battlestruct.ptr->field_affecting.misty_terrain--;
@@ -3371,7 +3372,7 @@ u8 update_turn_counters()
             }
             *statetracker +=1;
             break;
-        case 6:
+        case 6: //electric terrain
             if (new_battlestruct.ptr->field_affecting.electic_terrain)
             {
                 new_battlestruct.ptr->field_affecting.electic_terrain--;
@@ -3383,12 +3384,14 @@ u8 update_turn_counters()
             }
             *statetracker +=1;
             break;
-        case 7:
+        case 7: //ion deluge and fairy lock
             if (new_battlestruct.ptr->field_affecting.ion_deluge)
                 new_battlestruct.ptr->field_affecting.ion_deluge--;
+            if (new_battlestruct.ptr->field_affecting.fairy_lock)
+                new_battlestruct.ptr->field_affecting.fairy_lock--;
             *statetracker +=1;
             break;
-        case 8:
+        case 8: //something with turn order
             for (u8 i = 0; i < no_of_all_banks; i++)
             {
                 turn_order[i] = i;
@@ -3795,4 +3798,183 @@ u8 message_cant_choose_move()
         *loc_to_store_bs = &cantselecthealblock_bs;
     }
     return cant;
+}
+
+s8 can_switch(u8 bank) //1 - can; 0 - can't; -1 can't due to abilities
+{
+    if (battle_flags.battle_arena)
+        return 0;
+    if (get_item_effect(bank, 1) == ITEM_EFFECT_SHEDSHELL)
+        return 1;
+    if (battle_participants[bank].status2.trapped_in_wrap || battle_participants[bank].status2.cant_escape || status3[bank].rooted || new_battlestruct.ptr->field_affecting.fairy_lock)
+        return 0;
+    u8 ability_bank = ability_battle_effects(12, bank, ABILITY_SHADOW_TAG, 1, 0);
+    if (ability_bank && !check_ability(bank, ABILITY_SHADOW_TAG) && !is_of_type(bank, TYPE_GHOST))
+    {
+        another_active_bank = ability_bank - 1;
+        return -1;
+    }
+    ability_bank = ability_battle_effects(12, bank, ABILITY_MAGNET_PULL, 1, 0);
+    if (ability_bank && is_of_type(bank, TYPE_STEEL))
+    {
+        another_active_bank = ability_bank - 1;
+        return -1;
+    }
+    ability_bank = ability_battle_effects(12, bank, ABILITY_ARENA_TRAP, 1, 0);
+    if (ability_bank && GROUNDED(bank))
+    {
+        another_active_bank = ability_bank - 1;
+        return - 1;
+    }
+    return 1;
+}
+
+u8 wonderguard_good_move(u8 wonder_bank, u8 bank, u16 move, u8 check_status)
+{
+    u16 effectiveness = type_effectiveness_calc(move, move_table[move].type, bank, wonder_bank, 0);
+    if (DAMAGING_MOVE(move) && effectiveness > 64) //move is super effective
+        return 1;
+    if (check_status)
+    {
+        u8 movescript = move_table[move].script_id;
+        if (movescript == 13 || movescript == 14) //if we can poison the bank, switch isn't necessary
+        {
+            if (!cant_poison(wonder_bank, 0))
+                return 1;
+        }
+        else if (movescript == 16) //if we can burn the bank, switch isn't necessary
+        {
+            if (!cant_become_burned(wonder_bank, 0))
+                return 1;
+        }
+        else if (movescript == 78) //if the move can seed the bank, switch isn't necessary
+        {
+            if (!is_of_type(wonder_bank, TYPE_GRASS) && !status3[wonder_bank].leech_seed)
+                return 1;
+        }
+    }
+    return 0;
+}
+
+u8 can_poke_be_switched_into(u8 index, u8 bank)
+{
+    u8 bank_to_ignore = bank;
+    if (battle_flags.double_battle && is_bank_present(bank ^ 2))
+        bank_to_ignore = bank ^ 2;
+    u8 from = 0;
+    u8 to = 6;
+    if (battle_flags.multibattle)
+    {
+        if (bank <= 1) //indices 0, 1, 2 are from this bank's party
+            to = 2;
+        else //indices 3, 4, 5 are from this bank's party
+            from = 3;
+    }
+    struct pokemon* poke = get_party_ptr(bank);
+    if (is_poke_valid(&poke[0]) && battle_team_id_by_side[bank] != index && battle_team_id_by_side[bank_to_ignore] != index && index >= from && index <= to)
+        return 1;
+    return 0;
+}
+
+u8 ai_switch_wonderguard()
+{
+    u8 worth = 0;
+    u8 wonder_bank = 0;
+    u8 self = active_bank;
+    u8 ally = self ^ 2;
+    if (!is_bank_present(ally))
+        ally = self;
+    u8 enemy1 = self ^ 1;
+    u8 enemy2 = ally ^ 1;
+    if (!is_bank_present(enemy2))
+        enemy2 = enemy1;
+    if (check_ability(enemy1, ABILITY_WONDER_GUARD))
+    {
+        worth = 1;
+        wonder_bank = enemy1;
+    }
+    else if (check_ability(enemy2, ABILITY_WONDER_GUARD))
+    {
+        worth = 1;
+        wonder_bank = enemy2;
+    }
+    if (worth)
+    {
+        //check if has a move that's effective against wonder guard bank
+        for (u8 bank = 0; bank < no_of_all_banks; bank++)
+        {
+            if (bank == self || bank == ally)
+            {
+                for (u8 i = 0; i < 4; i ++)
+                {
+                    u16 move = battle_participants[bank].moves[i];
+                    if (move && wonderguard_good_move(wonder_bank, bank, move, 1))
+                        return 0;
+                }
+            }
+        }
+        //at this point we've searched for all moves and bank can't damage a poke with wonder guard, we need to search for a poke in party that can do it
+        struct pokemon* poke = get_party_ptr(self);
+        for (u8 i = 0; i < 6; i++)
+        {
+            if (can_poke_be_switched_into(i, self))
+            {
+                for (u8 j = 0; j < 4; j++)
+                {
+                    u16 move = get_attributes(&poke[i], ATTR_ATTACK_1 + j, 0);
+                    if (move && wonderguard_good_move(wonder_bank, self, move, 0))
+                    {
+                        battle_stuff_ptr.ptr->switchout_index[self] = j;
+                        prepare_chosen_option(1, 2, 0);
+                        return 1;
+                    }
+                }
+            }
+        }
+        //if we get here nothing was found, too bad :(
+    }
+    return 0;
+}
+
+u8 ai_ability_switch()
+{
+    if (check_ability(active_bank, ABILITY_NATURAL_CURE))
+    {
+
+    }
+    else if (check_ability(active_bank, ABILITY_REGENERATOR))
+    {
+
+    }
+    return 0;
+}
+
+u8 tai_should_switch()
+{
+    if (!can_switch(active_bank))
+        return 0;
+    u8 available_to_switch = 0;
+    for (u8 i = 0; i < 6; i++)
+    {
+        if (can_poke_be_switched_into(i, active_bank))
+            available_to_switch++;
+    }
+    if (available_to_switch)
+    {
+        if (ai_switch_perish_song())
+            return 1;
+        if (ai_switch_wonderguard())
+            return 1;
+        if (ai_switch_sth1())
+            return 1;
+        if (ai_ability_switch())
+            return 1;
+        if (ai_switch_sth2())
+            return 0;
+        if (ai_is_statbuffed())
+            return 0;
+        if (ai_switch_sth3(8, 2) || ai_switch_sth3(4, 3))
+            return 1;
+    }
+    return 0;
 }

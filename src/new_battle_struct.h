@@ -78,16 +78,16 @@ struct side_affecting{
 };
 
 struct field_affecting{
-    u8 trick_room : 3;
-    u8 wonder_room : 3;
-    u8 magic_room : 3;
-    u8 grassy_terrain : 3;
-    u8 electic_terrain : 3;
-    u8 misty_terrain : 3;
-    u8 ion_deluge : 3;
-    u8 gravity : 3;
-    u8 round_chosen : 1;
-    u8 fairy_lock : 1;
+    u32 trick_room : 3;
+    u32 wonder_room : 3;
+    u32 magic_room : 3;
+    u32 grassy_terrain : 3;
+    u32 electic_terrain : 3;
+    u32 misty_terrain : 3;
+    u32 ion_deluge : 3;
+    u32 gravity : 3;
+    u32 round_chosen : 1;
+    u32 fairy_lock : 2;
 };
 
 struct various{
@@ -107,6 +107,7 @@ struct various{
     u8 sheerforce_bonus : 1;
     u8 ate_bonus : 1;
     u8 gem_boost : 1;
+    u8 happyhour_bonus : 1;
     u16 accumulated_damage;
 };
 
@@ -116,12 +117,12 @@ struct various{
 
 struct mega_related
 {
-    u8 user_trigger: 2; // 0x0 for not set, //0x1 for stone, //0x2 for wish
-    u8 ally_trigger: 2;
-    u8 evo_happened_pbs: 4;
-    u8 party_mega_check: 6;
-    u8 ai_party_mega_check: 6;
-    u8 trigger_id;
+    u32 user_trigger: 2; // 0x0 for not set, //0x1 for stone, //0x2 for wish
+    u32 ally_trigger: 2;
+    u32 evo_happened_pbs: 4;
+    u32 party_mega_check: 6;
+    u32 ai_party_mega_check: 6;
+    u32 trigger_id : 8;
     u8 indicator_id_pbs[4];
 };
 

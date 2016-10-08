@@ -149,4 +149,5 @@ extern void* healberry_endmove_bs;
 extern void* healandconfuse_endmove_bs;
 extern void* statraise_berry_endmove_bs;
 extern void* lansat_endmove_bs;
+extern void* skydrop_tooheavy_bs;
 #endif /* static_references */

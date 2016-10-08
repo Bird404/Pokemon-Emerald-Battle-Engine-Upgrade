@@ -561,11 +561,14 @@ struct battle_flags{
     u32 flagx100 : 1; //0x100
     u32 wally : 1; //0x200
     u32 roaming : 1; //0x400
-    u32 flagx800 : 1;
-    u32 flagx1000 : 1;
-    u32 flagx2000 : 1;
-    u32 flagx4000 : 1;
+    u32 flagx800 : 1; //0x800
+    u32 flagx1000 : 1; //0x1000
+    u32 legendary : 1; //0x2000
+    u32 regis : 1; //0x4000
     u32 multibattle : 1; //0x8000
+    u32 battle_dome : 1; //0x10 000
+    u32 battle_palace : 1; //0x20 000
+    u32 battle_arena : 1; //0x40 000
     //more to come if needed
 };
 

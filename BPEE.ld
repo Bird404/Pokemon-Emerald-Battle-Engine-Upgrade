@@ -199,10 +199,17 @@ b_load_sprite = 0x080A9614|1;
 update_bank_sprite = 0x080A9708|1;
 bank_sprite_sth = 0x080A9ADC|1;
 get_poke_ability = 0x0806B6D8|1;
-
 attack_iteration_cleanup = 0x804AF30|1;
 prepare_pokemon_battle_sprite_manipulation_buffer = 0x08034414|1;
 check_failure_due_to_status = 0x803F90C|1;
+get_trainer_money = 0x0804E598|1;
+give_money = 0x080E5154|1;
+ai_switch_perish_song = 0x08062BF8|1;
+prepare_chosen_option = 0x08034158|1;
+ai_switch_sth1 = 0x08062E54|1;
+ai_switch_sth2 = 0x080631BC|1;
+ai_switch_sth3 = 0x08063364|1;
+ai_is_statbuffed = 0x0806331C|1;
 
 /*mega*/
 gpu_pal_obj_alloc_tag_and_apply = 0x8008744|1; 

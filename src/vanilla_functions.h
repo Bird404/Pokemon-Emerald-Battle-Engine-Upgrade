@@ -89,6 +89,14 @@ void update_bank_sprite(u8 bank);
 void bank_sprite_sth(u8 bank);
 u8 get_poke_ability(struct pokemon* poke);
 u8 get_overworld_weather();
+u32 get_trainer_money(u16 trainerID);
+void give_money(u32* owned_money, u32 to_add);
+u8 ai_switch_perish_song();
+void prepare_chosen_option(u8 bufferID, u8 optionID, u16 unkown);
+u8 ai_switch_sth1();
+u8 ai_switch_sth2();
+u8 ai_is_statbuffed();
+u8 ai_switch_sth3(u8 arg1, u8 arg2);
 
 u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);

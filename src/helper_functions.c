@@ -61,7 +61,7 @@ u8 foeteam_text[] = {T_, h_, e_, 0, f_, o_, e_, Apos, s_, 0, t_, e_, a_, m_, Ter
 //u8 foeteam_lc_text[] = {t_, h_, e_, 0, f_, o_, e_, Apos, s_, 0, t_, e_, a_, m_, Termin};
 u8 aftermath_text[] = {0xFD, 15, 0, 0xDD, 0xE7, 0x0, 0xDC, 0xE9, 0xE6, 0xE8, 0x00, 0xD6, 0xED, 0xFE, 0xFD, 16, 0xB4, 0xE7, 0, 0xFD, 25, 0xAB, 0xFF};
 u8 pickpocket_text[] = {0xFD, 16, 0, 0xE7, 0xE8, 0xE3, 0xE0, 0xD9, 0, 0xFD, 15, 0xB4, 0xE7, 0xFE, 0xFD, 22, 0xAB, 0xFF};
-u8 mummy_text[] = {0xFD, 15, 0xB4, 0xE7, 0, 0xD5, 0xD6, 0xDD, 0xE0, 0xDD, 0xE8, 0xED, 0xFE, 0xD6, 0xD9, 0xD7, 0xD5, 0xE1, 0xD9, 0, 0xFD, 24, 0xAB, 0xFF};
+/*0x194*/ u8 mummy_text[] = {0xFD, 15, 0xB4, 0xE7, 0, 0xD5, 0xD6, 0xDD, 0xE0, 0xDD, 0xE8, 0xED, 0xFE, 0xD6, 0xD9, 0xD7, 0xD5, 0xE1, 0xD9, 0, 0xFD, 24, 0xAB, 0xFF};
 /*0x195*/ u8 target_ability[] = {0xFD, 16, 0xB4, 0xE7, 0, 0xFD, 25, 0xAB, 0xFF};
 /*0x196*/ u8 cursedbody_text[] = {0xFD, 16, 0xB4, 0xE7, 0, 0xFD, 25, 0, 0xD8, 0xDD, 0xE7, 0xD5, 0xD6, 0xE0, 0xD9, 0xD8, 0xFE, 0xFD, 15, 0xB4, 0xE7, 0, 0xFD, 0, 0xAB, 0xFF};
 /*0x197*/ u8 drastically_text[] = {0xD8, 0xE6, 0xD5, 0xE7, 0xE8, 0xDD, 0xD7, 0xD5, 0xE0, 0xE0, 0xED, 0x0, 0xFF};
@@ -117,7 +117,7 @@ u8 mummy_text[] = {0xFD, 15, 0xB4, 0xE7, 0, 0xD5, 0xD6, 0xDD, 0xE0, 0xDD, 0xE8, 
 /*0x1C8*/ u8 fogends_text[] = {T_, h_, e_, Space, f_, o_, g_, Space, l_, i_, f_, t_, e_, d_, Exclam, 0xFF};
 /*0x1C9*/ u8 obtaineditem[] = {BuffCharac, 15, Space, o_, b_, t_, a_, i_, n_, e_, d_, Space, BuffCharac, 22, Exclam, 0xFF};
 /*0x1CA*/ u8 tailwind_begins_text[] = {T_, h_, e_, 0, T_, a_, i_, l_, w_, i_, n_, d_, 0, b_, l_, e_, w_, 0, f_, r_, o_, m_, 0xFE, b_, e_, h_, i_, n_, d_, 0, 0xFD, 0xF, Apos, s_, 0, t_, e_, a_, m_, Exclam, 0xFF};
-/*0x1CB*/ u8 luckychant_begins_text[] = {T_, h_, e_, 0, l_, u_, c_, k_, y_, 0, c_, h_, a_, n_, t_, 0, s_, h_, i_, e_, l_, d_, e_, d_, 0, 0xFD, 0xF, Apos, s_, 0xFE, t_, e_, a_, m_, 0, f_, r_, o_, m_, 0, c_, r_, i_, t_, i_, c_, a_, l_, 0, h_, i_, t_, s_, Exclam, 0xFF};
+/*0x1CB*/ u8 luckychant_begins_text[] = {T_, h_, e_, 0, l_, u_, c_, k_, y_, 0, c_, h_, a_, n_, t_, 0, s_, h_, i_, e_, l_, d_, e_, d_, JumpLine, 0xFD, 0xF, Apos, s_, Space, t_, e_, a_, m_, 0, f_, r_, o_, m_, 0xFA, c_, r_, i_, t_, i_, c_, a_, l_, 0, h_, i_, t_, s_, Exclam, 0xFF};
 /*0x1CC*/ u8 magnetrise_begins_text[] = {0xFD, 0xF, 0, l_, e_, v_, i_, t_, a_, t_, e_, d_, 0xFE, w_, i_, t_, h_, 0, e_, l_, e_, c_, t_, r_, o_, m_, a_, g_, n_, e_, t_, i_, s_, m_, Exclam, 0xFF};
 /*0x1CD*/ u8 magicroom_start_text[] = {I_, t_, 0, c_, r_, e_, a_, t_, e_, d_, 0, a_, 0, b_, i_, z_, a_, r_, r_, e_, 0, a_, r_, e_, a_, 0, i_, n_, 0, w_, h_, i_, c_, h_, 0xFE, P_, o_, k_, Poke_e, m_, o_, n_, Apos, s_, 0, h_, e_, l_, d_, 0, i_, t_, e_, m_, s_, 0, l_, o_, s_, e_, 0, t_, h_, e_, i_, r_, 0xFA, e_, f_, f_, e_, c_, t_, s_, Exclam, 0xFF};
 /*0x1CE*/ u8 trickroom_start_text[] = {0xFD, 0xF, 0, t_, w_, i_, s_, t_, e_, d_, 0xFE, t_, h_, e_, 0, d_, i_, m_, e_, n_, s_, i_, o_, n_, s_, Exclam, 0xFF};
@@ -188,6 +188,12 @@ u8 mummy_text[] = {0xFD, 15, 0xB4, 0xE7, 0, 0xD5, 0xD6, 0xDD, 0xE0, 0xDD, 0xE8, 
 /*0x20F*/ u8 statushealfrz_text[] = {0xFD, 0, Space, t_, h_, a_, w_, e_, d_, Space, o_, u_, t_, Exclam, 0xFF};
 /*0x210*/ u8 primal_reversion_text[] = {BuffCharac, 15, Apos, s_, Space, P_, r_, i_, m_, a_, l_, Space, R_, e_, v_, e_, r_, s_, i_, o_, n_, Exclam, JumpLine, I_, t_,
                                 Space, r_, e_, v_, e_, r_, t_, e_, d_, Space, t_, o_, Space, i_, t_, s_, Space, p_, r_, i_, m_, a_, l_, Space, f_, o_, r_, m_, Exclam, Termin};
+/*0x211*/ u8 congrats_player_text[] = {C_, o_, n_, g_, r_, a_, t_, u_, l_, a_, t_, i_, o_, n_, s_, Space, 0xFD, 35, Exclam, 0xFF};
+/*0x212*/ u8 happyhour_text[] = {E_, v_, e_, r_, y_, o_, n_, e_, Space, i_, s_, Space, c_, a_, u_, g_, h_, t_, Space, u_, p_, JumpLine, i_, n_, Space, t_, h_, e_, Space, h_, a_, p_, p_, y_, Space, a_, t_, m_, o_, s_, p_, h_, e_, r_, e_, Exclam, 0xFF};
+/*0x213*/ u8 skydrop1_text[] = {0xFD, 15, Space, t_, o_, o_,k_, Space, 0xFD, 16, JumpLine, i_, n_, t_, o_, Space, t_, h_, e_, Space, s_, k_, y_, Exclam, 0xFF};
+/*0x214*/ u8 skydrop2_text[] = {0xFD, 16, Space, w_, a_, s_, Space, f_, r_, e_, e_, d_, JumpLine, f_,r_, o_,m_, Space, t_, h_, e_, Space, s_, k_, y_, Space, d_, r_, o_, p_, Exclam, 0xFF};
+/*0x215*/ u8 skydroptooheavy_text[] = {0xFD, 16, Space, i_, s_, Space, t_, o_, o_, Space, h_, e_, a_, v_, y_, JumpLine, t_, o_, Space, b_, e_, Space, l_, i_, f_, t_, e_, d_, Exclam, 0xFF};
+/*0x216*/ u8 fairylock_text[] = {N_, o_, Space, o_, n_, e_, Space, w_,i_,l_,l_, Space, b_, e_, Space, a_, b_, l_, e_, Space, t_, o_, JumpLine, r_, u_, n_, Space, a_, w_, a_, y_, Space, d_, u_, r_, i_, n_, g_, Space, t_, h_, e_, Space, n_, e_, x_, t_, Space, t_, u_, r_, n_, Exclam, 0xFF};
 
 void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activation_text, &heavyrain_activation_text, &mysticalaircurrent_activation_text, &forewarn_text, &slowstart_text, &anticipation_text, &dryskin_damage_text, &solarpower_text, &harvest_text, &healer_text, &pickup_text, &moldbreaker_text, &turboblaze_text, &terravolt_text, &downloadatk_text,
 &downloadspatk_text, &absorbabilityboost_text , &absorbabilityimmune_text, &userteam_text/*0x190*/, &foeteam_text/*0x191*/,
@@ -208,7 +214,8 @@ void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activ
 &shadowforce_text, &mistyterrain_text, &grassyterrain_text, &electricterrain_text, &aquaring_text, &aquaringheal_text, &assaultvest_text,
 &gravityprevents2_text, &healblockprevents2_text , &let_it_move_first_text, &mega_evolved_text, &mega_trigger_text, &fervent_trigger_text,
 &quash_text, &allyswitch_text, &topsyturvy_text, &bestow_text, &statushealpoison_text, &statushealburn_text, &statushealpar_text,
-&statushealslp_text, &statushealfrz_text, &primal_reversion_text};
+&statushealslp_text, &statushealfrz_text, &primal_reversion_text, &congrats_player_text, &happyhour_text, &skydrop1_text, &skydrop2_text,
+&skydroptooheavy_text, &fairylock_text};
 
 void battle_string_loader(u16 string_id)
 {
@@ -450,7 +457,7 @@ void attacker_stat_change()
 
 void moxie_stat_raise()
 {
-    if ((current_move == MOVE_BLOCK || check_ability(bank_attacker, ABILITY_MOXIE)) && bank_attacker != bank_target && DAMAGING_MOVE)
+    if ((current_move == MOVE_BLOCK || check_ability(bank_attacker, ABILITY_MOXIE)) && bank_attacker != bank_target && DAMAGING_MOVE(current_move))
     {
         //check if that's the last opponent pokemon, if yes, then we'll skip the animation
         if (is_bank_from_opponent_side(bank_target))
@@ -1416,7 +1423,7 @@ void powder_setter()
 void jumpifnoally()
 {
     u8 ally_bank = bank_attacker ^ 2;
-    if (ally_bank < no_of_all_banks && battle_participants[ally_bank].current_hp)
+    if (is_bank_present(ally_bank))
     {
         battlescripts_curr_instruction += 4;
         bank_target = ally_bank;
@@ -2310,7 +2317,8 @@ u8 get_flowershieldbank()
         u8* stat_ptr = &battle_participants[i].hp_buff + bit_to_stat(move_table[current_move].arg1);
         if (is_bank_present(i) && !(crit_loc & bits_table[i]) && is_of_type(i, TYPE_GRASS) && *stat_ptr != 0xC)
         {
-            return i;
+            if (move_table[current_move].type != TYPE_GROUND || GROUNDED(i))
+                return i;
         }
     }
     return 0xFF;
@@ -2602,10 +2610,48 @@ void mega_primal_cry()
 void canusefling()
 {
     u16 item = battle_participants[bank_attacker].held_item;
-    if (item == 0 || !can_lose_item(bank_attacker, 0, 0) || check_ability(bank_attacker, ABILITY_KLUTZ || new_battlestruct.ptr->bank_affecting[bank_attacker].embargo || new_battlestruct.ptr->field_affecting.magic_room))
+    if (item == 0 || item == ITEM_REDORB || item == ITEM_BLUEORB || get_item_pocket_id(item) == 2 || get_item_pocket_id(item) == 3 || !can_lose_item(bank_attacker, 0, 0) || check_ability(bank_attacker, ABILITY_KLUTZ || new_battlestruct.ptr->bank_affecting[bank_attacker].embargo || new_battlestruct.ptr->field_affecting.magic_room))
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
         battlescripts_curr_instruction += 4;
+}
+
+void happyhour_effect()
+{
+    new_battlestruct.ptr->various.happyhour_bonus = 1;
+}
+
+void canuseskydrop()
+{
+    if (bank_target == (bank_attacker ^ 2) || new_battlestruct.ptr->field_affecting.gravity)
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else if (get_poke_weight(bank_target) > 2000)
+    {
+        battlescripts_curr_instruction = &skydrop_tooheavy_bs;
+        move_outcome.failed = 1;
+    }
+    else
+        battlescripts_curr_instruction += 4;
+}
+
+void skydropup()
+{
+    new_battlestruct.ptr->bank_affecting[bank_attacker].sky_drop_attacker = 1;
+    new_battlestruct.ptr->bank_affecting[bank_target].sky_drop_target = 1;
+    battle_participants[bank_attacker].status2.multiple_turn_move = 1;
+    locked_move[bank_attacker] = current_move;
+}
+
+void canusefairylock()
+{
+    struct field_affecting* lock = &new_battlestruct.ptr->field_affecting;
+    if (lock->fairy_lock)
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else
+    {
+        lock->fairy_lock = 2;
+        battlescripts_curr_instruction += 4;
+    }
 }
 
 void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*/, &change_attacker_item /*2*/, &try_to_lower_def /*3*/, &try_to_raise_spd /*4*/,
@@ -2628,7 +2674,7 @@ void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*
 &jumpifuserhasnoHP /*91*/, &quash_setter /*92*/, &beatup_getloopcounter /*93*/, &canuse_allyswitch /*94*/, &allyswitch_dataswitch /*95*/,
 &can_magneticflux_work /*96*/, &magnetic_flux_effect /*97*/, &canuse_flowershield /*98*/, &flowershield_effect /*99*/, &canuselastresort /*100*/,
 &topsyturvy_effect /*101*/, &bestow_effect /*102*/, &conversion_effect /*103*/, &party_heal /*104*/, &accupressure_effect /*105*/, &mega_primal_cry /*106*/,
-&canusefling /*107*/};
+&canusefling /*107*/, &happyhour_effect /*108*/, &canuseskydrop /*109*/, &skydropup /*110*/, &canusefairylock /*111*/};
 
 void callasm_cmd()
 {

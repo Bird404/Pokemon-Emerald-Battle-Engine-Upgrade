@@ -692,16 +692,20 @@ u8 primary_effect_setter()
             {
                 u8 arg = move_table[current_move].arg1 & 1;
                 new_battlestruct.ptr->bank_affecting[bank_attacker].bugbite = arg;
-                if (!arg)
+                u16* berry = &battle_participants[bank_to_apply].held_item;
+                last_used_item = *berry;
+                if (!arg) //berry destroy, no effect
                 {
-                    u16* berry = &battle_participants[bank_to_apply].held_item;
-                    last_used_item = *berry;
                     *berry = 0;
                     battlescript_push();
                     battlescripts_curr_instruction = &incinerateberry_bs;
                     active_bank = bank_to_apply;
                     prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, berry);
                     mark_buffer_bank_for_execution(bank_to_apply);
+                }
+                else //get berry's effect
+                {
+
                 }
             }
             break;
@@ -719,6 +723,17 @@ u8 primary_effect_setter()
 
 #define INC_END_EVENTS battle_scripting.cmd49_state_tracker++;
 #define case_max 34
+
+void clear_twoturn(u8 bank)
+{
+    status3[bank].on_air = 0;
+    status3[bank].underwater = 0;
+    status3[bank].underground = 0;
+    status3[bank].phantomforce = 0;
+    new_battlestruct.ptr->bank_affecting[bank].sky_drop_attacker = 0;
+    new_battlestruct.ptr->bank_affecting[bank].sky_drop_target = 0;
+    return;
+}
 
 void atk49_move_end_turn()
 {
@@ -761,7 +776,7 @@ void atk49_move_end_turn()
         case 1: //rage checker
             if (target_struct->current_hp && target_struct->status2.raged && bank_target != bank_attacker &&
                 is_bank_from_opponent_side(bank_target) != is_bank_from_opponent_side(bank_attacker) && MOVE_WORKED && TARGET_TURN_DAMAGED &&
-                DAMAGING_MOVE && target_struct->atk_buff != 0xC)
+                DAMAGING_MOVE(current_move) && target_struct->atk_buff != 0xC)
             {
                 target_struct->atk_buff++;
                 battlescript_push();
@@ -861,10 +876,7 @@ void atk49_move_end_turn()
                 active_bank=bank_attacker;
                 prepare_pokemon_battle_sprite_manipulation_buffer(0,0);
                 mark_buffer_bank_for_execution(active_bank);
-                status3[bank_attacker].underground=0;
-                status3[bank_attacker].underwater=0;
-                status3[bank_attacker].on_air=0;
-                status3[bank_attacker].phantomforce=0;
+                clear_twoturn(bank_attacker);
                 special_statuses[bank_attacker].restored_bank_sprite=1;
             }
             INC_END_EVENTS
@@ -876,10 +888,7 @@ void atk49_move_end_turn()
                 active_bank=bank_target;
                 prepare_pokemon_battle_sprite_manipulation_buffer(0,0);
                 mark_buffer_bank_for_execution(active_bank);
-                status3[bank_target].underground=0;
-                status3[bank_target].underwater=0;
-                status3[bank_target].on_air=0;
-                status3[bank_target].phantomforce=0;
+                clear_twoturn(bank_target);
             }
             INC_END_EVENTS
             new_battlestruct.ptr->various.active_bank = bank_attacker;
@@ -1513,7 +1522,7 @@ void check_and_set_parental_bond()
             new_battlestruct.ptr->various.parental_bond_mode=PBOND_DONT_SET;
             multihit_counter = 2;
         }
-        if(DAMAGING_MOVE)
+        if(DAMAGING_MOVE(current_move))
             new_battlestruct.ptr->various.parental_bond_mode=PBOND_PARENT;
     }
 }
@@ -2247,10 +2256,9 @@ void atkC5_hide_pre_attack()
 
 void atkC6_unhide_post_attack()
 {
-    status3[bank_attacker].on_air = 0;
-    status3[bank_attacker].underwater = 0;
-    status3[bank_attacker].underground = 0;
-    status3[bank_attacker].phantomforce = 0;
+    clear_twoturn(bank_attacker);
+    if (current_move == MOVE_SKY_DROP)
+        clear_twoturn(bank_target);
     battlescripts_curr_instruction++;
     return;
 }
@@ -2296,7 +2304,6 @@ void atkB7_present_calc()
             damage_loc = get_1_4_of_max_hp(bank_target) * (-1);
             battlescripts_curr_instruction = (void*) 0x082D9EE1;
         }
-
     }
     if (dynamic_base_power)
         battlescripts_curr_instruction = (void*) 0x082D8A30;
@@ -2476,4 +2483,26 @@ void atk15_setmoveeffectchance()
         battlescripts_curr_instruction++;
     *effect = 0;
     battle_scripting.field16 = 0;
+}
+
+void atk5D_moneyreward()
+{
+    u32 money = get_trainer_money(var_8015_trainer_opponent_A);
+    if (battle_flags.multibattle)
+        money += get_trainer_money(trainer_opponent_B);
+    if (new_battlestruct.ptr->various.happyhour_bonus)
+        money *= 2;
+    //sorry for the ugly casting, too lazy to type saveblock1 struct
+    give_money((u32*) (*(u8*)(0x03005D8C) + 0x490), money);
+    battle_text_buff1[0] = 0xFD;
+    battle_text_buff1[1] = 1;
+    battle_text_buff1[2] = 4;
+    battle_text_buff1[3] = 5;
+    battle_text_buff1[4] = money;
+    battle_text_buff1[5] = money >> 8;
+    battle_text_buff1[6] = money >> 0x10;
+    battle_text_buff1[7] = money >> 0x18;
+    battle_text_buff1[8] = 0xFF;
+    battlescripts_curr_instruction++;
+    return;
 }

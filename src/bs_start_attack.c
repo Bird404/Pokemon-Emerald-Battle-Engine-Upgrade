@@ -296,7 +296,7 @@ void set_attacking_move_type()
             break;
         }
         u8 ate=0;
-        if(move_type == TYPE_EGG && (DAMAGING_MOVE) && has_ability_effect(bank_attacker,0,1) && move_table[current_move].type==TYPE_NORMAL)
+        if(move_type == TYPE_EGG && (DAMAGING_MOVE(current_move)) && has_ability_effect(bank_attacker,0,1) && move_table[current_move].type==TYPE_NORMAL)
         {
             switch(ability)
             {
@@ -506,7 +506,12 @@ void bs_start_attack()
         }
     }
     bank_attacker=turn_order[current_move_turn];
-    if(!(bits_table[bank_attacker]&battle_stuff_ptr.ptr->absent_bank_flags_prev_turn))
+    if (new_battlestruct.ptr->bank_affecting[bank_attacker].sky_drop_target && is_bank_present(bank_attacker))
+    {
+        reset_several_turns_stuff(bank_attacker);
+        battle_state_mode = 0xB;
+    }
+    else if(!(bits_table[bank_attacker]&battle_stuff_ptr.ptr->absent_bank_flags_prev_turn))
     {
         struct battle_participant *attacker_struct = &battle_participants[bank_attacker];
         crit_loc=1;
@@ -609,7 +614,7 @@ void bs_start_attack()
             hitmarker |= HITMARKER_IGNORE_UNDERWATER;
     }
     else
-        battle_state_mode=0xC;
+        battle_state_mode = 0xC;
 }
 
 s8 get_bracket_alteration_factor(u8 bank, u8 item_effect);
@@ -667,5 +672,3 @@ void bc_preattacks()
         battle_resources.ptr->battlescript_stack->stack_height=0;
     }
 }
-
-

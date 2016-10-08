@@ -172,7 +172,7 @@ battlescripts_table:
 .word 0x082D8BF9 		@89 Dream Eater
 .word NIGHTMARE			@90 Nightmare
 .word 0x082D9249		@91 Transform
-.word 0x082D94F5		@92 Splash
+.word USELESS_MOVES		@92 Splash, Hold Hands, Celebrate
 .word 0x082D8F9C		@93 Rest
 .word CONVERSIONS		@94 Conversion and Conversion2, based on move IDs
 .word TRIATTACK 		@95 Tri Attack
@@ -237,7 +237,7 @@ battlescripts_table:
 .word SMACK_DOWN 		@154 Smack Down
 .word CHANGE_TARGET_TYPE_TO	@155 @arg1 is type to change target into
 .word SHELLSMASH		@156 Shell Smash
-.word ATTACKING_MOVE @	".word SKYDROP				"	157
+.word SKYDROP			@157 Sky Drop
 .word SHIFTGEAR			@158 Shift Gear; arg1 stats to raise + 2; arg2 stats to raise + 1
 .word QUASHH			@159 Quash
 .word FAKEOUT			@160 Fake Out
@@ -247,11 +247,107 @@ battlescripts_table:
 .word 0x082D9FD2		@164 Hail
 .word MAGNETICFLUX		@165 Magnetic Flux @arg1 bitfield for stats to raise; arg 2 by how much
 .word VENOMDRENCH		@166 Venom Drench
-.word FLOWERSHIELD		@167 Flower Shield @arg1 bitfield for stats to raise; arg 2 by how much
+.word GRASSTYPESSTATRAISE		@167 Flower Shield, Rototiler @arg1 bitfield for stats to raise; arg 2 by how much
 .word LASTRESORT		@168 Last Resort
 .word TOPSYTURVY		@169 Topsy Turvy
 .word BESTOW			@170 Bestow
 .word TARGETSTATSWITCH	@171 Parting Shot; @arg1 bitfield for stats to raise; arg 2 by how much
+.word HAPPYHOUR			@172 Happy Hour, multiplies gotten money by two
+.word FAIRYLOCK			@173 Fairy Lock
+
+FAIRYLOCK:
+	attackcanceler
+	callasm_cmd 111
+	.word MOVE_FAILED
+	attackstring
+	ppreduce
+	attackanimation
+	waitanimation
+	printstring 0x216
+	waitmessage 0x40
+	goto_cmd ENDTURN
+
+SKYDROP:
+	attackcanceler
+	jumpifsecondarystatus bank_attacker STATUS2_MULTIPLETURNS SKYDROP_SECONDTURN
+	jumpifsubstituteaffects MOVE_FAILED
+	callasm_cmd 109
+	.word MOVE_FAILED
+	accuracycheck MOVE_MISSED 0x0
+	ppreduce
+	printstring 0x213
+	waitmessage 0x40
+	attackanimation
+	waitanimation
+	callasm_cmd 110
+	goto_cmd ENDTURN
+	
+SKYDROP_SECONDTURN:
+	attackstring
+	bicword 0x020241F0 0xFFFFFFFF @set damage location to 0
+	call CLEAR_TWOTURN
+	jumpiftype bank_target TYPE_FLYING SKYDROP_NODAMAGE
+	critcalc
+	damagecalc
+	damageadjustment
+	printstring 0x214
+	waitmessage 0x40
+	attackanimation
+	waitanimation
+	effectiveness_sound
+	hitanim bank_target
+	waitstate
+	graphicalhpupdate bank_target
+	datahpupdate bank_target
+	critmessage
+	waitmessage 0x40
+	resultmessage
+	waitmessage 0x40
+	seteffectwithchance
+	faintpokemon bank_target 0x0 0x0 @faint target
+	goto_cmd ENDTURN
+
+SKYDROP_NODAMAGE:
+	attackanimation
+	waitanimation
+	orbyte MoveOutcome OutcomeNotaffected
+	resultmessage
+	waitmessage 0x40
+	goto_cmd ENDTURN
+
+HAPPYHOUR:
+	attackcanceler
+	attackstring
+	ppreduce
+	attackanimation
+	waitanimation
+	callasm_cmd 108
+	printstring 0x212
+	waitmessage 0x40
+	goto_cmd ENDTURN
+
+USELESS_MOVES:
+	jumpifmove MOVE_SPLASH 0x082D94F5
+	jumpifmove MOVE_HOLD_HANDS HOLDHANDS
+	@Otherwise, the move is Celebrate
+	attackcanceler
+	attackstring
+	ppreduce
+	attackanimation
+	waitanimation
+	printstring
+	waitmessage 0x40
+	goto_cmd ENDTURN
+	
+HOLDHANDS:
+	attackcanceler
+	jumpifnoally MOVE_FAILED
+	accuracycheck MOVE_FAILED 0xFFFF
+	attackstring
+	ppreduce
+	attackanimation
+	waitanimation
+	goto_cmd ENDTURN
 
 FLINGG:
 	attackcanceler
@@ -378,7 +474,7 @@ LASTRESORT:
 	.word MOVE_FAILED
 	goto_cmd ATTACKING_MOVE + 1
 
-FLOWERSHIELD:
+GRASSTYPESSTATRAISE:
 	attackcanceler
 	setbyte 0x02024211 0x0
 	callasm_cmd 98
@@ -555,7 +651,6 @@ SHIFTGEARATTACKBOOST_MSG:
 	call STATBUFF_CHANGE_POSITIVE_MSG
 SHIFTGEAREND:
 	goto_cmd ENDTURN
-	
 
 AQUA_RING:
 	attackcanceler

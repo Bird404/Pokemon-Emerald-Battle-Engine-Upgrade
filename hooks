@@ -31,3 +31,4 @@ slide_out_on_pressing_A_hook2 080578D8 1
 target_self_ally 08057CAE 0
 choose_self_or_ally_left 08057A14 1
 choose_self_or_ally_right 08057B38 1
+tai_should_switch 08063614 0
