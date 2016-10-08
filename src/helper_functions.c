@@ -639,11 +639,11 @@ void dostatchanges()
     u16* done_stats = &new_battlestruct.ptr->various.var1;
     u8 stats_to_change = move_table[current_move].arg1;
     s8 by_how_much = move_table[current_move].arg2;
-    u8 affects_user = 0x40;
+    u8 affects_user = 0x41;
     bank_partner_def = bank_attacker;
     if (move_table[current_move].target != move_target_user && move_table[current_move].base_power == 0 && move_table[current_move].split == 2)
     {
-        affects_user = 0;
+        affects_user = 1;
         bank_partner_def = bank_target;
     }
     for (u8 i = 0; i < 7; i++)
@@ -653,7 +653,8 @@ void dostatchanges()
             void* stat_msg = 0;
             *done_stats |= bits_table[i];
             battle_scripting.stat_changer = by_how_much | bit_to_stat(bits_table[i]);
-            if (change_stats(by_how_much, bit_to_stat(bits_table[i]), affects_user, 0) == 0) //it worked
+            void* curr_instr = battlescripts_curr_instruction;
+            if (change_stats(by_how_much, bit_to_stat(bits_table[i]), affects_user, curr_instr - 3) == 0) //it worked
             {
                 if (battle_scripting.stat_changer & 0x80)
                     stat_msg = &stat_lower;
@@ -667,9 +668,12 @@ void dostatchanges()
                 else
                     stat_msg = &cant_raise_bs;
             }
-            battlescripts_curr_instruction -= 3;
-            battlescript_push();
-            battlescripts_curr_instruction = stat_msg;
+            if (battlescripts_curr_instruction == curr_instr)
+            {
+                battlescripts_curr_instruction -= 3;
+                battlescript_push();
+                battlescripts_curr_instruction = stat_msg;
+            }
             break;
         }
     }

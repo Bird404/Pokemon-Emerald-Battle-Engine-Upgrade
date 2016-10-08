@@ -1659,22 +1659,28 @@ void call_ability_effects()
 u8 white_herb_effect(u8 bank, enum call_mode calling_mode)
 {
     u8 effect = false;
+    u8* stat = &battle_participants[bank].atk_buff;
     for (u8 i = 0; i < 7; i++)
     {
-        if (*(&battle_participants[bank].atk_buff + i) < 6)
+        if (*(stat + i) < 6)
         {
+            *(stat + i) = 6;
             effect = 5;
-            battle_scripting.active_bank = bank;
-            active_bank = bank;
-            bank_attacker = bank;
-            if(calling_mode==BATTLE_TURN)
-            {
-                call_bc_move_exec((void*) 0x082DB7AE);
-            }
-            else
-            {
-                battlescripts_curr_instruction = ((void*) 0x082DB7B4);
-            }
+        }
+    }
+    if (effect)
+    {
+        battle_scripting.active_bank = bank;
+        active_bank = bank;
+        bank_attacker = bank;
+        if (calling_mode == BATTLE_TURN)
+        {
+            call_bc_move_exec((void*) 0x082DB7AE);
+        }
+        else
+        {
+            battlescript_push();
+            battlescripts_curr_instruction = ((void*) 0x082DB7B4);
         }
     }
     return effect;
@@ -1700,6 +1706,7 @@ u8 mental_herb_effect(u8 bank, enum call_mode calling_mode)
         }
         else
         {
+            battlescript_push();
             battlescripts_curr_instruction = (&mentalherb_endmove_bs);
         }
         battle_scripting.active_bank = bank;
@@ -1850,7 +1857,6 @@ u8 hp_condition(u8 bank, u8 percent) //1 = 50 %, 2 = 25 %
         return 1;
     return 0;
 }
-
 
 u8 heal_and_confuse_berry(u8 bank, u8 item_effect, u8 quality, enum call_mode calling_mode)
 {
