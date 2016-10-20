@@ -52,7 +52,7 @@ void attack_iteration_cleanup();
 void prepare_pokemon_battle_sprite_manipulation_buffer(u8 unknown, u8 unknown2);
 u8 check_failure_due_to_status(u8 bank);
 void sub_803CEDC(u8 bank1, u8 bank2);
-u8 get_attributes(struct pokemon* poke_address, u8 request, void* destination);
+u32 get_attributes(struct pokemon* poke_address, u8 request, void* destination);
 void set_attributes(struct pokemon* poke_address, u8 request, void* new_value);
 u8 item_is_mail(u8 itemID);
 u8 get_lvl_from_exp(struct pokemon*);
