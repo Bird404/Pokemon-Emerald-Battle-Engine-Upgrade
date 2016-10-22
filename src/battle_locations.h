@@ -73,6 +73,7 @@ u8 healthbox_obj_id_pbs[4];
 u8 move_selection_chosen_target_pbs[4];
 u8 moves_to_choose_pbs[4];
 u8 move_selection_cursor_pbs[4];
+u32 bits_table[32];
 
 u32 poison_status_flag;
 u32 sleep_status_flag;

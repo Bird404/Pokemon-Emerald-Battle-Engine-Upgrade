@@ -134,11 +134,7 @@ struct new_battle_struct{
     struct mega_related mega_related;
 };
 
-struct new_battlestruct_ptr{
-    struct new_battle_struct *ptr;
-};
-
-extern struct new_battlestruct_ptr new_battlestruct;
+extern struct new_battle_struct* new_battlestruct;
 
 //functions used by multiple files
 u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special_cases_argument, u16 move);

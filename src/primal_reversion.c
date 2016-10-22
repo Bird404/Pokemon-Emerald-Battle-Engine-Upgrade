@@ -1,10 +1,4 @@
-#include "types.h"
 #include "defines.h"
-#include "battle_locations.h"
-#include "battle_structs.h"
-#include "vanilla_functions.h"
-#include "static_references.h"
-#include "new_battle_struct.h"
 
 #define ALPHA_REVERSION 1
 #define OMEGA_REVERSION 2
@@ -18,12 +12,12 @@ u8 get_reversion_type(u8 bank, u16 target_species)
 {
     u16 species = battle_participants[bank].poke_species;
     u8 reversion_type = 0;
-    struct evolution_data *evolution_table= (void *)(evo_table_ptr_ptr);
+    struct evolutions_of_poke* PokeEvo = &evo_table->poke_evo[species];
     for(u8 i=0; i<NUM_OF_EVOS; i++)
     {
-        if (evolution_table->poke_evolutions[species].evos[i].method==0xFD && evolution_table->poke_evolutions[species].evos[i].poke==target_species)
+        if (PokeEvo->evos[i].method==0xFD && PokeEvo->evos[i].poke==target_species)
         {
-            reversion_type=evolution_table->poke_evolutions[species].evos[i].paramter;
+            reversion_type=PokeEvo->evos[i].paramter;
             break;
         }
     }
@@ -60,18 +54,18 @@ bool handle_primal_reversion(u8 bank)
             bank_struct->sp_atk = get_attributes(poke_address, ATTR_SPECIAL_ATTACK, 0);
             bank_struct->sp_def = get_attributes(poke_address, ATTR_SPECIAL_DEFENCE, 0);
             bank_struct->poke_species = primal_species;
-            struct basestat_data *pokemon_table = (void *)(poke_stat_table_ptr_ptr);
-            bank_struct->type1 = pokemon_table->poke_stats[primal_species].type1;
-            bank_struct->type2 = pokemon_table->poke_stats[primal_species].type2;
+            struct poke_basestats* PokeStats = &basestat_table->poke_stats[primal_species];
+            bank_struct->type1 = PokeStats->type1;
+            bank_struct->type2 = PokeStats->type2;
             // The ability 1 and ability 2 of the primal species in the base stat table should both be set and
             // have the same value.
-            bank_struct->ability_id = pokemon_table->poke_stats[primal_species].ability1;
+            bank_struct->ability_id = PokeStats->ability1;
 
             bank_struct->max_hp = get_attributes(poke_address, ATTR_TOTAL_HP, 0);
             bank_struct->current_hp = get_attributes(poke_address, ATTR_CURRENT_HP, 0);
             bank_struct->level = get_attributes(poke_address, ATTR_LEVEL, 0);
 
-            new_battlestruct.ptr->various.active_bank = bank;
+            new_battlestruct->various.active_bank = bank;
             bank_attacker = bank;
             if(reversion_mode==ALPHA_REVERSION)
             {

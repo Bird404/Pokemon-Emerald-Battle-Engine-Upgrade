@@ -2,7 +2,6 @@
 #define VANILLA_FUNCTIONS
 
 #include "types.h"
-#include "battle_structs.h"
 
 u8 get_item_x12_battle_function(u16 item_id);
 u8 get_item_quality(u16 item_id);
@@ -97,9 +96,10 @@ u8 ai_switch_sth1();
 u8 ai_switch_sth2();
 u8 ai_is_statbuffed();
 u8 ai_switch_sth3(u8 arg1, u8 arg2);
+u32 malloc_and_clear(u16 size);
+void free(void* address);
 
 u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);
-u32 bits_table[32];
 
 #endif /* VANILLA_FUNCTIONS */

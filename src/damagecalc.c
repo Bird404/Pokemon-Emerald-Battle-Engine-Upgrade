@@ -1,27 +1,13 @@
-#include "types.h"
 #include "defines.h"
-#include "battle_locations.h"
-#include "battle_structs.h"
-#include "vanilla_functions.h"
-#include "new_battle_struct.h"
+#include "static_references.h"
 
 #define MOVE_PHYSICAL 0
 #define MOVE_SPECIAL 1
 #define MOVE_STATUS 2
 
-extern struct move_info move_table[1024];
-extern u16 reckless_moves_table[];
-extern u16 ironfist_moves_table[];
-extern u16 sheerforce_moves_table[];
-extern u16 biting_moves_table[];
-extern u16 megalauncher_moves_table[];
 u8 get_airborne_state(u8 bank, u8 mode, u8 check_levitate);
 u8 can_lose_item(u8 bank, u8 stickyholdcheck, u8 sticky_message);
 u8 is_item_a_plate(u16 item);
-
-#define MOVE_PHYSICAL 0
-#define MOVE_SPECIAL 1
-#define MOVE_STATUS 2
 
 struct natural_gift{
     u8 move_power;
@@ -47,11 +33,11 @@ struct stat_fractions stat_buffs[] = { {2, 8}, {2, 7}, {2, 6}, {2, 5}, {2, 4}, {
 
 u8 can_evolve(u16 poke_species)
 {
-    struct evolution_data *evolution_table= (void *)(evo_table_ptr_ptr);
+    struct evolutions_of_poke* PokeEvo = &evo_table->poke_evo[poke_species];
     for (u8 i = 0; i < NUM_OF_EVOS; i++)
     {
-        if (evolution_table->poke_evolutions[poke_species].evos[i].method != 0
-            && evolution_table->poke_evolutions[poke_species].evos[i].method < 0xFA)
+        u8 method = PokeEvo->evos[i].method;
+        if (method != 0 && method < 0xFA)
         {
             return true;
         }
@@ -120,7 +106,7 @@ s16 get_poke_weight(u8 bank)
     {
         poke_weight *= 2;
     }
-    s16 to_sub = 1000 * new_battlestruct.ptr->bank_affecting[bank].autonomize_uses;
+    s16 to_sub = 1000 * new_battlestruct->bank_affecting[bank].autonomize_uses;
     poke_weight -= to_sub;
     if (poke_weight < 1)
         poke_weight = 1;
@@ -213,7 +199,7 @@ u16 get_speed(u8 bank)
     if (battle_participants[bank].status.flags.paralysis)
         speed >>= 2;
     //tailwind
-    if (new_battlestruct.ptr->side_affecting[is_bank_from_opponent_side(bank)].tailwind)
+    if (new_battlestruct->side_affecting[is_bank_from_opponent_side(bank)].tailwind)
         speed <<= 1;
     //unburden
     if (status3[bank].unburden)
@@ -343,9 +329,9 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
             {                   //dynamic type will be set here
                 s8 berryID = itemid_to_berryid(battle_participants[atk_bank].held_item);
                 base_power = natural_gift_table[berryID].move_power;
-                battle_stuff_ptr.ptr->dynamic_move_type = natural_gift_table[berryID].move_type + 0x80;
-                if ((new_battlestruct.ptr->field_affecting.ion_deluge || new_battlestruct.ptr->bank_affecting[atk_bank].electrify) && battle_stuff_ptr.ptr->dynamic_move_type == 0x80)
-                    battle_stuff_ptr.ptr->dynamic_move_type = TYPE_ELECTRIC + 0x80;
+                battle_stuff_ptr->dynamic_move_type = natural_gift_table[berryID].move_type + 0x80;
+                if ((new_battlestruct->field_affecting.ion_deluge || new_battlestruct->bank_affecting[atk_bank].electrify) && battle_stuff_ptr->dynamic_move_type == 0x80)
+                    battle_stuff_ptr->dynamic_move_type = TYPE_ELECTRIC + 0x80;
             }
             break;
         case MOVE_WAKEUP_SLAP:
@@ -490,7 +476,7 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
                 base_power = 150;
             break;
         case MOVE_ECHOED_VOICE:
-            base_power += 40 * new_battlestruct.ptr->side_affecting[atk_banks_side].echo_voice_counter;
+            base_power += 40 * new_battlestruct->side_affecting[atk_banks_side].echo_voice_counter;
             if (base_power > 200)
                 base_power = 200;
             break;
@@ -502,7 +488,7 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
             break;
         case MOVE_GUST:
         case MOVE_TWISTER:
-            if (new_battlestruct.ptr->bank_affecting[def_bank].sky_drop_attacker || new_battlestruct.ptr->bank_affecting[def_bank].sky_drop_target || status3[def_bank].on_air)
+            if (new_battlestruct->bank_affecting[def_bank].sky_drop_attacker || new_battlestruct->bank_affecting[def_bank].sky_drop_target || status3[def_bank].on_air)
             {
                 base_power *= 2;
             }
@@ -530,8 +516,7 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
                     }
                 }
                 u16 species = get_attributes(&poke[poke_index], ATTR_SPECIES, 0);
-                struct basestat_data *pokemon_table = (void *)(poke_stat_table_ptr_ptr);
-                base_power = pokemon_table->poke_stats[species].base_atk / 10 + 5;
+                base_power = basestat_table->poke_stats[species].base_atk / 10 + 5;
             }
             break;
     }
@@ -593,7 +578,7 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
             if (find_move_in_table(move, &sheerforce_moves_table[0]))
             {
                 modifier = chain_modifier(modifier, 0x14CD);
-                new_battlestruct.ptr->various.sheerforce_bonus = 1;
+                new_battlestruct->various.sheerforce_bonus = 1;
             }
             break;
         case ABILITY_SAND_FORCE:
@@ -680,7 +665,7 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
     switch (get_item_effect(atk_bank, 1))
     {
     case ITEM_EFFECT_NOEFFECT:
-        if (new_battlestruct.ptr->various.gem_boost)
+        if (new_battlestruct->various.gem_boost)
         {
             modifier = chain_modifier(modifier, 0x14CD);
         }
@@ -846,7 +831,7 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
         }
         break;
     case MOVE_RETALIATE:
-        if (new_battlestruct.ptr->side_affecting[is_bank_from_opponent_side(atk_bank)].ally_fainted_last_turn)
+        if (new_battlestruct->side_affecting[is_bank_from_opponent_side(atk_bank)].ally_fainted_last_turn)
         {
             modifier = chain_modifier(modifier, 0x2000);
         }
@@ -860,7 +845,7 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
     case MOVE_EARTHQUAKE:
     case MOVE_MAGNITUDE:
     case MOVE_BULLDOZE:
-        if (new_battlestruct.ptr->field_affecting.grassy_terrain && get_airborne_state(def_bank, 1, 1) <= 2)
+        if (new_battlestruct->field_affecting.grassy_terrain && get_airborne_state(def_bank, 1, 1) <= 2)
         {
             modifier = chain_modifier(modifier, 0x800);
         }
@@ -886,19 +871,19 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
     {
         modifier = chain_modifier(modifier, 0x548);
     }
-    if (new_battlestruct.ptr->bank_affecting[atk_bank].me_first)
+    if (new_battlestruct->bank_affecting[atk_bank].me_first)
     {
         modifier = chain_modifier(modifier, 0x1800);
     }
-    if (new_battlestruct.ptr->field_affecting.grassy_terrain && get_airborne_state(atk_bank, 0, 1) <= 2 && move_type == TYPE_GRASS)
+    if (new_battlestruct->field_affecting.grassy_terrain && get_airborne_state(atk_bank, 0, 1) <= 2 && move_type == TYPE_GRASS)
     {
         modifier = chain_modifier(modifier, 0x1800);
     }
-    if (new_battlestruct.ptr->field_affecting.misty_terrain && get_airborne_state(def_bank, 1, 1) >= 2 && move_type == TYPE_DRAGON)
+    if (new_battlestruct->field_affecting.misty_terrain && get_airborne_state(def_bank, 1, 1) >= 2 && move_type == TYPE_DRAGON)
     {
         modifier = chain_modifier(modifier, 0x800);
     }
-    if (new_battlestruct.ptr->field_affecting.electic_terrain && get_airborne_state(atk_bank, 0, 1) >= 2 && move_type == TYPE_ELECTRIC)
+    if (new_battlestruct->field_affecting.electic_terrain && get_airborne_state(atk_bank, 0, 1) >= 2 && move_type == TYPE_ELECTRIC)
     {
         modifier = chain_modifier(modifier, 0x1800);
     }
@@ -962,7 +947,7 @@ u16 get_attack_stat(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
             }
             break;
         case ABILITY_SLOW_START:
-            if (new_battlestruct.ptr->bank_affecting[atk_bank].slowstart_duration)
+            if (new_battlestruct->bank_affecting[atk_bank].slowstart_duration)
             {
                 modifier = chain_modifier(modifier, 0x800);
             }
@@ -980,7 +965,7 @@ u16 get_attack_stat(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
             }
             break;
         case ABILITY_FLASH_FIRE:
-            if (move_type == TYPE_FIRE && battle_resources.ptr->ability_flags_ptr->flags_ability[atk_bank].flag1_flashfire)
+            if (move_type == TYPE_FIRE && battle_resources->ability_flags_ptr->flags_ability[atk_bank].flag1_flashfire)
             {
                 modifier = chain_modifier(modifier, 0x1800);
             }
@@ -1037,7 +1022,7 @@ u16 get_attack_stat(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
         if (flower_gift_bank && move_split == MOVE_PHYSICAL)
         {
             flower_gift_bank--;
-            if (new_battlestruct.ptr->bank_affecting[flower_gift_bank].sunshine_form)
+            if (new_battlestruct->bank_affecting[flower_gift_bank].sunshine_form)
             {
                 modifier = chain_modifier(modifier, 0x1800);
             }
@@ -1096,7 +1081,7 @@ u16 get_def_stat(u16 move, u8 atk_bank, u8 def_bank)
     else
         chosen_def = 1;
 
-    if (new_battlestruct.ptr->field_affecting.wonder_room)
+    if (new_battlestruct->field_affecting.wonder_room)
         chosen_def ^= 1;
 
     u16 def_stat;
@@ -1146,7 +1131,7 @@ u16 get_def_stat(u16 move, u8 atk_bank, u8 def_bank)
     {
         modifier = chain_modifier(modifier, 0x2000);
     }
-    else if (has_ability_effect(def_bank, 1, 1) && battle_participants[def_bank].ability_id == ABILITY_GRASS_PELT && new_battlestruct.ptr->field_affecting.grassy_terrain && chosen_def == 0)
+    else if (has_ability_effect(def_bank, 1, 1) && battle_participants[def_bank].ability_id == ABILITY_GRASS_PELT && new_battlestruct->field_affecting.grassy_terrain && chosen_def == 0)
     {
         modifier = chain_modifier(modifier, 0x1800);
     }
@@ -1194,8 +1179,8 @@ u8 does_move_target_multiple();
 void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
 {
     u16 base_power = apply_base_power_modifiers(move, move_type, atk_bank, def_bank, get_base_power(move, atk_bank, def_bank));
-    if (battle_stuff_ptr.ptr->dynamic_move_type)
-        move_type = battle_stuff_ptr.ptr->dynamic_move_type &0x3F;
+    if (battle_stuff_ptr->dynamic_move_type)
+        move_type = battle_stuff_ptr->dynamic_move_type &0x3F;
     u16 chained_effectiveness=type_effectiveness_calc(move, move_type, atk_bank,def_bank,1);
     if (chained_effectiveness==0) // avoid wastage of time in case of non effective moves
         return;
@@ -1291,10 +1276,10 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
     }
     if (get_item_effect(atk_bank, 1) == ITEM_EFFECT_METRONOME)
     {
-        if (new_battlestruct.ptr->bank_affecting[atk_bank].same_move_used > 4)
+        if (new_battlestruct->bank_affecting[atk_bank].same_move_used > 4)
             final_modifier = chain_modifier(final_modifier, 0x2000);
         else
-            final_modifier = chain_modifier(final_modifier, 0x1000 + new_battlestruct.ptr->bank_affecting[atk_bank].same_move_used * 0x333);
+            final_modifier = chain_modifier(final_modifier, 0x1000 + new_battlestruct->bank_affecting[atk_bank].same_move_used * 0x333);
     }
     else if (get_item_effect(atk_bank, 1) == ITEM_EFFECT_EXPERTBELT && move_outcome.super_effective)
     {
@@ -1329,7 +1314,7 @@ void damage_calc_cmd_05()
 {
     u8 move_type=get_attacking_move_type();
     damage_calc(current_move, move_type, bank_attacker, bank_target);
-    if(new_battlestruct.ptr->various.parental_bond_mode==PBOND_CHILD)
+    if(new_battlestruct->various.parental_bond_mode==PBOND_CHILD)
     {
         damage_loc=damage_loc>>1;
     }

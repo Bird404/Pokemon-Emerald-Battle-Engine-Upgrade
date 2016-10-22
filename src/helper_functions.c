@@ -1,9 +1,4 @@
-#include "types.h"
 #include "defines.h"
-#include "battle_locations.h"
-#include "battle_structs.h"
-#include "vanilla_functions.h"
-#include "new_battle_struct.h"
 #include "static_references.h"
 
 u8 check_ability(u8 bank, u8 ability);
@@ -246,9 +241,9 @@ void apply_burn_animation()
 {
     u8 active = active_bank;
     active_bank = bank_attacker;
-    new_battlestruct.ptr->various.var1 = 0x10;
-    new_battlestruct.ptr->various.var2 = 0;
-    prepare_status_animation(0, 0, new_battlestruct.ptr->various.var1);
+    new_battlestruct->various.var1 = 0x10;
+    new_battlestruct->various.var2 = 0;
+    prepare_status_animation(0, 0, new_battlestruct->various.var1);
     mark_buffer_bank_for_execution(bank_attacker);
     active_bank = active;
     return;
@@ -263,7 +258,7 @@ void change_attacker_item()
 
 void try_to_raise_spd()
 {
-    if (battle_participants[new_battlestruct.ptr->various.active_bank].spd_buff != 0xC)
+    if (battle_participants[new_battlestruct->various.active_bank].spd_buff != 0xC)
     {
         battle_scripting.stat_changer = 0x13;
         battlescript_push();
@@ -274,7 +269,7 @@ void try_to_raise_spd()
 
 void try_to_lower_def()
 {
-    if (battle_participants[new_battlestruct.ptr->various.active_bank].def_buff > 0)
+    if (battle_participants[new_battlestruct->various.active_bank].def_buff > 0)
     {
         battle_scripting.stat_changer = 0x92;
         battlescript_push();
@@ -285,9 +280,9 @@ void try_to_lower_def()
 
 void changestatvar1()
 {
-    if (new_battlestruct.ptr->various.var1)
+    if (new_battlestruct->various.var1)
     {
-        battle_scripting.stat_changer = new_battlestruct.ptr->various.var1;
+        battle_scripting.stat_changer = new_battlestruct->various.var1;
         battlescript_push();
         battlescripts_curr_instruction = &changetargetstat_bs;
     }
@@ -296,9 +291,9 @@ void changestatvar1()
 
 void changestatvar2()
 {
-    if (new_battlestruct.ptr->various.var2)
+    if (new_battlestruct->various.var2)
     {
-        battle_scripting.stat_changer = new_battlestruct.ptr->various.var2;
+        battle_scripting.stat_changer = new_battlestruct->various.var2;
         battlescript_push();
         battlescripts_curr_instruction = &changetargetstat_bs;
     }
@@ -331,7 +326,7 @@ void set_stat_msg_buffer()
 
 void set_type_msg_buffer()
 {
-    u8 move_type=battle_stuff_ptr.ptr->dynamic_move_type&0x3F;
+    u8 move_type=battle_stuff_ptr->dynamic_move_type&0x3F;
     if (!move_type)
         move_type = move_table[current_move].type;
     battle_text_buff1[0] = 0xFD;
@@ -397,9 +392,9 @@ void mentalherb()
         battlescript_push();
         battlescripts_curr_instruction = &taunt_end_bs;
     }
-    if (new_battlestruct.ptr->bank_affecting[bank].heal_block)
+    if (new_battlestruct->bank_affecting[bank].heal_block)
     {
-        new_battlestruct.ptr->bank_affecting[bank].heal_block = 0;
+        new_battlestruct->bank_affecting[bank].heal_block = 0;
         battlescript_push();
         battlescripts_curr_instruction = &healblock_end_bs;
     }
@@ -413,14 +408,14 @@ void placeholder0x14()
 
 void hazards_bank_switcher()
 {
-    new_battlestruct.ptr->various.active_bank = bank_target;
-    bank_target = new_battlestruct.ptr->various.var1;
+    new_battlestruct->various.active_bank = bank_target;
+    bank_target = new_battlestruct->various.var1;
     return;
 }
 
 void hazards_bank_return()
 {
-    bank_target = new_battlestruct.ptr->various.active_bank;
+    bank_target = new_battlestruct->various.active_bank;
     return;
 }
 
@@ -428,7 +423,7 @@ u32 percent_boost(u32 number, u16 percent);
 
 void leechseed_update()
 {
-    if (new_battlestruct.ptr->bank_affecting[bank_target].heal_block)
+    if (new_battlestruct->bank_affecting[bank_target].heal_block)
         damage_loc = 0;
     else if (get_item_effect(bank_target, 1) == ITEM_EFFECT_BIGROOT)
         damage_loc = percent_boost(damage_loc, 30);
@@ -481,9 +476,9 @@ void grassyterrainn_heal()
 {
     for (u8 i = 0; i < no_of_all_banks; i++)
     {
-        if (!new_battlestruct.ptr->bank_affecting[i].grassyterrain_heal && get_airborne_state(i, 0, 1) <= 2 && battle_participants[i].current_hp < battle_participants[i].max_hp && !SEMI_INVULNERABLE(i))
+        if (!new_battlestruct->bank_affecting[i].grassyterrain_heal && get_airborne_state(i, 0, 1) <= 2 && battle_participants[i].current_hp < battle_participants[i].max_hp && !SEMI_INVULNERABLE(i))
         {
-            new_battlestruct.ptr->bank_affecting[i].grassyterrain_heal = 1;
+            new_battlestruct->bank_affecting[i].grassyterrain_heal = 1;
             battlescripts_curr_instruction -= 3;
             battlescript_push();
             battlescripts_curr_instruction = &grassyheal;
@@ -600,7 +595,7 @@ u8 checkifstatchangehaseffect()
 
 void statcheck_return()
 {
-    new_battlestruct.ptr->various.var1 = 0;
+    new_battlestruct->various.var1 = 0;
     if (checkifstatchangehaseffect())
         return;
     battlescripts_curr_instruction = &return_bs;
@@ -608,7 +603,7 @@ void statcheck_return()
 
 void doublestatchange_check()
 {
-    new_battlestruct.ptr->various.var1 = 0;
+    new_battlestruct->various.var1 = 0;
     if (checkifstatchangehaseffect())
         battlescripts_curr_instruction += 4;
     else
@@ -636,7 +631,7 @@ u8 bit_to_stat(u8 value)
 
 void dostatchanges()
 {
-    u16* done_stats = &new_battlestruct.ptr->various.var1;
+    u16* done_stats = &new_battlestruct->various.var1;
     u8 stats_to_change = move_table[current_move].arg1;
     s8 by_how_much = move_table[current_move].arg2;
     u8 affects_user = 0x41;
@@ -821,7 +816,7 @@ void jumpifonlyonepokemon()
 
 void setlunardanceeffect()
 {
-    new_battlestruct.ptr->side_affecting[is_bank_from_opponent_side(bank_attacker)].lunardance = 1;
+    new_battlestruct->side_affecting[is_bank_from_opponent_side(bank_attacker)].lunardance = 1;
     damage_loc = battle_participants[bank_attacker].current_hp;
     hitmarker |= HITMARKER_IGNORE_SUBSTITUTE;
     return;
@@ -922,7 +917,7 @@ void choosestatusinflictiontext()
         bank_partner_def = bank_target;
         battlescript_push();
         battlescripts_curr_instruction = battlescripts_for_moveeffects[position];
-        battle_stuff_ptr.ptr->synchronize_effect_chooser = position;
+        battle_stuff_ptr->synchronize_effect_chooser = position;
     }
 }
 
@@ -942,11 +937,11 @@ void roostactivation()
         {
             u8 *type1 = &battle_participants[bank_attacker].type1;
             u8 *type2 = &battle_participants[bank_attacker].type2;
-            u8 type3 = new_battlestruct.ptr->bank_affecting[bank_attacker].type3;
+            u8 type3 = new_battlestruct->bank_affecting[bank_attacker].type3;
             if (*type1 == TYPE_FLYING && *type2 == TYPE_FLYING && (type3 == TYPE_EGG || type3 == TYPE_FLYING))
             {//pure flying type
                 set_type(bank_attacker, TYPE_NORMAL);
-                new_battlestruct.ptr->bank_affecting[bank_attacker].roost = 4; //pure type-flying, becomes normal type
+                new_battlestruct->bank_affecting[bank_attacker].roost = 4; //pure type-flying, becomes normal type
             }
             else
             {
@@ -956,7 +951,7 @@ void roostactivation()
                         *type1 = *type2;
                     else
                         *type1 = type3;
-                    new_battlestruct.ptr->bank_affecting[bank_attacker].roost = 1;
+                    new_battlestruct->bank_affecting[bank_attacker].roost = 1;
                 }
                 else if (*type2 == TYPE_FLYING)
                 {
@@ -964,15 +959,15 @@ void roostactivation()
                         *type2 = *type1;
                     else
                         *type2 = type3;
-                    new_battlestruct.ptr->bank_affecting[bank_attacker].roost = 2;
+                    new_battlestruct->bank_affecting[bank_attacker].roost = 2;
                 }
                 else
                 {
                     if (*type1 != TYPE_FLYING)
-                        new_battlestruct.ptr->bank_affecting[bank_attacker].type3 = *type1;
+                        new_battlestruct->bank_affecting[bank_attacker].type3 = *type1;
                     else
-                        new_battlestruct.ptr->bank_affecting[bank_attacker].type3 = *type2;
-                    new_battlestruct.ptr->bank_affecting[bank_attacker].roost = 3;
+                        new_battlestruct->bank_affecting[bank_attacker].type3 = *type2;
+                    new_battlestruct->bank_affecting[bank_attacker].roost = 3;
                 }
             }
         }
@@ -982,13 +977,13 @@ void roostactivation()
 
 void gravitysetter()
 {
-    if (new_battlestruct.ptr->field_affecting.gravity)
+    if (new_battlestruct->field_affecting.gravity)
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
     {
         battlescripts_curr_instruction += 4;
-        new_battlestruct.ptr->field_affecting.gravity = 5;
-        new_battlestruct.ptr->various.var1 = 0;
+        new_battlestruct->field_affecting.gravity = 5;
+        new_battlestruct->various.var1 = 0;
     }
     return;
 }
@@ -997,20 +992,20 @@ void gravity_ender()
 {
     u8 effect = 1;
     void* instruction = 0;
-    if (new_battlestruct.ptr->various.var1 == 0)
-        new_battlestruct.ptr->various.var2 = bank_attacker; //bank attacker conserving
+    if (new_battlestruct->various.var1 == 0)
+        new_battlestruct->various.var2 = bank_attacker; //bank attacker conserving
     for (u8 i = 0; i < no_of_all_banks; i++)
     {
-        if (new_battlestruct.ptr->bank_affecting[i].telekinesis)
+        if (new_battlestruct->bank_affecting[i].telekinesis)
         {
-            new_battlestruct.ptr->bank_affecting[i].telekinesis = 0;
+            new_battlestruct->bank_affecting[i].telekinesis = 0;
             bank_attacker = i;
             instruction = &telekinesis_end_return_bs;
             effect = 1;
         }
-        else if (new_battlestruct.ptr->bank_affecting[i].magnet_rise)
+        else if (new_battlestruct->bank_affecting[i].magnet_rise)
         {
-            new_battlestruct.ptr->bank_affecting[i].magnet_rise = 0;
+            new_battlestruct->bank_affecting[i].magnet_rise = 0;
             bank_attacker = i;
             effect = 1;
             instruction = &magnetrise_end_return_bs;
@@ -1032,25 +1027,25 @@ void gravity_ender()
     }
     if (effect && instruction)
     {
-        new_battlestruct.ptr->various.var1++;
+        new_battlestruct->various.var1++;
         battlescripts_curr_instruction -= 3;
         battlescript_push();
         battlescripts_curr_instruction = instruction;
     }
     else if (!effect)
-        bank_attacker = new_battlestruct.ptr->various.var2;
+        bank_attacker = new_battlestruct->various.var2;
     return;
 }
 
 void setidentifierbit()
 {
-    if (new_battlestruct.ptr->bank_affecting[bank_target].miracle_eyed || battle_participants[bank_target].status2.foresight)
+    if (new_battlestruct->bank_affecting[bank_target].miracle_eyed || battle_participants[bank_target].status2.foresight)
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
     {
         battlescripts_curr_instruction += 4;
         if (move_table[current_move].arg1)
-            new_battlestruct.ptr->bank_affecting[bank_target].miracle_eyed = 1;
+            new_battlestruct->bank_affecting[bank_target].miracle_eyed = 1;
         else
             battle_participants[bank_target].status2.foresight = 1;
     }
@@ -1066,34 +1061,34 @@ void breakprotection()
         protect_structs[bank_target].flag0_protect = 0;
         effect = 1;
     }
-    if (new_battlestruct.ptr->bank_affecting[bank_target].spiky_shield)
+    if (new_battlestruct->bank_affecting[bank_target].spiky_shield)
     {
-        new_battlestruct.ptr->bank_affecting[bank_target].spiky_shield = 0;
+        new_battlestruct->bank_affecting[bank_target].spiky_shield = 0;
         effect = 1;
     }
-    if (new_battlestruct.ptr->bank_affecting[bank_target].kings_shield)
+    if (new_battlestruct->bank_affecting[bank_target].kings_shield)
     {
-        new_battlestruct.ptr->bank_affecting[bank_target].kings_shield = 0;
+        new_battlestruct->bank_affecting[bank_target].kings_shield = 0;
         effect = 1;
     }
-    if (new_battlestruct.ptr->side_affecting[banks_side].quick_guard)
+    if (new_battlestruct->side_affecting[banks_side].quick_guard)
     {
-        new_battlestruct.ptr->side_affecting[banks_side].quick_guard = 0;
+        new_battlestruct->side_affecting[banks_side].quick_guard = 0;
         effect = 1;
     }
-    if (new_battlestruct.ptr->side_affecting[banks_side].mat_block)
+    if (new_battlestruct->side_affecting[banks_side].mat_block)
     {
-        new_battlestruct.ptr->side_affecting[banks_side].mat_block = 0;
+        new_battlestruct->side_affecting[banks_side].mat_block = 0;
         effect = 1;
     }
-    if (new_battlestruct.ptr->side_affecting[banks_side].wide_guard)
+    if (new_battlestruct->side_affecting[banks_side].wide_guard)
     {
-        new_battlestruct.ptr->side_affecting[banks_side].wide_guard = 0;
+        new_battlestruct->side_affecting[banks_side].wide_guard = 0;
         effect = 1;
     }
-    if (new_battlestruct.ptr->side_affecting[banks_side].crafty_shield)
+    if (new_battlestruct->side_affecting[banks_side].crafty_shield)
     {
-        new_battlestruct.ptr->side_affecting[banks_side].crafty_shield = 0;
+        new_battlestruct->side_affecting[banks_side].crafty_shield = 0;
         effect = 1;
     }
     if (effect)
@@ -1108,7 +1103,7 @@ void breakprotection()
 
 void suckerpunchchecker()
 {
-    if (move_table[battle_participants[bank_target].moves[battle_stuff_ptr.ptr->chosen_move_position[bank_target]]].split == 2 ||
+    if (move_table[battle_participants[bank_target].moves[battle_stuff_ptr->chosen_move_position[bank_target]]].split == 2 ||
         get_bank_turn_order(bank_attacker) > get_bank_turn_order(bank_target))
           battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
@@ -1135,7 +1130,7 @@ void setthirdtype()
     else
     {
         battlescripts_curr_instruction += 4;
-        new_battlestruct.ptr->bank_affecting[bank_target].type3 = type;
+        new_battlestruct->bank_affecting[bank_target].type3 = type;
         battle_text_buff1[0] = 0xFD;
         battle_text_buff1[1] = 0x3;
         battle_text_buff1[2] = type;
@@ -1227,39 +1222,39 @@ void roomsetter()
     switch (current_move)
     {
     case MOVE_TRICK_ROOM:
-        if (new_battlestruct.ptr->field_affecting.trick_room)
+        if (new_battlestruct->field_affecting.trick_room)
         {
             battle_communication_struct.multistring_chooser = 0;
-            new_battlestruct.ptr->field_affecting.trick_room = 0;
+            new_battlestruct->field_affecting.trick_room = 0;
         }
         else
         {
             battle_communication_struct.multistring_chooser = 1;
-            new_battlestruct.ptr->field_affecting.trick_room = 5;
+            new_battlestruct->field_affecting.trick_room = 5;
         }
         break;
     case MOVE_WONDER_ROOM:
-        if (new_battlestruct.ptr->field_affecting.wonder_room)
+        if (new_battlestruct->field_affecting.wonder_room)
         {
             battle_communication_struct.multistring_chooser = 2;
-            new_battlestruct.ptr->field_affecting.wonder_room = 0;
+            new_battlestruct->field_affecting.wonder_room = 0;
         }
         else
         {
             battle_communication_struct.multistring_chooser = 3;
-            new_battlestruct.ptr->field_affecting.wonder_room = 5;
+            new_battlestruct->field_affecting.wonder_room = 5;
         }
         break;
     case MOVE_MAGIC_ROOM:
-        if (new_battlestruct.ptr->field_affecting.magic_room)
+        if (new_battlestruct->field_affecting.magic_room)
         {
             battle_communication_struct.multistring_chooser = 4;
-            new_battlestruct.ptr->field_affecting.magic_room = 0;
+            new_battlestruct->field_affecting.magic_room = 0;
         }
         else
         {
             battle_communication_struct.multistring_chooser = 5;
-            new_battlestruct.ptr->field_affecting.magic_room = 5;
+            new_battlestruct->field_affecting.magic_room = 5;
         }
         break;
     }
@@ -1364,18 +1359,18 @@ void gastroacid()
     else
     {
         battlescripts_curr_instruction += 4;
-        new_battlestruct.ptr->bank_affecting[bank_target].gastro_acided = 1;
+        new_battlestruct->bank_affecting[bank_target].gastro_acided = 1;
     }
     return;
 }
 
 void setembargo()
 {
-    if (new_battlestruct.ptr->bank_affecting[bank_target].embargo)
+    if (new_battlestruct->bank_affecting[bank_target].embargo)
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
     {
-        new_battlestruct.ptr->bank_affecting[bank_target].embargo = 5;
+        new_battlestruct->bank_affecting[bank_target].embargo = 5;
         battlescripts_curr_instruction += 4;
     }
 }
@@ -1384,7 +1379,7 @@ void naturalgift()
 {
     u16 item = battle_participants[bank_attacker].held_item;
     u8 effect = 1;
-    if (battle_participants[bank_attacker].ability_id == ABILITY_KLUTZ || new_battlestruct.ptr->bank_affecting[bank_attacker].embargo || new_battlestruct.ptr->field_affecting.magic_room)
+    if (battle_participants[bank_attacker].ability_id == ABILITY_KLUTZ || new_battlestruct->bank_affecting[bank_attacker].embargo || new_battlestruct->field_affecting.magic_room)
         effect = 0;
     if (!effect || !item || get_item_pocket_id(item) != 4)
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
@@ -1422,7 +1417,7 @@ void afteryou_check() //0 - first, 1 - second, 2 - third, 3 - fourth
 
 void powder_setter()
 {
-    new_battlestruct.ptr->bank_affecting[bank_target].powder = 1;
+    new_battlestruct->bank_affecting[bank_target].powder = 1;
 }
 void jumpifnoally()
 {
@@ -1438,11 +1433,11 @@ void jumpifnoally()
 
 void electrify()
 {
-    if (get_bank_turn_order(bank_attacker) > get_bank_turn_order(bank_target) || new_battlestruct.ptr->bank_affecting[bank_target].electrify)
+    if (get_bank_turn_order(bank_attacker) > get_bank_turn_order(bank_target) || new_battlestruct->bank_affecting[bank_target].electrify)
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
     {
-        new_battlestruct.ptr->bank_affecting[bank_target].electrify = 1;
+        new_battlestruct->bank_affecting[bank_target].electrify = 1;
         battlescripts_curr_instruction += 4;
     }
 }
@@ -1451,7 +1446,7 @@ void set_entry_hazards()
 {
     u8 fail = 0;
     u8 targets_side = is_bank_from_opponent_side(bank_target);
-    struct side_affecting* target_struct = &new_battlestruct.ptr->side_affecting[targets_side];
+    struct side_affecting* target_struct = &new_battlestruct->side_affecting[targets_side];
     u8* string_chooser = &battle_communication_struct.multistring_chooser;
     switch (current_move)
     {
@@ -1511,7 +1506,7 @@ void jumpifattackerandtargetdontsharetypes()
 {
     u8 type1 = battle_participants[bank_attacker].type1;
     u8 type2 = battle_participants[bank_attacker].type2;
-    u8 type3 = new_battlestruct.ptr->bank_affecting[bank_attacker].type3;
+    u8 type3 = new_battlestruct->bank_affecting[bank_attacker].type3;
     if ((is_of_type(bank_target, type1) && type1 != TYPE_EGG) || (is_of_type(bank_target, type2) && type2 != TYPE_EGG) || (is_of_type(bank_target, type3) && type3 != TYPE_EGG))
         battlescripts_curr_instruction += 4;
     else
@@ -1520,7 +1515,7 @@ void jumpifattackerandtargetdontsharetypes()
 
 void try_autotonomize()
 {
-    u8* auto_uses = &new_battlestruct.ptr->bank_affecting[bank_attacker].autonomize_uses;
+    u8* auto_uses = &new_battlestruct->bank_affecting[bank_attacker].autonomize_uses;
     if (get_poke_weight(bank_attacker) == 1)
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
@@ -1533,29 +1528,29 @@ void try_autotonomize()
 
 void set_iondeluge()
 {
-    if (new_battlestruct.ptr->field_affecting.ion_deluge)
+    if (new_battlestruct->field_affecting.ion_deluge)
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
     {
         battlescripts_curr_instruction += 4;
-        new_battlestruct.ptr->field_affecting.ion_deluge = 1;
+        new_battlestruct->field_affecting.ion_deluge = 1;
     }
 }
 
 void reflecttypes()
 {
-    new_battlestruct.ptr->bank_affecting[bank_attacker].type3 = new_battlestruct.ptr->bank_affecting[bank_target].type3;
+    new_battlestruct->bank_affecting[bank_attacker].type3 = new_battlestruct->bank_affecting[bank_target].type3;
     battle_participants[bank_attacker].type1 = battle_participants[bank_target].type1;
     battle_participants[bank_attacker].type2 = battle_participants[bank_target].type2;
 }
 
 void sethealblock()
 {
-    if (new_battlestruct.ptr->bank_affecting[bank_target].heal_block)
+    if (new_battlestruct->bank_affecting[bank_target].heal_block)
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
     {
-        new_battlestruct.ptr->bank_affecting[bank_target].heal_block = 5;
+        new_battlestruct->bank_affecting[bank_target].heal_block = 5;
         battlescripts_curr_instruction += 4;
     }
 }
@@ -1573,8 +1568,8 @@ void mefirst_check()
     if (get_bank_turn_order(bank_target) > current_move_turn && move_table[chosen_move].base_power && !find_move_in_table(chosen_move, &mefirstforbiddenmoves[0]))
      {
          battlescripts_curr_instruction += 4;
-         new_battlestruct.ptr->bank_affecting[bank_attacker].me_first = 1;
-         new_battlestruct.ptr->various.var1 = chosen_move;
+         new_battlestruct->bank_affecting[bank_attacker].me_first = 1;
+         new_battlestruct->various.var1 = chosen_move;
      }
     else
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
@@ -1587,7 +1582,7 @@ void jump_to_move_bs()
     battle_scripting.field19 = 0;
     hitmarker &= 0xFFFFFBFF;
     hitmarker |= HITMARKER_NO_PPDEDUCT;
-    u16 move = new_battlestruct.ptr->various.var1;
+    u16 move = new_battlestruct->various.var1;
     battlescripts_curr_instruction = get_move_battlescript_ptr(move);
     current_move = move;
     bank_target = get_target_of_move(move, 0, 1);
@@ -1596,12 +1591,12 @@ void jump_to_move_bs()
 void setluckychant()
 {
     u8 side = is_bank_from_opponent_side(bank_attacker);
-    if (new_battlestruct.ptr->side_affecting[side].lucky_chant)
+    if (new_battlestruct->side_affecting[side].lucky_chant)
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
     {
-        new_battlestruct.ptr->side_affecting[side].lucky_chant = 5;
-        new_battlestruct.ptr->side_affecting[side].lucky_chant_bank = bank_attacker;
+        new_battlestruct->side_affecting[side].lucky_chant = 5;
+        new_battlestruct->side_affecting[side].lucky_chant_bank = bank_attacker;
         battlescripts_curr_instruction += 4;
     }
 }
@@ -1609,12 +1604,12 @@ void setluckychant()
 void settailwind()
 {
     u8 side = is_bank_from_opponent_side(bank_attacker);
-    if (new_battlestruct.ptr->side_affecting[side].tailwind)
+    if (new_battlestruct->side_affecting[side].tailwind)
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
     {
-        new_battlestruct.ptr->side_affecting[side].tailwind = 5;
-        new_battlestruct.ptr->side_affecting[side].tailwind_bank = bank_attacker;
+        new_battlestruct->side_affecting[side].tailwind = 5;
+        new_battlestruct->side_affecting[side].tailwind_bank = bank_attacker;
         battlescripts_curr_instruction += 4;
     }
 }
@@ -1647,7 +1642,7 @@ void bellydrum()
 
 void setmagnetrise()
 {
-    struct bank_affecting* magnetrise = &new_battlestruct.ptr->bank_affecting[bank_attacker];
+    struct bank_affecting* magnetrise = &new_battlestruct->bank_affecting[bank_attacker];
     if (magnetrise->magnet_rise || magnetrise->smacked_down || status3[bank_attacker].rooted)
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
@@ -1660,7 +1655,7 @@ void setmagnetrise()
 
 void settelekinesis()
 {
-    struct bank_affecting* telekinesis = &new_battlestruct.ptr->bank_affecting[bank_target];
+    struct bank_affecting* telekinesis = &new_battlestruct->bank_affecting[bank_target];
     if (telekinesis->telekinesis || telekinesis->smacked_down || status3[bank_target].rooted)
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
@@ -1678,13 +1673,13 @@ void setpowertrick()
     u16 placeholder = *atk;
     *atk = *def;
     *def = placeholder;
-    new_battlestruct.ptr->bank_affecting[bank_attacker].powertrick ^= 1;
+    new_battlestruct->bank_affecting[bank_attacker].powertrick ^= 1;
 }
 
 void make_pokemon_one_type()
 {
     u8 type = move_table[current_move].arg1 & 0x1F;
-    if (battle_participants[bank_target].type1 == type && (battle_participants[bank_target].type2 == type || battle_participants[bank_target].type2 == TYPE_EGG) && (new_battlestruct.ptr->bank_affecting[bank_target].type3 == type || new_battlestruct.ptr->bank_affecting[bank_target].type3 == TYPE_EGG))
+    if (battle_participants[bank_target].type1 == type && (battle_participants[bank_target].type2 == type || battle_participants[bank_target].type2 == TYPE_EGG) && (new_battlestruct->bank_affecting[bank_target].type3 == type || new_battlestruct->bank_affecting[bank_target].type3 == TYPE_EGG))
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
     {
@@ -1751,25 +1746,25 @@ void defog_effect()
         bank_attacker = bank_target;
         ptr_to_script = (void*) 0x082DAFDD;
     }
-    else if (new_battlestruct.ptr->side_affecting[targets_side].stealthrock)
+    else if (new_battlestruct->side_affecting[targets_side].stealthrock)
     {
         effect = 1;
-        new_battlestruct.ptr->side_affecting[targets_side].stealthrock = 0;
+        new_battlestruct->side_affecting[targets_side].stealthrock = 0;
         bank_attacker = bank_target;
         ptr_to_script = &rapidspinonstealthrock_bs;
     }
-    else if (new_battlestruct.ptr->side_affecting[targets_side].toxic_spikes_psn)
+    else if (new_battlestruct->side_affecting[targets_side].toxic_spikes_psn)
     {
         effect = 1;
-        new_battlestruct.ptr->side_affecting[targets_side].toxic_spikes_psn = 0;
-        new_battlestruct.ptr->side_affecting[targets_side].toxic_spikes_badpsn = 0;
+        new_battlestruct->side_affecting[targets_side].toxic_spikes_psn = 0;
+        new_battlestruct->side_affecting[targets_side].toxic_spikes_badpsn = 0;
         bank_attacker = bank_target;
         ptr_to_script = &rapidspinontoxicspikes_bs;
     }
-    else if (new_battlestruct.ptr->side_affecting[targets_side].sticky_web)
+    else if (new_battlestruct->side_affecting[targets_side].sticky_web)
     {
         effect = 1;
-        new_battlestruct.ptr->side_affecting[targets_side].sticky_web = 0;
+        new_battlestruct->side_affecting[targets_side].sticky_web = 0;
         bank_attacker = bank_target;
         ptr_to_script = &rapidspinonstickyweb_bs;
     }
@@ -1780,23 +1775,23 @@ void defog_effect()
         side_timers[attackers_side].spikes_amount = 0;
         ptr_to_script = (void*) 0x082DAFDD;
     }
-    else if (new_battlestruct.ptr->side_affecting[attackers_side].stealthrock)
+    else if (new_battlestruct->side_affecting[attackers_side].stealthrock)
     {
         effect = 1;
-        new_battlestruct.ptr->side_affecting[attackers_side].stealthrock = 0;
+        new_battlestruct->side_affecting[attackers_side].stealthrock = 0;
         ptr_to_script = &rapidspinonstealthrock_bs;
     }
-    else if (new_battlestruct.ptr->side_affecting[attackers_side].toxic_spikes_psn)
+    else if (new_battlestruct->side_affecting[attackers_side].toxic_spikes_psn)
     {
         effect = 1;
-        new_battlestruct.ptr->side_affecting[attackers_side].toxic_spikes_psn = 0;
-        new_battlestruct.ptr->side_affecting[attackers_side].toxic_spikes_badpsn = 0;
+        new_battlestruct->side_affecting[attackers_side].toxic_spikes_psn = 0;
+        new_battlestruct->side_affecting[attackers_side].toxic_spikes_badpsn = 0;
         ptr_to_script = &rapidspinontoxicspikes_bs;
     }
-    else if (new_battlestruct.ptr->side_affecting[attackers_side].sticky_web)
+    else if (new_battlestruct->side_affecting[attackers_side].sticky_web)
     {
         effect = 1;
-        new_battlestruct.ptr->side_affecting[attackers_side].sticky_web = 0;
+        new_battlestruct->side_affecting[attackers_side].sticky_web = 0;
         ptr_to_script = &rapidspinonstickyweb_bs;
     }
     if (effect)
@@ -1821,11 +1816,11 @@ u16 copycat_forbidden_moves[] = {MOVE_ASSIST, MOVE_BELCH, MOVE_BESTOW, MOVE_CHAT
 
 void copycat_move()
 {
-    if (find_move_in_table(new_battlestruct.ptr->various.previous_move, &copycat_forbidden_moves[0]))
+    if (find_move_in_table(new_battlestruct->various.previous_move, &copycat_forbidden_moves[0]))
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
     {
-        new_battlestruct.ptr->various.var1 = new_battlestruct.ptr->various.previous_move;
+        new_battlestruct->various.var1 = new_battlestruct->various.previous_move;
         battlescripts_curr_instruction += 4;
     }
 }
@@ -1921,9 +1916,9 @@ void psychosplits()
 void stockpile_record()
 {
     struct battle_participant* attacker_stats = &battle_participants[bank_attacker];
-    u8* stockpile_def = (u8*)&(new_battlestruct.ptr->various.var2);
-    u8* stockpile_spdef = (u8*)&(new_battlestruct.ptr->various.var2) + 1;
-    struct bank_affecting* attacker_stockpile = &new_battlestruct.ptr->bank_affecting[bank_attacker];
+    u8* stockpile_def = (u8*)&(new_battlestruct->various.var2);
+    u8* stockpile_spdef = (u8*)&(new_battlestruct->various.var2) + 1;
+    struct bank_affecting* attacker_stockpile = &new_battlestruct->bank_affecting[bank_attacker];
     switch (read_byte(battlescripts_curr_instruction))
     {
     case 0:
@@ -1938,7 +1933,7 @@ void stockpile_record()
         {
             attacker_stats->def_buff -= attacker_stockpile->stockpile_def_changes;
             attacker_stats->sp_def_buff -= attacker_stockpile->stockpile_sp_def_changes;
-            new_battlestruct.ptr->various.var2 = 0;
+            new_battlestruct->various.var2 = 0;
             attacker_stockpile->stockpile_def_changes = 0;
             attacker_stockpile->stockpile_sp_def_changes = 0;
             break;
@@ -2017,29 +2012,29 @@ void set_terrain()
     switch (current_move)
     {
     case MOVE_MISTY_TERRAIN:
-        if (new_battlestruct.ptr->field_affecting.misty_terrain)
+        if (new_battlestruct->field_affecting.misty_terrain)
             fail = 1;
         else
         {
-            new_battlestruct.ptr->field_affecting.misty_terrain = 5;
+            new_battlestruct->field_affecting.misty_terrain = 5;
             battle_communication_struct.multistring_chooser = 0;
         }
         break;
     case MOVE_GRASSY_TERRAIN:
-        if (new_battlestruct.ptr->field_affecting.grassy_terrain)
+        if (new_battlestruct->field_affecting.grassy_terrain)
             fail = 1;
         else
         {
-            new_battlestruct.ptr->field_affecting.grassy_terrain = 5;
+            new_battlestruct->field_affecting.grassy_terrain = 5;
             battle_communication_struct.multistring_chooser = 1;
         }
         break;
     case MOVE_ELECTRIC_TERRAIN:
-        if (new_battlestruct.ptr->field_affecting.electic_terrain)
+        if (new_battlestruct->field_affecting.electic_terrain)
             fail = 1;
         else
         {
-            new_battlestruct.ptr->field_affecting.electic_terrain = 5;
+            new_battlestruct->field_affecting.electic_terrain = 5;
             battle_communication_struct.multistring_chooser = 2;
         }
         break;
@@ -2052,12 +2047,12 @@ void set_terrain()
 
 void setaquaring()
 {
-    if (new_battlestruct.ptr->bank_affecting[bank_attacker].aqua_ring)
+    if (new_battlestruct->bank_affecting[bank_attacker].aqua_ring)
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
     {
         battlescripts_curr_instruction += 4;
-        new_battlestruct.ptr->bank_affecting[bank_attacker].aqua_ring = 1;
+        new_battlestruct->bank_affecting[bank_attacker].aqua_ring = 1;
     }
     return;
 }
@@ -2114,7 +2109,7 @@ void quash_setter() //0 - first, 1 - second, 2 - third, 3 - fourth
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
     {
-        new_battlestruct.ptr->bank_affecting[bank_attacker].quashed = 1;
+        new_battlestruct->bank_affecting[bank_attacker].quashed = 1;
         battlescripts_curr_instruction += 4;
         if (battle_flags.double_battle)
         {
@@ -2189,14 +2184,14 @@ void allyswitch_dataswitch()
     special_statuses[ally_bank] = attacker5;
 
     //new battle struct
-    struct bank_affecting attacker6 = new_battlestruct.ptr->bank_affecting[bank_attacker];
-    new_battlestruct.ptr->bank_affecting[bank_attacker] = new_battlestruct.ptr->bank_affecting[ally_bank];
-    new_battlestruct.ptr->bank_affecting[ally_bank] = attacker6;
+    struct bank_affecting attacker6 = new_battlestruct->bank_affecting[bank_attacker];
+    new_battlestruct->bank_affecting[bank_attacker] = new_battlestruct->bank_affecting[ally_bank];
+    new_battlestruct->bank_affecting[ally_bank] = attacker6;
 
     //tai move history
-    struct used_moves attacker7 = battle_resources.ptr->battle_history->used_moves[bank_attacker];
-    battle_resources.ptr->battle_history->used_moves[bank_attacker] = battle_resources.ptr->battle_history->used_moves[ally_bank];
-    battle_resources.ptr->battle_history->used_moves[ally_bank] = attacker7;
+    struct used_moves attacker7 = battle_resources->battle_history->used_moves[bank_attacker];
+    battle_resources->battle_history->used_moves[bank_attacker] = battle_resources->battle_history->used_moves[ally_bank];
+    battle_resources->battle_history->used_moves[ally_bank] = attacker7;
 
     //abilities in RAM
     u8 attackerability = abilities_by_banks[bank_attacker];
@@ -2221,13 +2216,13 @@ void allyswitch_dataswitch()
     chosen_move_by_banks[bank_attacker] = chosen_move_by_banks[ally_bank];
     chosen_move_by_banks[ally_bank] = attacker9;
 
-    u8 attacker10 = battle_stuff_ptr.ptr->chosen_move_position[bank_attacker];
-    battle_stuff_ptr.ptr->chosen_move_position[bank_attacker] = battle_stuff_ptr.ptr->chosen_move_position[ally_bank];
-    battle_stuff_ptr.ptr->chosen_move_position[ally_bank] = attacker10;
+    u8 attacker10 = battle_stuff_ptr->chosen_move_position[bank_attacker];
+    battle_stuff_ptr->chosen_move_position[bank_attacker] = battle_stuff_ptr->chosen_move_position[ally_bank];
+    battle_stuff_ptr->chosen_move_position[ally_bank] = attacker10;
 
-    u8 attacker11 = battle_stuff_ptr.ptr->move_target[bank_attacker];
-    battle_stuff_ptr.ptr->move_target[bank_attacker] = battle_stuff_ptr.ptr->move_target[ally_bank];
-    battle_stuff_ptr.ptr->move_target[ally_bank] = attacker11;
+    u8 attacker11 = battle_stuff_ptr->move_target[bank_attacker];
+    battle_stuff_ptr->move_target[bank_attacker] = battle_stuff_ptr->move_target[ally_bank];
+    battle_stuff_ptr->move_target[ally_bank] = attacker11;
 
     if (!is_bank_from_opponent_side(ally_bank))
     {
@@ -2280,8 +2275,8 @@ void can_magneticflux_work()
         if (side == is_bank_from_opponent_side(i) && check_magneticflux_bank(i))
         {
             effect = 1;
-            new_battlestruct.ptr->various.var1 = 0;
-            new_battlestruct.ptr->various.var2 = 0;
+            new_battlestruct->various.var1 = 0;
+            new_battlestruct->various.var2 = 0;
             another_active_bank = bank_attacker;
             break;
         }
@@ -2297,12 +2292,12 @@ void magnetic_flux_effect()
     u8 side = is_bank_from_opponent_side(bank_attacker);
     for (u8 i = 0; i < no_of_all_banks; i++)
     {
-        if (side == is_bank_from_opponent_side(i) && ((new_battlestruct.ptr->various.var2 & bits_table[i]) == 0) && check_magneticflux_bank(i))
+        if (side == is_bank_from_opponent_side(i) && ((new_battlestruct->various.var2 & bits_table[i]) == 0) && check_magneticflux_bank(i))
         {
-            if (new_battlestruct.ptr->various.var1 == move_table[current_move].arg1)
+            if (new_battlestruct->various.var1 == move_table[current_move].arg1)
             {
-                new_battlestruct.ptr->various.var1 = 0;
-                new_battlestruct.ptr->various.var2 |= bits_table[i];
+                new_battlestruct->various.var1 = 0;
+                new_battlestruct->various.var2 |= bits_table[i];
                 battlescripts_curr_instruction -= 3;
                 break;
             }
@@ -2335,7 +2330,7 @@ void canuse_flowershield()
     else
     {
         battlescripts_curr_instruction += 4;
-        new_battlestruct.ptr->various.var2 = bank_attacker;
+        new_battlestruct->various.var2 = bank_attacker;
     }
 }
 
@@ -2349,7 +2344,7 @@ void flowershield_effect()
         dostatchanges();
         return;
     }
-    bank_attacker = new_battlestruct.ptr->various.var2;
+    bank_attacker = new_battlestruct->various.var2;
     return;
 }
 
@@ -2361,7 +2356,7 @@ void canuselastresort()
         for (u8 i = 0; i < 4; i++)
         {
             u16* move_ptr = &battle_participants[bank_attacker].moves[0];
-            if (*move_ptr && i != lastresort_pos && (new_battlestruct.ptr->bank_affecting[bank_attacker].usedmoves & bits_table[i]))
+            if (*move_ptr && i != lastresort_pos && (new_battlestruct->bank_affecting[bank_attacker].usedmoves & bits_table[i]))
             {
                 battlescripts_curr_instruction += 4;
                 return;
@@ -2433,7 +2428,7 @@ void conversion_effect()
     {
         u8 searched_moves = 0;
         u32 searched_moves_bitfield = 0;
-        u8 last_type = new_battlestruct.ptr->bank_affecting[bank_target].lastmove_type;
+        u8 last_type = new_battlestruct->bank_affecting[bank_target].lastmove_type;
         if (last_type)
         {
             last_type &= 0x3F;
@@ -2608,13 +2603,13 @@ void accupressure_effect()
 
 void mega_primal_cry()
 {
-    play_cry(battle_participants[new_battlestruct.ptr->various.active_bank].poke_species,-0x19,0x5);
+    play_cry(battle_participants[new_battlestruct->various.active_bank].poke_species,-0x19,0x5);
 }
 
 void canusefling()
 {
     u16 item = battle_participants[bank_attacker].held_item;
-    if (item == 0 || item == ITEM_REDORB || item == ITEM_BLUEORB || get_item_pocket_id(item) == 2 || get_item_pocket_id(item) == 3 || !can_lose_item(bank_attacker, 0, 0) || check_ability(bank_attacker, ABILITY_KLUTZ || new_battlestruct.ptr->bank_affecting[bank_attacker].embargo || new_battlestruct.ptr->field_affecting.magic_room))
+    if (item == 0 || item == ITEM_REDORB || item == ITEM_BLUEORB || get_item_pocket_id(item) == 2 || get_item_pocket_id(item) == 3 || !can_lose_item(bank_attacker, 0, 0) || check_ability(bank_attacker, ABILITY_KLUTZ || new_battlestruct->bank_affecting[bank_attacker].embargo || new_battlestruct->field_affecting.magic_room))
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
         battlescripts_curr_instruction += 4;
@@ -2622,12 +2617,12 @@ void canusefling()
 
 void happyhour_effect()
 {
-    new_battlestruct.ptr->various.happyhour_bonus = 1;
+    new_battlestruct->various.happyhour_bonus = 1;
 }
 
 void canuseskydrop()
 {
-    if (bank_target == (bank_attacker ^ 2) || new_battlestruct.ptr->field_affecting.gravity)
+    if (bank_target == (bank_attacker ^ 2) || new_battlestruct->field_affecting.gravity)
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else if (get_poke_weight(bank_target) > 2000)
     {
@@ -2640,15 +2635,15 @@ void canuseskydrop()
 
 void skydropup()
 {
-    new_battlestruct.ptr->bank_affecting[bank_attacker].sky_drop_attacker = 1;
-    new_battlestruct.ptr->bank_affecting[bank_target].sky_drop_target = 1;
+    new_battlestruct->bank_affecting[bank_attacker].sky_drop_attacker = 1;
+    new_battlestruct->bank_affecting[bank_target].sky_drop_target = 1;
     battle_participants[bank_attacker].status2.multiple_turn_move = 1;
     locked_move[bank_attacker] = current_move;
 }
 
 void canusefairylock()
 {
-    struct field_affecting* lock = &new_battlestruct.ptr->field_affecting;
+    struct field_affecting* lock = &new_battlestruct->field_affecting;
     if (lock->fairy_lock)
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else

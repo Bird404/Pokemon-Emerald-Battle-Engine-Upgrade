@@ -1,10 +1,5 @@
-#include "types.h"
 #include "defines.h"
-#include "battle_locations.h"
-#include "battle_structs.h"
-#include "vanilla_functions.h"
 #include "static_references.h"
-#include "new_battle_struct.h"
 
 u16 get_speed(u8 bank);
 u8 percent_chance(u8 percent);
@@ -50,8 +45,8 @@ s8 get_bracket_alteration_factor(u8 bank, u8 item_effect) // will be used for qu
 
 u8 get_first_to_strike(u8 bank1, u8 bank2, u8 ignore_priority)
 {
-    u8 quash1=new_battlestruct.ptr->bank_affecting[bank1].quashed;
-    u8 quash2=new_battlestruct.ptr->bank_affecting[bank2].quashed;
+    u8 quash1=new_battlestruct->bank_affecting[bank1].quashed;
+    u8 quash2=new_battlestruct->bank_affecting[bank2].quashed;
     u8 faster=2;
 
     if (quash1 && !quash2)
@@ -62,8 +57,8 @@ u8 get_first_to_strike(u8 bank1, u8 bank2, u8 ignore_priority)
     {
         s8 priority1 = 0;
         s8 priority2 = 0;
-        u16 move1 = battle_participants[bank1].moves[battle_stuff_ptr.ptr->chosen_move_position[bank1]];
-        u16 move2 = battle_participants[bank2].moves[battle_stuff_ptr.ptr->chosen_move_position[bank2]];
+        u16 move1 = battle_participants[bank1].moves[battle_stuff_ptr->chosen_move_position[bank1]];
+        u16 move2 = battle_participants[bank2].moves[battle_stuff_ptr->chosen_move_position[bank2]];
         if(menu_choice_pbs[bank1]==0)
             priority1 = get_priority(move1, bank1);
         if(menu_choice_pbs[bank2]==0)
@@ -93,7 +88,7 @@ u8 get_first_to_strike(u8 bank1, u8 bank2, u8 ignore_priority)
                 {
                     u16 speed1 = get_speed(bank1);
                     u16 speed2 = get_speed(bank2);
-                    if (new_battlestruct.ptr->field_affecting.trick_room || (stall1 && stall2)) //swapping speeds will do the job
+                    if (new_battlestruct->field_affecting.trick_room || (stall1 && stall2)) //swapping speeds will do the job
                     {
                         u16 placeholder = speed1;
                         speed1 = speed2;

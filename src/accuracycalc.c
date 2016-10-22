@@ -1,19 +1,10 @@
-#include "types.h"
 #include "defines.h"
-#include "battle_locations.h"
-#include "battle_structs.h"
-#include "vanilla_functions.h"
-#include "new_battle_struct.h"
+#include "static_references.h"
 
-extern struct move_info move_table[1024];
 u8 is_of_type(u8 bank, u8 type);
 u32 percent_boost(u32 number, u16 percent);
 u32 percent_lose(u32 number, u16 percent);
 s8 get_priority(u16 move, u8 bank);
-
-#define MOVE_PHYSICAL 0
-#define MOVE_SPECIAL 1
-#define MOVE_STATUS 2
 
 u8 protect_affects(u16 move, u8 set)
 {
@@ -25,25 +16,25 @@ u8 protect_affects(u16 move, u8 set)
     u8 targets_side = is_bank_from_opponent_side(bank_target);
     if (protect_structs[bank_target].flag0_protect && protect_flag)
         effect = 1;
-    else if (new_battlestruct.ptr->bank_affecting[bank_target].kings_shield && protect_flag && split != 2)
+    else if (new_battlestruct->bank_affecting[bank_target].kings_shield && protect_flag && split != 2)
     {
         effect = 1;
         if (contact && set)
-            new_battlestruct.ptr->bank_affecting[bank_attacker].kingsshield_damage = 1;
+            new_battlestruct->bank_affecting[bank_attacker].kingsshield_damage = 1;
     }
-    else if (new_battlestruct.ptr->bank_affecting[bank_target].spiky_shield && protect_flag)
+    else if (new_battlestruct->bank_affecting[bank_target].spiky_shield && protect_flag)
     {
         effect = 1;
         if (contact && set)
-            new_battlestruct.ptr->bank_affecting[bank_attacker].spikyshield_damage = 1;
+            new_battlestruct->bank_affecting[bank_attacker].spikyshield_damage = 1;
     }
-    else if (new_battlestruct.ptr->side_affecting[targets_side].crafty_shield && protect_flag && split == 2)
+    else if (new_battlestruct->side_affecting[targets_side].crafty_shield && protect_flag && split == 2)
         effect = 1;
-    else if (new_battlestruct.ptr->side_affecting[targets_side].quick_guard && protect_flag && get_priority(current_move, bank_attacker) > 0)
+    else if (new_battlestruct->side_affecting[targets_side].quick_guard && protect_flag && get_priority(current_move, bank_attacker) > 0)
         effect = 1;
-    else if (new_battlestruct.ptr->side_affecting[targets_side].mat_block && protect_flag && split != 2)
+    else if (new_battlestruct->side_affecting[targets_side].mat_block && protect_flag && split != 2)
         effect = 1;
-    else if (new_battlestruct.ptr->side_affecting[targets_side].wide_guard && protect_flag && (target == 8 || target == 0x20))
+    else if (new_battlestruct->side_affecting[targets_side].wide_guard && protect_flag && (target == 8 || target == 0x20))
         effect = 1;
 
     return effect;
@@ -67,12 +58,12 @@ u8 accuracy_helper_replacement(u16 move)
     if ((status3[bank_target].always_hits && disable_structs[bank_target].always_hits_bank == bank_attacker)
         || (has_ability_effect(bank_attacker, 0, 1) && battle_participants[bank_attacker].ability_id == ABILITY_NO_GUARD) || (has_ability_effect(bank_target, 0, 1) && battle_participants[bank_target].ability_id == ABILITY_NO_GUARD)
         || (current_move == MOVE_TOXIC && is_of_type(bank_attacker, TYPE_POISON))
-        || (new_battlestruct.ptr->bank_affecting[bank_target].telekinesis && move_table[current_move].script_id != 70)) //lock-on/mind reader checked, then no guard, always hiting toxic on poison types, then always hitting telekinesis except OHKO moves
+        || (new_battlestruct->bank_affecting[bank_target].telekinesis && move_table[current_move].script_id != 70)) //lock-on/mind reader checked, then no guard, always hiting toxic on poison types, then always hitting telekinesis except OHKO moves
     {
         jump_if_move_has_no_effect(7, move);
         done_status = 1;
     }
-    else if (((status3[bank_target].on_air || new_battlestruct.ptr->bank_affecting[bank_target].sky_drop_attacker || new_battlestruct.ptr->bank_affecting[bank_target].sky_drop_target) && !(hitmarker & HITMARKER_IGNORE_ON_AIR))
+    else if (((status3[bank_target].on_air || new_battlestruct->bank_affecting[bank_target].sky_drop_attacker || new_battlestruct->bank_affecting[bank_target].sky_drop_target) && !(hitmarker & HITMARKER_IGNORE_ON_AIR))
              || (status3[bank_target].underground && !(hitmarker & HITMERKER_IGNORE_UNDERGROUND))
              || (status3[bank_target].underwater && !(hitmarker & HITMARKER_IGNORE_UNDERWATER))
              || status3[bank_target].phantomforce)
@@ -94,11 +85,11 @@ u8 accuracy_helper_replacement(u16 move)
 u32 accuracy_percent(u16 move, u8 bankatk, u8 bankdef)
 {
     u8 evs_buff = battle_participants[bankdef].evasion_buff;
-    if (new_battlestruct.ptr->field_affecting.gravity)
+    if (new_battlestruct->field_affecting.gravity)
         evs_buff -= 2;
     if (move == MOVE_SACRED_SWORD || move == MOVE_CHIP_AWAY || (battle_participants[bankatk].ability_id == ABILITY_UNAWARE && has_ability_effect(bankatk, 0, 1)))
         evs_buff = 6;
-    else if (evs_buff > 6 && (battle_participants[bankdef].status2.foresight || new_battlestruct.ptr->bank_affecting[bankdef].miracle_eyed
+    else if (evs_buff > 6 && (battle_participants[bankdef].status2.foresight || new_battlestruct->bank_affecting[bankdef].miracle_eyed
                               || (battle_participants[bankatk].ability_id == ABILITY_KEEN_EYE && has_ability_effect(bankatk, 0, 1))))
         evs_buff = 6;
 
@@ -181,7 +172,7 @@ void accuracy_calc()
 
     if ((arg + 2) > 1)
     {
-        if(new_battlestruct.ptr->various.parental_bond_mode==PBOND_CHILD)
+        if(new_battlestruct->various.parental_bond_mode==PBOND_CHILD)
         {
             battlescripts_curr_instruction += 7;
         }
@@ -222,7 +213,7 @@ void accuracy_calc()
         }
         else
         {
-            if (status3[bank_target].on_air || status3[bank_target].underground || status3[bank_target].underwater || new_battlestruct.ptr->bank_affecting[bank_target].sky_drop_attacker || new_battlestruct.ptr->bank_affecting[bank_target].sky_drop_target)
+            if (status3[bank_target].on_air || status3[bank_target].underground || status3[bank_target].underwater || new_battlestruct->bank_affecting[bank_target].sky_drop_attacker || new_battlestruct->bank_affecting[bank_target].sky_drop_target)
             {
                 battlescripts_curr_instruction = (void*)jump_loc;
             }

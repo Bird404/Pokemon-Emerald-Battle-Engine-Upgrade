@@ -26,7 +26,7 @@ u16 get_speed(u8 bank);
 u8 get_target_of_move(u16 move, u8 target_given, u8 adjust)
 {
     u8 target_case;
-    u8 old_target = battle_stuff_ptr.ptr->move_target[bank_attacker];
+    u8 old_target = battle_stuff_ptr->move_target[bank_attacker];
     u8 result_target = old_target;
     u8 attacker_side = is_bank_from_opponent_side(bank_attacker);
     u8 target_side = attacker_side ^ 1;
@@ -98,7 +98,7 @@ u8 get_target_of_move(u16 move, u8 target_given, u8 adjust)
                         record_usage_of_ability(result_target, ability);
                         special_statuses[result_target].lightning_rod_redirected = 1;
                         if (ability == ABILITY_STORM_DRAIN)
-                            new_battlestruct.ptr->various.stormdrain = 1;
+                            new_battlestruct->various.stormdrain = 1;
                     }
                 }
                 break;
@@ -144,7 +144,7 @@ u8 get_target_of_move(u16 move, u8 target_given, u8 adjust)
             }
         }
     }
-    battle_stuff_ptr.ptr->move_target[bank_attacker] = result_target;
+    battle_stuff_ptr->move_target[bank_attacker] = result_target;
     return result_target;
 }
 
@@ -152,7 +152,7 @@ void set_attacking_move_type()
 {
     u8 ability=battle_participants[bank_attacker].ability_id;
     u8 move_type = TYPE_EGG;
-    if(new_battlestruct.ptr->bank_affecting[bank_attacker].electrify)
+    if(new_battlestruct->bank_affecting[bank_attacker].electrify)
         move_type=TYPE_ELECTRIC;
     else
     {
@@ -315,18 +315,18 @@ void set_attacking_move_type()
             }
         }
         if(ate)
-            new_battlestruct.ptr->various.ate_bonus=1;
+            new_battlestruct->various.ate_bonus=1;
     }
-    if((new_battlestruct.ptr->field_affecting.ion_deluge)
+    if((new_battlestruct->field_affecting.ion_deluge)
        && (move_table[current_move].type==TYPE_NORMAL || check_ability(bank_attacker,ABILITY_NORMALIZE)))
         move_type = TYPE_ELECTRIC;
 
     if (move_type != TYPE_EGG)
     {
-        battle_stuff_ptr.ptr->dynamic_move_type=move_type + 0x80;
+        battle_stuff_ptr->dynamic_move_type=move_type + 0x80;
     }
     else
-        battle_stuff_ptr.ptr->dynamic_move_type = 0;
+        battle_stuff_ptr->dynamic_move_type = 0;
 }
 
 
@@ -349,7 +349,7 @@ u8 is_multi_battle();
 
 void reset_indicators_height()
 {
-    struct mega_related* mega = &new_battlestruct.ptr->mega_related;
+    struct mega_related* mega = &new_battlestruct->mega_related;
     for(u8 i = 0; i<no_of_all_banks ;i++)
     {
         objects[mega->indicator_id_pbs[i]].pos2.y=0;
@@ -379,35 +379,35 @@ u8 check_mega_evo(u8 bank)
     {
         if(bank==0)
         {
-            bank_mega_mode=new_battlestruct.ptr->mega_related.user_trigger;
+            bank_mega_mode=new_battlestruct->mega_related.user_trigger;
             if(bank_mega_mode)
             {
                 if(!is_multi_battle())
                 {
-                    new_battlestruct.ptr->mega_related.evo_happened_pbs|=0x5;
+                    new_battlestruct->mega_related.evo_happened_pbs|=0x5;
                 }
                 else
                 {
-                    new_battlestruct.ptr->mega_related.evo_happened_pbs|=0x1;
+                    new_battlestruct->mega_related.evo_happened_pbs|=0x1;
                 }
-                objects[new_battlestruct.ptr->mega_related.trigger_id].private[ANIM_STATE]=DISABLE;
+                objects[new_battlestruct->mega_related.trigger_id].private[ANIM_STATE]=DISABLE;
             }
         }
         else if(bank==2 && !is_multi_battle())
         {
-            bank_mega_mode=new_battlestruct.ptr->mega_related.ally_trigger;
+            bank_mega_mode=new_battlestruct->mega_related.ally_trigger;
             if(bank_mega_mode)
             {
-                new_battlestruct.ptr->mega_related.evo_happened_pbs|=0x5;
-                objects[new_battlestruct.ptr->mega_related.trigger_id].private[ANIM_STATE]=DISABLE;
+                new_battlestruct->mega_related.evo_happened_pbs|=0x5;
+                objects[new_battlestruct->mega_related.trigger_id].private[ANIM_STATE]=DISABLE;
             }
         }
-        else if (!(new_battlestruct.ptr->mega_related.evo_happened_pbs & bits_table[bank]))
+        else if (!(new_battlestruct->mega_related.evo_happened_pbs & bits_table[bank]))
         {
             bank_mega_mode=ai_mega_mode;
             if(bank_mega_mode)
             {
-                (new_battlestruct.ptr->mega_related.evo_happened_pbs) |= bits_table[bank];
+                (new_battlestruct->mega_related.evo_happened_pbs) |= bits_table[bank];
             }
         }
     }
@@ -417,12 +417,12 @@ u8 check_mega_evo(u8 bank)
         if (banks_side == 1)
         {
             poke_address = &party_opponent[battle_team_id_by_side[bank]];
-            new_battlestruct.ptr->mega_related.ai_party_mega_check|=bits_table[battle_team_id_by_side[bank]];
+            new_battlestruct->mega_related.ai_party_mega_check|=bits_table[battle_team_id_by_side[bank]];
         }
         else
         {
             poke_address = &party_player[battle_team_id_by_side[bank]];
-            new_battlestruct.ptr->mega_related.party_mega_check|=bits_table[battle_team_id_by_side[bank]];
+            new_battlestruct->mega_related.party_mega_check|=bits_table[battle_team_id_by_side[bank]];
         }
         set_attributes(poke_address, ATTR_SPECIES, &mega_species);
         calculate_stats_pokekmon(poke_address);
@@ -432,12 +432,12 @@ u8 check_mega_evo(u8 bank)
         attacker_struct->sp_atk = get_attributes(poke_address, ATTR_SPECIAL_ATTACK, 0);
         attacker_struct->sp_def = get_attributes(poke_address, ATTR_SPECIAL_DEFENCE, 0);
         attacker_struct->poke_species = mega_species;
-        struct basestat_data *pokemon_table = (void *)(poke_stat_table_ptr_ptr);
-        attacker_struct->type1 = pokemon_table->poke_stats[mega_species].type1;
-        attacker_struct->type2 = pokemon_table->poke_stats[mega_species].type2;
+        struct poke_basestats* PokeStats = &basestat_table->poke_stats[mega_species];
+        attacker_struct->type1 = PokeStats->type1;
+        attacker_struct->type2 = PokeStats->type2;
         // The ability 1 and ability 2 of the mega species in the base stat table should both be set and
         // have the same value.
-        attacker_struct->ability_id = pokemon_table->poke_stats[mega_species].ability1;
+        attacker_struct->ability_id = PokeStats->ability1;
 
         attacker_struct->max_hp = get_attributes(poke_address, ATTR_TOTAL_HP, 0);
         attacker_struct->current_hp = get_attributes(poke_address, ATTR_CURRENT_HP, 0);
@@ -467,7 +467,7 @@ u8 check_mega_evo(u8 bank)
             execute_battle_script(&mega_evolution_script);
         }
 
-        new_battlestruct.ptr->various.active_bank = bank;
+        new_battlestruct->various.active_bank = bank;
         return 1;
     }
     else
@@ -506,21 +506,21 @@ void bs_start_attack()
         }
     }
     bank_attacker=turn_order[current_move_turn];
-    if (new_battlestruct.ptr->bank_affecting[bank_attacker].sky_drop_target && is_bank_present(bank_attacker))
+    if (new_battlestruct->bank_affecting[bank_attacker].sky_drop_target && is_bank_present(bank_attacker))
     {
         reset_several_turns_stuff(bank_attacker);
         battle_state_mode = 0xB;
     }
-    else if(!(bits_table[bank_attacker]&battle_stuff_ptr.ptr->absent_bank_flags_prev_turn))
+    else if(!(bits_table[bank_attacker]&battle_stuff_ptr->absent_bank_flags_prev_turn))
     {
         struct battle_participant *attacker_struct = &battle_participants[bank_attacker];
         crit_loc=1;
         battle_scripting.damage_multiplier=0;
-        battle_stuff_ptr.ptr->atk_canceller_state_tracker=0;
+        battle_stuff_ptr->atk_canceller_state_tracker=0;
         clear_move_outcome();
         multihit_counter=0;
         battle_communication_struct.multistring_chooser=0;
-        current_move_position=battle_stuff_ptr.ptr->chosen_move_position[bank_attacker];
+        current_move_position=battle_stuff_ptr->chosen_move_position[bank_attacker];
         if(protect_structs[bank_attacker].flag0_onlystruggle)
         {
             protect_structs[bank_attacker].flag0_onlystruggle=0;
@@ -597,11 +597,11 @@ void bs_start_attack()
         battle_state_mode=0xA;
         if (current_move == last_used_moves[bank_attacker])
         {
-            if (new_battlestruct.ptr->bank_affecting[bank_attacker].same_move_used < 5)
-                new_battlestruct.ptr->bank_affecting[bank_attacker].same_move_used++;
+            if (new_battlestruct->bank_affecting[bank_attacker].same_move_used < 5)
+                new_battlestruct->bank_affecting[bank_attacker].same_move_used++;
         }
         else
-            new_battlestruct.ptr->bank_affecting[bank_attacker].same_move_used = 0;
+            new_battlestruct->bank_affecting[bank_attacker].same_move_used = 0;
 
         if (battle_flags.double_battle && !is_bank_present(bank_target))
             bank_target = get_target_of_move(current_move, 0, 0);
@@ -634,7 +634,7 @@ void set_focus_charge()
 void bc_preattacks()
 {
     u8 play_script=0;
-    u8 *count = &(battle_stuff_ptr.ptr->pre_attacks_bank_counter);
+    u8 *count = &(battle_stuff_ptr->pre_attacks_bank_counter);
     if(!(hitmarker&HITMARKER_FLEE))
     {   reset_indicators_height();
         while(*count<no_of_all_banks)
@@ -664,11 +664,11 @@ void bc_preattacks()
         current_move_turn=0;
         battle_state_mode=battle_state_mode_first_assigned;
         dynamic_base_power=0;
-        battle_stuff_ptr.ptr->dynamic_move_type=0;
+        battle_stuff_ptr->dynamic_move_type=0;
         b_c=&bc_bs_executer;
         battle_communication_struct.move_effect=0;
         battle_communication_struct.field4=0;
         battle_scripting.field16=0;
-        battle_resources.ptr->battlescript_stack->stack_height=0;
+        battle_resources->battlescript_stack->stack_height=0;
     }
 }

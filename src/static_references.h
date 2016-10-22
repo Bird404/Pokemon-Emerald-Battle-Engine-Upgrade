@@ -3,9 +3,8 @@
 
 #include "types.h"
 #include "battle_structs.h"
-#include "defines.h"
 
-extern struct move_info move_table[1024];
+extern const struct move_info move_table[1024];
 extern u16 forewarn_moves[];
 extern u16 sound_moves[];
 extern u16 powder_moves[];
@@ -150,4 +149,5 @@ extern void* healandconfuse_endmove_bs;
 extern void* statraise_berry_endmove_bs;
 extern void* lansat_endmove_bs;
 extern void* skydrop_tooheavy_bs;
+
 #endif /* static_references */

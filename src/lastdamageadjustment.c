@@ -1,9 +1,4 @@
-#include "types.h"
 #include "defines.h"
-#include "battle_locations.h"
-#include "battle_structs.h"
-#include "vanilla_functions.h"
-#include "new_battle_struct.h"
 #include "static_references.h"
 
 u8 get_all_item_quality(u8 bank);

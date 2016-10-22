@@ -1,14 +1,8 @@
-#include "types.h"
 #include "defines.h"
-#include "battle_locations.h"
-#include "battle_structs.h"
-#include "vanilla_functions.h"
-#include "new_battle_struct.h"
-#include "static_references.h"
 
 void reset_indicators_height_except_bank(u8  bank)
 {
-    struct mega_related* mega = &new_battlestruct.ptr->mega_related;
+    struct mega_related* mega = &new_battlestruct->mega_related;
     for(u8 i = 0; i<no_of_all_banks ;i++)
     {
         if(i!=bank)
@@ -20,24 +14,24 @@ void reset_indicators_height_except_bank(u8  bank)
 
 void clear_mega_triggers(u8 bank)
 {
-    struct object *trigger=&objects[new_battlestruct.ptr->mega_related.trigger_id];
+    struct object *trigger=&objects[new_battlestruct->mega_related.trigger_id];
     if(trigger->private[PALLET_STATE]==TRIGGER_ON)
     {
         trigger->private[PALLET_STATE]=REVERT_COLORS;
     }
     reset_indicators_height_except_bank(bank);
     if(bank==0)
-        new_battlestruct.ptr->mega_related.user_trigger=0;
+        new_battlestruct->mega_related.user_trigger=0;
     else if(bank==2)
-        new_battlestruct.ptr->mega_related.ally_trigger=0;
+        new_battlestruct->mega_related.ally_trigger=0;
 }
 
 void set_mega_triggers(u8 bank,u8 set_mode)
 {
     if(bank==0)
-        new_battlestruct.ptr->mega_related.user_trigger=set_mode;
+        new_battlestruct->mega_related.user_trigger=set_mode;
     else if(bank==2)
-        new_battlestruct.ptr->mega_related.ally_trigger=set_mode;
+        new_battlestruct->mega_related.ally_trigger=set_mode;
 }
 
 bool is_multi_battle()
@@ -52,18 +46,16 @@ bool is_multi_battle()
 
 u32 get_item_extra_param(u16 item)
 {
-    struct item_data *item_set= (void *) (item_data_ptr_ptr);
-    return item_set->items[item].extra_param;
+    return item_table->items[item].extra_param;
 }
 
 u16 get_mega_species(u8 bank, u8 chosen_method)
 {
     u16 species = battle_participants[bank].poke_species;
     u16 target_species=0;
-    struct evolution_data *evolution_table= (void *)(evo_table_ptr_ptr);
     for (u8 i = 0; i < NUM_OF_EVOS; i++)
     {
-        u8 method = evolution_table->poke_evolutions[species].evos[i].method;
+        u8 method = evo_table->poke_evo[species].evos[i].method;
         if (method == chosen_method)
         {
             switch(method)
@@ -73,7 +65,7 @@ u16 get_mega_species(u8 bank, u8 chosen_method)
                     if(get_item_effect(bank, 0) == ITEM_EFFECT_MEGASTONE)
                     {
                         u16 stone_target_species = (u16) get_item_extra_param(battle_participants[bank].held_item);
-                        if(evolution_table->poke_evolutions[species].evos[i].poke==stone_target_species)
+                        if(evo_table->poke_evo[species].evos[i].poke==stone_target_species)
                         {
                             target_species = stone_target_species;
                         }
@@ -85,7 +77,7 @@ u16 get_mega_species(u8 bank, u8 chosen_method)
                     if(get_item_effect(bank, 0) == ITEM_EFFECT_PRIMALORB)
                     {
                         u16 orb_target_species = (u16) get_item_extra_param(battle_participants[bank].held_item);
-                        if(evolution_table->poke_evolutions[species].evos[i].poke==orb_target_species)
+                        if(evo_table->poke_evo[species].evos[i].poke==orb_target_species)
                         {
                             target_species = orb_target_species;
                         }
@@ -94,14 +86,14 @@ u16 get_mega_species(u8 bank, u8 chosen_method)
                 break;
             case 0xFC: //fervent wish mega
                 {
-                    u8 fervent_move = evolution_table->poke_evolutions[species].evos[i].paramter;
+                    u8 fervent_move = evo_table->poke_evo[species].evos[i].paramter;
                     if (fervent_move)
                     {
                         for(u8 j=0; j<4; j++)
                         {
                             if(battle_participants[bank].moves[j]==fervent_move)
                             {
-                                target_species = evolution_table->poke_evolutions[species].evos[i].poke;
+                                target_species = evo_table->poke_evo[species].evos[i].poke;
                                 break;
                             }
                         }
@@ -118,7 +110,7 @@ u16 get_mega_species(u8 bank, u8 chosen_method)
 
 u8 can_set_mega_trigger(u8 bank)
 {
-    struct mega_related* mega=&new_battlestruct.ptr->mega_related;
+    struct mega_related* mega=&new_battlestruct->mega_related;
     bool res=0;
     int mega_mode=0;
     if(bank==0 && !(mega->user_trigger) &&
@@ -150,7 +142,7 @@ void set_mega_triggers_for_user_team(u8 bank)
     if(set_mode)
     {
         set_mega_triggers(bank,set_mode);
-        objects[new_battlestruct.ptr->mega_related.trigger_id].private[PALLET_STATE]=LIGHT_UP_TRIGGER;
+        objects[new_battlestruct->mega_related.trigger_id].private[PALLET_STATE]=LIGHT_UP_TRIGGER;
         play_sound(2);
     }
 }
@@ -166,13 +158,12 @@ void revert_mega_to_normalform(u8 teamID, u8 opponent_side)
     u8 can_revert = 0;
     u16 species_to_revert = 0;
 
-    struct evolution_data *evolution_table= (void *)(evo_table_ptr_ptr);
     for (u8 i = 0; i < NUM_OF_EVOS; i++)
     {
-        if (evolution_table->poke_evolutions[mega_current_species].evos[i].method == 0xFF)
+        if (evo_table->poke_evo[mega_current_species].evos[i].method == 0xFF)
         {
             can_revert = 1;
-            species_to_revert = evolution_table->poke_evolutions[mega_current_species].evos[i].poke;
+            species_to_revert = evo_table->poke_evo[mega_current_species].evos[i].poke;
             break;
         }
     }

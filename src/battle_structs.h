@@ -2,6 +2,7 @@
 #define B_STRUCTS
 
 #include "types.h"
+#include "defines.h"
 
 struct status_main{
     u32 sleep : 3;
@@ -96,13 +97,6 @@ struct battle_participant {
 };
 
 extern struct battle_participant battle_participants[4];
-
-struct evolution_sub{
-    u16 method;
-    u16 paramter;
-    u16 poke;
-    u16 padding;
-};
 
 struct in_battle_weather{
     u32 rain : 1;
@@ -265,11 +259,7 @@ struct battle_stuff{
     u8 field_2A3;
 };
 
-struct battle_stuff_ptr{
-    struct battle_stuff *ptr;
-};
-
-extern struct battle_stuff_ptr battle_stuff_ptr;
+extern struct battle_stuff* battle_stuff_ptr;
 
 struct special_status{
     u8 statloweringflag : 1;
@@ -428,11 +418,7 @@ struct b_resources_table{
     void* taiscripts_stack;
 };
 
-struct b_resources{
-    struct b_resources_table* ptr;
-};
-
-extern struct b_resources battle_resources;
+extern struct b_resources_table* battle_resources;
 
 struct b_communication{
     u8 field0;
@@ -702,6 +688,8 @@ struct palette {
 
 extern struct palette palette_obj_faded[16];
 
+//Pokemon Basestats table
+
 struct poke_basestats{
     u8 base_hp;
     u8 base_atk;
@@ -736,6 +724,12 @@ struct poke_basestats{
     u8 padding2;
 };
 
+struct basestat_data{
+    struct poke_basestats poke_stats[ALL_POKES];
+};
+
+extern struct basestat_data* basestat_table;
+
 struct battle_info_struct
 {
     u8 user_team_faint_counter;
@@ -758,6 +752,8 @@ struct battle_info_struct
 
 extern struct battle_info_struct battle_trace;
 
+//Item Table
+
 struct item_struct
 {
     u8 name[14];
@@ -775,31 +771,29 @@ struct item_struct
     u32 extra_param;
 };
 
-extern struct item_struct *item_data_ptr_ptr;
-
 struct item_data{
-    struct item_struct items[0xFFFF];
+    struct item_struct items[ALL_ITEMS];
 };
 
-//Evolution table defines
-#define NUM_OF_EVOS 5
+extern struct item_data* item_table;
+
+//Evolution table
+
+struct evolution_sub{
+    u16 method;
+    u16 paramter;
+    u16 poke;
+    u16 padding;
+};
 
 struct evolutions_of_poke{
     struct evolution_sub evos[NUM_OF_EVOS];
 };
 
-extern struct evolution_of_poke *evo_table_ptr_ptr;
-
-struct evolution_data{
-    struct evolutions_of_poke poke_evolutions[0xFFFF];
+struct evolution_all_pokes{
+    struct evolutions_of_poke poke_evo[ALL_POKES];
 };
 
-//Pokemon Basestats table
-
-extern struct poke_basestats *poke_stat_table_ptr_ptr;
-
-struct basestat_data{
-    struct poke_basestats poke_stats[0xFFFF];
-};
+extern struct evolution_all_pokes* evo_table;
 
 #endif /* B_STRUCTS */

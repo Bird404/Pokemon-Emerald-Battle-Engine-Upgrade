@@ -1,10 +1,5 @@
-#include "types.h"
 #include "defines.h"
-#include "battle_locations.h"
-#include "battle_structs.h"
-#include "vanilla_functions.h"
 #include "static_references.h"
-#include "new_battle_struct.h"
 
 bool load_weather_from_overworld();
 bool handle_primal_reversion(u8 bank);
@@ -23,7 +18,7 @@ u8 is_bank_present(u8 bank);
 
 u8 get_attacking_move_type()
 {
-    u8 move_type=battle_stuff_ptr.ptr->dynamic_move_type&0x3F;
+    u8 move_type=battle_stuff_ptr->dynamic_move_type&0x3F;
     if(!move_type)
     {
         if(check_ability(bank_attacker,ABILITY_NORMALIZE))
@@ -39,7 +34,7 @@ u8 get_item_effect(u8 bank, u8 check_negating_effects)
     u16 held_item = battle_participants[bank].held_item;
     if (check_negating_effects)
     {
-        if (check_ability(bank, ABILITY_KLUTZ) || new_battlestruct.ptr->field_affecting.magic_room || new_battlestruct.ptr->bank_affecting[bank].embargo)
+        if (check_ability(bank, ABILITY_KLUTZ) || new_battlestruct->field_affecting.magic_room || new_battlestruct->bank_affecting[bank].embargo)
             return ITEM_EFFECT_NOEFFECT;
         if (get_item_pocket_id(held_item) && ability_battle_effects(12, bank, ABILITY_UNNERVE, 0, 0))
             return ITEM_EFFECT_NOEFFECT;
@@ -56,7 +51,7 @@ u8 get_item_effect(u8 bank, u8 check_negating_effects)
 
 u8 is_of_type(u8 bank, u8 type)
 {
-    if (battle_participants[bank].type1 == type || battle_participants[bank].type2 == type || new_battlestruct.ptr->bank_affecting[bank].type3 == type)
+    if (battle_participants[bank].type1 == type || battle_participants[bank].type2 == type || new_battlestruct->bank_affecting[bank].type3 == type)
         return true;
     else
         return false;
@@ -66,7 +61,7 @@ void set_type(u8 bank, u8 type)
 {
     battle_participants[bank].type1 = type;
     battle_participants[bank].type2 = type;
-    new_battlestruct.ptr->bank_affecting[bank].type3 = type;
+    new_battlestruct->bank_affecting[bank].type3 = type;
     return;
 }
 
@@ -143,18 +138,18 @@ u8 should_cherrim_change(u8 bank)
     }
     if ((battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun) && weather_abilities_effect())
     {
-        if (!new_battlestruct.ptr->bank_affecting[bank].sunshine_form)
+        if (!new_battlestruct->bank_affecting[bank].sunshine_form)
         {
             effect = 2;
-            new_battlestruct.ptr->bank_affecting[bank].sunshine_form = 1;
+            new_battlestruct->bank_affecting[bank].sunshine_form = 1;
         }
     }
     else
     {
-        if (new_battlestruct.ptr->bank_affecting[bank].sunshine_form)
+        if (new_battlestruct->bank_affecting[bank].sunshine_form)
         {
             effect = 1;
-            new_battlestruct.ptr->bank_affecting[bank].sunshine_form = 0;
+            new_battlestruct->bank_affecting[bank].sunshine_form = 0;
         }
     }
     return effect;
@@ -225,16 +220,16 @@ u16 get_airborne_state(u8 bank, u8 mode, u8 check_levitate)
     // return 3 airborne due to flying type or telekinesis
     // return 4 airborne due to levitate
     // mode 1 for damage calc && 0 for hazards etc.
-    if (new_battlestruct.ptr->field_affecting.gravity)
+    if (new_battlestruct->field_affecting.gravity)
         return 0;
     if (get_item_effect(bank, true) == ITEM_EFFECT_IRONBALL
-        || new_battlestruct.ptr->bank_affecting[bank].smacked_down
+        || new_battlestruct->bank_affecting[bank].smacked_down
         || status3[bank].rooted)
         return 1;
     if (check_levitate && battle_participants[bank].ability_id == ABILITY_LEVITATE && has_ability_effect(bank,mode,1))
         return 4;
     if ((mode==0 && is_of_type(bank,TYPE_FLYING)) || get_item_effect(bank, true) == ITEM_EFFECT_AIRBALLOON ||
-        new_battlestruct.ptr->bank_affecting[bank].magnet_rise || new_battlestruct.ptr->bank_affecting[bank].telekinesis)
+        new_battlestruct->bank_affecting[bank].magnet_rise || new_battlestruct->bank_affecting[bank].telekinesis)
         return 3;
     return 2;
 }
@@ -265,7 +260,7 @@ u16 damage_type_effectiveness_update(u8 attacking_type, u8 defending_type, u8 at
 
     effect=type_effectiveness_table[atype][dtype];
 
-    if (new_battlestruct.ptr->various.inverse_battle)
+    if (new_battlestruct->various.inverse_battle)
     {
         if (effect == 20)
         {
@@ -282,7 +277,7 @@ u16 damage_type_effectiveness_update(u8 attacking_type, u8 defending_type, u8 at
         effect = 10;
     }
 
-    else if ((attacking_type == TYPE_PSYCHIC) && defending_type == TYPE_DARK && new_battlestruct.ptr->bank_affecting[def_bank].miracle_eyed && effect == 0)
+    else if ((attacking_type == TYPE_PSYCHIC) && defending_type == TYPE_DARK && new_battlestruct->bank_affecting[def_bank].miracle_eyed && effect == 0)
     {
         effect = 10;
     }
@@ -325,7 +320,7 @@ u16 apply_type_effectiveness(u16 chained_effect, u8 move_type, u8 target_bank, u
 {
     u8 defender_type1 = battle_participants[target_bank].type1;
     u8 defender_type2 = battle_participants[target_bank].type2;
-    u8 defender_type3 = new_battlestruct.ptr->bank_affecting[target_bank].type3;
+    u8 defender_type3 = new_battlestruct->bank_affecting[target_bank].type3;
     //set different types
     if (defender_type2 == defender_type1)
         defender_type2 = TYPE_EGG;
@@ -484,7 +479,7 @@ u8 prepare_castform_switch(u8 effect, u8 bank)
         void* bs_castform = (void*) 0x082DB4A9;
         execute_battle_script(bs_castform);
         battle_scripting.active_bank = bank;
-        battle_stuff_ptr.ptr->castform_switch_form = effect - 1;
+        battle_stuff_ptr->castform_switch_form = effect - 1;
     }
     return effect;
 }
@@ -492,7 +487,7 @@ u8 prepare_castform_switch(u8 effect, u8 bank)
 u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro)
 {
     u8 attacker_ability;
-    if (gastro && new_battlestruct.ptr->bank_affecting[bank].gastro_acided)
+    if (gastro && new_battlestruct->bank_affecting[bank].gastro_acided)
         return false;
     if (mold_breaker)
     {   attacker_ability=battle_participants[bank_attacker].ability_id;
@@ -538,7 +533,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             break;
         if(handle_primal_reversion(bank))
         {
-            battle_stuff_ptr.ptr->switch_in_ability_bank_counter--;
+            battle_stuff_ptr->switch_in_ability_bank_counter--;
             effect=1;
             break;
         }
@@ -700,7 +695,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         case ABILITY_FRISK:
             {
                 effect = true;
-                battle_stuff_ptr.ptr->intimidate_user=bank;
+                battle_stuff_ptr->intimidate_user=bank;
                 execute_battle_script(frisk_bs);
             }
             break;
@@ -739,7 +734,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 bank_attacker = bank;
                 bank_target = (bank ^ 1);
                 battle_scripting.active_bank = bank;
-                new_battlestruct.ptr->various.active_bank = bank;
+                new_battlestruct->various.active_bank = bank;
                 dontlock=1;
             }
             break;
@@ -747,7 +742,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             {
                 script_ptr = (void*) 0x082DB4B8;
                 execute_battle_script(script_ptr);
-                battle_stuff_ptr.ptr->intimidate_user=bank;
+                battle_stuff_ptr->intimidate_user=bank;
                 bank_attacker = bank;
                 effect=true;
             }
@@ -771,14 +766,14 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     break;
                 if (last_used_ability!=ABILITY_TRACE) //If trace copies another switch-in ability. This fragment enables to activate that ability immediately after tracing.
                 {
-                    battle_stuff_ptr.ptr->switch_in_ability_bank_counter--;
+                    battle_stuff_ptr->switch_in_ability_bank_counter--;
                     dontlock=1;
                 }
                 script_ptr = (void*) 0x082DB452;
                 execute_battle_script(script_ptr);
                 battle_participants[bank].ability_id=last_used_ability;
                 battle_scripting.active_bank = bank;
-                battle_stuff_ptr.ptr->intimidate_user=bank;
+                battle_stuff_ptr->intimidate_user=bank;
                 battle_text_buff1[0]=0xFD;
                 battle_text_buff1[1]=0x4;
                 battle_text_buff1[2]=active_bank;
@@ -807,21 +802,21 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 {
                     execute_battle_script(&cherrimswitch_bs);
                     battle_scripting.active_bank = j;
-                    battle_stuff_ptr.ptr->castform_switch_form = effect - 1;
+                    battle_stuff_ptr->castform_switch_form = effect - 1;
                     break;
                 }
             }
             break;
         case ABILITY_FLOWER_GIFT:
-            if (!(new_battlestruct.ptr->bank_affecting[bank].cherrim_transformed))
+            if (!(new_battlestruct->bank_affecting[bank].cherrim_transformed))
             {
                 effect = should_cherrim_change(bank);
                 if (effect)
                 {
                     execute_battle_script(&cherrimswitch_bs);
                     battle_scripting.active_bank = bank;
-                    battle_stuff_ptr.ptr->castform_switch_form = effect - 1;
-                    new_battlestruct.ptr->bank_affecting[bank].cherrim_transformed = 1;
+                    battle_stuff_ptr->castform_switch_form = effect - 1;
+                    new_battlestruct->bank_affecting[bank].cherrim_transformed = 1;
                     dontlock=1;
                 }
             }
@@ -833,7 +828,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             break;
         case ABILITY_SLOW_START:
             {
-                new_battlestruct.ptr->bank_affecting[bank].slowstart_duration = 5;
+                new_battlestruct->bank_affecting[bank].slowstart_duration = 5;
                 effect = true;
                 battle_scripting.active_bank = bank;
                 execute_battle_script(&slowstart_bs);
@@ -859,7 +854,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             case ABILITY_RAIN_DISH:
                 if (weather_abilities_effect() && (battle_weather.flags.downpour || battle_weather.flags.rain || battle_weather.flags.permament_rain || battle_weather.flags.heavy_rain))
                 {
-                    if (battle_participants[bank].current_hp < battle_participants[bank].max_hp && !new_battlestruct.ptr->bank_affecting[bank].heal_block)
+                    if (battle_participants[bank].current_hp < battle_participants[bank].max_hp && !new_battlestruct->bank_affecting[bank].heal_block)
                     {
                         script_ptr = (void*) 0x082DB45C;
                         execute_battle_script(script_ptr);
@@ -873,7 +868,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 {
                     if (battle_weather.flags.downpour || battle_weather.flags.rain || battle_weather.flags.permament_rain || battle_weather.flags.heavy_rain)
                     {
-                        if (battle_participants[bank].current_hp < battle_participants[bank].max_hp && !new_battlestruct.ptr->bank_affecting[bank].heal_block)
+                        if (battle_participants[bank].current_hp < battle_participants[bank].max_hp && !new_battlestruct->bank_affecting[bank].heal_block)
                         {
                             script_ptr = (void*) 0x082DB45C;
                             execute_battle_script(script_ptr);
@@ -898,7 +893,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 }
                 break;
             case ABILITY_HARVEST:
-                if (get_item_pocket_id(battle_stuff_ptr.ptr->used_held_items[bank]) == 4 && !battle_participants[bank].held_item)
+                if (get_item_pocket_id(battle_stuff_ptr->used_held_items[bank]) == 4 && !battle_participants[bank].held_item)
                 {
                     if ((weather_abilities_effect() && (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)) || two_options_rand(0, 1) == 0)
                     {
@@ -939,14 +934,14 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 {
                     for (u8 i = 0; i < no_of_all_banks; i++)
                     {
-                        if (i!=bank && battle_stuff_ptr.ptr->used_held_items[i]
-                            && new_battlestruct.ptr->various.recently_used_item == battle_stuff_ptr.ptr->used_held_items[i])
+                        if (i!=bank && battle_stuff_ptr->used_held_items[i]
+                            && new_battlestruct->various.recently_used_item == battle_stuff_ptr->used_held_items[i])
                         {
                             effect = true;
-                            battle_stuff_ptr.ptr->used_held_items[i] = 0;
+                            battle_stuff_ptr->used_held_items[i] = 0;
                             execute_battle_script(&pickup_bs);
-                            battle_participants[bank].held_item = new_battlestruct.ptr->various.recently_used_item;
-                            new_battlestruct.ptr->various.recently_used_item = 0;
+                            battle_participants[bank].held_item = new_battlestruct->various.recently_used_item;
+                            new_battlestruct->various.recently_used_item = 0;
                             active_bank = bank;
                             prepare_setattributes_in_battle(0, 2, 0, 2,&battle_participants[bank].held_item);
                             mark_buffer_bank_for_execution(bank);
@@ -957,7 +952,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 break;
             case ABILITY_BAD_DREAMS:
                 effect = true;
-                battle_stuff_ptr.ptr->intimidate_user=bank;
+                battle_stuff_ptr->intimidate_user=bank;
                 execute_battle_script(bad_dreams_bs);
                 break;
             case ABILITY_SPEED_BOOST:
@@ -995,8 +990,8 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     {
                         effect = true;
                         execute_battle_script(&moody_bs);
-                        new_battlestruct.ptr->various.var1 = 0;
-                        new_battlestruct.ptr->various.var2 = 0;
+                        new_battlestruct->various.var1 = 0;
+                        new_battlestruct->various.var2 = 0;
                         battle_scripting.active_bank = bank;
                         bank_target = bank;
                         while (raiseable_stats != 0)
@@ -1004,7 +999,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                             u8 rand_stat = __umodsi3(rng(), 7);
                             if (raiseable_stats & bits_table[rand_stat])
                             {
-                                new_battlestruct.ptr->various.var1 = 0x21 + rand_stat;
+                                new_battlestruct->various.var1 = 0x21 + rand_stat;
                                 if (lowerable_stats & bits_table[rand_stat])
                                     lowerable_stats ^= bits_table[rand_stat];
                                 break;
@@ -1015,7 +1010,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                             u8 rand_stat = __umodsi3(rng(), 7);
                             if (lowerable_stats & bits_table[rand_stat])
                             {
-                                new_battlestruct.ptr->various.var2 = 0x91 + rand_stat;
+                                new_battlestruct->various.var2 = 0x91 + rand_stat;
                                 break;
                             }
                         }
@@ -1095,7 +1090,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     if (move_type == TYPE_FIRE)
                     {
                         effect = 1;
-                        battle_resources.ptr->ability_flags_ptr->flags_ability[bank].flag1_flashfire = 1;
+                        battle_resources->ability_flags_ptr->flags_ability[bank].flag1_flashfire = 1;
                         script_ptr = (void*) 0x082DB5A7;
                         script_ptr += adder;
                         battlescripts_curr_instruction = script_ptr;
@@ -1133,7 +1128,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 }
                 if(common_effect==1)
                 {
-                    if (battle_participants[bank].max_hp == battle_participants[bank].current_hp || new_battlestruct.ptr->bank_affecting[bank].heal_block)
+                    if (battle_participants[bank].max_hp == battle_participants[bank].current_hp || new_battlestruct->bank_affecting[bank].heal_block)
                         script_ptr = (void*) 0x082DB591;
                     else
                     {
@@ -1291,7 +1286,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                         effect = true;
                         battlescript_push();
                         battlescripts_curr_instruction = &weakarmor_bs;
-                        new_battlestruct.ptr->various.active_bank = bank;
+                        new_battlestruct->various.active_bank = bank;
                     }
                     break;
                 case ABILITY_CUTE_CHARM:
@@ -1405,7 +1400,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     {
                       execute_battle_script(&cherrimswitch_bs);
                       battle_scripting.active_bank = i;
-                      battle_stuff_ptr.ptr->castform_switch_form = effect - 1;
+                      battle_stuff_ptr->castform_switch_form = effect - 1;
                       break;
                     }
                 }
@@ -1415,12 +1410,12 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
      case 7: //user's synchronize
         adder=0x40;
     case 8: //target's synchronize after static etc.
-        if(battle_participants[bank].ability_id==ABILITY_SYNCHRONIZE && has_ability_effect(bank,0,1) && battle_stuff_ptr.ptr->synchronize_effect_chooser)
+        if(battle_participants[bank].ability_id==ABILITY_SYNCHRONIZE && has_ability_effect(bank,0,1) && battle_stuff_ptr->synchronize_effect_chooser)
         {
             effect=true;
             hitmarker &= 0xFFFFBFFF;
-            battle_stuff_ptr.ptr->synchronize_effect_chooser &= 0x3F;
-            battle_communication_struct.move_effect=adder+battle_stuff_ptr.ptr->synchronize_effect_chooser;
+            battle_stuff_ptr->synchronize_effect_chooser &= 0x3F;
+            battle_communication_struct.move_effect=adder+battle_stuff_ptr->synchronize_effect_chooser;
             battle_scripting.active_bank=bank;
             battlescript_push();
             battlescripts_curr_instruction=(void *)(0x82DB680);
@@ -1441,7 +1436,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     if((*target_held_item)!=0 && (*target_held_item)!=0xAF)
                     {
                         last_used_item = *target_held_item;
-                        battle_stuff_ptr.ptr->choiced_move[bank_target]=0;
+                        battle_stuff_ptr->choiced_move[bank_target]=0;
                         battle_participants[bank].held_item = last_used_item;
                         *target_held_item = 0;
                         battlescript_push();
@@ -1601,7 +1596,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
     case 21: // color change
         if (check_ability(bank,ABILITY_COLOR_CHANGE) && curr_move != MOVE_STRUGGLE &&
             battle_participants[bank].current_hp && MOVE_WORKED && TARGET_TURN_DAMAGED &&
-            !new_battlestruct.ptr->various.sheerforce_bonus && !is_of_type(bank, move_type))
+            !new_battlestruct->various.sheerforce_bonus && !is_of_type(bank, move_type))
         {
             battle_text_buff1[0] = 0xFD;
             battle_text_buff1[1] = 0x3;
@@ -1619,7 +1614,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             battle_participants[bank].current_hp && battle_participants[bank_attacker].current_hp)
         {
             if (!contact || battle_participants[bank].held_item
-                || (new_battlestruct.ptr->various.sheerforce_bonus)
+                || (new_battlestruct->various.sheerforce_bonus)
                 || (battle_participants[bank_attacker].ability_id == ABILITY_STICKY_HOLD
                     && has_ability_effect(bank_attacker,0,1)))
                 break;
@@ -1627,7 +1622,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             if((*user_held_item)!=0 && (*user_held_item)!=0xAF)
             {
                 last_used_item = *user_held_item;
-                battle_stuff_ptr.ptr->choiced_move[bank_attacker]=0;
+                battle_stuff_ptr->choiced_move[bank_attacker]=0;
                 battle_participants[bank].held_item = last_used_item;
                 *user_held_item = 0;
                 battlescript_push();
@@ -1652,7 +1647,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
 
 void call_ability_effects()
 {
-    ability_battle_effects(0, new_battlestruct.ptr->various.active_bank, 0, 0, 0);
+    ability_battle_effects(0, new_battlestruct->various.active_bank, 0, 0, 0);
     return;
 }
 
@@ -1697,7 +1692,7 @@ u8 get_all_item_quality(u8 bank)
 u8 mental_herb_effect(u8 bank, enum call_mode calling_mode)
 {
     u8 effect = false;
-    if (disable_structs[bank].disable_timer || disable_structs[bank].encore_timer || disable_structs[bank].taunt_timer || battle_participants[bank].status2.tormented || battle_participants[bank].status2.in_love || new_battlestruct.ptr->bank_affecting[bank].heal_block)
+    if (disable_structs[bank].disable_timer || disable_structs[bank].encore_timer || disable_structs[bank].taunt_timer || battle_participants[bank].status2.tormented || battle_participants[bank].status2.in_love || new_battlestruct->bank_affecting[bank].heal_block)
     {
         effect = 2;
         if(calling_mode==BATTLE_TURN)
@@ -1734,7 +1729,7 @@ u8 cant_poison(u8 bank, u8 self_inflicted)
         return 4;
     if (side_affecting_halfword[is_bank_from_opponent_side(bank)].safeguard_on && !self_inflicted)
         return 5;
-    if (new_battlestruct.ptr->field_affecting.misty_terrain && get_airborne_state(bank, 1, 1) <= 2 && !self_inflicted)
+    if (new_battlestruct->field_affecting.misty_terrain && get_airborne_state(bank, 1, 1) <= 2 && !self_inflicted)
         return 8;
     return 0;
 }
@@ -1766,9 +1761,9 @@ u8 cant_fall_asleep(u8 bank, u8 self_inflicted)
                 return 6;
         }
     }
-    if (new_battlestruct.ptr->field_affecting.misty_terrain && get_airborne_state(bank, 1, 1) <= 2 && !self_inflicted)
+    if (new_battlestruct->field_affecting.misty_terrain && get_airborne_state(bank, 1, 1) <= 2 && !self_inflicted)
         return 8;
-    if (new_battlestruct.ptr->field_affecting.electic_terrain && get_airborne_state(bank, 1, 1) <= 2 && !self_inflicted)
+    if (new_battlestruct->field_affecting.electic_terrain && get_airborne_state(bank, 1, 1) <= 2 && !self_inflicted)
         return 9;
     return 0;
 }
@@ -1791,7 +1786,7 @@ u8 cant_become_paralyzed(u8 bank, u8 self_inflicted)
         return 4;
     if (side_affecting_halfword[is_bank_from_opponent_side(bank)].safeguard_on && !self_inflicted)
         return 5;
-    if (new_battlestruct.ptr->field_affecting.misty_terrain && get_airborne_state(bank, 1, 1) <= 2 && !self_inflicted)
+    if (new_battlestruct->field_affecting.misty_terrain && get_airborne_state(bank, 1, 1) <= 2 && !self_inflicted)
         return 8;
     return 0;
 }
@@ -1814,7 +1809,7 @@ u8 cant_become_burned(u8 bank, u8 self_inflicted)
         return 4;
     if (side_affecting_halfword[is_bank_from_opponent_side(bank)].safeguard_on && !self_inflicted)
         return 5;
-    if (new_battlestruct.ptr->field_affecting.misty_terrain && get_airborne_state(bank, 1, 1) <= 2 && !self_inflicted)
+    if (new_battlestruct->field_affecting.misty_terrain && get_airborne_state(bank, 1, 1) <= 2 && !self_inflicted)
         return 8;
     return 0;
 }
@@ -1840,7 +1835,7 @@ u8 cant_become_freezed(u8 bank, u8 self_inflicted)
         return 5;
     if (weather_abilities_effect() && battle_weather.int_bw & (weather_harsh_sun || weather_permament_sun || weather_sun))
         return 7;
-    if (new_battlestruct.ptr->field_affecting.misty_terrain && get_airborne_state(bank, 1, 1) <= 2 && !self_inflicted)
+    if (new_battlestruct->field_affecting.misty_terrain && get_airborne_state(bank, 1, 1) <= 2 && !self_inflicted)
         return 8;
     return 0;
 }
@@ -1862,7 +1857,7 @@ u8 heal_and_confuse_berry(u8 bank, u8 item_effect, u8 quality, enum call_mode ca
 {
     u8 effect = 0;
     //This assumes that the effect ids of these has different contiguous effects.
-    if(hp_condition(bank, 1) && new_battlestruct.ptr->bank_affecting[bank].heal_block)
+    if(hp_condition(bank, 1) && new_battlestruct->bank_affecting[bank].heal_block)
     {
         s32 max_hp = battle_participants[bank].max_hp;
         s32 current_hp = battle_participants[bank].current_hp;
@@ -1984,7 +1979,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
         case ITEM_EFFECT_AMULETCOIN:
             if (!is_bank_from_opponent_side(bank))
             {
-                battle_stuff_ptr.ptr->money_multiplier = 2;
+                battle_stuff_ptr->money_multiplier = 2;
                 effect = true;
             }
             break;
@@ -1992,7 +1987,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             effect = white_herb_effect(bank, BATTLE_TURN);
             break;
         case ITEM_EFFECT_AIRBALLOON:
-            if (!new_battlestruct.ptr->field_affecting.gravity)
+            if (!new_battlestruct->field_affecting.gravity)
             {
                 effect = 1;
                 active_bank = bank;
@@ -2005,7 +2000,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
         switch (item_effect)
         {
         case ITEM_EFFECT_ORANBERRY:
-            if (hp_condition(bank, 1) && !move_turn && !new_battlestruct.ptr->bank_affecting[bank_target].heal_block)
+            if (hp_condition(bank, 1) && !move_turn && !new_battlestruct->bank_affecting[bank_target].heal_block)
             {
                 effect = 4;
                 if (quality > battle_participants[bank].max_hp - battle_participants[bank].current_hp)
@@ -2016,7 +2011,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             }
             break;
         case ITEM_EFFECT_SITRUSBERRY:
-            if (hp_condition(bank, 1) && !move_turn && !new_battlestruct.ptr->bank_affecting[bank_target].heal_block)
+            if (hp_condition(bank, 1) && !move_turn && !new_battlestruct->bank_affecting[bank_target].heal_block)
             {
                 effect = 4;
                 s32 damage = battle_participants[bank].max_hp >> 2;
@@ -2158,7 +2153,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 goto STICKYBARB;
             }
         case ITEM_EFFECT_LEFTOVERS:
-            if (battle_participants[bank].max_hp != battle_participants[bank].current_hp && !move_turn && !new_battlestruct.ptr->bank_affecting[bank_target].heal_block)
+            if (battle_participants[bank].max_hp != battle_participants[bank].current_hp && !move_turn && !new_battlestruct->bank_affecting[bank_target].heal_block)
             {
                 effect = 4;
                 s32 damage = battle_participants[bank].max_hp >> 4;
@@ -2314,7 +2309,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             switch (item_effect)
             {
             case ITEM_EFFECT_ORANBERRY:
-                if (hp_condition(bank, 1) && !move_turn && !new_battlestruct.ptr->bank_affecting[bank_target].heal_block)
+                if (hp_condition(bank, 1) && !move_turn && !new_battlestruct->bank_affecting[bank_target].heal_block)
                 {
                     effect = 4;
                     if (quality > battle_participants[bank].max_hp - battle_participants[bank].current_hp)
@@ -2326,7 +2321,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 }
                 break;
             case ITEM_EFFECT_SITRUSBERRY:
-                if (hp_condition(bank, 1) && !move_turn && !new_battlestruct.ptr->bank_affecting[bank_target].heal_block)
+                if (hp_condition(bank, 1) && !move_turn && !new_battlestruct->bank_affecting[bank_target].heal_block)
                 {
                     effect = 4;
                     s32 damage = battle_participants[bank].max_hp >> 2;
@@ -2472,9 +2467,9 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             case ITEM_EFFECT_SHELLBELL:
                 if (MOVE_WORKED && special_statuses[bank_target].moveturn_losthp && special_statuses[bank_target].moveturn_losthp != 0xFFFF && bank_target != bank_attacker
                     && battle_participants[bank_attacker].current_hp && battle_participants[bank_attacker].current_hp <= battle_participants[bank_attacker].max_hp &&
-                    !new_battlestruct.ptr->bank_affecting[bank_target].heal_block)
+                    !new_battlestruct->bank_affecting[bank_target].heal_block)
                 {
-                    new_battlestruct.ptr->various.accumulated_damage += special_statuses[bank_target].moveturn_losthp;
+                    new_battlestruct->various.accumulated_damage += special_statuses[bank_target].moveturn_losthp;
                     special_statuses[bank_target].moveturn_losthp = 0;
                 }
                 break;
@@ -2482,7 +2477,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 if (MOVE_WORKED && special_statuses[bank_target].moveturn_losthp && special_statuses[bank_target].moveturn_losthp != 0xFFFF &&
                      bank_target != bank_attacker)
                 {
-                    new_battlestruct.ptr->various.life_orbed = 1;
+                    new_battlestruct->various.life_orbed = 1;
                 }
                 break;
             }
@@ -2516,10 +2511,10 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
     {
         u16 item = battle_participants[bank].held_item;
         last_used_item = item;
-        new_battlestruct.ptr->various.recently_used_item = item;
-        new_battlestruct.ptr->bank_affecting[bank].item_used = 1;
+        new_battlestruct->various.recently_used_item = item;
+        new_battlestruct->bank_affecting[bank].item_used = 1;
         if (eaten_berry)
-            new_battlestruct.ptr->bank_affecting[bank].eaten_berry = 1;
+            new_battlestruct->bank_affecting[bank].eaten_berry = 1;
         if (effect == 1)
         {
             active_bank = bank;
@@ -2539,9 +2534,9 @@ u8 not_magicguard(u8 bank);
 u8 berry_eaten(enum call_mode how_to_call, u8 bank)
 {
     u8 cheek_pouch = 0;
-    if (new_battlestruct.ptr->bank_affecting[bank].eaten_berry)
+    if (new_battlestruct->bank_affecting[bank].eaten_berry)
     {
-        new_battlestruct.ptr->bank_affecting[bank].eaten_berry = 0;
+        new_battlestruct->bank_affecting[bank].eaten_berry = 0;
         if (check_ability(bank, ABILITY_CHEEK_POUCH) && battle_participants[bank].current_hp != battle_participants[bank].max_hp)
         {
             cheek_pouch = 1;
@@ -2572,7 +2567,7 @@ u8 poison_heal_check()
     if (check_ability(active_bank, ABILITY_POISON_HEAL))
     {
         effect = 1;
-        if (!(new_battlestruct.ptr->bank_affecting[active_bank].heal_block || battle_participants[active_bank].current_hp == battle_participants[active_bank].max_hp))
+        if (!(new_battlestruct->bank_affecting[active_bank].heal_block || battle_participants[active_bank].current_hp == battle_participants[active_bank].max_hp))
         {
             damage_loc = get_1_8_of_max_hp(active_bank) * -1;
             call_bc_move_exec(&poisonheal_bs);
@@ -2598,7 +2593,7 @@ u8 check_if_move_failed(u8 bank)
         return 1;
     if (failed->flag1_noteffective)
         return 1;
-    if (new_battlestruct.ptr->bank_affecting[bank].move_failed)
+    if (new_battlestruct->bank_affecting[bank].move_failed)
         return 1;
     return 0;
 }
@@ -2810,10 +2805,10 @@ void move_effect_setter(u8 primary, u8 certain)
             battlescripts_curr_instruction = &attackingstatschange_bs;
             break;
         default:
-            new_battlestruct.ptr->various.move_primary_effect = *move_effect;
+            new_battlestruct->various.move_primary_effect = *move_effect;
             if(affects_user)
             {
-                new_battlestruct.ptr->various.move_primary_effect |= 0x40;
+                new_battlestruct->various.move_primary_effect |= 0x40;
             }
             statustoeffect();
             if (*move_effect && current_hp && !shield_dust && !substitute && calculate_effect_chance(bank_attacker, current_move))
@@ -2848,7 +2843,7 @@ void move_effect_setter(u8 primary, u8 certain)
             if (*move_effect == 1 || *move_effect == 4)
                 reset_several_turns_stuff(bank_to_apply);
             else
-                battle_stuff_ptr.ptr->synchronize_effect_chooser = *move_effect;
+                battle_stuff_ptr->synchronize_effect_chooser = *move_effect;
             break;
         case 4: //ability prevents it
             if (primary || certain)
@@ -2872,8 +2867,8 @@ u8 battle_turn_move_effects()
 {
     u8 effect = 0;
     hitmarker |= 0x1000020;
-    u8* bank = &battle_stuff_ptr.ptr->end_turn_checked_bank;
-    u8* tracker = &battle_stuff_ptr.ptr->end_turn_statetracker1;
+    u8* bank = &battle_stuff_ptr->end_turn_checked_bank;
+    u8* tracker = &battle_stuff_ptr->end_turn_statetracker1;
     while (*bank < no_of_all_banks)
     {
         active_bank = bank_attacker = turn_order[*bank];
@@ -2883,7 +2878,7 @@ u8 battle_turn_move_effects()
         }
         else
         {
-            struct bank_affecting* ptr_to_struct = &new_battlestruct.ptr->bank_affecting[active_bank];
+            struct bank_affecting* ptr_to_struct = &new_battlestruct->bank_affecting[active_bank];
             u16 current_hp = battle_participants[active_bank].current_hp;
             struct battle_participant* attacker_struct = &battle_participants[active_bank];
             switch (*tracker)
@@ -3000,7 +2995,7 @@ u8 battle_turn_move_effects()
                 case 13: //check being trapped in a multiturn attack like wrap or whirpool
                     if (current_hp && attacker_struct->status2.trapped_in_wrap)
                     {
-                        u16 trapped_move = battle_stuff_ptr.ptr->trapped_move[active_bank];
+                        u16 trapped_move = battle_stuff_ptr->trapped_move[active_bank];
                         battle_text_buff1[0] = 0xFD;
                         battle_text_buff1[1] = 2;
                         battle_text_buff1[2] = trapped_move;
@@ -3011,7 +3006,7 @@ u8 battle_turn_move_effects()
                         {
                             battle_scripting.field10 = trapped_move;
                             battle_scripting.field11 = trapped_move >> 8;
-                            if (get_item_effect(new_battlestruct.ptr->bank_affecting[active_bank].wrap_bank, 1) == ITEM_EFFECT_BINDINGBAND)
+                            if (get_item_effect(new_battlestruct->bank_affecting[active_bank].wrap_bank, 1) == ITEM_EFFECT_BINDINGBAND)
                             {
                                 u32 damage = __udivsi3(attacker_struct->max_hp, 6);
                                 if (damage == 0)
@@ -3227,7 +3222,7 @@ u8 battle_turn_move_effects()
                         effect = 1;
                     break;
                 case 29: //change roost type
-                    switch (new_battlestruct.ptr->bank_affecting[active_bank].roost)
+                    switch (new_battlestruct->bank_affecting[active_bank].roost)
                     {
                     case 1:
                         battle_participants[active_bank].type1 = TYPE_FLYING;
@@ -3236,7 +3231,7 @@ u8 battle_turn_move_effects()
                         battle_participants[active_bank].type2 = TYPE_FLYING;
                         break;
                     case 3:
-                        new_battlestruct.ptr->bank_affecting[active_bank].type3 = TYPE_FLYING;
+                        new_battlestruct->bank_affecting[active_bank].type3 = TYPE_FLYING;
                         break;
                     case 4:
                         set_type(active_bank, TYPE_FLYING);
@@ -3290,17 +3285,17 @@ u8 update_turn_counters()
         if (!(absent_bank_flags & bits_table[bank_target]))
             break;
     }
-    u8* statetracker = &battle_stuff_ptr.ptr->end_turn_statetracker2;
-    u8* sidebank = &battle_stuff_ptr.ptr->field_DB;
+    u8* statetracker = &battle_stuff_ptr->end_turn_statetracker2;
+    u8* sidebank = &battle_stuff_ptr->field_DB;
     while (effect == 0)
     {
         switch (*statetracker)
         {
         case 0: //trick room
-            if (new_battlestruct.ptr->field_affecting.trick_room)
+            if (new_battlestruct->field_affecting.trick_room)
             {
-                new_battlestruct.ptr->field_affecting.trick_room--;
-                if (new_battlestruct.ptr->field_affecting.trick_room == 0)
+                new_battlestruct->field_affecting.trick_room--;
+                if (new_battlestruct->field_affecting.trick_room == 0)
                 {
                     effect = 1;
                     call_bc_move_exec(&trickroomends_bs);
@@ -3309,10 +3304,10 @@ u8 update_turn_counters()
             *statetracker +=1;
             break;
         case 1: //magic room
-            if (new_battlestruct.ptr->field_affecting.magic_room)
+            if (new_battlestruct->field_affecting.magic_room)
             {
-                new_battlestruct.ptr->field_affecting.magic_room--;
-                if (new_battlestruct.ptr->field_affecting.magic_room == 0)
+                new_battlestruct->field_affecting.magic_room--;
+                if (new_battlestruct->field_affecting.magic_room == 0)
                 {
                     effect = 1;
                     call_bc_move_exec(&magicroomends_bs);
@@ -3321,10 +3316,10 @@ u8 update_turn_counters()
             *statetracker +=1;
             break;
         case 2: //wonder room
-            if (new_battlestruct.ptr->field_affecting.wonder_room)
+            if (new_battlestruct->field_affecting.wonder_room)
             {
-                new_battlestruct.ptr->field_affecting.wonder_room--;
-                if (new_battlestruct.ptr->field_affecting.wonder_room == 0)
+                new_battlestruct->field_affecting.wonder_room--;
+                if (new_battlestruct->field_affecting.wonder_room == 0)
                 {
                     effect = 1;
                     call_bc_move_exec(&wonderoomends_bs);
@@ -3333,10 +3328,10 @@ u8 update_turn_counters()
             *statetracker +=1;
             break;
         case 3: //gravity
-            if (new_battlestruct.ptr->field_affecting.gravity)
+            if (new_battlestruct->field_affecting.gravity)
             {
-                new_battlestruct.ptr->field_affecting.gravity--;
-                if (new_battlestruct.ptr->field_affecting.gravity == 0)
+                new_battlestruct->field_affecting.gravity--;
+                if (new_battlestruct->field_affecting.gravity == 0)
                 {
                     effect = 1;
                     call_bc_move_exec(&gravityends_bs);
@@ -3345,10 +3340,10 @@ u8 update_turn_counters()
             *statetracker +=1;
             break;
         case 4: //grassy terrain
-            if (new_battlestruct.ptr->field_affecting.grassy_terrain)
+            if (new_battlestruct->field_affecting.grassy_terrain)
             {
-                new_battlestruct.ptr->field_affecting.grassy_terrain--;
-                if (new_battlestruct.ptr->field_affecting.grassy_terrain == 0)
+                new_battlestruct->field_affecting.grassy_terrain--;
+                if (new_battlestruct->field_affecting.grassy_terrain == 0)
                 {
                     effect = 1;
                     call_bc_move_exec(&grassyterrainends_bs);
@@ -3359,17 +3354,17 @@ u8 update_turn_counters()
                     call_bc_move_exec(&grassyterrain_hpheal);
                     for (u8 i = 0; i < no_of_all_banks; i++)
                     {
-                        new_battlestruct.ptr->bank_affecting[i].grassyterrain_heal = 0;
+                        new_battlestruct->bank_affecting[i].grassyterrain_heal = 0;
                     }
                 }
             }
             *statetracker +=1;
             break;
         case 5: //misty terrain
-            if (new_battlestruct.ptr->field_affecting.misty_terrain)
+            if (new_battlestruct->field_affecting.misty_terrain)
             {
-                new_battlestruct.ptr->field_affecting.misty_terrain--;
-                if (new_battlestruct.ptr->field_affecting.misty_terrain == 0)
+                new_battlestruct->field_affecting.misty_terrain--;
+                if (new_battlestruct->field_affecting.misty_terrain == 0)
                 {
                     effect = 1;
                     call_bc_move_exec(&mistyterrainends_bs);
@@ -3379,10 +3374,10 @@ u8 update_turn_counters()
             *statetracker +=1;
             break;
         case 6: //electric terrain
-            if (new_battlestruct.ptr->field_affecting.electic_terrain)
+            if (new_battlestruct->field_affecting.electic_terrain)
             {
-                new_battlestruct.ptr->field_affecting.electic_terrain--;
-                if (new_battlestruct.ptr->field_affecting.electic_terrain == 0)
+                new_battlestruct->field_affecting.electic_terrain--;
+                if (new_battlestruct->field_affecting.electic_terrain == 0)
                 {
                     effect = 1;
                     call_bc_move_exec(&electrterrainends_bs);
@@ -3391,10 +3386,10 @@ u8 update_turn_counters()
             *statetracker +=1;
             break;
         case 7: //ion deluge and fairy lock
-            if (new_battlestruct.ptr->field_affecting.ion_deluge)
-                new_battlestruct.ptr->field_affecting.ion_deluge--;
-            if (new_battlestruct.ptr->field_affecting.fairy_lock)
-                new_battlestruct.ptr->field_affecting.fairy_lock--;
+            if (new_battlestruct->field_affecting.ion_deluge)
+                new_battlestruct->field_affecting.ion_deluge--;
+            if (new_battlestruct->field_affecting.fairy_lock)
+                new_battlestruct->field_affecting.fairy_lock--;
             *statetracker +=1;
             break;
         case 8: //something with turn order
@@ -3519,12 +3514,12 @@ u8 update_turn_counters()
         case 13: //lucky chant
             while (*sidebank <= 1 && effect == 0)
             {
-                if (new_battlestruct.ptr->side_affecting[*sidebank].lucky_chant)
+                if (new_battlestruct->side_affecting[*sidebank].lucky_chant)
                 {
-                    new_battlestruct.ptr->side_affecting[*sidebank].lucky_chant--;
-                    if (new_battlestruct.ptr->side_affecting[*sidebank].lucky_chant == 0)
+                    new_battlestruct->side_affecting[*sidebank].lucky_chant--;
+                    if (new_battlestruct->side_affecting[*sidebank].lucky_chant == 0)
                     {
-                        bank_attacker = active_bank = new_battlestruct.ptr->side_affecting[*sidebank].lucky_chant_bank;
+                        bank_attacker = active_bank = new_battlestruct->side_affecting[*sidebank].lucky_chant_bank;
                         effect = 1;
                         call_bc_move_exec((void*)0x82DACFA);
                         battle_communication_struct.multistring_chooser = *sidebank;
@@ -3543,12 +3538,12 @@ u8 update_turn_counters()
         case 14: //tailwind
             while (*sidebank <= 1 && effect == 0)
             {
-                if (new_battlestruct.ptr->side_affecting[*sidebank].tailwind)
+                if (new_battlestruct->side_affecting[*sidebank].tailwind)
                 {
-                    new_battlestruct.ptr->side_affecting[*sidebank].tailwind--;
-                    if (new_battlestruct.ptr->side_affecting[*sidebank].tailwind == 0)
+                    new_battlestruct->side_affecting[*sidebank].tailwind--;
+                    if (new_battlestruct->side_affecting[*sidebank].tailwind == 0)
                     {
-                        bank_attacker = active_bank = new_battlestruct.ptr->side_affecting[*sidebank].tailwind_bank;
+                        bank_attacker = active_bank = new_battlestruct->side_affecting[*sidebank].tailwind_bank;
                         effect = 1;
                         call_bc_move_exec((void*)0x82DACFA);
                         battle_communication_struct.multistring_chooser = *sidebank;
@@ -3614,9 +3609,9 @@ u8 update_turn_counters()
         case 17: //new struct
             while (*sidebank >= 1)
             {
-                if (new_battlestruct.ptr->side_affecting[*sidebank].ally_fainted_last_turn)
+                if (new_battlestruct->side_affecting[*sidebank].ally_fainted_last_turn)
                 {
-                    new_battlestruct.ptr->side_affecting[*sidebank].ally_fainted_last_turn--;
+                    new_battlestruct->side_affecting[*sidebank].ally_fainted_last_turn--;
                 }
                 *sidebank += 1;
             }
@@ -3724,7 +3719,7 @@ u8 check_move_limitations(u8 bank, u8 not_usable_moves, struct move_limitation l
             not_usable_moves |= bits_table[i];
         else if (status3[bank].imprision && check_if_imprisioned(bank, move_to_check) && limitations.limitation_imprision)
             not_usable_moves |= bits_table[i];
-        else if (CHOICE_ITEM(item_effect) && battle_stuff_ptr.ptr->choiced_move[bank] && battle_stuff_ptr.ptr->choiced_move[bank] != 0xFFFF && battle_stuff_ptr.ptr->choiced_move[bank] != move_to_check)
+        else if (CHOICE_ITEM(item_effect) && battle_stuff_ptr->choiced_move[bank] && battle_stuff_ptr->choiced_move[bank] != 0xFFFF && battle_stuff_ptr->choiced_move[bank] != move_to_check)
             not_usable_moves |= bits_table[i];
         else if (item_effect == ITEM_EFFECT_ASSAULTVEST && move_table[move_to_check].split == 2)
             not_usable_moves |= bits_table[i];
@@ -3732,11 +3727,11 @@ u8 check_move_limitations(u8 bank, u8 not_usable_moves, struct move_limitation l
             not_usable_moves |= bits_table[i];
         else if (checking_bank->status2.tormented && last_used_moves[bank] == move_to_check)
             not_usable_moves |= bits_table[i];
-        else if (new_battlestruct.ptr->field_affecting.gravity && gravity_forbidden_move(move_to_check))
+        else if (new_battlestruct->field_affecting.gravity && gravity_forbidden_move(move_to_check))
             not_usable_moves |= bits_table[i];
-        else if (new_battlestruct.ptr->bank_affecting[bank].heal_block && healblock_forbidden_moves(move_to_check, 0))
+        else if (new_battlestruct->bank_affecting[bank].heal_block && healblock_forbidden_moves(move_to_check, 0))
             not_usable_moves |= bits_table[i];
-        else if (new_battlestruct.ptr->bank_affecting[bank].embargo && embargo_forbidden_move(move_to_check))
+        else if (new_battlestruct->bank_affecting[bank].embargo && embargo_forbidden_move(move_to_check))
             not_usable_moves |= bits_table[i];
     }
     return not_usable_moves;
@@ -3756,9 +3751,9 @@ u8 message_cant_choose_move()
         cant = 1;
         *loc_to_store_bs = (void*) 0x82DB076;
     }
-    else if (CHOICE_ITEM(item_effect) && battle_stuff_ptr.ptr->choiced_move[bank] && battle_stuff_ptr.ptr->choiced_move[bank] != 0xFFFF && battle_stuff_ptr.ptr->choiced_move[bank] != checking_move)
+    else if (CHOICE_ITEM(item_effect) && battle_stuff_ptr->choiced_move[bank] && battle_stuff_ptr->choiced_move[bank] != 0xFFFF && battle_stuff_ptr->choiced_move[bank] != checking_move)
     {
-        current_move = battle_stuff_ptr.ptr->choiced_move[bank];
+        current_move = battle_stuff_ptr->choiced_move[bank];
         cant = 1;
         *loc_to_store_bs = (void*) 0x82DB812;
         last_used_item = checking_bank->held_item;
@@ -3791,13 +3786,13 @@ u8 message_cant_choose_move()
         current_move = checking_move;
         *loc_to_store_bs = (void*) 0x82DAE1F;
     }
-    else if (new_battlestruct.ptr->field_affecting.gravity && gravity_forbidden_move(checking_move))
+    else if (new_battlestruct->field_affecting.gravity && gravity_forbidden_move(checking_move))
     {
         cant = 1;
         current_move = checking_move;
         *loc_to_store_bs = &gravityprevents2_bs;
     }
-    else if (new_battlestruct.ptr->bank_affecting[bank].heal_block && healblock_forbidden_moves(checking_move, 0))
+    else if (new_battlestruct->bank_affecting[bank].heal_block && healblock_forbidden_moves(checking_move, 0))
     {
         cant = 1;
         current_move = checking_move;
@@ -3812,7 +3807,7 @@ s8 can_switch(u8 bank) //1 - can; 0 - can't; -1 can't due to abilities
         return 0;
     if (get_item_effect(bank, 1) == ITEM_EFFECT_SHEDSHELL)
         return 1;
-    if (battle_participants[bank].status2.trapped_in_wrap || battle_participants[bank].status2.cant_escape || status3[bank].rooted || new_battlestruct.ptr->field_affecting.fairy_lock)
+    if (battle_participants[bank].status2.trapped_in_wrap || battle_participants[bank].status2.cant_escape || status3[bank].rooted || new_battlestruct->field_affecting.fairy_lock)
         return 0;
     u8 ability_bank = ability_battle_effects(12, bank, ABILITY_SHADOW_TAG, 1, 0);
     if (ability_bank && !check_ability(bank, ABILITY_SHADOW_TAG) && !is_of_type(bank, TYPE_GHOST))
@@ -3930,7 +3925,7 @@ u8 ai_switch_wonderguard()
                     u16 move = get_attributes(&poke[i], ATTR_ATTACK_1 + j, 0);
                     if (move && wonderguard_good_move(wonder_bank, self, move, 0))
                     {
-                        battle_stuff_ptr.ptr->switchout_index[self] = j;
+                        battle_stuff_ptr->switchout_index[self] = j;
                         prepare_chosen_option(1, 2, 0);
                         return 1;
                     }

@@ -1,11 +1,5 @@
-#include "types.h"
 #include "defines.h"
-#include "battle_locations.h"
-#include "battle_structs.h"
-#include "vanilla_functions.h"
-#include "new_battle_struct.h"
-
-extern struct move_info move_table[1024];
+#include "static_references.h"
 
 u16 crit_table[] = {4096, 8192, 32768};
 
@@ -15,13 +9,13 @@ void critcalc_cmd4()
     crit_loc = 1;
     if (!((has_ability_effect(bank_target, 1, 1) && (battle_participants[bank_target].ability_id == ABILITY_SHELL_ARMOR || battle_participants[bank_target].ability_id == ABILITY_BATTLE_ARMOR))
         ) || status3[bank_attacker].unkown_no_crit || battle_flags.wally || (battle_flags.save_birch && is_bank_from_opponent_side(bank_attacker))
-        || new_battlestruct.ptr->side_affecting[is_bank_from_opponent_side(bank_target)].lucky_chant)
+        || new_battlestruct->side_affecting[is_bank_from_opponent_side(bank_target)].lucky_chant)
     {
         if (current_move == MOVE_FROST_BREATH || current_move == MOVE_STORM_THROW)
             crit_loc = 2;
         else
         {
-            if (!(new_battlestruct.ptr->side_affecting[is_bank_from_opponent_side(bank_target)].lucky_chant || status3[bank_target].unkown_no_crit))
+            if (!(new_battlestruct->side_affecting[is_bank_from_opponent_side(bank_target)].lucky_chant || status3[bank_target].unkown_no_crit))
             {
                 if (battle_participants[bank_attacker].status2.focus_energy)
                     crit_chance += 2;

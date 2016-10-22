@@ -146,7 +146,6 @@ castform_switch = 0x080426BC|1;
 display_string_in_battle = 0x0814E6F0|1;
 prepare_status_animation = 0x08033FBC|1;
 mark_buffer_bank_for_execution = 0x0803F800|1;
-truant_hook = 0x08042EDE|1;
 call_bc_move_exec = 0x08044458|1;
 __aeabi_idiv = 0x082E7540|1; /*signed*/
 __aeabi_uidiv = 0x082E7B68|1; /*unsigned*/
@@ -222,9 +221,9 @@ get_pingpong = 0x0806F534|1;
 palette_obj_faded = 0x02037D14;
 gpu_pal_tags_index_of = 0x8008804|1;
 obj_delete_and_free_tiles = 0x80070E8|1;
-item_data_ptr_ptr = 0x80001C8;
-evo_table_ptr_ptr = 0x806D140;
-poke_stat_table_ptr_ptr = 0x80001BC;
+item_table = 0x80001C8;
+evo_table = 0x806D140;
+basestat_table = 0x80001BC;
 
 /*Expandable tables*/
 battle_strings_table = 0x085CC270;

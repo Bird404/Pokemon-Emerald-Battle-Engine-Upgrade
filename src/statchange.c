@@ -1,9 +1,4 @@
-#include "types.h"
 #include "defines.h"
-#include "battle_locations.h"
-#include "battle_structs.h"
-#include "vanilla_functions.h"
-#include "new_battle_struct.h"
 
 #define STAT_ATTACK 1
 #define STAT_DEFENCE 2
@@ -310,6 +305,6 @@ u8 change_stats(struct stat stat_change, u8 stat, struct failbank bank, void* ba
         }
     }
     if (fail == 0 && battle_communication_struct.multistring_chooser != 2 && stat_change.decrement && has_ability && active_bank != bank_attacker)
-        new_battlestruct.ptr->bank_affecting[active_bank].stat_lowered = 1;
+        new_battlestruct->bank_affecting[active_bank].stat_lowered = 1;
     return fail;
 }
