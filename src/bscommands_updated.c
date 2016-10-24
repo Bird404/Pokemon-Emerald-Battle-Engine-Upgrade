@@ -533,15 +533,18 @@ u8 primary_effect_setter()
     switch (*move_effect)
     {
         case 10: //heal target's status
-            if (!substitute && applier_bank->status.int_status & move_table[current_move].arg1 && current_hp)
             {
-                copy_status_condition_text(bank_to_apply, 0);
-                applier_bank->status.int_status = 0;
-                active_bank = bank_to_apply;
-                prepare_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &applier_bank->status);
-                mark_buffer_bank_for_execution(active_bank);
-                battlescript_push();
-                battlescripts_curr_instruction = (void*) 0x82DB361;
+                u32* status = &applier_bank->status.int_status;
+                if (!substitute && applier_bank->status.int_status && (move_table[current_move].arg1 & *status) && current_hp)
+                {
+                    copy_status_condition_text(bank_to_apply, 0);
+                    *status = 0;
+                    active_bank = bank_to_apply;
+                    prepare_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, status);
+                    mark_buffer_bank_for_execution(active_bank);
+                    battlescript_push();
+                    battlescripts_curr_instruction = (void*) 0x82DB361;
+                }
             }
             break;
         case 11: //wrap
@@ -688,24 +691,26 @@ u8 primary_effect_setter()
             }
             break;
         case 0x36: //berry eating
-            if (!substitute && MOVE_WORKED && get_item_pocket_id(battle_participants[bank_to_apply].held_item == 4) && current_hp)
             {
-                u8 arg = move_table[current_move].arg1 & 1;
-                new_battlestruct->bank_affecting[bank_attacker].bugbite = arg;
                 u16* berry = &battle_participants[bank_to_apply].held_item;
-                last_used_item = *berry;
-                if (!arg) //berry destroy, no effect
+                if (!substitute && MOVE_WORKED && *berry && get_item_pocket_id(*berry) == 4 && current_hp)
                 {
-                    *berry = 0;
-                    battlescript_push();
-                    battlescripts_curr_instruction = &incinerateberry_bs;
-                    active_bank = bank_to_apply;
-                    prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, berry);
-                    mark_buffer_bank_for_execution(bank_to_apply);
-                }
-                else //get berry's effect
-                {
+                    u8 arg = move_table[current_move].arg1 & 1;
+                    new_battlestruct->bank_affecting[bank_attacker].bugbite = arg;
+                    last_used_item = *berry;
+                    if (!arg) //incinerate; berry destroy, no effect
+                    {
+                        *berry = 0;
+                        battlescript_push();
+                        battlescripts_curr_instruction = &incinerateberry_bs;
+                        active_bank = bank_to_apply;
+                        prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, berry);
+                        mark_buffer_bank_for_execution(bank_to_apply);
+                    }
+                    else //pluck, bug bite; get berry's effect
+                    {
 
+                    }
                 }
             }
             break;

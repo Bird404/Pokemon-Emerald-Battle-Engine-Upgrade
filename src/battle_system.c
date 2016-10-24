@@ -934,17 +934,18 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 {
                     for (u8 i = 0; i < no_of_all_banks; i++)
                     {
-                        if (i!=bank && battle_stuff_ptr->used_held_items[i]
-                            && new_battlestruct->various.recently_used_item == battle_stuff_ptr->used_held_items[i])
+                        u16* used_held_item = &battle_stuff_ptr->used_held_items[i];
+                        if (i != bank && *used_held_item && new_battlestruct->various.recently_used_item == *used_held_item)
                         {
                             effect = true;
-                            battle_stuff_ptr->used_held_items[i] = 0;
                             execute_battle_script(&pickup_bs);
-                            battle_participants[bank].held_item = new_battlestruct->various.recently_used_item;
-                            new_battlestruct->various.recently_used_item = 0;
+                            battle_participants[bank].held_item = *used_held_item;
+                            last_used_item = *used_held_item;
                             active_bank = bank;
                             prepare_setattributes_in_battle(0, 2, 0, 2,&battle_participants[bank].held_item);
                             mark_buffer_bank_for_execution(bank);
+                            new_battlestruct->various.recently_used_item = 0;
+                            *used_held_item = 0;
                             break;
                         }
                     }
@@ -2810,11 +2811,14 @@ void move_effect_setter(u8 primary, u8 certain)
             {
                 new_battlestruct->various.move_primary_effect |= 0x40;
             }
-            statustoeffect();
-            if (*move_effect && current_hp && !shield_dust && !substitute && calculate_effect_chance(bank_attacker, current_move))
+            if (*move_effect != 10) //wake up slap/smelling salts
             {
-                battlescripts_curr_instruction--;
-                move_effect_setter(0, 0);
+                statustoeffect();
+                if (*move_effect && current_hp && !shield_dust && !substitute && calculate_effect_chance(bank_attacker, current_move))
+                {
+                    battlescripts_curr_instruction--;
+                    move_effect_setter(0, 0);
+                }
             }
         }
 

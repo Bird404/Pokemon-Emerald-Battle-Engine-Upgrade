@@ -6,6 +6,156 @@
 .include "anim_particle/particle_ids.s"
 .include "anim_bg/move_background_ids.s"
 
+.equ BankAttacker, 0
+.equ BankTarget, 1
+
+.equ OpponentSide, 1
+.equ PlayerSide, 0
+
+.macro loadparticle loadparticleID
+.byte 0x0
+.hword \loadparticleID
+.endm
+
+.macro unloadparticle unloadparticleID
+.byte 0x1
+.hword \unloadparticleID
+.endm
+
+.macro launchtemplate launchtemplatePtr launchtemplateUnkown launchtemplateArgsNo
+.byte 0x2
+.word \launchtemplatePtr
+.byte \launchtemplateUnkown
+.byte \launchtemplateArgsNo
+.endm
+
+.macro launchtask launchtaskPtr launchtaskUnkown launchtaskArgsNo
+.byte 0x3
+.word \launchtaskPtr
+.byte \launchtaskUnkown
+.byte \launchtaskArgsNo
+.endm
+
+.macro pause_cmd pause_cmdToWait
+.byte 0x4
+.byte \pause_cmdToWait
+.endm
+
+.macro waitanimation
+.byte 0x5
+.endm
+
+.macro endanimation
+.byte 0x8
+.endm
+
+.macro playsound1 playsound1ID
+.byte 0x9
+.hword \playsound1ID
+.endm
+
+.macro animA animABank
+.byte 0xA
+.byte \animABank
+.endm
+
+.macro animB animBBank
+.byte 0xB
+.byte \animBBank
+.endm
+
+.macro set_BLDALPHA_BLDCNT set_BLDALPHA_value
+.byte 0xC
+.hword \set_BLDALPHA_value
+.endm
+
+.macro reset_BLDALPHA_BLDCNT
+.byte 0xD
+.endm
+
+.macro call_cmd call_cmd_ptr
+.byte 0xE
+.word \call_cmd_ptr
+.endm
+
+.macro return_cmd
+.byte 0xF
+.endm
+
+.macro setarg setargID setargValue
+.byte 0x10
+.byte \setargID
+.hword \setargValue
+.endm
+
+.macro goto_cmd goto_cmdPtr
+.byte 0x13
+.word \goto_cmdPtr
+.endm
+
+.macro loadBG1 loadBG1ID
+.byte 0x14
+.byte \loadBG1ID
+.endm
+
+.macro waitforscreenelements1
+.byte 0x16
+.endm
+
+.macro waitforscreenelements2
+.byte 0x17
+.endm
+
+.macro loadBG2 loadBG2ID
+.byte 0x18
+.byte \loadBG2ID
+.endm
+
+.macro playsound2 playsound2ID playsound2Unkown
+.byte 0x19
+.hword \playsound2ID
+.byte \playsound2Unkown
+.endm
+
+.macro anim1B anim1BsongID anim1BArg3 anim1BArg4 anim1BArg5 anim1BArg6
+.byte 0x1B
+.hword \anim1BsongID
+.byte \anim1BArg3
+.byte \anim1BArg4
+.byte \anim1BArg5
+.byte \anim1BArg6
+.endm
+
+.macro set_BLDCNT set_BLDCNTvalue
+.byte 0x1E
+.hword \set_BLDCNTvalue
+.endm
+
+.macro jumpifargmatches jumpifargmatchesargID jumpifargmatchesValue jumpifargmatchesPtr
+.byte 0x21
+.byte \jumpifargmatchesargID
+.hword \jumpifargmatchesValue
+.word \jumpifargmatchesPtr
+.endm
+
+.macro setBGprioritiestoBGIDs
+.byte 0x29
+.endm
+
+.macro makebankinvisible makebankinvisibleBank
+.byte 0x2B
+.byte \makebankinvisibleBank
+.endm
+
+.macro makebankvisible makebankvisibleBank
+.byte 0x2C
+.byte \makebankvisibleBank
+.endm
+
+.macro stopmusic
+.byte 0x2F
+.endm
+
 move_animations_table:
 .byte 0x98, 0x93, 0x2C, 0x08
 .byte 0x98, 0x93, 0x2C, 0x08
@@ -2857,18 +3007,31 @@ DARK_VOID_animation:
 SEED_FLARE_animation:
 .byte 0x8
 
-.align 2
 OMINOUS_WIND_animation:
-.byte 0x00, 0x1F, 0x28, 0x1B, 0x84, 0x00, 0xC0, 0x3F, 0x02, 0x00, 0x19, 0xE4, 0x00, 0x00, 0x04, 0x00
-.byte 0x0A, 0x03, 0x29, 0x04, 0x00, 0x03, 0x65, 0x66, 0x11, 0x08, 0x0A, 0x05, 0x01, 0x00, 0x00, 0x00
-.byte 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x03, 0x81, 0x77, 0x11, 0x08, 0x02, 0x00, 0x21, 0x07, 0x01
-.byte 0x00
-.word OMINOUS_WIND_animation_part_2
-.byte 0x14, 0x02, 0x16, 0x03, 0x61, 0x76, 0x11, 0x08, 0x05, 0x04, 0x00, 0x06, 0x00, 0x00, 0x00, 0x00
-.align 2
-OMINOUS_WIND_animation_part_2:
-.byte 0x14, 0x02, 0x16, 0x03, 0x61, 0x76, 0x11, 0x08, 0x05, 0x04, 0x00, 0xFA, 0x00, 0x00, 0x00, 0x00
-.byte 0xFF, 0xFF, 0x13, 0x52, 0x63, 0x2D, 0x08
+	loadparticle 0x281F
+	anim1B 0x84 0xC0 0x3F 0x2 0x0
+	playsound2 0xE4 0x0
+	pause_cmd 0x0
+	animA 0x3
+	setBGprioritiestoBGIDs
+	pause_cmd 0x0
+	launchtask 0x08116665 0xA 0x5
+	.hword 0x1, 0x0, 0x0, 0x0, 0x0
+	pause_cmd 0x0
+	launchtask animtask_get_targetside_arg7 0x2 0x0
+	jumpifargmatches 0x7 OpponentSide OMINOUS_WIND_animation_Opponent
+OMINOUS_WIND_animation_Player:
+	loadBG1 0x2
+	waitforscreenelements1
+	launchtask 0x08117661 0x5 0x4
+	.hword 0x600, 0x00, 0x0, 0xFFFF
+	goto_cmd 0x082D6352
+OMINOUS_WIND_animation_Opponent:
+	loadBG1 0x2
+	waitforscreenelements1
+	launchtask 0x08117661 0x5 0x4
+	.hword 0xFA00, 0x0, 0x0, 0xFFFF
+	goto_cmd 0x082D6352
 
 SHADOW_FORCE_animation:
 .byte 0x8

@@ -1,3 +1,6 @@
+/*move animation related*/
+animtask_get_targetside_arg7 = 0x08117780 | 1;
+
 battle_turn_random_no = 0x02024330;
 last_used_ability = 0x0202420A;
 last_used_item = 0x02024208;
