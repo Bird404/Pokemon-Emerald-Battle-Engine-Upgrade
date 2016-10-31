@@ -661,12 +661,12 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
             break;
         }
     }
-
     switch (get_item_effect(atk_bank, 1))
     {
     case ITEM_EFFECT_NOEFFECT:
         if (new_battlestruct->various.gem_boost)
         {
+            new_battlestruct->various.gem_boost = 0;
             modifier = chain_modifier(modifier, 0x14CD);
         }
         break;

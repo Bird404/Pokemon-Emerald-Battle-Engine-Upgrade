@@ -51,3 +51,5 @@
 080D7508 C0 46 C0 46 C0 46 C0 46
 ## adjust focus turn script
 082DB212 3F
+## Illusion, the function is called at the end instead of in the middle
+0805B204 00 00 00 00

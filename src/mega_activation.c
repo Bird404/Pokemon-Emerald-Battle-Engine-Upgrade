@@ -32,6 +32,8 @@ void set_mega_triggers(u8 bank,u8 set_mode)
         new_battlestruct->mega_related.user_trigger=set_mode;
     else if(bank==2)
         new_battlestruct->mega_related.ally_trigger=set_mode;
+    if (battle_flags.link)
+        new_battlestruct->mega_related.link_indicator[bank] = set_mode;
 }
 
 bool is_multi_battle()

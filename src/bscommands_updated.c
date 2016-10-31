@@ -33,6 +33,8 @@ void revert_mega_to_normalform(u8 teamID, u8 opponent_side);
 u8 is_bank_present(u8 bank);
 u8 calculate_effect_chance(u8 bank, u16 move);
 void move_effect_setter(u8 primary, u8 certain);
+struct pokemon* get_bank_poke_ptr(u8 bank);
+u16 get_item_extra_param(u16 item);
 
 void atk7D_set_rain()
 {
@@ -449,6 +451,7 @@ void switchin_newstruct_update()
     side_ptr->sticky_web_done = 0;
     side_ptr->toxic_spikes_done = 0;
     side_ptr->lunardance_done = 0;
+
     return;
 }
 
@@ -935,8 +938,10 @@ void atk49_move_end_turn()
                 }
             }
             INC_END_EVENTS
-        case 18: //magic bounce and coat eraser; avoids endless loops if magic bounce meets magic bounce or magic coat
-            new_battlestruct->various.magicbounce = 0;
+        case 18: //clear turn bits
+            new_battlestruct->various.magicbounce = 0; //avoids endless loops if magic bounce meets magic bounce or magic coat
+            new_battlestruct->various.protean_msg = 0; //protean message
+            new_battlestruct->various.gem_boost = 0; //gem boost
             battle_stuff_ptr->synchronize_effect_chooser = 0;
             INC_END_EVENTS
             break;
@@ -948,7 +953,7 @@ void atk49_move_end_turn()
                 bank_target=active_bank;
                 hitmarker &= 0xFFFFEFFF;
             }
-            if(hitmarker & HITMARKER_NO_ATTACKSTRING2) //used by sketch
+            if(hitmarker & HITMARKER_ATTACKSTRING_PRINTED) //used by sketch
                 previously_used_move[bank_attacker]=last_used_move;
             if (!(absent_bank_flags & bits_table[bank_attacker] & battle_stuff_ptr->absent_bank_flags_prev_turn) && last_move!=MOVE_BATON_PASS)
             {
@@ -1539,7 +1544,7 @@ void atk00_move_canceller()
         battle_state_mode = 0xC;
         return;
     }
-    else if (battle_participants[bank_attacker].current_hp == 0 && !(hitmarker & HITMARKER_NO_ATTACKSTRING))
+    if (battle_participants[bank_attacker].current_hp == 0 && !(hitmarker & HITMARKER_NO_ATTACKSTRING))
     {
         hitmarker |= 0x80000;
         battlescripts_curr_instruction = (void*) 0x082D8A4E; //bs_endturn and end
@@ -1628,7 +1633,6 @@ void atk00_move_canceller()
         move_hit_with_pbs[bank_target] = 0;
         move_type_hit_with_pbs[bank_target] = 0;
     }
-
     battlescripts_curr_instruction++;
     return;
 }
@@ -2360,6 +2364,26 @@ void atk13_printfromtable()
     return;
 }
 
+void revert_form_change(u8 mega_revert, u8 teamID, u8 side, struct pokemon* poke)
+{
+    if (mega_revert)
+    {
+        revert_mega_to_normalform(teamID, side);
+    }
+    u16 species = get_attributes(poke, ATTR_SPECIES, 0);
+    if (species == POKE_CHERRIM_SUNSHINE)
+    {
+        u16 Cherrim = POKE_CHERRIM;
+        set_attributes(poke, ATTR_SPECIES, &Cherrim);
+    }
+    else if (species == POKE_AEGISLASH_BLADE)
+    {
+        u16 Aegi = POKE_AEGISLASH_SHIELD;
+        set_attributes(poke, ATTR_SPECIES, &Aegi);
+    }
+    return;
+}
+
 void atk56_prepare_fainting_cry()
 {
     u8 bank = get_battle_bank(read_byte(battlescripts_curr_instruction + 1));
@@ -2368,9 +2392,9 @@ void atk56_prepare_fainting_cry()
     prepare_fainting_cry(0);
     mark_buffer_bank_for_execution(bank);
     u8 side = is_bank_from_opponent_side(bank);
-    u8 id_by_side=battle_team_id_by_side[bank];
-    revert_mega_to_normalform(id_by_side, side);
+    revert_form_change(1, battle_team_id_by_side[bank], side, get_bank_poke_ptr(bank));
     new_battlestruct->side_affecting[side].ally_fainted_last_turn = 2;
+    new_battlestruct->various.switch_in_cos_switch = 0;
 }
 
 void atkE1_intimidate_loop()
@@ -2509,5 +2533,76 @@ void atk5D_moneyreward()
     battle_text_buff1[7] = money >> 0x18;
     battle_text_buff1[8] = 0xFF;
     battlescripts_curr_instruction++;
+    return;
+}
+
+void atk5C_hitanimation()
+{
+    u8 bank = get_battle_bank(read_byte(battlescripts_curr_instruction + 1));
+    battlescripts_curr_instruction += 2;
+    if (MOVE_WORKED && !affected_by_substitute(bank_target))
+    {
+        active_bank = bank;
+        prepare_hitanimation(0);
+        mark_buffer_bank_for_execution(bank);
+        if (damage_loc && DAMAGING_MOVE(current_move) && battle_participants[bank].ability_id == ABILITY_ILLUSION && new_battlestruct->bank_affecting[bank].illusion_on)
+        {
+            new_battlestruct->bank_affecting[bank].illusion_on = 0;
+            new_battlestruct->bank_affecting[bank].illusion_hit = 1;
+            battlescript_push();
+            battlescripts_curr_instruction = &illusion_wore_off_bs;
+            new_battlestruct->various.var1 = hitmarker & HITMARKER_NO_ANIMATIONS; //save whether animations are on or off
+            hitmarker &= ~ HITMARKER_NO_ANIMATIONS; //clear animation flag
+            battle_participants[bank].status2.transformed = 0;
+        }
+    }
+    return;
+}
+
+void atk02_attackstring()
+{
+    if (!battle_execution_buffer)
+    {
+        u8 type = get_attacking_move_type();
+        u16 item = battle_participants[bank_attacker].held_item;
+        if (check_ability(bank_attacker, ABILITY_PROTEAN) && current_move != MOVE_STRUGGLE && !move_outcome.failed && !new_battlestruct->various.protean_msg)
+        {
+            new_battlestruct->various.protean_msg = 1;
+            if (!is_of_type(bank_attacker, type))
+            {
+                last_used_ability = ABILITY_PROTEAN;
+                record_usage_of_ability(bank_attacker, ABILITY_PROTEAN);
+                set_type(bank_attacker, type);
+                battle_text_buff1[0] = 0xFD;
+                battle_text_buff1[1] = 0x3;
+                battle_text_buff1[2] = type;
+                battle_text_buff1[3] = 0xFF;
+                battlescript_push();
+                battlescripts_curr_instruction = &protean_bs;
+            }
+        }
+        else if (MOVE_WORKED && DAMAGING_MOVE(current_move) && item && get_item_effect(bank_attacker, 1) == ITEM_EFFECT_GEM && get_item_extra_param(item) == type && current_move != MOVE_STRUGGLE && current_move != MOVE_WATER_PLEDGE && current_move != MOVE_FIRE_PLEDGE && current_move != MOVE_GRASS_PLEDGE)
+        {
+            last_used_item = item;
+            new_battlestruct->various.gem_boost = 1;
+            battle_text_buff1[0] = 0xFD;
+            battle_text_buff1[1] = 0x2;
+            battle_text_buff1[2] = current_move;
+            battle_text_buff1[3] = current_move >> 8;
+            battle_text_buff1[4] = 0xFF;
+            battlescript_push();
+            battlescripts_curr_instruction = &gem_bs;
+        }
+        else
+        {
+            if (!((hitmarker & HITMARKER_NO_ATTACKSTRING) || (hitmarker & HITMARKER_ATTACKSTRING_PRINTED)))
+            {
+                b_std_message(4, bank_attacker);
+                hitmarker |= HITMARKER_ATTACKSTRING_PRINTED;
+            }
+            battlescripts_curr_instruction++;
+            battle_communication_struct.is_message_displayed = 0;
+        }
+    }
     return;
 }

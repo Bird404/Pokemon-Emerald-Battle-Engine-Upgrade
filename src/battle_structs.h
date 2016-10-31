@@ -397,8 +397,8 @@ struct battle_history{
     u8 item[4];
 };
 
-struct b_resources_field0{
-    u8 unkown;
+struct b_resources_secretbaseinfo{
+    u8 todolater;
 };
 
 struct battlescript_stack{
@@ -408,7 +408,7 @@ struct battlescript_stack{
 };
 
 struct b_resources_table{
-    struct b_resources_field0 *field0_ptr;
+    struct b_resources_field0 *secretbase_opponent;
     struct ability_flags *ability_flags_ptr;
     struct battlescript_stack *battlescript_stack;
     void* battle_callback1_stack;
@@ -452,7 +452,7 @@ u32 hitmarker;
 #define HITMARKER_NO_ANIMATIONS 0x80
 #define HITMARKER_IGNORE_SUBSTITUTE 0x100
 #define HITMARKER_NO_ATTACKSTRING 0x200 //used in dual foe and user defrosting moves
-#define HITMARKER_NO_ATTACKSTRING2 0x400
+#define HITMARKER_ATTACKSTRING_PRINTED 0x400
 #define HITMARKER_NO_PPDEDUCT 0x800
 #define HITMARKER_PURSUIT_TRAP 0x1000
 #define HITMAKRER_IGNORE_SAFEGUARD 0x2000
@@ -538,13 +538,13 @@ extern struct side_timer side_timers[2];
 struct battle_flags{
     u32 double_battle : 1; //1
     u32 link : 1; //2
-    u32 wild : 1; //4
+    u32 battle : 1; //4
     u32 trainer : 1; //8
     u32 save_birch : 1; //0x10
     u32 flagx20 : 1; //0x20
-    u32 flagx40 : 1; //0x40
+    u32 player_partner : 1; //0x40
     u32 safari : 1; //0x80
-    u32 flagx100 : 1; //0x100
+    u32 frontier_general : 1; //0x100
     u32 wally : 1; //0x200
     u32 roaming : 1; //0x400
     u32 flagx800 : 1; //0x800
@@ -555,7 +555,19 @@ struct battle_flags{
     u32 battle_dome : 1; //0x10 000
     u32 battle_palace : 1; //0x20 000
     u32 battle_arena : 1; //0x40 000
-    //more to come if needed
+    u32 battle_factory : 1; //0x80 000
+    u32 flag_x100000 : 1; //0x100 000
+    u32 battle_pyramid : 1; //0x200 000
+    u32 player_ingame_partner : 1; //0x400 000
+    u32 flag_x800000 : 1; //0x800 000
+    u32 flag_x1000000 : 1;// 0x1 000 000
+    u32 flag_x2000000 : 1; //0x2 000 000
+    u32 flag_x4000000 : 1; //0x4 000 000
+    u32 secret_base : 1; //0x8 000 000
+    u32 groudon : 1; //0x10 000 000
+    u32 kyorge : 1; //0x20 000 000
+    u32 rayquaza : 1; //0x40 000 000
+    u32 flag_x80000000 : 1; //0x80 000 000
 };
 
 extern struct battle_flags battle_flags;
@@ -638,7 +650,7 @@ struct coords8{
 struct object;
 typedef void (*object_callback)(struct object*);
 
-struct template {
+struct template{
   u16 tiles_tag;
   u16 pal_tag;
   struct sprite *oam;
@@ -795,5 +807,73 @@ struct evolution_all_pokes{
 };
 
 extern struct evolution_all_pokes* evo_table;
+
+struct b_graphics_loc{
+    void* beg_decompressed_sprites; //ptr to the decompressed sprite of the first pokemon
+    void* decompressed_sprite[4];
+};
+
+struct b_species_info{
+    u16 flag_x1 : 1; //0x1
+    u16 flag_x2 : 1; //0x2
+    u16 substitute : 1; //0x4
+    u16 flag_x8 : 1; //0x8
+    u16 HPnumbers : 1; //0x10 not bar but raw numbers
+    //rest seems unused ?
+    u16 flag_x20 : 1; //0x20
+    u16 flag_x40 : 1; //0x40
+    u16 flag_x80 : 1; //0x80
+    u16 pal_change : 1; //0x100
+    u16 transformed_species;
+};
+
+struct b_graphics_data{
+    struct b_species_info (*species_info)[1]; //ptr to an array of b_species_info
+};
+
+struct battle_graphics_struct{
+    struct b_graphics_data* graphics_data;
+    struct b_graphics_loc* graphics_loc;
+};
+
+extern struct battle_graphics_struct battle_graphics;
+
+struct sprite_poke{
+    void* sprite;
+    u16 unkown;
+    u16 species;
+};
+
+struct sprite_table{
+    struct sprite_poke p_sprite[ALL_POKES];
+};
+
+extern struct sprite_table* front_sprites;
+extern struct sprite_table* back_sprites;
+
+struct pokenames{
+    u8 letter[11];
+};
+
+struct pokenames_all{
+    struct pokenames pokename[ALL_POKES];
+};
+
+extern struct pokenames_all* poke_name_table;
+
+struct superstate{
+    void* callback1;
+    void* callback2;
+    void* callback_backup;
+    void* vblank_callback;
+    void* hblank_callback;
+    void* field14;
+    void* field18;
+    u32 bits_to_wait_for;
+    u32 some_timer;
+    u32 field24;
+};
+
+extern struct superstate super;
 
 #endif /* B_STRUCTS */

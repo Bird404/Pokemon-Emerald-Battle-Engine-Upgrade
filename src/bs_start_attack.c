@@ -377,6 +377,8 @@ u8 check_mega_evo(u8 bank)
     u8 bank_mega_mode=0;
     if(mega_species)
     {
+        if (battle_flags.link && !new_battlestruct->mega_related.link_indicator[bank])
+            return 0;
         if(bank==0)
         {
             bank_mega_mode=new_battlestruct->mega_related.user_trigger;
@@ -592,7 +594,6 @@ void bs_start_attack()
         {
             battle_trace.ai_team_move = current_move;
         }
-
         battlescripts_curr_instruction = get_move_battlescript_ptr(current_move);
         battle_state_mode=0xA;
         if (current_move == last_used_moves[bank_attacker])
@@ -612,6 +613,29 @@ void bs_start_attack()
             hitmarker |= HITMERKER_IGNORE_UNDERGROUND;
         else if (find_move_in_table(current_move, &moveshitting_underwater[0]))
             hitmarker |= HITMARKER_IGNORE_UNDERWATER;
+        if (battle_participants[bank_attacker].ability_id == ABILITY_STANCE_CHANGE && !battle_participants[bank_attacker].status2.transformed)
+        {
+            u16* species = &battle_participants[bank_attacker].poke_species;
+            u8 change = 0;
+            if (*species == POKE_AEGISLASH_BLADE && current_move == MOVE_KINGS_SHIELD)
+            {
+                *species = POKE_AEGISLASH_SHIELD;
+                change = 1;
+            }
+            else if (*species == POKE_AEGISLASH_SHIELD && DAMAGING_MOVE(current_move))
+            {
+                *species = POKE_AEGISLASH_BLADE;
+                change = 1;
+            }
+            if (change)
+            {
+                active_bank = bank_attacker;
+                prepare_setattributes_in_battle(0, REQUEST_SPECIES_BATTLE, 0, 2, species);
+                mark_buffer_bank_for_execution(active_bank);
+                battlescript_push();
+                battlescripts_curr_instruction = &aegislash_change_bs;
+            }
+        }
     }
     else
         battle_state_mode = 0xC;

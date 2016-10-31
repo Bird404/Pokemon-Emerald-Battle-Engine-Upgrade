@@ -1,6 +1,50 @@
 /*move animation related*/
 animtask_get_targetside_arg7 = 0x08117780 | 1;
 
+decompression_buffer = 0x0201C000;
+battle_graphics = 0x020244D0;
+PiD_pbs = 0x020244BC;
+
+front_sprites = 0x08000128;
+back_sprites = 0x0800012C;
+nick_male_sign = 0x085ED22E;
+nick_female_sign = 0x085ED233;
+nick_genderless_sign = 0x085ED238;
+
+text_Wild_ = 0x085CBD85;
+text_Foe_ = 0x085CBD8B;
+text_Foe = 0x085CBD91;
+text_Ally = 0x085CBD95;
+super = 0x030022C0;
+palette_bg_faded = 0x02037B14;
+palette_bg_unfaded = 0x02037714;
+
+poke_get_pal = 0x0806E740 | 1;
+LZ77UnCompWram = 0x082E7090|1;
+bbp05_send_out_poke = 0x0805B1CC|1;
+bbp06_return_poke_to_pokeball = 0x0805B3D4|1;
+bbo_06_return_poke_to_ball = 0x0806156C|1;
+bbp15_open_bag = 0x0805C248 | 1;
+bbp16_open_poke_menu = 0x0805C2AC | 1;
+bbp2F_trainer_ball_throw = 0x0805CA80|1;
+b_link_related = 0x080688F8 | 1;
+load_poke_sprite = 0x08034B7C|1;
+load_poke_sprite_deoxys_form = 0x08034A40|1;
+gpu_pal_apply = 0x080A1938|1;
+ball_index_to_processing_id = 0x08170D84|1;
+shorten_str_to_10 = 0x08008B44|1;
+str_append = 0x08008BC0|1;
+sub_8075094 = 0x08075094|1;
+sub_8075198 = 0x08075198|1;
+rboxid_08003574 = 0x08003574|1;
+pal_fade_1 = 0x0806F98C|1;
+buffer_poke_nick = 0x081B1B44|1;
+battle_callback1 = 0x08039EF0|1;
+CpuSet = 0x082E7084|1;
+poke_update_altitude = 0x0805EE54|1;
+b_get_sprite_y = 0x080A6138|1;
+prepare_hitanimation = 0x08034294|1;
+
 battle_turn_random_no = 0x02024330;
 last_used_ability = 0x0202420A;
 last_used_item = 0x02024208;
@@ -27,6 +71,7 @@ battle_scripting = 0x02024474;
 battle_text_buff1 = 0x02022F58;
 battle_text_buff2 = 0x02022F68;
 battle_text_buff3 = 0x02022F78;
+displayed_string_in_battle = 0x02022E2C;
 battle_resources = 0x020244A8;
 multihit_counter = 0x02024212;
 bits_table = 0x0832A328;
@@ -123,6 +168,7 @@ get_item_x12_battle_function = 0x080D74DC|1;
 __udivsi3 = 0x082E7B68|1;
 __umodsi3 = 0x082E7BE0|1;
 gender_from_pid = 0x0806A020|1;
+poke_get_gender = 0x08069FC4|1;
 get_item_quality = 0x080D7500|1;
 count_alive_pokes_on_side = 0x08069DEC|1;
 ability_something = 0x08042828|1;
@@ -197,7 +243,6 @@ set_callback2 = 0x08000540|1;
 set_obj_pos = 0x08072A24|1;
 c2_80777E8 = 0x080A933C|1;
 obj_delete = 0x08007244|1;
-b_load_sprite = 0x080A9614|1;
 update_bank_sprite = 0x080A9708|1;
 bank_sprite_sth = 0x080A9ADC|1;
 get_poke_ability = 0x0806B6D8|1;
@@ -227,6 +272,7 @@ obj_delete_and_free_tiles = 0x80070E8|1;
 item_table = 0x80001C8;
 evo_table = 0x806D140;
 basestat_table = 0x80001BC;
+poke_name_table = 0x08000144;
 
 /*Expandable tables*/
 battle_strings_table = 0x085CC270;

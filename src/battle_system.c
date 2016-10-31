@@ -129,30 +129,37 @@ s8 get_move_position(u8 bank, u16 move)
     return -1;
 }
 
-u8 should_cherrim_change(u8 bank)
+u8 try_cherrim_change(u8 bank)
 {
-    u8 effect = false;
-    if (!(battle_participants[bank].ability_id == ABILITY_FLOWER_GIFT && battle_participants[bank].poke_species == POKE_CHERRIM))
+    u16 species_to_change = 0;
+    if (battle_participants[bank].ability_id == ABILITY_FLOWER_GIFT && CHERRIM_ID(battle_participants[bank].poke_species))
     {
-        return effect;
-    }
-    if ((battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun) && weather_abilities_effect())
-    {
-        if (!new_battlestruct->bank_affecting[bank].sunshine_form)
+        if ((battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun) && weather_abilities_effect())
         {
-            effect = 2;
-            new_battlestruct->bank_affecting[bank].sunshine_form = 1;
+            if (!new_battlestruct->bank_affecting[bank].sunshine_form)
+            {
+                species_to_change = POKE_CHERRIM_SUNSHINE;
+                new_battlestruct->bank_affecting[bank].sunshine_form = 1;
+            }
+        }
+        else
+        {
+            if (new_battlestruct->bank_affecting[bank].sunshine_form)
+            {
+                species_to_change = POKE_CHERRIM;
+                new_battlestruct->bank_affecting[bank].sunshine_form = 0;
+            }
         }
     }
-    else
+    if (species_to_change)
     {
-        if (new_battlestruct->bank_affecting[bank].sunshine_form)
-        {
-            effect = 1;
-            new_battlestruct->bank_affecting[bank].sunshine_form = 0;
-        }
+        battle_participants[bank].poke_species = species_to_change;
+        active_bank = bank;
+        prepare_setattributes_in_battle(0, REQUEST_SPECIES_BATTLE, 0, 2, &battle_participants[bank].poke_species);
+        mark_buffer_bank_for_execution(bank);
+        return 1;
     }
-    return effect;
+    return 0;
 }
 
 void copy_status_condition_text(u8 bank, u8 confusion)
@@ -797,12 +804,11 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 {
                     break;
                 }
-                effect = should_cherrim_change(j);
+                effect = try_cherrim_change(j);
                 if (effect)
                 {
                     execute_battle_script(&cherrimswitch_bs);
                     battle_scripting.active_bank = j;
-                    battle_stuff_ptr->castform_switch_form = effect - 1;
                     break;
                 }
             }
@@ -810,12 +816,11 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         case ABILITY_FLOWER_GIFT:
             if (!(new_battlestruct->bank_affecting[bank].cherrim_transformed))
             {
-                effect = should_cherrim_change(bank);
+                effect = try_cherrim_change(bank);
                 if (effect)
                 {
                     execute_battle_script(&cherrimswitch_bs);
                     battle_scripting.active_bank = bank;
-                    battle_stuff_ptr->castform_switch_form = effect - 1;
                     new_battlestruct->bank_affecting[bank].cherrim_transformed = 1;
                     dontlock=1;
                 }
@@ -1388,21 +1393,20 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         {
             for (u8 i = 0; i < no_of_all_banks; i++)
             {
-                if(battle_participants[i].ability_id==ABILITY_FORECAST && has_ability_effect(i,0,1))
+                if (battle_participants[i].ability_id==ABILITY_FORECAST && has_ability_effect(i,0,1))
                 {
                     effect = prepare_castform_switch(castform_switch(i), i);
                     if (effect == true)
                         break;
                 }
-                else if(battle_participants[i].ability_id==ABILITY_FLOWER_GIFT && has_ability_effect(i,0,1))
+                else if (battle_participants[i].ability_id==ABILITY_FLOWER_GIFT && has_ability_effect(i,0,1))
                 {
-                    effect = should_cherrim_change(i);
-                    if (effect)
+                    if (try_cherrim_change(i))
                     {
-                      execute_battle_script(&cherrimswitch_bs);
-                      battle_scripting.active_bank = i;
-                      battle_stuff_ptr->castform_switch_form = effect - 1;
-                      break;
+                        effect = 1;
+                        execute_battle_script(&cherrimswitch_bs);
+                        battle_scripting.active_bank = i;
+                        break;
                     }
                 }
             }
@@ -1639,8 +1643,6 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         }
         break;
     }
-
-
     if (effect && last_used_ability != 0xFF && switch_id < 0xB)
         record_usage_of_ability(bank, last_used_ability);
     return effect;

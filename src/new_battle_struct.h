@@ -47,6 +47,12 @@ struct bank_affecting{
     u8 autonomize_uses;
     u8 lastmove_type;
     u16 wish_hp;
+    u32 transform_tid;
+    u8 illusion_on : 1;
+    u8 illusion_hit : 1;
+    u8 illusion_ball : 6;
+    u8 illusion_nick[10];
+    u8 transform_pal_changed : 1;
 };
 
 struct side_affecting{
@@ -101,6 +107,7 @@ struct various{
     u16 var2;
     u16 recently_used_item;
     u16 previous_move;
+    u16 accumulated_damage;
     u8 move_primary_effect;
     u8 parental_bond_mode: 2;
     u8 life_orbed : 1;
@@ -108,7 +115,8 @@ struct various{
     u8 ate_bonus : 1;
     u8 gem_boost : 1;
     u8 happyhour_bonus : 1;
-    u16 accumulated_damage;
+    u8 switch_in_cos_switch : 1; //and not because a poke fainted or it is the first one
+    u8 protean_msg : 1;
 };
 
 #define PBOND_PARENT 2
@@ -124,6 +132,7 @@ struct mega_related
     u32 ai_party_mega_check: 6;
     u32 trigger_id : 8;
     u8 indicator_id_pbs[4];
+    u8 link_indicator[4];
 };
 
 struct new_battle_struct{

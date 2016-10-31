@@ -8,6 +8,17 @@
 #define NUM_OF_EVOS 5 //number of evolutions per pokemon
 #define KEYSTONE 0x28 //mega item that the player has to posses in order to mega evolve
 
+enum poke_sprite{
+    SPRITE_BACK = 0,
+    SPRITE_FRONT = 1
+};
+
+enum poke_gender{
+    POKE_MALE = 0,
+    POKE_FEMALE = 0xFE,
+    POKE_GENDERLESS = 0xFF
+};
+
 #include "./defines/poke_types.h"
 #include "./defines/abilities.h"
 #include "./defines/moves.h"
@@ -30,8 +41,11 @@
 #define TARGET_TURN_DAMAGED (special_statuses[bank_target].moveturn_losthp)
 #define DAMAGING_MOVE(move) (move_table[move].split!=2)
 #define CHOICE_ITEM(effect) (effect == ITEM_EFFECT_CHOICEBAND || effect == ITEM_EFFECT_CHOICESCARF || effect == ITEM_EFFECT_CHOICESPECS)
+#define CHERRIM_ID(species) (species == POKE_CHERRIM || species == POKE_CHERRIM_SUNSHINE)
+#define AEGISLASH_ID(species) (species == POKE_AEGISLASH_BLADE || species == POKE_AEGISLASH_SHIELD)
 #define SEMI_INVULNERABLE(bank) (status3[bank].underground || status3[bank].underwater || status3[bank].on_air || status3[bank].phantomforce || new_battlestruct->bank_affecting[bank].sky_drop_attacker || new_battlestruct->bank_affecting[bank].sky_drop_target)
 
+#define REQUEST_SPECIES_BATTLE 0x1
 #define REQUEST_HELDITEM_BATTLE 0x2
 #define REQUEST_STATUS_BATTLE 0x28
 

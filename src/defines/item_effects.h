@@ -143,5 +143,6 @@
 #define ITEM_EFFECT_DRIVES 0x8C
 #define ITEM_EFFECT_PRIMALORB 0x8D
 #define ITEM_EFFECT_SHEDSHELL 0x8E
+#define ITEM_EFFECT_GEM 0x8F //the extra is the type it boosts
 
 #endif /* ITEM_BATTLE_EFFECTS_H_H */

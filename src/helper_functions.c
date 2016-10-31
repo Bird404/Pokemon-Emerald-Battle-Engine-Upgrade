@@ -28,6 +28,8 @@ u8 check_mega_evo(u8 bank);
 u8 is_bank_present(u8 bank);
 u8 can_lose_item(u8 bank, u8 stickyhold_check, u8 sticky_message);
 u8 canlose_megastone(u8 bank, u16 item);
+void b_load_sprite_opponent(struct pokemon* poke, u8 bank_target);
+void b_load_sprite_player(struct pokemon* poke, u8 bank_target);
 extern u8 type_effectiveness_table[TYPE_FAIRY-0x4][TYPE_FAIRY-0x4];
 
 u8 sample_text[] = {0xDD, 0xFF};
@@ -189,6 +191,9 @@ u8 pickpocket_text[] = {0xFD, 16, 0, 0xE7, 0xE8, 0xE3, 0xE0, 0xD9, 0, 0xFD, 15, 
 /*0x214*/ u8 skydrop2_text[] = {0xFD, 16, Space, w_, a_, s_, Space, f_, r_, e_, e_, d_, JumpLine, f_,r_, o_,m_, Space, t_, h_, e_, Space, s_, k_, y_, Space, d_, r_, o_, p_, Exclam, 0xFF};
 /*0x215*/ u8 skydroptooheavy_text[] = {0xFD, 16, Space, i_, s_, Space, t_, o_, o_, Space, h_, e_, a_, v_, y_, JumpLine, t_, o_, Space, b_, e_, Space, l_, i_, f_, t_, e_, d_, Exclam, 0xFF};
 /*0x216*/ u8 fairylock_text[] = {N_, o_, Space, o_, n_, e_, Space, w_,i_,l_,l_, Space, b_, e_, Space, a_, b_, l_, e_, Space, t_, o_, JumpLine, r_, u_, n_, Space, a_, w_, a_, y_, Space, d_, u_, r_, i_, n_, g_, Space, t_, h_, e_, Space, n_, e_, x_, t_, Space, t_, u_, r_, n_, Exclam, 0xFF};
+/*0x217*/ u8 illusion_off_text[] = {0xFD, 16, Apos, s_, Space, i_, l_, l_, u_, s_, i_, o_, n_, JumpLine, w_, o_, r_, e_, Space, o_, f_, f_, Exclam, 0xFF};
+/*0x218*/ u8 protean_text[] = {0xFD, 15, Apos, s_, Space, 0xFD, 23, Space, m_, a_, d_, e_, JumpLine, i_, t_, Space, t_, h_, e_, Space, 0xFD, 0x0, Space, t_, y_, p_, e_, Exclam, 0xFF};
+/*0x219*/ u8 gem_text[] = {T_, h_, e_, Space, 0xFD, 22, Space, s_, t_, r_, e_, n_, g_, t_, h_, e_, n_, e_, d_, JumpLine, 0xFD, 0x0, Apos, s_, Space, p_, o_, w_, e_, r_, Exclam, 0xFF};
 
 void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activation_text, &heavyrain_activation_text, &mysticalaircurrent_activation_text, &forewarn_text, &slowstart_text, &anticipation_text, &dryskin_damage_text, &solarpower_text, &harvest_text, &healer_text, &pickup_text, &moldbreaker_text, &turboblaze_text, &terravolt_text, &downloadatk_text,
 &downloadspatk_text, &absorbabilityboost_text , &absorbabilityimmune_text, &userteam_text/*0x190*/, &foeteam_text/*0x191*/,
@@ -210,7 +215,7 @@ void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activ
 &gravityprevents2_text, &healblockprevents2_text , &let_it_move_first_text, &mega_evolved_text, &mega_trigger_text, &fervent_trigger_text,
 &quash_text, &allyswitch_text, &topsyturvy_text, &bestow_text, &statushealpoison_text, &statushealburn_text, &statushealpar_text,
 &statushealslp_text, &statushealfrz_text, &primal_reversion_text, &congrats_player_text, &happyhour_text, &skydrop1_text, &skydrop2_text,
-&skydroptooheavy_text, &fairylock_text};
+&skydroptooheavy_text, &fairylock_text, &illusion_off_text, &protean_text, &gem_text};
 
 void battle_string_loader(u16 string_id)
 {
@@ -219,17 +224,33 @@ void battle_string_loader(u16 string_id)
     return;
 }
 
+u8 is_poke_valid(struct pokemon* poke)
+{
+    u16 species = get_attributes(poke, ATTR_SPECIES, 0);
+    if (species != 0 && species != 412)
+        return 1;
+    return 0;
+}
+
+struct pokemon* get_party_ptr(u8 bank)
+{
+    if (is_bank_from_opponent_side(bank))
+        return &party_opponent[0];
+    return &party_player[0];
+}
+
+struct pokemon* get_bank_poke_ptr(u8 bank)
+{
+    return &get_party_ptr(bank)[battle_team_id_by_side[bank]];
+}
+
 u8 count_party_pokemon(u8 bank)
 {
-    struct pokemon* poke;
-    if (is_bank_from_opponent_side(bank))
-        poke = &party_opponent[0];
-    else
-        poke = &party_player[0];
     u8 usable_pokes = 0;
-    for (u8 i = 0; i < 6; i ++)
+    struct pokemon* poke = get_party_ptr(bank);
+    for (u8 i = 0; i < 6; i++)
     {
-        if (get_attributes(&poke[i], ATTR_CURRENT_HP, 0) != 0 && get_attributes(&poke[i], ATTR_IS_EGG, 0) != 1 && get_attributes(&poke[i], ATTR_SPECIES, 0) != 0)
+        if (get_attributes(&poke[i], ATTR_CURRENT_HP, 0) != 0 && is_poke_valid(&poke[i]))
             usable_pokes++;
     }
     return usable_pokes;
@@ -2072,16 +2093,20 @@ void get_trainer_name_for_mega()
     strcpy_xFF_terminated_0(&battle_text_buff3, trainer_name);
 }
 
-void mega_evo_updatehpbar()
+void update_hpbar(u8 bank)
 {
     struct pokemon* poke_address;
-    u8 bank = bank_attacker;
     if (is_bank_from_opponent_side(bank))
         poke_address = &party_opponent[battle_team_id_by_side[bank]];
     else
         poke_address = &party_player[battle_team_id_by_side[bank]];
     u8 obj_ID = graphical_elements_pbs[bank];
     update_bank_graphical_elements(obj_ID, poke_address, 0); //0 updates all things; gender, exp, hp, etc.
+}
+
+void mega_evo_updatehpbar()
+{
+    update_hpbar(bank_attacker);
 }
 
 void mega_evo_pursuit_check()
@@ -2468,21 +2493,6 @@ void conversion_effect()
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
 }
 
-u8 is_poke_valid(struct pokemon* poke)
-{
-    u16 species = get_attributes(poke, ATTR_SPECIES, 0);
-    if (species != 0 && species != 412)
-        return 1;
-    return 0;
-}
-
-struct pokemon* get_party_ptr(u8 bank)
-{
-    if (is_bank_from_opponent_side(bank))
-        return &party_opponent[0];
-    return &party_player[0];
-}
-
 //not functions delcarations, just addresses for BS
 extern void PARTYHEAL_USER();
 extern void PARTYHEAL_ALLY();
@@ -2653,6 +2663,41 @@ void canusefairylock()
     }
 }
 
+void healthbox_target_update()
+{
+    update_hpbar(bank_target);
+}
+
+void return_hitmarker_animation()
+{
+    hitmarker |= new_battlestruct->various.var1;
+    battle_graphics.graphics_data->species_info[bank_target]->transformed_species = 0;
+}
+
+void transformed_species_to_0()
+{
+    battle_graphics.graphics_data->species_info[battle_scripting.active_bank]->transformed_species = 0;
+}
+
+void aegi_change()
+{
+    battle_graphics.graphics_data->species_info[bank_attacker]->transformed_species = 0;
+    struct pokemon* poke = get_bank_poke_ptr(bank_attacker);
+    calculate_stats_pokekmon(poke);
+    struct battle_participant* aegi = &battle_participants[bank_attacker];
+    aegi->atk = get_attributes(poke, ATTR_ATTACK, 0);
+    aegi->def = get_attributes(poke, ATTR_DEFENCE, 0);
+    aegi->spd = get_attributes(poke, ATTR_SPEED, 0);
+    aegi->sp_atk = get_attributes(poke, ATTR_SPECIAL_ATTACK, 0);
+    aegi->sp_def = get_attributes(poke, ATTR_SPECIAL_DEFENCE, 0);
+}
+
+void set_transfrom_palchange()
+{
+    battle_graphics.graphics_data->species_info[bank_attacker]->pal_change = 1;
+    new_battlestruct->bank_affecting[bank_attacker].transform_tid = get_attributes(get_bank_poke_ptr(bank_target), ATTR_TID, 0);
+}
+
 void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*/, &change_attacker_item /*2*/, &try_to_lower_def /*3*/, &try_to_raise_spd /*4*/,
 &changestatvar1 /*5*/, &changestatvar2 /*6*/, &frisk_target_item /*7*/, &set_stat_msg_buffer /*8*/, &set_type_msg_buffer /*9*/, &set_team_msg_buffer /*10*/, &bad_dreams_damage_calc /*11*/,
 &weaknesspolicy /*12*/, &mentalherb /*13*/, &placeholder0x14 /*14*/, &hazards_bank_switcher /*15*/, &hazards_bank_return /*16*/, &leechseed_update /*17*/,
@@ -2673,7 +2718,8 @@ void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*
 &jumpifuserhasnoHP /*91*/, &quash_setter /*92*/, &beatup_getloopcounter /*93*/, &canuse_allyswitch /*94*/, &allyswitch_dataswitch /*95*/,
 &can_magneticflux_work /*96*/, &magnetic_flux_effect /*97*/, &canuse_flowershield /*98*/, &flowershield_effect /*99*/, &canuselastresort /*100*/,
 &topsyturvy_effect /*101*/, &bestow_effect /*102*/, &conversion_effect /*103*/, &party_heal /*104*/, &accupressure_effect /*105*/, &mega_primal_cry /*106*/,
-&canusefling /*107*/, &happyhour_effect /*108*/, &canuseskydrop /*109*/, &skydropup /*110*/, &canusefairylock /*111*/};
+&canusefling /*107*/, &happyhour_effect /*108*/, &canuseskydrop /*109*/, &skydropup /*110*/, &canusefairylock /*111*/, &healthbox_target_update /*112*/,
+&return_hitmarker_animation /*113*/, &transformed_species_to_0 /*114*/, &aegi_change /*115*/, &set_transfrom_palchange /*116*/};
 
 void callasm_cmd()
 {

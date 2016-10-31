@@ -149,5 +149,9 @@ extern void* healandconfuse_endmove_bs;
 extern void* statraise_berry_endmove_bs;
 extern void* lansat_endmove_bs;
 extern void* skydrop_tooheavy_bs;
+extern void* illusion_wore_off_bs;
+extern void* aegislash_change_bs;
+extern void* protean_bs;
+extern void* gem_bs;
 
 #endif /* static_references */

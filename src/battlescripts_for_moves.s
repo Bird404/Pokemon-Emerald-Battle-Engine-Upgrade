@@ -171,7 +171,7 @@ battlescripts_table:
 .word 0x082D8C62 		@88 Mirror Move
 .word 0x082D8BF9 		@89 Dream Eater
 .word NIGHTMARE			@90 Nightmare
-.word 0x082D9249		@91 Transform
+.word TRANSFROM_MOVE_BS		@91 Transform
 .word USELESS_MOVES		@92 Splash, Hold Hands, Celebrate
 .word 0x082D8F9C		@93 Rest
 .word CONVERSIONS		@94 Conversion and Conversion2, based on move IDs
@@ -254,6 +254,10 @@ battlescripts_table:
 .word TARGETSTATSWITCH	@171 Parting Shot; @arg1 bitfield for stats to raise; arg 2 by how much
 .word HAPPYHOUR			@172 Happy Hour, multiplies gotten money by two
 .word FAIRYLOCK			@173 Fairy Lock
+
+TRANSFROM_MOVE_BS:
+	callasm_cmd 116
+	goto_cmd 0x082D9249
 
 FAIRYLOCK:
 	attackcanceler
@@ -1333,7 +1337,7 @@ FURYCUTTER:
 	jumpiftypenotaffected FURYCUTTERNOTAFFECTED
 	furycutterdamagecalculation
 	critcalc
-	damagecalc
+	
 	goto_cmd SUCCESS_MOVE_ATTACK
 FURYCUTTERMISS:
 	orbyte MoveOutcome OutcomeMissed
@@ -2146,6 +2150,7 @@ ATTACKING_MOVE:
 	attackcanceler
 	accuracycheck MOVE_MISSED 0x0
 SUCCESS_MOVE_ATTACK_WITH_CALC:
+	attackstring
 	critcalc
 	damagecalc
 SUCCESS_MOVE_ATTACK:
