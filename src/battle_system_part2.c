@@ -211,23 +211,6 @@ void update_transform_sprite_pal(u8 bank, u16 pal_arg1)
     }
 }
 
-void update_poke_sprite_y(u8 objectID, u8 bank)
-{
-    objects[objectID].pos1.y = b_get_sprite_y(bank);
-}
-
-void update_poke_position(u8 objectID, u8 bank)
-{
-    update_poke_sprite_y(objectID, bank);
-    u16 species;
-    u16 transform_species = get_transform_species(bank);
-    if (transform_species)
-        species = transform_species;
-    else
-        species = get_attributes(get_bank_poke_ptr(bank), ATTR_SPECIES, 0);
-    poke_update_altitude(bank, species);
-}
-
 void b_load_sprite(struct pokemon* poke, u8 bank, struct sprite_table* sprites)
 {
     u16 species;
@@ -255,11 +238,17 @@ void b_load_sprite(struct pokemon* poke, u8 bank, struct sprite_table* sprites)
     sprite_load(&sprites->p_sprite[species].sprite, battle_graphics.graphics_loc->decompressed_sprite[bank], species, PiD, SPRITE_BACK);
     void* poke_pal = poke_get_pal(species, TiD, PiD);
     LZ77UnCompWram(poke_pal, &decompression_buffer[0]);
-    gpu_pal_apply(&decompression_buffer[0], 256 + bank * 16, 0x20);
-    gpu_pal_apply(&decompression_buffer[0], 0x80 + bank * 16, 0x20);
+    u16 pal_adder = 256 + bank * 16;
+    gpu_pal_apply((struct palette*) (&decompression_buffer), pal_adder, 0x20);
+    gpu_pal_apply((struct palette*) (&decompression_buffer), 0x80 + bank * 16, 0x20);
+    if (species == POKE_CASTFORM)
+    {
+        LZ77UnCompWram(poke_pal, &battle_stuff_ptr->castform_pal);
+        gpu_pal_apply(&battle_stuff_ptr->castform_pal[castform_form[bank]], pal_adder, 0x20);
+    }
     if (transform_species)
     {
-        update_transform_sprite_pal(bank, 256 + bank);
+        update_transform_sprite_pal(bank,  pal_adder);
     }
 }
 

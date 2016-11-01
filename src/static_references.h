@@ -24,6 +24,7 @@ extern void* forewarn_bs;
 extern void* slowstart_bs;
 extern void* anticipation_bs;
 extern void* cherrimswitch_bs;
+extern void* cherrimswitch2_bs;
 extern void* dryskindamage_bs;
 extern void* solarpower_bs;
 extern void* harvest_bs;

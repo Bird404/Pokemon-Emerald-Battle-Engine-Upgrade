@@ -36,7 +36,6 @@ u8 protect_affects(u16 move, u8 set)
         effect = 1;
     else if (new_battlestruct->side_affecting[targets_side].wide_guard && protect_flag && (target == 8 || target == 0x20))
         effect = 1;
-
     return effect;
 }
 

@@ -84,6 +84,7 @@ u8 text_Wild_[6];
 u8 text_Foe_[5];
 u8 text_Foe[4];
 u8 text_Ally[5];
+u8 castform_form[4];
 
 u32 poison_status_flag;
 u32 sleep_status_flag;

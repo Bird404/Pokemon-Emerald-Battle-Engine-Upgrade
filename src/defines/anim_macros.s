@@ -119,6 +119,14 @@
 .byte \anim1BArg6
 .endm
 
+.macro anim1C anim1Carg1 anim1Carg2 anim1Carg3 anim1Carg4
+.byte 0x1C
+.hword \anim1Carg1
+.byte \anim1Carg2
+.byte \anim1Carg3
+.byte \anim1Carg4
+.endm
+
 .macro anim1D anim1Darg1 anim1Darg2 anim1Darg3
 .byte 0x1D
 .hword \anim1Darg1

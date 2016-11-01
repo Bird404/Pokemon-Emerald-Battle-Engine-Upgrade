@@ -146,6 +146,23 @@ illusion_on_opponent_switch_in_return:
 	ldr r0, =(0x08061426 | 1)
 	bx r0
 	
+illusion_playcorrectcry: @r7 = pokestruct, r5 = bank
+	mov r0, r5
+	bl get_transform_species
+	cmp r0, #0x0
+	beq illusion_playcorrectcry_nottransformed
+	mov r9, r0
+	b illusion_playcorrectcry_return
+illusion_playcorrectcry_nottransformed:
+	mov r0, r7
+	mov r1, #0xB
+	ldr r2, =(get_attributes)
+	bl r2_caller
+	mov r9, r0
+illusion_playcorrectcry_return:
+	ldr r1, =(0x08075DE4 | 1)
+	bx r1
+	
 illusion_special_fdecoder_name:
 	ldrb r0, [r4, #1] @bank
 	bl get_party_ptr

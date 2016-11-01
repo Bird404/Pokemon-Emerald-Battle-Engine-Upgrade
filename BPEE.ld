@@ -10,6 +10,7 @@ back_sprites = 0x0800012C;
 nick_male_sign = 0x085ED22E;
 nick_female_sign = 0x085ED233;
 nick_genderless_sign = 0x085ED238;
+castform_form = 0x020244E4;
 
 text_Wild_ = 0x085CBD85;
 text_Foe_ = 0x085CBD8B;
@@ -44,6 +45,7 @@ CpuSet = 0x082E7084|1;
 poke_update_altitude = 0x0805EE54|1;
 b_get_sprite_y = 0x080A6138|1;
 prepare_hitanimation = 0x08034294|1;
+get_bank_identity = 0x080A6A44|1;
 
 battle_turn_random_no = 0x02024330;
 last_used_ability = 0x0202420A;
@@ -211,7 +213,6 @@ free = 0x08000B60|1;
 record_usage_of_item = 0x08131148|1;
 pressure_pp_lose =  0x0803F480|1;
 is_poke_disobedient = 0x08045CBC|1;
-check_if_twoturns_move = 0x08052F48|1;
 uproar_wakeup_check = 0x08050650|1;
 reset_several_turns_stuff = 0x0803F8A0|1;
 check_if_imprisioned = 0x08040130|1;

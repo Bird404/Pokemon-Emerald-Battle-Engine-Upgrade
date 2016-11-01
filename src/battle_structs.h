@@ -203,6 +203,12 @@ struct mirror_move_set_per_bank
 
 extern struct mirror_move_set_per_bank mirror_move_set_pbs;
 
+struct palette {
+  u16 c[16];
+};
+
+extern struct palette palette_obj_faded[16];
+
 struct battle_stuff{
     u8 end_turn_statetracker1; //0x0
     u8 end_turn_checked_bank; //0x1
@@ -250,7 +256,8 @@ struct battle_stuff{
     u8 field_DE; //0xDE
     u8 field_DF; //0xDF
     struct mirror_move_set_per_bank mirror_move_set_pbs[4]; //0xE0-0xFF
-    u8 field_100[162]; //0x100-0x1A1
+    struct palette castform_pal[4]; //0x100 - 0x179
+    u8 field_180[34]; //0x180 - 0x1A1
     u8 battle_load_weather_from_map_flag; //0x1A2
     u8 atk_canceller_state_tracker; //0x1A3
     u8 field_1A4[240]; //0x1A4-0x293
@@ -694,12 +701,6 @@ struct image_resource{
 
 extern struct object objects[64];
 
-struct palette {
-  u16 c[16];
-};
-
-extern struct palette palette_obj_faded[16];
-
 //Pokemon Basestats table
 
 struct poke_basestats{
@@ -814,7 +815,7 @@ struct b_graphics_loc{
 };
 
 struct b_species_info{
-    u16 flag_x1 : 1; //0x1
+    u16 invisible : 1; //0x1
     u16 flag_x2 : 1; //0x2
     u16 substitute : 1; //0x4
     u16 flag_x8 : 1; //0x8

@@ -35,6 +35,7 @@ u8 calculate_effect_chance(u8 bank, u16 move);
 void move_effect_setter(u8 primary, u8 certain);
 struct pokemon* get_bank_poke_ptr(u8 bank);
 u16 get_item_extra_param(u16 item);
+u8 try_cherrim_change(u8 bank);
 
 void atk7D_set_rain()
 {
@@ -526,13 +527,11 @@ u8 primary_effect_setter()
     void *matcher = (void *)battlescripts_curr_instruction;
     if (!MOVE_WORKED)
         *move_effect = 0;
-
     struct battle_participant* applier_bank = &battle_participants[bank_to_apply];
     u16 current_hp = applier_bank->current_hp;
     u8 substitute = 0;
     if (affected_by_substitute(bank_to_apply) && !affects_user)
         substitute = 1;
-
     switch (*move_effect)
     {
         case 10: //heal target's status
@@ -643,7 +642,7 @@ u8 primary_effect_setter()
             }
             break;
         case 0x30: //recoil
-            if (current_hp && recoil_damage(bank_attacker))
+            if (battle_participants[bank_attacker].current_hp && recoil_damage(bank_attacker))
             {
                 battlescript_push();
                 battlescripts_curr_instruction = (void*) 0x082DB3F4; //recoil battlescript
@@ -1077,7 +1076,7 @@ void atk49_move_end_turn()
                     record_usage_of_item(bank_attacker, ITEM_EFFECT_LIFEORB);
                     effect = 1;
                 }
-                else if (new_battlestruct->various.accumulated_damage)
+                else if (new_battlestruct->various.accumulated_damage && attacker_struct->current_hp < attacker_struct->max_hp)
                 {
                     u32 damage = new_battlestruct->various.accumulated_damage>>3;
                     if (damage == 0)
@@ -1085,6 +1084,7 @@ void atk49_move_end_turn()
                     damage_loc = damage*-1;
                     another_active_bank = bank_attacker;
                     battle_scripting.active_bank = bank_attacker;
+                    last_used_item = attacker_struct->held_item;
                     battlescript_push();
                     battlescripts_curr_instruction = (void*)0x82DB7F7;
                     record_usage_of_item(bank_attacker, ITEM_EFFECT_SHELLBELL);
@@ -1154,6 +1154,54 @@ void atk49_move_end_turn()
             if (ability_battle_effects(22, bank_target, 0, 0, 0))
                 effect = 1;
             INC_END_EVENTS
+            break;
+        case 33: //forecast's or flower gift's ability changing
+            {
+                for (u8 i = 0; i < no_of_all_banks; i++)
+                {
+                    u16* species = &battle_participants[i].poke_species;
+                    battle_scripting.active_bank = i;
+                    if (*species == POKE_CASTFORM)
+                    {
+                        if (castform_form[i] == 0 && check_ability(i, ABILITY_FORECAST)) //castform is in default form and has the ability
+                        {
+                            u8 form_to_switch = castform_switch(i);
+                            if (form_to_switch)
+                            {
+                                effect = 1;
+                                battle_stuff_ptr->castform_switch_form = form_to_switch - 1;
+                                battlescript_push();
+                                battlescripts_curr_instruction = (void*) (0x082DB4AF);
+                                break;
+                            }
+                        }
+                    }
+                    else if (*species == POKE_CHERRIM_SUNSHINE && !check_ability(i, ABILITY_FLOWER_GIFT))
+                    {
+                        effect = 1;
+                        new_battlestruct->bank_affecting[i].sunshine_form = 0;
+                        *species = POKE_CHERRIM;
+                        active_bank = i;
+                        prepare_setattributes_in_battle(0, REQUEST_SPECIES_BATTLE, 0, 2, species);
+                        mark_buffer_bank_for_execution(i);
+                        battlescript_push();
+                        battlescripts_curr_instruction = &cherrimswitch2_bs;
+                        break;
+                    }
+                    else if (*species == POKE_CHERRIM && check_ability(i, ABILITY_FLOWER_GIFT))
+                    {
+                        if (try_cherrim_change(i))
+                        {
+                            effect = 1;
+                            battlescript_push();
+                            battlescripts_curr_instruction = &cherrimswitch2_bs;
+                            break;
+                        }
+                    }
+                }
+                if (effect == 0)
+                    INC_END_EVENTS
+            }
             break;
         default:
             battle_scripting.cmd49_state_tracker = case_max;
@@ -1537,6 +1585,14 @@ void check_and_set_parental_bond()
     }
 }
 
+u8 check_if_twoturns_move(u16 move)
+{
+    u8 script_id = move_table[move].script_id;
+    if (script_id == 71 /*all two turns moves' effect */ || script_id == 157 /*Sky Drop's effect*/)
+        return 1;
+    return 0;
+}
+
 void atk00_move_canceller()
 {
     if (battle_outcome)
@@ -1624,14 +1680,18 @@ void atk00_move_canceller()
         return;
     }
     if (protect_affects(current_move, 0)
-        && !(check_if_twoturns_move(current_move) && battle_participants[bank_attacker].status2.multiple_turn_move)
         && !(current_move == MOVE_CURSE && is_of_type(bank_attacker, TYPE_GHOST)))
     {
-        battle_communication_struct.field6 = 1;
-        move_outcome.missed = 1;
-        reset_several_turns_stuff(bank_attacker);
-        move_hit_with_pbs[bank_target] = 0;
-        move_type_hit_with_pbs[bank_target] = 0;
+        u8 twoturn = check_if_twoturns_move(current_move);
+        if (!twoturn || (twoturn && battle_participants[bank_attacker].status2.multiple_turn_move)) //not two turn or twoturn's attacking turn
+        {
+            battle_communication_struct.field6 = 1;
+            move_outcome.missed = 1;
+            move_hit_with_pbs[bank_target] = 0;
+            move_type_hit_with_pbs[bank_target] = 0;
+            if (!twoturn)
+                reset_several_turns_stuff(bank_attacker);
+        }
     }
     battlescripts_curr_instruction++;
     return;

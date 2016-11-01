@@ -369,7 +369,7 @@ u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8
             chained_effect = 0;
             handle_type_immune_ability(def_bank,3,ABILITY_WONDER_GUARD);
         }
-        else if(airstatus==4 && chained_effect==0)
+        else if(airstatus == 4 && chained_effect == 0 && move_type == TYPE_GROUND)
             handle_type_immune_ability(def_bank,4,ABILITY_LEVITATE);
         if(move_outcome.not_affected)
             protect_structs[atk_bank].flag1_noteffective=1;
@@ -733,16 +733,19 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             }
             break;
         case ABILITY_IMPOSTER:
-            if (battle_participants[(bank ^ 1)].current_hp && (bank ^ 1) < no_of_all_banks && !(battle_participants[bank].status2.transformed) && !(battle_participants[(bank ^1)].status2.transformed))
             {
-                effect = true;
-                execute_battle_script(&transform_bs);
-                current_move = MOVE_TRANSFORM;
-                bank_attacker = bank;
-                bank_target = (bank ^ 1);
-                battle_scripting.active_bank = bank;
-                new_battlestruct->various.active_bank = bank;
-                dontlock=1;
+                u8 opposing_bank = bank ^ 1;
+                if (is_bank_present(opposing_bank) && !battle_participants[opposing_bank].status2.transformed && !battle_participants[bank].status2.transformed)
+                {
+                    effect = 1;
+                    execute_battle_script(&transform_bs);
+                    current_move = MOVE_TRANSFORM;
+                    bank_attacker = bank;
+                    bank_target = opposing_bank;
+                    battle_scripting.active_bank = bank;
+                    new_battlestruct->various.active_bank = bank;
+                    dontlock=1;
+                }
             }
             break;
         case ABILITY_INTIMIDATE:
