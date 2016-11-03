@@ -877,4 +877,16 @@ struct superstate{
 
 extern struct superstate super;
 
+struct saveblock1{
+    u8 will_do_later_if_needed[0x234];
+    u8 poke_quantity;
+    u8 alignment_padding[3];
+    struct pokemon player_party[6];
+    u32 money;
+    u16 coints;
+    u16 item_on_select;
+};
+
+extern struct saveblock1* sav1;
+
 #endif /* B_STRUCTS */
