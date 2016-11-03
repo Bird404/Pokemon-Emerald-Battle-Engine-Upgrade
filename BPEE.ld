@@ -19,6 +19,9 @@ text_Ally = 0x085CBD95;
 super = 0x030022C0;
 palette_bg_faded = 0x02037B14;
 palette_bg_unfaded = 0x02037714;
+sav1 = 0x03005D8C;
+sav2 = 0x03005D90;
+sav3 = 0x03005D94;
 
 poke_get_pal = 0x0806E740 | 1;
 LZ77UnCompWram = 0x082E7090|1;
