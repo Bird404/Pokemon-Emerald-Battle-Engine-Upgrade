@@ -1,11 +1,6 @@
-#include "types.h"
 #include "defines.h"
-#include "battle_locations.h"
-#include "battle_structs.h"
-#include "vanilla_functions.h"
-#include "new_battle_struct.h"
-#include <string.h>
 #include "static_references.h"
+#include <string.h>
 
 u8 check_ability(u8 bank, u8 ability);
 u16 get_1_4_of_max_hp(u8 bank);
@@ -2581,8 +2576,7 @@ void atk5D_moneyreward()
         money += get_trainer_money(trainer_opponent_B);
     if (new_battlestruct->various.happyhour_bonus)
         money *= 2;
-    //sorry for the ugly casting, too lazy to type saveblock1 struct
-    give_money((u32*) (*(u8*)(0x03005D8C) + 0x490), money);
+    give_money(&sav1->money, money);
     battle_text_buff1[0] = 0xFD;
     battle_text_buff1[1] = 1;
     battle_text_buff1[2] = 4;
