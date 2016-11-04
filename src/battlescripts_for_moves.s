@@ -101,7 +101,7 @@ battlescripts_table:
 .word ATTACK_STATUS_CHANCE	@18 arg1 is status(poison, burn, etc.) flag
 .word RECOIL_ATTACK		@19 arg1 is status(poison, burn, etc.) flag that can be applied; default recoil is 1/3
 .word CRASH_ATTACK		@20 Jump Kick and such
-.word FAINT_HEAL	@21 user heals, replacement is healed
+.word FAINT_HEAL		@21 user faints, replacement is healed
 .word FAINTSTATCHANGE	@22 user faints, but lowers target's stats; arg1 is bitfield for stats, arg2 is value for raising/lowering
 .word EXPLODE			@23 Selfdestruct and explosion
 .word 0x082D8AEA		@24 moves that drain damage, arg1 is percent of the damage to be applied to HP(note: don't try values higher than 100), if arg2 isn't 0 we round up, else round down
@@ -1425,11 +1425,19 @@ TORMENTT:
 
 TAUNTT:
 	attackcanceler
-	settaunt MOVE_FAILED
 	accuracycheck MOVE_MISSED 0x0
+	jumpifability bank_target ABILITY_OBLIVIOUS TAUNT_OBLIVIOUS_FAIL
+	settaunt MOVE_FAILED
 	attackstring
 	ppreduce
 	goto_cmd 0x082DA203
+	
+TAUNT_OBLIVIOUS_FAIL:
+	recordability bank_target
+	orbyte MoveOutcome OutcomeNotaffected
+	resultmessage
+	waitmessage 0x40
+	goto_cmd ENDTURN
 
 FOCUSENERGY:
 	attackcanceler
@@ -2075,6 +2083,8 @@ CANT_CONFUSE_DUETOABILITY:
 	goto_cmd ENDTURN
 	
 CANTCONFUSE:
+	cmd76 0x1 0x17
+	pause_cmd 0x20
 	printstring 0x44
 	waitmessage 0x40
 	goto_cmd ENDTURN
