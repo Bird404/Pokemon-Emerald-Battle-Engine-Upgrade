@@ -88,7 +88,7 @@ u16 get_mega_species(u8 bank, u8 chosen_method)
                 break;
             case 0xFC: //fervent wish mega
                 {
-                    u8 fervent_move = evo_table->poke_evo[species].evos[i].paramter;
+                    u16 fervent_move = evo_table->poke_evo[species].evos[i].paramter;
                     if (fervent_move)
                     {
                         for(u8 j=0; j<4; j++)
