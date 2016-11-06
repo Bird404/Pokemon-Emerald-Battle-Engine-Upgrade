@@ -5,6 +5,8 @@ u8 is_of_type(u8 bank, u8 type);
 u32 percent_boost(u32 number, u16 percent);
 u32 percent_lose(u32 number, u16 percent);
 s8 get_priority(u16 move, u8 bank);
+u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8 effects_handling_and_recording);
+u8 get_attacking_move_type();
 
 u8 protect_affects(u16 move, u8 set)
 {
@@ -168,7 +170,6 @@ void accuracy_calc()
     u32 jump_loc = read_word(battlescripts_curr_instruction + 1);
     s16 arg = read_hword(battlescripts_curr_instruction + 5);
     u16 checked_move=current_move;
-
     if ((arg + 2) > 1)
     {
         if(new_battlestruct->various.parental_bond_mode==PBOND_CHILD)
@@ -187,18 +188,16 @@ void accuracy_calc()
                 if (__umodsi3(rng(), 100) + 1 > accuracy)
                 {
                     move_outcome.missed = 1;
-                    if (battle_flags.double_battle)
+                    if (battle_flags.double_battle && (move_table[checked_move].target == 0x8 || move_table[checked_move].target == 0x20))
                     {
-                        if (move_table[checked_move].target == 0x8 || move_table[checked_move].target == 0x20)
-                        {
-                            battle_communication_struct.field6 = 2;
-                        }
-                        else
-                        {
-                            battle_communication_struct.field6 = 0;
-                        }
+                        battle_communication_struct.field6 = 2;
                     }
-                    check_wonderguard_levitate_damage();
+                    else
+                    {
+                        battle_communication_struct.field6 = 0;
+                    }
+                    type_effectiveness_calc(checked_move, get_attacking_move_type(), bank_attacker, bank_target, 1);
+                    move_outcome.not_affected = 0;
                 }
                 jump_if_move_has_no_effect(7, checked_move);
             }
