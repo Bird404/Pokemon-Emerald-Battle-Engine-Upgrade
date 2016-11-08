@@ -25,3 +25,4 @@
 .equ PSYCHO_CUT_particle_ID, 0x45
 .equ DEFOG_particle_ID, 0x46
 .equ LEAF_STORM_particle_ID, 0x47
+.equ ATTACK_ORDER_particle_ID, 0x48
