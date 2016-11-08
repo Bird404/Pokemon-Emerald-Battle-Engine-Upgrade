@@ -347,6 +347,8 @@ shiny_particle_image:
 .byte 0x00, 0x02, DEFOG_particle_ID, 0x28
 .word LEAF_STORM_particle
 .byte 0x00, 0x02, LEAF_STORM_particle_ID, 0x28
+.word ATTACK_ORDER_particle
+.byte 0x80, 0x04, ATTACK_ORDER_particle_ID, 0x28
 
 .align 2
 
@@ -688,3 +690,5 @@ shiny_particle_pallet:
 .byte DEFOG_particle_ID, 0x28, 0x00, 0x00
 .word LEAF_STORM_palette
 .byte LEAF_STORM_particle_ID, 0x28, 0x00, 0x00
+.word ATTACK_ORDER_palette
+.byte ATTACK_ORDER_particle_ID, 0x28, 0x00, 0x00
