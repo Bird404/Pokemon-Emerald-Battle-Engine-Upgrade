@@ -13,3 +13,4 @@
 .equ MAGIC_ROOM_background, 0x23
 .equ WONDER_ROOM_background, 0x24
 .equ LEAF_STORM_background, 0x25
+.equ ROCK_WRECKER_background, 0x26
