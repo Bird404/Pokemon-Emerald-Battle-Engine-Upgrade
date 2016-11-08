@@ -84,3 +84,7 @@ battle_anim_bg_table:
 .word LEAF_STORM_background_image
 .word LEAF_STORM_background_palette
 .word LEAF_STORM_background_tilemap
+#rockwreckerbackground
+.word ROCK_WRECKER_background_image
+.word ROCK_WRECKER_background_palette
+.word ROCK_WRECKER_background_tilemap
