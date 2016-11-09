@@ -88,3 +88,7 @@ battle_anim_bg_table:
 .word ROCK_WRECKER_background_image
 .word ROCK_WRECKER_background_palette
 .word ROCK_WRECKER_background_tilemap
+#magmastormbackground
+.byte 0x14, 0xF4, 0xD8, 0x08
+.word MAGMA_STORM_background_palette
+.byte 0x98, 0xF5, 0xD8, 0x08
