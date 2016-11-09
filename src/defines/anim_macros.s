@@ -34,6 +34,8 @@
 .byte 0x5
 .endm
 
+@no 6,7 commands
+
 .macro endanimation
 .byte 0x8
 .endm
@@ -77,6 +79,18 @@
 .hword \setargValue
 .endm
 
+.macro choosetwoturnanim choosetwoturnanim1 choosetwoturnanim2
+.byte 0x11
+.word \choosetwoturnanim1
+.word \choosetwoturnanim2
+.endm
+
+.macro jumpifmoveturnEQ jumpifmoveturnEQturn jumpifmoveturnEQPTR
+.byte 0x12
+.byte \jumpifmoveturnEQturn
+.word \jumpifmoveturnEQPTR
+.endm
+
 .macro goto_cmd goto_cmdPtr
 .byte 0x13
 .word \goto_cmdPtr
@@ -108,6 +122,11 @@
 .byte 0x19
 .hword \playsound2ID
 .byte \playsound2Unkown
+.endm
+
+.macro anim1A anim1Aarg1
+.byte 0x1A
+.byte \anim1Aarg1
 .endm
 
 .macro anim1B anim1BsongID anim1BArg3 anim1BArg4 anim1BArg5 anim1BArg6
@@ -144,6 +163,11 @@
 .byte \jumpifargmatchesargID
 .hword \jumpifargmatchesValue
 .word \jumpifargmatchesPtr
+.endm
+
+.macro jumpifnotinbattle jumpifnotinbattlePTR
+.byte 0x24
+.word \jumpifnotinbattlePTR
 .endm
 
 .macro anim28 anim28Bank
