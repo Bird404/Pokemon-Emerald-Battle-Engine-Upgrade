@@ -131,7 +131,6 @@ struct in_battle_weather{
 #define weather_heavy_rain 0x1000
 #define weather_air_current 0x2000
 
-
 union battle_weather{
     u32 int_bw;
     struct in_battle_weather flags;
@@ -318,7 +317,7 @@ struct disable_struct{
     u8 field1 [4];
     u16 disabled_move;
     u16 encored_move;
-    u8 protect_endure_effect;
+    u8 protect_uses;
     u8 stockpile_counter;
     u8 substitute_hp;
     u8 disable_timer;
@@ -450,6 +449,7 @@ struct move_outcome{
     u8 endured : 1;
     u8 hanged_on_using_item : 1;
     u8 sturdied : 1;
+    u8 explosion_stop : 1;
 };
 
 extern struct move_outcome move_outcome;
@@ -567,7 +567,7 @@ struct battle_flags{
     u32 battle_pyramid : 1; //0x200 000
     u32 player_ingame_partner : 1; //0x400 000
     u32 flag_x800000 : 1; //0x800 000
-    u32 flag_x1000000 : 1;// 0x1 000 000
+    u32 recorded_battle : 1;// 0x1 000 000
     u32 flag_x2000000 : 1; //0x2 000 000
     u32 flag_x4000000 : 1; //0x4 000 000
     u32 secret_base : 1; //0x8 000 000
@@ -888,5 +888,16 @@ struct saveblock1{
 };
 
 extern struct saveblock1* sav1;
+
+struct battle_record_pbs{
+    u8 action[664];
+};
+
+extern struct battle_record_pbs battle_record[4];
+
+struct stat_fractions{
+    u8 dividend;
+    u8 divisor;
+};
 
 #endif /* B_STRUCTS */

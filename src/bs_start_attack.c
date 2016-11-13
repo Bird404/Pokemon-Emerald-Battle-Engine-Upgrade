@@ -148,15 +148,15 @@ u8 get_target_of_move(u16 move, u8 target_given, u8 adjust)
     return result_target;
 }
 
-void set_attacking_move_type()
+u8 calculate_move_type(u8 bank, u16 move, u8 set_bonus)
 {
-    u8 ability=battle_participants[bank_attacker].ability_id;
+    u8 ability=battle_participants[bank].ability_id;
     u8 move_type = TYPE_EGG;
-    if(new_battlestruct->bank_affecting[bank_attacker].electrify)
+    if(new_battlestruct->bank_affecting[bank].electrify)
         move_type=TYPE_ELECTRIC;
     else
     {
-        switch(current_move)
+        switch(move)
         {
         case MOVE_WEATHER_BALL:
             if(weather_abilities_effect())
@@ -164,29 +164,27 @@ void set_attacking_move_type()
                 if (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)
                 {
                     move_type=TYPE_FIRE;
-                    battle_scripting.damage_multiplier=2;
                 }
                 else if (battle_weather.flags.rain || battle_weather.flags.permament_rain ||
                           battle_weather.flags.heavy_rain || battle_weather.flags.downpour)
                 {
                     move_type=TYPE_WATER;
-                    battle_scripting.damage_multiplier=2;
                 }
                 else if (battle_weather.flags.hail || battle_weather.flags.permament_hail)
                 {
                     move_type=TYPE_ICE;
-                    battle_scripting.damage_multiplier=2;
                 }
                 else if (battle_weather.flags.sandstorm || battle_weather.flags.permament_sandstorm)
                 {
                     move_type=TYPE_ROCK;
-                    battle_scripting.damage_multiplier=2;
                 }
+                if (move_type != TYPE_EGG && move_type != TYPE_ELECTRIC && set_bonus)
+                    battle_scripting.damage_multiplier=2;
             }
             break;
         case MOVE_HIDDEN_POWER:
             {
-                struct iv_set *ivs= &battle_participants[bank_attacker].ivs;
+                struct iv_set *ivs= &battle_participants[bank].ivs;
                 u32 sum=((ivs->iv_hp)&1)+(((ivs->iv_atk)&1)<<1)+(((ivs->iv_def)&1)<<2)+(((ivs->iv_spd)&1)<<3)
                        +(((ivs->iv_sp_atk)&1)<<4)+(((ivs->iv_sp_def)&1)<<5);
                 move_type=__udivsi3(sum*15,63);
@@ -194,9 +192,9 @@ void set_attacking_move_type()
             break;
         case MOVE_JUDGMENT:
             {
-                if((u16)get_item_extra_param(battle_participants[bank_attacker].held_item) == 1)//PLATE CHECK
+                if((u16)get_item_extra_param(battle_participants[bank].held_item) == 1)//PLATE CHECK
                 {
-                	switch (get_item_effect(bank_attacker,1))
+                	switch (get_item_effect(bank,1))
                     {
                     case ITEM_EFFECT_DRAGONFANG://DRACOPLATE
                         move_type=TYPE_DRAGON;
@@ -271,9 +269,9 @@ void set_attacking_move_type()
             break;
         case MOVE_TECHNO_BLAST:
             {
-                if(get_item_effect(bank_attacker,1) == ITEM_EFFECT_DRIVES)
+                if(get_item_effect(bank,1) == ITEM_EFFECT_DRIVES)
                 {
-                	switch ((u16)get_item_extra_param(battle_participants[bank_attacker].held_item))
+                	switch ((u16)get_item_extra_param(battle_participants[bank].held_item))
                     {
                     case 1://DOUSEDRIVE
                         move_type=TYPE_WATER;
@@ -296,7 +294,7 @@ void set_attacking_move_type()
             break;
         }
         u8 ate=0;
-        if(move_type == TYPE_EGG && (DAMAGING_MOVE(current_move)) && has_ability_effect(bank_attacker,0,1) && move_table[current_move].type==TYPE_NORMAL)
+        if(move_type == TYPE_EGG && (DAMAGING_MOVE(move)) && has_ability_effect(bank,0,1) && move_table[move].type==TYPE_NORMAL)
         {
             switch(ability)
             {
@@ -314,13 +312,18 @@ void set_attacking_move_type()
                 break;
             }
         }
-        if(ate)
+        if(ate && set_bonus)
             new_battlestruct->various.ate_bonus=1;
     }
     if((new_battlestruct->field_affecting.ion_deluge)
-       && (move_table[current_move].type==TYPE_NORMAL || check_ability(bank_attacker,ABILITY_NORMALIZE)))
+       && (move_table[move].type==TYPE_NORMAL || check_ability(bank,ABILITY_NORMALIZE)))
         move_type = TYPE_ELECTRIC;
+    return move_type;
+}
 
+void set_attacking_move_type()
+{
+    u8 move_type = calculate_move_type(bank_attacker, current_move, 1);
     if (move_type != TYPE_EGG)
     {
         battle_stuff_ptr->dynamic_move_type=move_type + 0x80;
@@ -329,10 +332,9 @@ void set_attacking_move_type()
         battle_stuff_ptr->dynamic_move_type = 0;
 }
 
-
 void clear_move_outcome()
 {
-    *(u8 *)(0x202427C)=0;
+    *(u16 *)(0x202427C)=0;
 }
 
 void* get_move_battlescript_ptr(u16 move)
@@ -476,10 +478,6 @@ u8 check_mega_evo(u8 bank)
         return 0;
 }
 
-u16 moveshitting_onair[] = {MOVE_TWISTER, MOVE_SKY_UPPERCUT, MOVE_WHIRLWIND, MOVE_GUST, MOVE_THUNDER, MOVE_HURRICANE, MOVE_SMACK_DOWN, MOVE_THOUSAND_ARROWS, 0xFFFF};
-u16 moveshitting_underground[] = {MOVE_MAGNITUDE, MOVE_EARTHQUAKE, MOVE_FISSURE, 0xFFFF};
-u16 moveshitting_underwater[] = {MOVE_SURF, MOVE_WHIRLPOOL, 0xFFFF};
-
 bool check_focus(u8 bank)
 {
     bool is_bank_focusing = false;
@@ -585,7 +583,6 @@ void bs_start_attack()
             }
             bank_target=get_target_of_move(current_move,0,0);
         }
-
         if(!is_bank_from_opponent_side(bank_attacker))
         {
             battle_trace.user_team_move = current_move;
@@ -604,7 +601,8 @@ void bs_start_attack()
         else
             new_battlestruct->bank_affecting[bank_attacker].same_move_used = 0;
 
-        if (battle_flags.double_battle && !is_bank_present(bank_target))
+        u8 move_target = move_table[current_move].target;
+        if ((battle_flags.double_battle && !is_bank_present(bank_target)) || (bank_attacker == bank_target && move_target != move_target_user && move_target != 12 && move_target != 2)) //fix correct targeting
             bank_target = get_target_of_move(current_move, 0, 0);
 
         if (find_move_in_table(current_move, &moveshitting_onair[0]))
@@ -660,9 +658,11 @@ void bc_preattacks()
     u8 play_script=0;
     u8 *count = &(battle_stuff_ptr->pre_attacks_bank_counter);
     if(!(hitmarker&HITMARKER_FLEE))
-    {   reset_indicators_height();
+    {
+        reset_indicators_height();
         while(*count<no_of_all_banks)
-        {   bank_attacker=*count;
+        {
+            bank_attacker=*count;
             (*count)++;
             if(menu_choice_pbs[bank_attacker]==0)
             {

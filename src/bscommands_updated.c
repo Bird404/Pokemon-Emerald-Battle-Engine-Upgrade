@@ -31,6 +31,8 @@ void move_effect_setter(u8 primary, u8 certain);
 struct pokemon* get_bank_poke_ptr(u8 bank);
 u16 get_item_extra_param(u16 item);
 u8 try_cherrim_change(u8 bank);
+u8 check_move_limitations(u8 bank, u8 not_usable_moves, u8 limitations);
+u32 accuracy_percent(u16 move, u8 bankatk, u8 bankdef);
 
 void atk7D_set_rain()
 {
@@ -1039,6 +1041,12 @@ void atk49_move_end_turn()
             if(!(hitmarker&HITMARKER_IMMOBILE_DUE_TO_STATUS) && move_table[current_move].target==move_target_foes_and_ally &&
                 battle_flags.double_battle &&!protect_structs[bank_attacker].flag0_onlystruggle)
             {
+                if (move_table[current_move].script_id == 23 && move_outcome.explosion_stop) //stop explosion if damp on
+                {
+                    move_outcome.explosion_stop = 0;
+                    INC_END_EVENTS
+                    break;
+                }
                 u8 next_target=bank_target+1;
                 while(next_target<no_of_all_banks && ((absent_bank_flags & bits_table[next_target]) || next_target==bank_attacker))
                     next_target++;
@@ -1919,7 +1927,7 @@ void atk77_set_protect_stuff()
     u8 fail = 0;
     u8 protects_team = 0;
     u8 attacker_side = is_bank_from_opponent_side(bank_attacker);
-    u8* activity = &disable_structs[bank_attacker].protect_endure_effect;
+    u8* activity = &disable_structs[bank_attacker].protect_uses;
     u16 previous_move = last_used_moves[bank_attacker];
     if (move_table[previous_move].script_id != 34 || previous_move == MOVE_MAT_BLOCK)
         *activity = 0;
@@ -2270,8 +2278,10 @@ u8 can_select_this_random_move(u16 move)
         break;
     case MOVE_SLEEP_TALK:
         if (script_id == 71) //two-turn moves
+        {
             can = 0;
-        break;
+            break;
+        }
         SHAREDWITHASSIST:
         if(move == MOVE_ASSIST || move == MOVE_SLEEP_TALK || move == MOVE_BELCH || move == MOVE_BIDE || move == MOVE_CHATTER || move == MOVE_COPYCAT || move == MOVE_HOLD_HANDS || move == MOVE_ME_FIRST || move == MOVE_METRONOME || move == MOVE_MIMIC || move == MOVE_MIRROR_MOVE || move == MOVE_NATURE_POWER || move == MOVE_SKETCH || move == MOVE_STRUGGLE)
             can = 0;
@@ -2281,6 +2291,35 @@ u8 can_select_this_random_move(u16 move)
 }
 
 u16 metronome_forbidden_moves[] = {MOVE_AFTER_YOU, MOVE_ASSIST, MOVE_BELCH, MOVE_BESTOW, MOVE_CELEBRATE, MOVE_CHATTER, MOVE_COPYCAT, MOVE_COUNTER, MOVE_COVET, MOVE_CRAFTY_SHIELD, MOVE_DESTINY_BOND, MOVE_DETECT, MOVE_DIAMOND_STORM, MOVE_ENDURE, MOVE_FEINT, MOVE_FOCUS_PUNCH, MOVE_FOLLOW_ME, MOVE_FREEZE_SHOCK, MOVE_HAPPY_HOUR, MOVE_HELPING_HAND, MOVE_HOLD_HANDS, MOVE_HYPERSPACE_HOLE, MOVE_ICE_BURN, MOVE_KINGS_SHIELD, MOVE_LIGHT_OF_RUIN, MOVE_MAT_BLOCK, MOVE_ME_FIRST, MOVE_METRONOME, MOVE_MIMIC, MOVE_MIRROR_COAT, MOVE_MIRROR_MOVE, MOVE_NATURE_POWER, MOVE_PROTECT, MOVE_QUASH, MOVE_QUICK_GUARD, MOVE_RAGE_POWDER, MOVE_RELIC_SONG, MOVE_SECRET_SWORD, MOVE_SKETCH, MOVE_SLEEP_TALK, MOVE_SNARL, MOVE_SNATCH, MOVE_SNORE, MOVE_SPIKY_SHIELD, MOVE_STEAM_ERUPTION, MOVE_STRUGGLE, MOVE_SWITCHEROO, MOVE_TECHNO_BLAST, MOVE_THIEF, MOVE_THOUSAND_ARROWS, MOVE_THOUSAND_WAVES, MOVE_TRANSFORM, MOVE_TRICK, MOVE_VCREATE, MOVE_WIDE_GUARD, 0xFFFF};
+
+void atkA9_sleeptalkmovechoose() //void* success_ptr
+{
+    u8 usable_bitfield = 0;
+    for (u8 i = 0; i < 4; i++)
+    {
+        if (can_select_this_random_move(battle_participants[bank_attacker].moves[i]))
+        {
+            usable_bitfield |= (bits_table[i]);
+        }
+    }
+    usable_bitfield = check_move_limitations(bank_attacker, usable_bitfield, 0xFF);
+    if (usable_bitfield)
+    {
+        u8 chosen_id;
+        do
+        {
+            chosen_id = rng() & 3;
+        } while(!(usable_bitfield & bits_table[chosen_id]));
+        u16 move = battle_participants[bank_attacker].moves[chosen_id];
+        randomly_chosen_move = move;
+        current_move_position = chosen_id;
+        hitmarker &= 0xFFFFFBFF;
+        bank_target = get_target_of_move(move, 0, 0);
+        battlescripts_curr_instruction = (void*) (read_word(battlescripts_curr_instruction + 1));
+    }
+    else
+        battlescripts_curr_instruction += 5;
+}
 
 void atk9E_metronome_chooser()
 {
@@ -2421,12 +2460,12 @@ void atk13_printfromtable()
 
 void revert_form_change(u8 mega_revert, u8 teamID, u8 side, struct pokemon* poke)
 {
+    u16 species = get_attributes(poke, ATTR_SPECIES, 0);
     if (mega_revert)
     {
         revert_mega_to_normalform(teamID, side);
     }
-    u16 species = get_attributes(poke, ATTR_SPECIES, 0);
-    if (species == POKE_CHERRIM_SUNSHINE)
+    else if (species == POKE_CHERRIM_SUNSHINE)
     {
         u16 Cherrim = POKE_CHERRIM;
         set_attributes(poke, ATTR_SPECIES, &Cherrim);
@@ -2659,4 +2698,72 @@ void atk02_attackstring()
         }
     }
     return;
+}
+
+void atkA7_KO_handler()
+{
+    if (check_ability(bank_target, ABILITY_STURDY))
+    {
+        move_outcome.missed = 1;
+        last_used_ability = ABILITY_STURDY;
+        record_usage_of_ability(bank_target, ABILITY_STURDY);
+        battlescripts_curr_instruction = (void*) (0x82DB552);
+    }
+    else
+    {
+        u8 fail = 0;
+        u8* string_chooser = &battle_communication_struct.multistring_chooser;
+        if (battle_participants[bank_target].level > battle_participants[bank_attacker].level) //lower level
+        {
+            move_outcome.missed = 1;
+            *string_chooser = 1;
+            fail = 1;
+        }
+        else if (!MUST_HIT(bank_attacker, bank_target) && __umodsi3(rng(), 100) + 1 > accuracy_percent(current_move, bank_attacker, bank_target)) //missed
+        {
+            move_outcome.missed = 1;
+            *string_chooser = 0;
+            fail = 1;
+        }
+        else //move hits
+        {
+            move_outcome.not_very_effective = 0;
+            move_outcome.super_effective = 0;
+            move_outcome.one_hit_ko = 1;
+            damage_loc = battle_participants[bank_target].current_hp;
+            battlescripts_curr_instruction += 5;
+        }
+        if (fail)
+            battlescripts_curr_instruction = (void*) (read_word(battlescripts_curr_instruction + 1));
+    }
+}
+
+void atk78_explodeifnotdamp()
+{
+    for (u8 i = 0; i < 4; i++)
+    {
+        if (is_bank_present(i) && battle_participants[i].ability_id == ABILITY_DAMP && has_ability_effect(i, 1, 1))
+        {
+            bank_target = i;
+            last_used_ability = ABILITY_DAMP;
+            record_usage_of_ability(i, ABILITY_DAMP);
+            move_outcome.failed = 1;
+            move_outcome.explosion_stop = 1;
+            battlescripts_curr_instruction = (void*) (0x082DB560);
+            return;
+        }
+    }
+    damage_loc = battle_participants[bank_attacker].current_hp;
+    active_bank = bank_attacker;
+    prepare_health_bar_update_buffer(0, 0x7FFF);
+    mark_buffer_bank_for_execution(active_bank);
+    for (u8 i = 0; i < 4; i++)
+    {
+        if (is_bank_present(i) && i != bank_attacker)
+        {
+            bank_target = i;
+            break;
+        }
+    }
+    battlescripts_curr_instruction++;
 }

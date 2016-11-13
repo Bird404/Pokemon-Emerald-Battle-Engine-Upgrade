@@ -839,6 +839,27 @@
 .equ MOVE_ZAP_CANNON, 0xC0
 .equ MOVE_ZEN_HEADBUTT, 0x1AC
 
+@weather
+.equ weather_rain, 0x1
+.equ weather_downpour, 0x2
+.equ weather_permament_rain, 0x4
+.equ weather_sandstorm, 0x8
+.equ weather_permament_sandstorm, 0x10
+.equ weather_sun, 0x20
+.equ weather_permament_sun, 0x40
+.equ weather_hail, 0x80
+.equ weather_permament_hail, 0x100
+.equ weather_fog, 0x200
+.equ weather_permament_fog, 0x400
+.equ weather_harsh_sun, 0x800
+.equ weather_heavy_rain, 0x1000
+.equ weather_air_current, 0x2000
+
+@split
+.equ SPLIT_PHYSICAL, 0
+.equ SPLIT_SPECIAL, 1
+.equ SPLIT_STATUS, 2
+
 @stats
 .equ STAT_HP, 0
 .equ STAT_ATK, 1
@@ -859,11 +880,13 @@
 
 @secondary status
 .equ STATUS2_CONFUSION, 	0x7
+.equ STATUS2_UPROAR,		0x70
 .equ STATUS2_MULTIPLETURNS,	0x1000
 .equ STATUS2_WRAPPED,		0xE000
 .equ STATUS2_INLOVE, 		0xF0000
 .equ STATUS2_PUMPEDUP, 		0x100000
 .equ STATUS2_TRANSFORMED, 	0x200000
+.equ STATUS2_RECHARGE,		0x400000
 .equ STATUS2_SUBSTITUTE, 	0x1000000
 .equ STATUS2_TRAPPED, 		0x4000000
 .equ STATUS2_NIGHTMARE, 	0x8000000
@@ -872,17 +895,18 @@
 .equ STATUS2_TORMENTED, 	0x80000000
 
 @status 3
-.equ STATUS3_SEEDED, 0x4
-.equ STATUS3_PERISHSONG, 0x20
-.equ STATUS3_ONAIR, 0x40
-.equ STATUS3_UNDERGROUND, 0x80
-.equ STATUS3_CHARGED, 0x200
-.equ STATUS3_ROOTED, 0x400
-.equ STATUS3_UNDERWATER, 0x40000
-.equ STATUS3_MUDSPORT, 0x10000
-.equ STATUS3_WATERSPORT, 0x20000
-.equ STATUS3_YAWN, 0x1800
-.equ STATUS3_DISAPPEARED, 0x200000
+.equ STATUS3_SEEDED, 			0x4
+.equ STATUS3_PERISHSONG, 		0x20
+.equ STATUS3_ONAIR, 			0x40
+.equ STATUS3_UNDERGROUND, 		0x80
+.equ STATUS3_CHARGED, 			0x200
+.equ STATUS3_ROOTED, 			0x400
+.equ STATUS3_IMPRISONED, 		0x2000
+.equ STATUS3_UNDERWATER, 		0x40000
+.equ STATUS3_MUDSPORT, 			0x10000
+.equ STATUS3_WATERSPORT, 		0x20000
+.equ STATUS3_YAWN, 				0x1800
+.equ STATUS3_DISAPPEARED, 		0x200000
 
 @side affecting
 .equ SIDE_REFLECT, 0x1
@@ -1029,6 +1053,10 @@
 .equ ITEM_EFFECT_CUSTAPBERRY, 0x89
 .equ ITEM_EFFECT_POWERHERB, 0x8A
 .equ ITEM_EFFECT_MEGASTONE, 0x8B
+.equ ITEM_EFFECT_DRIVES, 0x8C
+.equ ITEM_EFFECT_PRIMALORB, 0x8D
+.equ ITEM_EFFECT_SHEDSHELL, 0x8E
+.equ ITEM_EFFECT_GEM, 0x8F
 
 @strings
 

@@ -655,11 +655,11 @@ void dostatchanges()
     u16* done_stats = &new_battlestruct->various.var1;
     u8 stats_to_change = move_table[current_move].arg1;
     s8 by_how_much = move_table[current_move].arg2;
-    u8 affects_user = 0x41;
+    u8 affects_user = 0x40;
     bank_partner_def = bank_attacker;
     if (move_table[current_move].target != move_target_user && move_table[current_move].base_power == 0 && move_table[current_move].split == 2)
     {
-        affects_user = 1;
+        affects_user = 0;
         bank_partner_def = bank_target;
     }
     for (u8 i = 0; i < 7; i++)

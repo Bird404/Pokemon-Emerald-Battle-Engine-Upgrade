@@ -1,3 +1,13 @@
+/*battle recording*/
+no_of_recorded_bytes = 0x0203C794;
+battle_record = 0x0203BD34;
+viewing_recorded_battle = 0x0203C7AC;
+var_800D_lastresult = 0x020375F0;
+
+quit_recorded_battle = 0x080384E4|1;
+pal_fade_control_reset_maybe = 0x080A1FD0|1;
+fadescreen_related = 0x080A1AD4|1;
+
 /*move animation related*/
 animtask_get_targetside_arg7 = 0x08117780 | 1;
 
@@ -11,6 +21,8 @@ nick_male_sign = 0x085ED22E;
 nick_female_sign = 0x085ED233;
 nick_genderless_sign = 0x085ED238;
 castform_form = 0x020244E4;
+
+randomly_chosen_move = 0x020241EE;
 
 text_Wild_ = 0x085CBD85;
 text_Foe_ = 0x085CBD8B;

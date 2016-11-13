@@ -256,3 +256,9 @@ contestdatatable 081D2BC4
 ### Contest combos
 contestcombotable 080E546C 
 contestcombotable 080E5BCC
+### Trainer AI
+tai_command_table 08130FF0
+TAI_SCRIPT_0 082DBEF8
+TAI_SCRIPT_1 082DBEFC
+TAI_SCRIPT_2 082DBF00
+TAI_SCRIPT_3 082DBF04

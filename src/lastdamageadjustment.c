@@ -23,7 +23,6 @@ void final_damagecalc_cmd7()
     battlescripts_curr_instruction++;
     if (damage_loc == 0)
         damage_loc = 1;
-
     if (!affected_by_substitute(bank_target))
     {
         u16 target_hp = battle_participants[bank_target].current_hp;

@@ -49,3 +49,7 @@ anim_spritechange_pal 0805E70A 0
 illusion_pokenick_hpbox 080741F2 2
 illusion_special_fdecoder_name 0814F7E4 0
 illusion_playcorrectcry 08075DD6 0
+read_recorded_battle_byte 08185054 1
+update_battle_record 08184FBC 2
+return_0_nop 080475E4 0
+return_0_nop 080472A8 0

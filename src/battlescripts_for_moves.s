@@ -2047,7 +2047,7 @@ PUT_TARGET_TO_SLEEP:
 	jumpifstatus 0x0 0x7 0x82D8AB0 @already asleep
 	jumpifcannotsleep 0x82D8ACF @uproar, abiliy
 	jumpifstatus 0x0 0xFF MOVE_FAILED
-	accuracycheck MOVE_FAILED 0x0
+	accuracycheck MOVE_MISSED 0x0
 	jumpifhalverset 0x0 0x20 0x82DAD01
 	attackanimation
 	waitanimation

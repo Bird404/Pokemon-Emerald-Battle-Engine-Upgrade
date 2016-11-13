@@ -117,6 +117,7 @@ struct various{
     u8 happyhour_bonus : 1;
     u8 switch_in_cos_switch : 1; //and not because a poke fainted or it is the first one
     u8 protean_msg : 1;
+    u8 recorded_mega : 1;
 };
 
 #define PBOND_PARENT 2
@@ -135,12 +136,20 @@ struct mega_related
     u8 link_indicator[4];
 };
 
+struct tai_related{
+    u16 saved_species;
+    u16 saved_item;
+    u8 saved_ability;
+    u16 var2;
+};
+
 struct new_battle_struct{
     struct bank_affecting bank_affecting[4];
     struct side_affecting side_affecting[2];
     struct field_affecting field_affecting;
     struct various various;
     struct mega_related mega_related;
+    struct tai_related trainer_AI;
 };
 
 extern struct new_battle_struct* new_battlestruct;

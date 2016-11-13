@@ -1,13 +1,5 @@
 #include "defines.h"
 
-#define STAT_ATTACK 1
-#define STAT_DEFENCE 2
-#define STAT_SPD 3
-#define STAT_SP_ATK 4
-#define STAT_SP_DEF 5
-#define STAT_ACCURACY 6
-#define STAT_EVASION 7
-
 u8 is_of_type(u8 bank, u8 type);
 u8 protect_affecting_moves(u16 move);
 u8 weather_abilities_effect();

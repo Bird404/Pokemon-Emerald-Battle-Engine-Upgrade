@@ -181,24 +181,30 @@ u8 b_get_ball_to_throw(struct pokemon* poke, u8 bank)
     return get_attributes(poke, ATTR_POKEBALL, 0);
 }
 
-void* get_poke_nick_prefix(u8 bank, void* prefix_dst)
+u8 get_poke_nick_prefix(u8 bank, u8* prefix_dst, u8 adder)
 {
     if (is_bank_from_opponent_side(bank))
     {
-        void* prefix;
+        u8* prefix;
         if (battle_flags.trainer)
-            prefix = &text_Foe_;
+            prefix = (u8*) &text_Foe_;
         else
-            prefix = &text_Wild_;
-        prefix_dst = str_append(prefix_dst, prefix);
+            prefix = (u8*) &text_Wild_;
+        do
+        {
+            *(prefix_dst + adder) = *prefix;
+            prefix++;
+            adder++;
+        } while (*prefix != 0xFF);
     }
-    return prefix_dst;
+    return adder;
 }
 
-void get_poke_nick_with_prefix(u8 bank, void* nick_dst, void* prefix_dst)
+u8 get_poke_nick_with_prefix(u8 bank, void* nick_dst, void* prefix_dst, u8 adder)
 {
-    get_poke_nick_prefix(bank, prefix_dst);
+    adder = get_poke_nick_prefix(bank, prefix_dst, adder);
     get_poke_nick(bank, nick_dst);
+    return adder;
 }
 
 void update_transform_sprite_pal(u8 bank, u16 pal_arg1)
@@ -295,4 +301,9 @@ void bbp16_open_poke_menu_new()
 void bbp2F_trainer_ball_throw_new()
 {
     bbp2F_trainer_ball_throw();
+}
+
+u8 return_0_nop()
+{
+    return 0;
 }

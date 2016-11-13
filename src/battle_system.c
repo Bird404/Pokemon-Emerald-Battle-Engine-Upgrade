@@ -292,7 +292,7 @@ u16 damage_type_effectiveness_update(u8 attacking_type, u8 defending_type, u8 at
     else if (effect == 0 && (get_item_effect(def_bank, true) == ITEM_EFFECT_RINGTARGET))
     {
         effect = 10;
-        }
+    }
     else if (battle_weather.flags.air_current && defending_type == TYPE_FLYING && effect == 20 && weather_abilities_effect())
     {
         effect = 10;
@@ -531,7 +531,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
     switch (switch_id)
     {
     case 0: //switch-in abilities
-        if(special_cases_argument==0xFF)
+        if(special_cases_argument == 0xFF && !battle_flags.recorded_battle)
         {
             effect=load_weather_from_overworld();
             break;
@@ -3880,8 +3880,8 @@ u8 can_poke_be_switched_into(u8 index, u8 bank)
         else //indices 3, 4, 5 are from this bank's party
             from = 3;
     }
-    struct pokemon* poke = get_party_ptr(bank);
-    if (is_poke_valid(&poke[0]) && battle_team_id_by_side[bank] != index && battle_team_id_by_side[bank_to_ignore] != index && index >= from && index <= to)
+    struct pokemon* poke = &get_party_ptr(bank)[index];
+    if (is_poke_valid(poke) && get_attributes(poke, ATTR_CURRENT_HP, 0) && battle_team_id_by_side[bank] != index && battle_team_id_by_side[bank_to_ignore] != index && index >= from && index <= to)
         return 1;
     return 0;
 }

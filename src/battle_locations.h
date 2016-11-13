@@ -85,6 +85,10 @@ u8 text_Foe_[5];
 u8 text_Foe[4];
 u8 text_Ally[5];
 u8 castform_form[4];
+u8 viewing_recorded_battle;
+u16 no_of_recorded_bytes[4];
+u16 var_800D_lastresult;
+u16 randomly_chosen_move;
 
 u32 poison_status_flag;
 u32 sleep_status_flag;

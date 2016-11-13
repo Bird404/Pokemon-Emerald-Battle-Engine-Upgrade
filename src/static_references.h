@@ -14,6 +14,9 @@ extern u16 ironfist_moves_table[];
 extern u16 sheerforce_moves_table[];
 extern u16 biting_moves_table[];
 extern u16 megalauncher_moves_table[];
+extern u16 moveshitting_onair[];
+extern u16 moveshitting_underground[];
+extern u16 moveshitting_underwater[];
 
 extern void* transform_bs;
 extern void* snow_warning_bs;

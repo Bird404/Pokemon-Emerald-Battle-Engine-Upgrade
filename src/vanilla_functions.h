@@ -37,7 +37,6 @@ void jump_if_cannot_switch_atk4F();
 void set_move_effect(u8 a1, u8 a2);
 u8 accuracy_helper_function(u16 move);
 void jump_if_move_has_no_effect(u8 howmuchtoadd, u16 move);
-void check_wonderguard_levitate_damage();
 void record_usage_of_item(u8 bank, u8 item_effect);
 u8 get_battle_bank(u8 bank_getter);
 void pressure_pp_lose(u8 bank_atk, u8 bank_def, u16 move);
@@ -121,6 +120,9 @@ void poke_update_altitude(u8 bank, u16 species);
 u8 b_get_sprite_y(u8 bank);
 void prepare_hitanimation(u8 bufferID);
 u8 get_bank_identity(u8 bank);
+void pal_fade_control_reset_maybe();
+u8 fadescreen_related(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u16 arg4);
+void quit_recorded_battle();
 
 u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);

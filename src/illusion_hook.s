@@ -58,7 +58,9 @@ illusion_attacker_name_with_prefix:
 	ldrb r0, [r0]
 	mov r1, sp
 	mov r2, r8
+	mov r3, r6
 	bl get_poke_nick_with_prefix
+	mov r6, r0
 	b illusion_name_return
 	
 illusion_target_name_with_prefix:
@@ -66,7 +68,9 @@ illusion_target_name_with_prefix:
 	ldrb r0, [r0]
 	mov r1, sp
 	mov r2, r8
+	mov r3, r6
 	bl get_poke_nick_with_prefix
+	mov r6, r0
 	b illusion_name_return
 	
 illusion_active_with_prefix:
@@ -74,7 +78,9 @@ illusion_active_with_prefix:
 	ldrb r0, [r0]
 	mov r1, sp
 	mov r2, r8
+	mov r3, r6
 	bl get_poke_nick_with_prefix
+	mov r6, r0
 	b illusion_name_return
 	
 illusion_scripting_active_with_prefix:
@@ -82,7 +88,9 @@ illusion_scripting_active_with_prefix:
 	ldrb r0, [r5, #0x17]
 	mov r1, sp
 	mov r2, r8
+	mov r3, r6
 	bl get_poke_nick_with_prefix
+	mov r6, r0
 	b illusion_name_return
 	
 illusion_name_return:

@@ -6,7 +6,7 @@
 #define ALL_POKES 412 //number of all pokemon
 #define ALL_ITEMS 377 //number of all items
 #define NUM_OF_EVOS 5 //number of evolutions per pokemon
-#define KEYSTONE 0x28 //mega item that the player has to posses in order to mega evolve
+#define KEYSTONE 0x4 //mega item that the player has to posses in order to mega evolve
 
 enum poke_sprite{
     SPRITE_BACK = 0,
@@ -37,6 +37,14 @@ enum poke_gender{
 #define MOVE_SPECIAL 1
 #define MOVE_STATUS 2
 
+#define STAT_ATTACK 1
+#define STAT_DEFENCE 2
+#define STAT_SPD 3
+#define STAT_SP_ATK 4
+#define STAT_SP_DEF 5
+#define STAT_ACCURACY 6
+#define STAT_EVASION 7
+
 #define MOVE_WORKED !(move_outcome.failed || move_outcome.missed || move_outcome.not_affected)
 #define TARGET_TURN_DAMAGED (special_statuses[bank_target].moveturn_losthp)
 #define DAMAGING_MOVE(move) (move_table[move].split!=2)
@@ -44,6 +52,7 @@ enum poke_gender{
 #define CHERRIM_ID(species) (species == POKE_CHERRIM || species == POKE_CHERRIM_SUNSHINE)
 #define AEGISLASH_ID(species) (species == POKE_AEGISLASH_BLADE || species == POKE_AEGISLASH_SHIELD)
 #define SEMI_INVULNERABLE(bank) (status3[bank].underground || status3[bank].underwater || status3[bank].on_air || status3[bank].phantomforce || new_battlestruct->bank_affecting[bank].sky_drop_attacker || new_battlestruct->bank_affecting[bank].sky_drop_target)
+#define MUST_HIT(bank_atk, bank_def) (status3[bank_def].always_hits && disable_structs[bank_def].always_hits_bank == bank_atk)
 
 #define REQUEST_SPECIES_BATTLE 0x1
 #define REQUEST_HELDITEM_BATTLE 0x2
