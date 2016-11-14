@@ -36,7 +36,7 @@ u8 get_item_effect(u8 bank, u8 check_negating_effects)
     {
         if (check_ability(bank, ABILITY_KLUTZ) || new_battlestruct->field_affecting.magic_room || new_battlestruct->bank_affecting[bank].embargo)
             return ITEM_EFFECT_NOEFFECT;
-        if (get_item_pocket_id(held_item) && ability_battle_effects(12, bank, ABILITY_UNNERVE, 0, 0))
+        if (get_item_pocket_id(held_item)==4 && ability_battle_effects(12, bank, ABILITY_UNNERVE, 0, 0))
             return ITEM_EFFECT_NOEFFECT;
     }
     if (held_item == ITEM_ENIGMABERRY)
@@ -1077,7 +1077,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             }
         }
         break;
-    case 3: //abilities that affect type
+    case 3: //abilities that affect type except telepathy
             if (curr_move && has_ability_effect(bank, 1, 1))
             {
                 if (protect_structs[bank_attacker].flag2_notfirststrike)
@@ -1086,6 +1086,13 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
 
                 switch (last_used_ability)
                 {
+                case ABILITY_TELEPATHY:
+                if((bank_target == (bank_attacker^2)) && is_bank_present(bank_target) && DAMAGING_MOVE(move))
+                {
+                    effect=true;
+                    battlescripts_curr_instruction = (&telepathy_bs)+adder;
+                }
+                    break;
                 case ABILITY_WATER_ABSORB:
                 case ABILITY_DRY_SKIN:
                     if (move_type == TYPE_WATER)

@@ -204,7 +204,7 @@ u32 ai_calculate_damage(u8 atk_bank, u8 def_bank, u16 move)
         no_of_hits = 2;
     else if (script_ID == 66) //hits multiple times
     {
-        if (check_ability(atk_bank, ABILITY_MULTISCALE))
+        if (check_ability(atk_bank, ABILITY_SKILL_LINK))
             no_of_hits = 5;
         else
             no_of_hits = 2 + __umodsi3(rng(), 3) + __umodsi3(rng(), 2); //2 + 0/1/2 + 0/1 = 2/3/4/5

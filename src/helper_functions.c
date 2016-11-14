@@ -195,6 +195,8 @@ u8 pickpocket_text[] = {0xFD, 16, 0, 0xE7, 0xE8, 0xE3, 0xE0, 0xD9, 0, 0xFD, 15, 
 /*0x218*/ u8 protean_text[] = {0xFD, 15, Apos, s_, Space, 0xFD, 23, Space, m_, a_, d_, e_, JumpLine, i_, t_, Space, t_, h_, e_, Space, 0xFD, 0x0, Space, t_, y_, p_, e_, Exclam, 0xFF};
 /*0x219*/ u8 gem_text[] = {T_, h_, e_, Space, 0xFD, 22, Space, s_, t_, r_, e_, n_, g_, t_, h_, e_, n_, e_, d_, JumpLine, 0xFD, 0x0, Apos, s_, Space, p_, o_, w_, e_, r_, Exclam, 0xFF};
 
+/*0x21A*/ u8 telepathy_text[] = {0xFD, 16, Space, a_, v_, o_, i_, d_, s_, Space, a_, t_, t_, a_, c_, k_, s_, Space, b_, y_, JumpLine, i_, t_, s_, Space, a_, l_, l_, y_, Space, P_, o_, k_, Poke_e, m_, o_, n_, Exclam, Termin};
+
 void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activation_text, &heavyrain_activation_text, &mysticalaircurrent_activation_text, &forewarn_text, &slowstart_text, &anticipation_text, &dryskin_damage_text, &solarpower_text, &harvest_text, &healer_text, &pickup_text, &moldbreaker_text, &turboblaze_text, &terravolt_text, &downloadatk_text,
 &downloadspatk_text, &absorbabilityboost_text , &absorbabilityimmune_text, &userteam_text/*0x190*/, &foeteam_text/*0x191*/,
 &aftermath_text, &pickpocket_text, &mummy_text, &target_ability, &cursedbody_text, &drastically_text, &pressure_text, &unnerve_text, &aurabreak_text, &fairyaura_text, &darkaura_text, &frisk_text, //0x19D
@@ -215,7 +217,7 @@ void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activ
 &gravityprevents2_text, &healblockprevents2_text , &let_it_move_first_text, &mega_evolved_text, &mega_trigger_text, &fervent_trigger_text,
 &quash_text, &allyswitch_text, &topsyturvy_text, &bestow_text, &statushealpoison_text, &statushealburn_text, &statushealpar_text,
 &statushealslp_text, &statushealfrz_text, &primal_reversion_text, &congrats_player_text, &happyhour_text, &skydrop1_text, &skydrop2_text,
-&skydroptooheavy_text, &fairylock_text, &illusion_off_text, &protean_text, &gem_text};
+&skydroptooheavy_text, &fairylock_text, &illusion_off_text, &protean_text, &gem_text, &telepathy_text};
 
 void battle_string_loader(u16 string_id)
 {

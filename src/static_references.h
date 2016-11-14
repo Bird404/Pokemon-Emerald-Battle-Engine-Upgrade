@@ -157,5 +157,6 @@ extern void* illusion_wore_off_bs;
 extern void* aegislash_change_bs;
 extern void* protean_bs;
 extern void* gem_bs;
+extern void* telepathy_bs;
 
 #endif /* static_references */
