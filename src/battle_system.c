@@ -2705,10 +2705,23 @@ void move_effect_setter(u8 primary, u8 certain)
         shield_dust = 1;
 
     u8 status_change = 8;
+    if (*move_effect == 9) //tri attack
+    {
+        switch (__umodsi3(rng(), 3)) //random number
+        {
+        case 0:
+            *move_effect = 1;
+            break;
+        case 1:
+            *move_effect = 3;
+            break;
+        default:
+            *move_effect = 4;
+            break;
+        }
+    }
     u8 status_table = status_flags_for_move_effects[*move_effect];
     void* script_pointer = battlescripts_for_moveeffects[*move_effect];
-    if (*move_effect == 9) //tri attack
-        *move_effect = 3 + __umodsi3(rng(), 3);
     void* ability_prevention = 0;
 
     switch (*move_effect)
