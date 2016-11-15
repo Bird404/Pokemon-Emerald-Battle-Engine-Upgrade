@@ -40,7 +40,6 @@ struct bank_affecting{
     u8 type3 : 5;
     u8 stat_lowered : 1;
     u8 roost : 3;
-    u8 bugbite : 1;
     u8 usedmoves : 4;
     s8 stockpile_def_changes;
     s8 stockpile_sp_def_changes;

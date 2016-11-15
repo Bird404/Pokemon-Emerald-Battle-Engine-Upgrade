@@ -131,7 +131,6 @@ extern void* return_bs;
 extern void* frisk_bs();
 extern void* bad_dreams_bs();
 extern void* incinerateberry_bs;
-extern void* bugbiteeffect_bs;
 extern void* magnetrise_end_return_bs;
 extern void* telekinesis_end_return_bs;
 extern void* gravitybringsdown_bs;
@@ -147,11 +146,26 @@ extern void* assaultvest_bs;
 extern void* gravityprevents2_bs;
 extern void* cantselecthealblock_bs;
 extern void* quickclaw_bs;
+
 extern void* custapberry_bs;
 extern void* healberry_endmove_bs;
 extern void* healandconfuse_endmove_bs;
 extern void* statraise_berry_endmove_bs;
 extern void* lansat_endmove_bs;
+
+extern void* prlzcure_bugbite_bs;
+extern void* slpcure_bugbite_bs;
+extern void* frzcure_bugbite_bs;
+extern void* psncure_bugbite_bs;
+extern void* brncure_bugbite_bs;
+extern void* confcure_bugbite_bs;
+extern void* lum_bugbite_bs;
+extern void* healberry_bugbite_bs;
+extern void* healandconfuse_bugbite_bs;
+extern void* statraise_berry_bugbite_bs;
+extern void* lansat_bugbite_bs;
+extern void* bugsteal_bs;
+
 extern void* skydrop_tooheavy_bs;
 extern void* illusion_wore_off_bs;
 extern void* aegislash_change_bs;

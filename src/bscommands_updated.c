@@ -33,6 +33,7 @@ u16 get_item_extra_param(u16 item);
 u8 try_cherrim_change(u8 bank);
 u8 check_move_limitations(u8 bank, u8 not_usable_moves, u8 limitations);
 u32 accuracy_percent(u16 move, u8 bankatk, u8 bankdef);
+void handle_bug_bite();
 
 void atk7D_set_rain()
 {
@@ -694,8 +695,8 @@ u8 primary_effect_setter()
                 u16* berry = &battle_participants[bank_to_apply].held_item;
                 if (!substitute && MOVE_WORKED && *berry && get_item_pocket_id(*berry) == 4 && current_hp)
                 {
-                    u8 arg = move_table[current_move].arg1 & 1;
-                    new_battlestruct->bank_affecting[bank_attacker].bugbite = arg;
+
+                    bool arg = (move_table[current_move].arg2 == 0xA);
                     last_used_item = *berry;
                     if (!arg) //incinerate; berry destroy, no effect
                     {
@@ -708,7 +709,7 @@ u8 primary_effect_setter()
                     }
                     else //pluck, bug bite; get berry's effect
                     {
-
+                        handle_bug_bite();
                     }
                 }
             }

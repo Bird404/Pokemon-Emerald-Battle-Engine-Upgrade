@@ -1,4 +1,5 @@
 #include "defines.h"
+#include "static_references.h"
 
 u8 is_bank_present(u8 bank);
 struct pokemon* get_party_ptr(u8 bank);
@@ -6,6 +7,8 @@ struct pokemon* get_bank_poke_ptr(u8 bank);
 u8 is_poke_valid(struct pokemon* poke);
 u8 count_party_pokemon(u8 bank);
 void revert_form_change(u8 mega_revert, u8 teamID, u8 side, struct pokemon* poke);
+u8 check_ability(u8 bank, u8 ability);
+void copy_status_condition_text(u8 bank, u8 confusion);
 
 bool load_weather_from_overworld()
 {
@@ -306,4 +309,243 @@ void bbp2F_trainer_ball_throw_new()
 u8 return_0_nop()
 {
     return 0;
+}
+
+
+u8 heal_and_confuse_berry_bug_bite(u8 bank, u8 item_effect, u8 quality)
+{
+    u8 effect = 0;
+    //This assumes that the effect ids of these berries are contiguous.
+    if(new_battlestruct->bank_affecting[bank].heal_block)
+    {
+        s32 max_hp = battle_participants[bank].max_hp;
+        s32 current_hp = battle_participants[bank].current_hp;
+        u8 flavour = item_effect - ITEM_EFFECT_FIGYBERRY;
+        s32 damage = (max_hp / quality);
+        if (damage == 0)
+            damage = 1;
+        if (damage > (max_hp - current_hp))
+            damage = (max_hp - current_hp);
+        damage_loc = damage * -1;
+        effect = 4;
+        if (get_poke_flavour_relation(battle_participants[bank].pid, flavour) == FLAVOUR_DISLIKED)
+        {
+            battlescript_push();
+            battlescripts_curr_instruction=&healandconfuse_bugbite_bs;
+        }
+        else
+        {
+            battlescript_push();
+            battlescripts_curr_instruction=&healberry_bugbite_bs;
+        }
+        battle_text_buff1[0] = 0xFD;
+        battle_text_buff1[1] = 8;
+        battle_text_buff1[2] = 1;
+        battle_text_buff1[3] = 0xFF;
+    }
+    return effect;
+
+}
+
+u8 stat_raise_berry_bug_bite(u8 bank, u8 item_effect)
+{
+    u8 effect = 0;
+    u8 stat_to_check = 0xC;
+    u8 stat_to_raise = item_effect - ITEM_EFFECT_LIECHIBERRY;
+    if(check_ability(bank,ABILITY_CONTRARY))
+    {
+        stat_to_check = 0;
+    }
+    if(item_effect == ITEM_EFFECT_STARFBERRY)
+    {
+        u8 doable = 0;
+        for (u8 i = 0; i < 5; i++)
+        {
+            if (*(&battle_participants[bank].atk_buff + i) != stat_to_raise)
+                doable |= bits_table[i];
+        }
+        while (doable)
+        {
+            u8 rand = __umodsi3(rng(), 5);
+            if (doable & bits_table[rand])
+            {
+                effect = 5;
+                battle_scripting.stat_changer = 0x21 + rand;
+                battle_scripting.field10 = 0xF + rand;
+                battle_scripting.field11 = 0;
+                break;
+            }
+        }
+    }
+    else
+    {
+        if (*(&battle_participants[bank].atk_buff + stat_to_raise) != stat_to_check)
+        {
+            effect = 5;
+            battle_text_buff1[0] = 0xFD;
+            battle_text_buff1[1] = 0x5;
+            battle_text_buff1[2] = stat_to_raise + 1;
+            battle_text_buff1[3] = 0xFF;
+            bank_partner_def = bank;
+            battle_scripting.stat_changer = 0x11 + stat_to_raise;
+            battle_scripting.field10 = 0xF + stat_to_raise;
+            battle_scripting.field11 = 0;
+        }
+    }
+    if(effect)
+    {
+        battlescript_push();
+        battlescripts_curr_instruction=&statraise_berry_bugbite_bs;
+    }
+    return effect;
+}
+
+void handle_bug_bite()
+{
+    u8 bank = bank_attacker;
+    u8 effect= 0;
+    u8 item_effect=get_item_x12_battle_function(last_used_item);
+    u8 quality=get_item_quality(last_used_item);
+    switch(item_effect)
+    {
+        case ITEM_EFFECT_ORANBERRY:
+            if (new_battlestruct->bank_affecting[bank_target].heal_block)
+            {
+                effect = 4;
+                if (quality > battle_participants[bank].max_hp - battle_participants[bank].current_hp)
+                    quality = battle_participants[bank].max_hp - battle_participants[bank].current_hp;
+                damage_loc = quality * -1;
+                battlescript_push();
+                battlescripts_curr_instruction=&healberry_bugbite_bs;
+            }
+            break;
+        case ITEM_EFFECT_SITRUSBERRY:
+            if (!new_battlestruct->bank_affecting[bank_target].heal_block)
+            {
+                effect = 4;
+                s32 damage = battle_participants[bank].max_hp >> 2;
+                if (damage > battle_participants[bank].max_hp - battle_participants[bank].current_hp)
+                    damage = battle_participants[bank].max_hp - battle_participants[bank].current_hp;
+                damage_loc = damage * -1;
+                battlescript_push();
+                battlescripts_curr_instruction=&healberry_bugbite_bs;
+            }
+            break;
+        case ITEM_EFFECT_CHERIBERRY:
+            if (battle_participants[bank].status.flags.paralysis)
+            {
+                effect = 1;
+                battle_participants[bank].status.flags.paralysis = 0;
+                battlescript_push();
+                battlescripts_curr_instruction=&prlzcure_bugbite_bs;
+            }
+            break;
+        case ITEM_EFFECT_CHESTOBERRY:
+            if (battle_participants[bank].status.flags.sleep)
+            {
+                effect = 1;
+                battle_participants[bank].status.flags.sleep = 0;
+                battlescript_push();
+                battlescripts_curr_instruction=&slpcure_bugbite_bs;
+            }
+            break;
+        case ITEM_EFFECT_PECHABERRY:
+            if (battle_participants[bank].status.flags.poison || battle_participants[bank].status.flags.toxic_poison)
+            {
+                effect = 1;
+                battle_participants[bank].status.flags.poison = 0;
+                battle_participants[bank].status.flags.toxic_poison = 0;
+                battlescript_push();
+                battlescripts_curr_instruction=&psncure_bugbite_bs;
+            }
+            break;
+        case ITEM_EFFECT_RAWSTBERRY:
+            if (battle_participants[bank].status.flags.burn)
+            {
+                effect = 1;
+                battle_participants[bank].status.flags.burn = 0;
+                battlescript_push();
+                battlescripts_curr_instruction=&brncure_bugbite_bs;
+            }
+            break;
+        case ITEM_EFFECT_ASPEARBERRY:
+            if (battle_participants[bank].status.flags.freeze)
+            {
+                effect = 1;
+                battle_participants[bank].status.flags.freeze = 0;
+                battlescript_push();
+                battlescripts_curr_instruction=&frzcure_bugbite_bs;
+            }
+            break;
+        /*
+        case ITEM_EFFECT_LEPPABERRY:
+            for (u8 i = 0; i < 4; i++)
+            {
+                if (battle_participants[bank].moves[i] && battle_participants[bank].current_pp[i] == 0)
+                {
+                    effect = 3;
+                    break;
+                }
+            }
+            break;*/
+        case ITEM_EFFECT_PERSIMBERRY:
+            if (battle_participants[bank].status2.confusion)
+            {
+                battle_participants[bank].status2.confusion = 0;
+                effect = 2;
+                battlescript_push();
+                battlescripts_curr_instruction=&confcure_bugbite_bs;
+            }
+            break;
+        case ITEM_EFFECT_LUMBERRY:
+            if (battle_participants[bank].status.int_status || battle_participants[bank].status2.confusion)
+            {
+                copy_status_condition_text(bank, 1);
+                battle_participants[bank].status2.confusion = 0;
+                battle_participants[bank].status.int_status = 0;
+                effect = 1;
+                battlescript_push();
+                battlescripts_curr_instruction=&lum_bugbite_bs;
+            }
+            break;
+        case ITEM_EFFECT_FIGYBERRY:
+        case ITEM_EFFECT_WIKIBERRY:
+        case ITEM_EFFECT_MAGOBERRY:
+        case ITEM_EFFECT_AGUAVBERRY:
+        case ITEM_EFFECT_IAPAPABERRY:
+            effect = heal_and_confuse_berry_bug_bite(bank, item_effect, quality);
+            break;
+        case ITEM_EFFECT_LIECHIBERRY:
+        case ITEM_EFFECT_GANLONBERRY:
+        case ITEM_EFFECT_SALACBERRY:
+        case ITEM_EFFECT_PETAYABERRY:
+        case ITEM_EFFECT_APICOTBERRY:
+        case ITEM_EFFECT_STARFBERRY:
+            effect = stat_raise_berry_bug_bite(bank, item_effect);
+            break;
+        case ITEM_EFFECT_LANSATBERRY:
+            if (!(battle_participants[bank].status2.focus_energy))
+            {
+                battle_participants[bank].status2.focus_energy = 1;
+                effect = 2;
+                battlescript_push();
+                battlescripts_curr_instruction=&lansat_bugbite_bs;
+            }
+            break;
+    }
+    if(effect==0)
+    {
+        battlescript_push();
+        battlescripts_curr_instruction=&bugsteal_bs;
+    }
+    else
+    {
+        new_battlestruct->bank_affecting[bank].eaten_berry = 1;
+        if (effect == 1)
+        {
+            active_bank = bank;
+            prepare_setattributes_in_battle(0, 0x28, 0, 4, &battle_participants[bank].status.flags);
+            mark_buffer_bank_for_execution(bank);
+        }
+    }
 }
