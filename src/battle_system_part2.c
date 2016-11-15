@@ -316,7 +316,7 @@ u8 heal_and_confuse_berry_bug_bite(u8 bank, u8 item_effect, u8 quality)
 {
     u8 effect = 0;
     //This assumes that the effect ids of these berries are contiguous.
-    if(new_battlestruct->bank_affecting[bank].heal_block && battle_participants[bank].max_hp > battle_participants[bank].current_hp)
+    if(!new_battlestruct->bank_affecting[bank].heal_block && battle_participants[bank].max_hp > battle_participants[bank].current_hp)
     {
         s32 max_hp = battle_participants[bank].max_hp;
         s32 current_hp = battle_participants[bank].current_hp;

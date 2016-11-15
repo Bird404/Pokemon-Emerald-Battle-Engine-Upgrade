@@ -1870,7 +1870,7 @@ u8 heal_and_confuse_berry(u8 bank, u8 item_effect, u8 quality, enum call_mode ca
 {
     u8 effect = 0;
     //This assumes that the effect ids of these has different contiguous effects.
-    if(hp_condition(bank, 1) && new_battlestruct->bank_affecting[bank].heal_block)
+    if(hp_condition(bank, 1) && !new_battlestruct->bank_affecting[bank].heal_block)
     {
         s32 max_hp = battle_participants[bank].max_hp;
         s32 current_hp = battle_participants[bank].current_hp;
