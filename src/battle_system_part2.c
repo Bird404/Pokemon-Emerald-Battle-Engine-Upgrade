@@ -400,6 +400,127 @@ u8 stat_raise_berry_bug_bite(u8 bank, u8 item_effect)
     return effect;
 }
 
+bool handle_leppa(u8 bank, u8 quality, enum call_mode calling_mode)
+{
+    u8 i=0;
+    u8 pp_to_set=0;
+    bool effect = false;
+    struct pokemon *poke_data;
+    u8 poke_slot_id = battle_team_id_by_side[bank];
+    u16 chosen_move;
+    poke_data = is_bank_from_opponent_side(bank)?&party_opponent[poke_slot_id]:&party_player[poke_slot_id];
+    for (i = 0; i < 4; i++)
+    {
+        chosen_move = get_attributes(poke_data,ATTR_ATTACK_1+i,0);
+        if (chosen_move && get_attributes(poke_data,ATTR_PP_1+i,0)==0)
+        {
+            effect = true;
+            break;
+        }
+    }
+    if(effect)
+    {
+        u8 total_pp=calc_total_move_pp(chosen_move,get_attributes(poke_data,ATTR_PP_BONUS,0),i);
+        if(total_pp<quality)
+        {
+            pp_to_set=total_pp;
+        }
+        else
+        {
+            pp_to_set=quality;
+        }
+        battle_text_buff1[0]=0xFD;
+        battle_text_buff1[1]=0x2;
+        battle_text_buff1[2]=(u8)chosen_move;
+        battle_text_buff1[3]=chosen_move>>8;
+        battle_text_buff1[4]=0xFF;
+
+        bank_attacker=bank;
+        if(calling_mode==BATTLE_TURN)
+        {
+            call_bc_move_exec((void *)0x82DB7E1);
+        }
+        else
+        {
+            battlescript_push();
+            battlescripts_curr_instruction = &leppa_endmove_bs;
+        }
+        prepare_setattributes_in_battle(0,i+10,0,1,&pp_to_set);
+        mark_buffer_bank_for_execution(bank);
+
+        if(!battle_participants[bank].status2.transformed && !((disable_structs[bank].truant_counter>>4)&bits_table[i]))
+        {
+            battle_participants[bank].current_pp[i]=pp_to_set;
+        }
+    }
+    return effect;
+}
+
+
+bool handle_leppa_bugbite(u8 bank, u8 quality)
+{
+    u8 i=0,j;
+    u8 pp_to_set=0;
+    bool effect = false;
+    struct pokemon *poke_data;
+    u8 poke_slot_id = battle_team_id_by_side[bank];
+    u16 chosen_move=0;
+    u16 min_pp_ratio=0x7FFF;
+    u16 curr_pp=0;
+    u8 total_pp=0;
+    poke_data = is_bank_from_opponent_side(bank)?&party_opponent[poke_slot_id]:&party_player[poke_slot_id];
+    for (j = 0; j < 4; j++)
+    {
+        u16 candidate_move = get_attributes(poke_data,ATTR_ATTACK_1+j,0);
+        if(candidate_move)
+        {
+            u8 cand_curr_pp = get_attributes(poke_data,ATTR_PP_1+j,0);
+            u8 cand_tot_pp = calc_total_move_pp(candidate_move,get_attributes(poke_data,ATTR_PP_BONUS,0),j);
+            u16 pp_ratio = __udivsi3(cand_curr_pp<<7,cand_tot_pp);
+            if (cand_curr_pp!=cand_tot_pp && pp_ratio<min_pp_ratio)
+            {
+                min_pp_ratio = pp_ratio;
+                chosen_move = candidate_move;
+                total_pp = cand_tot_pp;
+                curr_pp = cand_curr_pp;
+                i=j;
+                effect = 2;
+            }
+        }
+
+    }
+    if(effect)
+    {
+        if(total_pp<(quality+curr_pp))
+        {
+            pp_to_set=total_pp;
+        }
+        else
+        {
+            pp_to_set=(quality+curr_pp);
+        }
+        battle_text_buff1[0]=0xFD;
+        battle_text_buff1[1]=0x2;
+        battle_text_buff1[2]=(u8)chosen_move;
+        battle_text_buff1[3]=chosen_move>>8;
+        battle_text_buff1[4]=0xFF;
+
+        bank_attacker=bank;
+
+        battlescript_push();
+        battlescripts_curr_instruction = &leppa_bugbite_bs;
+
+        prepare_setattributes_in_battle(0,i+10,0,1,&pp_to_set);
+        mark_buffer_bank_for_execution(bank);
+
+        if(!battle_participants[bank].status2.transformed && !((disable_structs[bank].truant_counter>>4)&bits_table[i]))
+        {
+            battle_participants[bank].current_pp[i]=pp_to_set;
+        }
+    }
+    return effect;
+}
+
 void handle_bug_bite()
 {
     u8 bank = bank_attacker;
@@ -477,17 +598,10 @@ void handle_bug_bite()
                 battlescripts_curr_instruction=&frzcure_bugbite_bs;
             }
             break;
-        /*
+
         case ITEM_EFFECT_LEPPABERRY:
-            for (u8 i = 0; i < 4; i++)
-            {
-                if (battle_participants[bank].moves[i] && battle_participants[bank].current_pp[i] == 0)
-                {
-                    effect = 3;
-                    break;
-                }
-            }
-            break;*/
+            effect = handle_leppa_bugbite(bank,quality);
+            break;
         case ITEM_EFFECT_PERSIMBERRY:
             if (battle_participants[bank].status2.confusion)
             {
@@ -549,3 +663,5 @@ void handle_bug_bite()
         }
     }
 }
+
+

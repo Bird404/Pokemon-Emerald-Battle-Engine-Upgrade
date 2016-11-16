@@ -14,6 +14,7 @@ u8 read_byte(void*);
 s16 read_hword(void*);
 u32 read_word(void*);
 u16 rng();
+u8 calc_total_move_pp(u16 move_id, u8 pp_bonus, u8 moveset_slot);
 void damage_modulate_by_type_effectivity(u8 effect);
 void prepare_status_animation(u8 buffer, u8 unkown, u32 status);
 void mark_buffer_bank_for_execution(u8 bank);

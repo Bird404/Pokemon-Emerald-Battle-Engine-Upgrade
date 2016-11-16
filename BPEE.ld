@@ -175,6 +175,7 @@ terrain_to_type_table = 0x0831C483;
 some_strings_table =  0x085CC834;
 protect_chance_table = 0x0831C3D8;
 
+calc_total_move_pp = 0x0806B960|1;
 get_overworld_weather = 0x80AC30C|1;
 play_sound = 0x080A37A4|1;
 play_cry = 0x080A32E4|1;

@@ -15,6 +15,16 @@ u16 get_mega_species(u16 species);
 struct pokemon* get_party_ptr(u8 bank);
 u8 is_poke_valid(struct pokemon* poke);
 u8 is_bank_present(u8 bank);
+u8 handle_leppa(u8 bank, u8 quality, enum call_mode calling_mode);
+
+enum COMMON_ITEM_EFFECT
+{
+    NO_ITEM_EFFECT,
+    NO_COMMON_ITEM_EFFECT,
+    ALTER_NON_VOLATILE_STATUS,
+    PP_RESTORE_ITEM,
+    HP_RESTORE_ITEM
+};
 
 u8 get_attacking_move_type()
 {
@@ -1666,14 +1676,14 @@ void call_ability_effects()
 
 u8 white_herb_effect(u8 bank, enum call_mode calling_mode)
 {
-    u8 effect = false;
+    u8 effect = NO_ITEM_EFFECT;
     u8* stat = &battle_participants[bank].atk_buff;
     for (u8 i = 0; i < 7; i++)
     {
         if (*(stat + i) < 6)
         {
             *(stat + i) = 6;
-            effect = 5;
+            effect = NO_COMMON_ITEM_EFFECT;
         }
     }
     if (effect)
@@ -1704,10 +1714,10 @@ u8 get_all_item_quality(u8 bank)
 
 u8 mental_herb_effect(u8 bank, enum call_mode calling_mode)
 {
-    u8 effect = false;
+    u8 effect = NO_ITEM_EFFECT;
     if (disable_structs[bank].disable_timer || disable_structs[bank].encore_timer || disable_structs[bank].taunt_timer || battle_participants[bank].status2.tormented || battle_participants[bank].status2.in_love || new_battlestruct->bank_affecting[bank].heal_block)
     {
-        effect = 2;
+        effect = NO_COMMON_ITEM_EFFECT;
         if(calling_mode==BATTLE_TURN)
         {
             call_bc_move_exec(&mentalherb_bs);
@@ -1866,9 +1876,22 @@ u8 hp_condition(u8 bank, u8 percent) //1 = 50 %, 2 = 25 %
     return 0;
 }
 
+void setup_berry_consume_buffers(u8 bank)
+{
+    new_battlestruct->bank_affecting[bank].eaten_berry = 1;
+    if(!is_bank_from_opponent_side(bank))
+    {
+        new_battlestruct->various.eaten_berry_player[battle_team_id_by_side]=1;
+    }
+    else
+    {
+        new_battlestruct->various.eaten_berry_player[battle_team_id_by_side]=1;
+    }
+}
+
 u8 heal_and_confuse_berry(u8 bank, u8 item_effect, u8 quality, enum call_mode calling_mode)
 {
-    u8 effect = 0;
+    u8 effect = NO_ITEM_EFFECT;
     //This assumes that the effect ids of these has different contiguous effects.
     if(hp_condition(bank, 1) && !new_battlestruct->bank_affecting[bank].heal_block)
     {
@@ -1881,7 +1904,7 @@ u8 heal_and_confuse_berry(u8 bank, u8 item_effect, u8 quality, enum call_mode ca
         if (damage > (max_hp - current_hp))
             damage = (max_hp - current_hp);
         damage_loc = damage * -1;
-        effect = 4;
+        effect = HP_RESTORE_ITEM;
         if (get_poke_flavour_relation(battle_participants[bank].pid, flavour) == FLAVOUR_DISLIKED)
         {
             if(calling_mode==BATTLE_TURN)
@@ -1917,7 +1940,7 @@ u8 heal_and_confuse_berry(u8 bank, u8 item_effect, u8 quality, enum call_mode ca
 
 u8 stat_raise_berry(u8 bank, u8 item_effect, enum call_mode calling_mode)
 {
-    u8 effect = 0;
+    u8 effect = NO_ITEM_EFFECT;
     u8 stat_to_check = 0xC;
     if (hp_condition(bank, 2))
     {
@@ -1939,7 +1962,7 @@ u8 stat_raise_berry(u8 bank, u8 item_effect, enum call_mode calling_mode)
                 u8 rand = __umodsi3(rng(), 5);
                 if (doable & bits_table[rand])
                 {
-                    effect = 5;
+                    effect = NO_COMMON_ITEM_EFFECT;
                     battle_scripting.stat_changer = 0x21 + rand;
                     battle_scripting.field10 = 0xF + rand;
                     battle_scripting.field11 = 0;
@@ -1951,7 +1974,7 @@ u8 stat_raise_berry(u8 bank, u8 item_effect, enum call_mode calling_mode)
         {
             if (*(&battle_participants[bank].atk_buff + stat_to_raise) != stat_to_check)
             {
-                effect = 5;
+                effect = NO_COMMON_ITEM_EFFECT;
                 battle_text_buff1[0] = 0xFD;
                 battle_text_buff1[1] = 0x5;
                 battle_text_buff1[2] = stat_to_raise + 1;
@@ -1981,8 +2004,8 @@ u8 stat_raise_berry(u8 bank, u8 item_effect, enum call_mode calling_mode)
 u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
 {
     u8 item_effect = get_item_effect(bank, 1);
-    u8 effect = false;
-    u8 eaten_berry = false;
+    u8 effect = NO_ITEM_EFFECT;
+    bool eaten_berry = false;
     u8 quality = get_all_item_quality(bank);
     switch (switchid)
     {
@@ -1993,7 +2016,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             if (!is_bank_from_opponent_side(bank))
             {
                 battle_stuff_ptr->money_multiplier = 2;
-                effect = true;
+                effect = NO_COMMON_ITEM_EFFECT;
             }
             break;
         case ITEM_EFFECT_WHITEHERB:
@@ -2002,7 +2025,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
         case ITEM_EFFECT_AIRBALLOON:
             if (!new_battlestruct->field_affecting.gravity)
             {
-                effect = 1;
+                effect = NO_COMMON_ITEM_EFFECT;
                 active_bank = bank;
                 call_bc_move_exec(&airballon_bs);
                 record_usage_of_item(bank, ITEM_EFFECT_AIRBALLOON);
@@ -2015,93 +2038,86 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
         case ITEM_EFFECT_ORANBERRY:
             if (hp_condition(bank, 1) && !move_turn && !new_battlestruct->bank_affecting[bank_target].heal_block)
             {
-                effect = 4;
+                effect = HP_RESTORE_ITEM;
                 if (quality > battle_participants[bank].max_hp - battle_participants[bank].current_hp)
                     quality = battle_participants[bank].max_hp - battle_participants[bank].current_hp;
                 damage_loc = quality * -1;
                 call_bc_move_exec((void*)0x082DB7C4);
-                eaten_berry = 1;
+                eaten_berry = true;
             }
             break;
         case ITEM_EFFECT_SITRUSBERRY:
             if (hp_condition(bank, 1) && !move_turn && !new_battlestruct->bank_affecting[bank_target].heal_block)
             {
-                effect = 4;
+                effect = HP_RESTORE_ITEM;
                 s32 damage = battle_participants[bank].max_hp >> 2;
                 if (damage > battle_participants[bank].max_hp - battle_participants[bank].current_hp)
                     damage = battle_participants[bank].max_hp - battle_participants[bank].current_hp;
                 damage_loc = damage * -1;
                 call_bc_move_exec((void*)0x082DB7C4);
-                eaten_berry = 1;
+                eaten_berry = true;
             }
             break;
         case ITEM_EFFECT_CHERIBERRY:
             if (battle_participants[bank].status.flags.paralysis)
             {
-                effect = 1;
+                effect = ALTER_NON_VOLATILE_STATUS;
                 battle_participants[bank].status.flags.paralysis = 0;
                 call_bc_move_exec((void*)0x082DB706);
-                eaten_berry = 1;
+                eaten_berry = true;
             }
             break;
         case ITEM_EFFECT_CHESTOBERRY:
             if (battle_participants[bank].status.flags.sleep)
             {
-                effect = 1;
+                effect = ALTER_NON_VOLATILE_STATUS;
                 battle_participants[bank].status.flags.sleep = 0;
                 call_bc_move_exec((void*)0x082DB766);
-                eaten_berry = 1;
+                eaten_berry = true;
             }
             break;
         case ITEM_EFFECT_PECHABERRY:
             if (battle_participants[bank].status.flags.poison || battle_participants[bank].status.flags.toxic_poison)
             {
-                effect = 1;
+                effect = ALTER_NON_VOLATILE_STATUS;
                 battle_participants[bank].status.flags.poison = 0;
                 battle_participants[bank].status.flags.toxic_poison = 0;
                 call_bc_move_exec((void*)0x082DB71E);
-                eaten_berry = 1;
+                eaten_berry = true;
             }
             break;
         case ITEM_EFFECT_RAWSTBERRY:
             if (battle_participants[bank].status.flags.burn)
             {
-                effect = 1;
+                effect = ALTER_NON_VOLATILE_STATUS;
                 battle_participants[bank].status.flags.burn = 0;
                 call_bc_move_exec((void*)0x082DB736);
-                eaten_berry = 1;
+                eaten_berry = true;
             }
             break;
         case ITEM_EFFECT_ASPEARBERRY:
             if (battle_participants[bank].status.flags.freeze)
             {
-                effect = 1;
+                effect = ALTER_NON_VOLATILE_STATUS;
                 battle_participants[bank].status.flags.freeze = 0;
                 call_bc_move_exec((void*)0x082DB74E);
-                eaten_berry = 1;
+                eaten_berry = true;
             }
             break;
         case ITEM_EFFECT_LEPPABERRY:
-            if (!move_turn)
+            if(!move_turn && handle_leppa(bank,quality,BATTLE_TURN))
             {
-                for (u8 i = 0; i < 4; i++)
-                {
-                    if (battle_participants[bank].moves[i] && battle_participants[bank].current_pp[i] == 0)
-                    {
-                        effect = 3;
-                        eaten_berry = 1;
-                        break;
-                    }
-                }
+                effect = NO_COMMON_ITEM_EFFECT;
+                eaten_berry = true;
             }
             break;
         case ITEM_EFFECT_PERSIMBERRY:
             if (battle_participants[bank].status2.confusion)
             {
                 battle_participants[bank].status2.confusion = 0;
-                effect = 2;
+                effect = NO_COMMON_ITEM_EFFECT;
                 call_bc_move_exec((void*)0x82DB77E);
-                eaten_berry = 1;
+                eaten_berry = true;
             }
             break;
         case ITEM_EFFECT_LUMBERRY:
@@ -2110,8 +2126,8 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 copy_status_condition_text(bank, 1);
                 battle_participants[bank].status2.confusion = 0;
                 battle_participants[bank].status.int_status = 0;
-                eaten_berry = 1;
-                effect = 1;
+                eaten_berry = true;
+                effect = ALTER_NON_VOLATILE_STATUS;
                 call_bc_move_exec((void*)0x082DB794);
             }
             break;
@@ -2138,9 +2154,9 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 if (!(battle_participants[bank].status2.focus_energy))
                 {
                     battle_participants[bank].status2.focus_energy = 1;
-                    effect = 2;
+                    effect = NO_COMMON_ITEM_EFFECT;
                     call_bc_move_exec((void*)0x82DB869);
-                    eaten_berry = 1;
+                    eaten_berry = true;
                 }
             }
             break;
@@ -2154,7 +2170,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             STICKYBARB:
             if (battle_participants[bank].current_hp && !move_turn && !(has_ability_effect(bank, 0, 1) && battle_participants[bank].ability_id == ABILITY_MAGIC_GUARD))
             {
-                effect = 4;
+                effect = NO_COMMON_ITEM_EFFECT;
                 damage_loc = battle_participants[bank].max_hp >> 3;
                 call_bc_move_exec(&itemhurt_bs);
                 record_usage_of_item(bank, get_item_effect(bank, 0));
@@ -2168,7 +2184,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
         case ITEM_EFFECT_LEFTOVERS:
             if (battle_participants[bank].max_hp != battle_participants[bank].current_hp && !move_turn && !new_battlestruct->bank_affecting[bank_target].heal_block)
             {
-                effect = 4;
+                effect = HP_RESTORE_ITEM;
                 s32 damage = battle_participants[bank].max_hp >> 4;
                 if (damage == 0)
                     damage = 1;
@@ -2180,9 +2196,12 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             }
             break;
         }
-        active_bank = bank;
-        battle_scripting.active_bank = bank;
-        bank_attacker = bank;
+        if(effect)
+        {
+            active_bank = bank;
+            battle_scripting.active_bank = bank;
+            bank_attacker = bank;
+        }
         break;
     case 2: //having effect on target items
         active_bank = bank;
@@ -2200,7 +2219,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             {
                 if (battle_participants[bank].atk_buff != 0xC || battle_participants[bank].sp_atk_buff != 0xC)
                 {
-                    effect = 5;
+                    effect = NO_COMMON_ITEM_EFFECT;
                     battle_scripting.field11 = 0;
                     call_bc_move_exec(&weaknesspolicy_bs);
                 }
@@ -2216,7 +2235,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 jump_if_cannot_switch_atk4F();
                 if ((u32)battlescripts_curr_instruction != 1)
                 {
-                    effect = 6;
+                    effect = NO_COMMON_ITEM_EFFECT;
                     battlescripts_curr_instruction = current_instruction;
                     call_bc_move_exec(&ejectbutton_bs);
                 }
@@ -2231,7 +2250,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 damage_loc = __udivsi3(battle_participants[bank_attacker].max_hp, 6);
                 if (damage_loc == 0)
                     damage_loc = 1;
-                effect = 7;
+                effect = NO_COMMON_ITEM_EFFECT;
                 call_bc_move_exec(&rockyhelmet_bs);
                 record_usage_of_item(bank, ITEM_EFFECT_ROCKYHELMET);
             }
@@ -2239,7 +2258,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
         case ITEM_EFFECT_STICKYBARB:
             if (move_table[current_move].move_flags.flags.makes_contact && (MOVE_WORKED && TARGET_TURN_DAMAGED) && !(battle_participants[bank_attacker].status2.substitute) && battle_participants[bank_attacker].current_hp && battle_participants[bank_attacker].held_item == 0)
             {
-                effect = 2;
+                effect = NO_COMMON_ITEM_EFFECT;
                 u16* target_item = &battle_participants[bank].held_item;
                 u16* attacker_item = &battle_participants[bank_attacker].held_item;
                 *attacker_item = *target_item;
@@ -2257,7 +2276,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
         case ITEM_EFFECT_AIRBALLOON:
             if (MOVE_WORKED && TARGET_TURN_DAMAGED)
             {
-                effect = 8;
+                effect = NO_COMMON_ITEM_EFFECT;
                 call_bc_move_exec(&balloonpops_bs);
             }
             break;
@@ -2267,7 +2286,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 if (!(battle_participants[bank_attacker].status2.in_love & bits_table[bank]))
                 {
                     battle_participants[bank_attacker].status2.in_love |= bits_table[bank];
-                    effect = 9;
+                    effect = NO_COMMON_ITEM_EFFECT;
                     call_bc_move_exec(&destinyknot_bs);
                 }
             }
@@ -2281,7 +2300,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             }
             break;
             STATRAISE:
-                effect = 5;
+                effect = NO_COMMON_ITEM_EFFECT;
                 call_bc_move_exec(&statraise_bs);
                 battle_scripting.field11 = 0;
             break;
@@ -2324,7 +2343,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             case ITEM_EFFECT_ORANBERRY:
                 if (hp_condition(bank, 1) && !move_turn && !new_battlestruct->bank_affecting[bank_target].heal_block)
                 {
-                    effect = 4;
+                    effect = HP_RESTORE_ITEM;
                     if (quality > battle_participants[bank].max_hp - battle_participants[bank].current_hp)
                         quality = battle_participants[bank].max_hp - battle_participants[bank].current_hp;
                     damage_loc = quality;
@@ -2336,7 +2355,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             case ITEM_EFFECT_SITRUSBERRY:
                 if (hp_condition(bank, 1) && !move_turn && !new_battlestruct->bank_affecting[bank_target].heal_block)
                 {
-                    effect = 4;
+                    effect = HP_RESTORE_ITEM;
                     s32 damage = battle_participants[bank].max_hp >> 2;
                     if (damage > battle_participants[bank].max_hp - battle_participants[bank].current_hp)
                         damage = battle_participants[bank].max_hp - battle_participants[bank].current_hp;
@@ -2348,20 +2367,20 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 if (battle_participants[bank].status.flags.paralysis)
                 {
                     battle_participants[bank].status.flags.paralysis = 0;
-                    effect = 1;
+                    effect = ALTER_NON_VOLATILE_STATUS;
                     battlescript_push();
                     battlescripts_curr_instruction = (void*) 0x82DB70C;
-                    eaten_berry = 1;
+                    eaten_berry = true;
                 }
                 break;
             case ITEM_EFFECT_CHESTOBERRY:
                 if (battle_participants[bank].status.flags.sleep)
                 {
                     battle_participants[bank].status.flags.sleep = 0;
-                    effect = 1;
+                    effect = ALTER_NON_VOLATILE_STATUS;
                     battlescript_push();
                     battlescripts_curr_instruction = (void*) 0x82DB76C;
-                    eaten_berry = 1;
+                    eaten_berry = true;
                 }
                 break;
             case ITEM_EFFECT_PECHABERRY:
@@ -2369,40 +2388,40 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 {
                     battle_participants[bank].status.flags.poison = 0;
                     battle_participants[bank].status.flags.toxic_poison = 0;
-                    effect = 1;
+                    effect = ALTER_NON_VOLATILE_STATUS;
                     battlescript_push();
                     battlescripts_curr_instruction = (void*) 0x82DB724;
-                    eaten_berry = 1;
+                    eaten_berry = true;
                 }
                 break;
             case ITEM_EFFECT_RAWSTBERRY:
                 if (battle_participants[bank].status.flags.burn)
                 {
-                    effect = 1;
+                    effect = ALTER_NON_VOLATILE_STATUS;
                     battle_participants[bank].status.flags.burn = 0;
                     battlescript_push();
                     battlescripts_curr_instruction = (void*) 0x82DB73C;
-                    eaten_berry = 1;
+                    eaten_berry = true;
                 }
                 break;
             case ITEM_EFFECT_ASPEARBERRY:
                 if (battle_participants[bank].status.flags.freeze)
                 {
-                    effect = 1;
+                    effect = ALTER_NON_VOLATILE_STATUS;
                     battle_participants[bank].status.flags.freeze = 0;
                     battlescript_push();
                     battlescripts_curr_instruction = (void*) 0x82DB754;
-                    eaten_berry = 1;
+                    eaten_berry = true;
                 }
                 break;
             case ITEM_EFFECT_PERSIMBERRY:
                 if (battle_participants[bank].status2.confusion)
                 {
                     battle_participants[bank].status2.confusion = 0;
-                    effect = 2;
+                    effect = NO_COMMON_ITEM_EFFECT;
                     battlescript_push();
                     battlescripts_curr_instruction = (void*) 0x82DB784;
-                    eaten_berry = 1;
+                    eaten_berry = true;
                 }
                 break;
             case ITEM_EFFECT_LUMBERRY:
@@ -2411,12 +2430,19 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                     copy_status_condition_text(bank, 1);
                     battle_participants[bank].status2.confusion = 0;
                     battle_participants[bank].status.int_status = 0;
-                    eaten_berry = 1;
-                    effect = 1;
+                    eaten_berry = true;
+                    effect = ALTER_NON_VOLATILE_STATUS;
                     battlescript_push();
                     battlescripts_curr_instruction = (void*) 0x82DB79A;
                 }
                 break;
+            case ITEM_EFFECT_LEPPABERRY:
+                if((multihit_counter==0 || multihit_counter==1) && handle_leppa(bank,quality,BATTLE_TURN))
+                {
+                    effect = NO_COMMON_ITEM_EFFECT;
+                    eaten_berry = true;
+                }
+            break;
             case ITEM_EFFECT_FIGYBERRY:
             case ITEM_EFFECT_WIKIBERRY:
             case ITEM_EFFECT_MAGOBERRY:
@@ -2440,10 +2466,10 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                     if (!(battle_participants[bank].status2.focus_energy))
                     {
                         battle_participants[bank].status2.focus_energy = 1;
-                        effect = 2;
+                        effect = NO_COMMON_ITEM_EFFECT;
                         battlescript_push();
                         battlescripts_curr_instruction = &lansat_endmove_bs;
-                        eaten_berry = 1;
+                        eaten_berry = true;
                     }
                 }
                 break;
@@ -2502,7 +2528,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
         case ITEM_EFFECT_FLAMEORB:
             if (!cant_become_burned(bank, 1))
             {
-                effect = 1;
+                effect = ALTER_NON_VOLATILE_STATUS;
                 battle_participants[bank].status.flags.burn = 1;
                 call_bc_move_exec(&flameorb_bs);
                 record_usage_of_item(bank, ITEM_EFFECT_FLAMEORB);
@@ -2511,7 +2537,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
         case ITEM_EFFECT_TOXICORB:
             if (!cant_poison(bank, 1))
             {
-                effect = 1;
+                effect = ALTER_NON_VOLATILE_STATUS;
                 battle_participants[bank].status.flags.toxic_poison = 1;
                 call_bc_move_exec(&toxicorb_bs);
                 record_usage_of_item(bank, ITEM_EFFECT_TOXICORB);
@@ -2525,18 +2551,16 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
         u16 item = battle_participants[bank].held_item;
         last_used_item = item;
         new_battlestruct->various.recently_used_item = item;
-        new_battlestruct->bank_affecting[bank].item_used = 1;
         if (eaten_berry)
-            new_battlestruct->bank_affecting[bank].eaten_berry = 1;
-        if (effect == 1)
+        {
+            new_battlestruct->bank_affecting[bank].item_used = 1;
+            setup_berry_consume_buffers(bank);
+        }
+        if (effect == ALTER_NON_VOLATILE_STATUS)
         {
             active_bank = bank;
             prepare_setattributes_in_battle(0, 0x28, 0, 4, &battle_participants[bank].status.flags);
             mark_buffer_bank_for_execution(bank);
-        }
-        else if (effect == 2)
-        {
-
         }
     }
     return effect;

@@ -152,6 +152,7 @@ extern void* healberry_endmove_bs;
 extern void* healandconfuse_endmove_bs;
 extern void* statraise_berry_endmove_bs;
 extern void* lansat_endmove_bs;
+extern void* leppa_endmove_bs;
 
 extern void* prlzcure_bugbite_bs;
 extern void* slpcure_bugbite_bs;
@@ -164,6 +165,7 @@ extern void* healberry_bugbite_bs;
 extern void* healandconfuse_bugbite_bs;
 extern void* statraise_berry_bugbite_bs;
 extern void* lansat_bugbite_bs;
+extern void* leppa_bugbite_bs;
 extern void* bugsteal_bs;
 
 extern void* skydrop_tooheavy_bs;
