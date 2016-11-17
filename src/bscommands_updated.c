@@ -1116,6 +1116,7 @@ void atk49_move_end_turn()
             new_battlestruct->various.active_bank = bank_attacker;
             INC_END_EVENTS
         case 28: //item move end turn
+            new_battlestruct->various.active_bank=bank_attacker;
             if ((multihit_counter==0 || multihit_counter==1) && item_battle_effects(3, 0, 0))
             {
                 effect = 1;
