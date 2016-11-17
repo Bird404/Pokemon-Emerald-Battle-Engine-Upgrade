@@ -2,6 +2,7 @@
 #include "static_references.h"
 #include <string.h>
 
+u8 hp_condition(u8 bank, u8 percent);
 u8 check_ability(u8 bank, u8 ability);
 u16 get_1_4_of_max_hp(u8 bank);
 u16 get_1_8_of_max_hp(u8 bank);
@@ -2109,6 +2110,15 @@ void atk0C_datahpupdate()
                             special_statuses[bank].moveturn_special_bank = bank_attacker;
                             protect_structs[bank].mirrorcoat_target = bank_attacker;
                         }
+                    }
+                    u16 species =  battle_participants[active_bank].poke_species;
+                    if(hp_condition(active_bank,1) && battle_participants[active_bank].ability_id==ABILITY_ZEN_MODE && species!=POKE_ZEN_MODE
+                       && !battle_participants[active_bank].status2.transformed)
+                    {
+                        //new_battlestruct->various.active_bank=active_bank;
+                        battle_scripting.active_bank=active_bank;
+                        battlescript_push();
+                        battlescripts_curr_instruction = &zen_change_bs;
                     }
 
                 }

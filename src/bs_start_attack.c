@@ -10,6 +10,7 @@ u32 get_item_extra_param(u16 item);
 u16 get_mega_species(u8 bank, u8 chosen_method);
 u8 weather_abilities_effect();
 u8 find_move_in_table(u16 move, u16 table_ptr[]);
+void setup_berry_consume_buffers(u8 bank);
 
 u8 is_bank_present(u8 bank)
 {
@@ -671,9 +672,14 @@ void bc_preattacks()
                 if(alteration_occurs==1)
                 {
                     if(item_effect==ITEM_EFFECT_QUICKCLAW)
+                    {
                         call_bc_move_exec(&quickclaw_bs);
+                    }
                     else if(item_effect==ITEM_EFFECT_CUSTAPBERRY)
+                    {
                         call_bc_move_exec(&custapberry_bs);
+                        setup_berry_consume_buffers(bank_attacker);
+                    }
                     play_script=1;
                     last_used_item=battle_participants[bank_attacker].held_item;
                     break;

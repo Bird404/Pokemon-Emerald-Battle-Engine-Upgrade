@@ -2681,17 +2681,65 @@ void transformed_species_to_0()
     battle_graphics.graphics_data->species_info[battle_scripting.active_bank]->transformed_species = 0;
 }
 
-void aegi_change()
+/* Not used now but can be useful for future
+void bank_exchange()
 {
-    battle_graphics.graphics_data->species_info[bank_attacker]->transformed_species = 0;
-    struct pokemon* poke = get_bank_poke_ptr(bank_attacker);
+    u8 temp = bank_attacker;
+    bank_attacker = new_battlestruct->various.active_bank;
+    new_battlestruct->various.active_bank = temp;
+}
+*/
+
+void setup_form_change_buffers(u8 bank, u16 target_species)
+{
+    u16* species =  &battle_participants[bank].poke_species;
+    *species=target_species;
+    active_bank = bank;
+    prepare_setattributes_in_battle(0, REQUEST_SPECIES_BATTLE, 0, 2, species);
+    mark_buffer_bank_for_execution(active_bank);
+}
+
+void setup_zen_buffers()
+{
+    setup_form_change_buffers(battle_scripting.active_bank,POKE_ZEN_MODE);
+}
+
+void in_battle_form_change(u8 bank, bool change_hp, bool change_type)
+{
+    battle_graphics.graphics_data->species_info[bank]->transformed_species = 0;
+    struct pokemon* poke = get_bank_poke_ptr(bank);
     calculate_stats_pokekmon(poke);
-    struct battle_participant* aegi = &battle_participants[bank_attacker];
+    struct battle_participant* aegi = &battle_participants[bank];
+    if(change_type)
+    {
+        struct poke_basestats* PokeStats = &basestat_table->poke_stats[aegi->poke_species];
+        aegi->type1 = PokeStats->type1;
+        aegi->type2 = PokeStats->type2;
+
+    }
+    if(change_hp)
+    {
+        aegi->max_hp = get_attributes(poke, ATTR_TOTAL_HP, 0);
+        aegi->current_hp = get_attributes(poke, ATTR_CURRENT_HP, 0);
+        update_hpbar(bank);
+    }
+
     aegi->atk = get_attributes(poke, ATTR_ATTACK, 0);
     aegi->def = get_attributes(poke, ATTR_DEFENCE, 0);
     aegi->spd = get_attributes(poke, ATTR_SPEED, 0);
     aegi->sp_atk = get_attributes(poke, ATTR_SPECIAL_ATTACK, 0);
     aegi->sp_def = get_attributes(poke, ATTR_SPECIAL_DEFENCE, 0);
+}
+
+void aegi_change()
+{
+    in_battle_form_change(bank_attacker,false,false);
+}
+
+void zen_change()
+{
+    //in_battle_form_change(new_battlestruct->various.active_bank,false,true);
+    in_battle_form_change(battle_scripting.active_bank,false,true);
 }
 
 void set_transfrom_palchange()
@@ -2730,7 +2778,8 @@ void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*
 &can_magneticflux_work /*96*/, &magnetic_flux_effect /*97*/, &canuse_flowershield /*98*/, &flowershield_effect /*99*/, &canuselastresort /*100*/,
 &topsyturvy_effect /*101*/, &bestow_effect /*102*/, &conversion_effect /*103*/, &party_heal /*104*/, &accupressure_effect /*105*/, &mega_primal_cry /*106*/,
 &canusefling /*107*/, &happyhour_effect /*108*/, &canuseskydrop /*109*/, &skydropup /*110*/, &canusefairylock /*111*/, &healthbox_target_update /*112*/,
-&return_hitmarker_animation /*113*/, &transformed_species_to_0 /*114*/, &aegi_change /*115*/, &set_transfrom_palchange /*116*/, &destroy_target_item /*117*/};
+&return_hitmarker_animation /*113*/, &transformed_species_to_0 /*114*/, &aegi_change /*115*/, &set_transfrom_palchange /*116*/, &destroy_target_item /*117*/,
+&zen_change/*118*/, &setup_zen_buffers/*119*/};
 
 void callasm_cmd()
 {

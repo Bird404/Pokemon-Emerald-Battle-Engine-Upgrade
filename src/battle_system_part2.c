@@ -9,6 +9,7 @@ u8 count_party_pokemon(u8 bank);
 void revert_form_change(u8 mega_revert, u8 teamID, u8 side, struct pokemon* poke);
 u8 check_ability(u8 bank, u8 ability);
 void copy_status_condition_text(u8 bank, u8 confusion);
+u8 setup_berry_consume_buffers(u8 bank);
 
 bool load_weather_from_overworld()
 {
@@ -436,6 +437,7 @@ bool handle_leppa(u8 bank, u8 quality, enum call_mode calling_mode)
         battle_text_buff1[4]=0xFF;
 
         bank_attacker=bank;
+        active_bank=bank;
         if(calling_mode==BATTLE_TURN)
         {
             call_bc_move_exec((void *)0x82DB7E1);
@@ -506,7 +508,7 @@ bool handle_leppa_bugbite(u8 bank, u8 quality)
         battle_text_buff1[4]=0xFF;
 
         bank_attacker=bank;
-
+        active_bank=bank;
         battlescript_push();
         battlescripts_curr_instruction = &leppa_bugbite_bs;
 
@@ -654,7 +656,6 @@ void handle_bug_bite()
     }
     else
     {
-        new_battlestruct->bank_affecting[bank].eaten_berry = 1;
         if (effect == 1)
         {
             active_bank = bank;
@@ -662,6 +663,7 @@ void handle_bug_bite()
             mark_buffer_bank_for_execution(bank);
         }
     }
+    setup_berry_consume_buffers(bank);
 }
 
 

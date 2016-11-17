@@ -1881,11 +1881,11 @@ void setup_berry_consume_buffers(u8 bank)
     new_battlestruct->bank_affecting[bank].eaten_berry = 1;
     if(!is_bank_from_opponent_side(bank))
     {
-        new_battlestruct->various.eaten_berry_player[battle_team_id_by_side]=1;
+        new_battlestruct->various.eaten_berry_player|=bits_table[battle_team_id_by_side[bank]];
     }
     else
     {
-        new_battlestruct->various.eaten_berry_player[battle_team_id_by_side]=1;
+        new_battlestruct->various.eaten_berry_opponent|=bits_table[battle_team_id_by_side[bank]];
     }
 }
 
