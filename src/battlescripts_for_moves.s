@@ -254,6 +254,20 @@ battlescripts_table:
 .word TARGETSTATSWITCH	@171 Parting Shot; @arg1 bitfield for stats to raise; arg 2 by how much
 .word HAPPYHOUR			@172 Happy Hour, multiplies gotten money by two
 .word FAIRYLOCK			@173 Fairy Lock
+.word BELCH             @174 Only able to execute after Berry Consumption
+.word FLAME_BURST       @175 Flame Burst
+
+FLAME_BURST:
+	setbyte EffectChooser 0x38
+	goto_cmd ATTACKING_MOVE
+
+BELCH:
+	attackcanceler
+	callasm_cmd 120
+	accuracycheck MOVE_FAILED 0x0
+	critcalc
+	damagecalc
+	goto_cmd SUCCESS_MOVE_ATTACK
 
 TRANSFROM_MOVE_BS:
 	callasm_cmd 116
@@ -1587,9 +1601,9 @@ AFTERYOU:
 
 NATURALGIFT:
 	attackcanceler
-	accuracycheck MOVE_FAILED 0x0
 	callasm_cmd 56 @checks if can attack
 	.word MOVE_FAILED
+	accuracycheck MOVE_FAILED 0x0
 	critcalc
 	damagecalc
 	removeitem bank_attacker

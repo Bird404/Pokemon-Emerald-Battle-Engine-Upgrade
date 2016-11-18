@@ -2681,14 +2681,12 @@ void transformed_species_to_0()
     battle_graphics.graphics_data->species_info[battle_scripting.active_bank]->transformed_species = 0;
 }
 
-/* Not used now but can be useful for future
-void bank_exchange()
+void attacker_bank_exchange()
 {
     u8 temp = bank_attacker;
     bank_attacker = new_battlestruct->various.active_bank;
     new_battlestruct->various.active_bank = temp;
 }
-*/
 
 void setup_form_change_buffers(u8 bank, u16 target_species)
 {
@@ -2757,6 +2755,20 @@ void destroy_target_item()
     mark_buffer_bank_for_execution(bank_target);
 }
 
+void belch_canceler()
+{
+    if((is_bank_from_opponent_side(bank_attacker) && new_battlestruct->various.eaten_berry_opponent&bits_table[battle_team_id_by_side[bank_attacker]])
+       || (!is_bank_from_opponent_side(bank_attacker) && new_battlestruct->various.eaten_berry_player&bits_table[battle_team_id_by_side[bank_attacker]]))
+    {
+
+    }
+    else
+    {
+        battlescripts_curr_instruction = (void *) 0x082D9F1A;
+        move_outcome.failed = 1;
+    }
+}
+
 void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*/, &change_attacker_item /*2*/, &try_to_lower_def /*3*/, &try_to_raise_spd /*4*/,
 &changestatvar1 /*5*/, &changestatvar2 /*6*/, &frisk_target_item /*7*/, &set_stat_msg_buffer /*8*/, &set_type_msg_buffer /*9*/, &set_team_msg_buffer /*10*/, &bad_dreams_damage_calc /*11*/,
 &weaknesspolicy /*12*/, &mentalherb /*13*/, &placeholder0x14 /*14*/, &hazards_bank_switcher /*15*/, &hazards_bank_return /*16*/, &leechseed_update /*17*/,
@@ -2779,7 +2791,7 @@ void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*
 &topsyturvy_effect /*101*/, &bestow_effect /*102*/, &conversion_effect /*103*/, &party_heal /*104*/, &accupressure_effect /*105*/, &mega_primal_cry /*106*/,
 &canusefling /*107*/, &happyhour_effect /*108*/, &canuseskydrop /*109*/, &skydropup /*110*/, &canusefairylock /*111*/, &healthbox_target_update /*112*/,
 &return_hitmarker_animation /*113*/, &transformed_species_to_0 /*114*/, &aegi_change /*115*/, &set_transfrom_palchange /*116*/, &destroy_target_item /*117*/,
-&zen_change/*118*/, &setup_zen_buffers/*119*/};
+&zen_change/*118*/, &setup_zen_buffers/*119*/, &belch_canceler/*120*/, &attacker_bank_exchange/*121*/};
 
 void callasm_cmd()
 {

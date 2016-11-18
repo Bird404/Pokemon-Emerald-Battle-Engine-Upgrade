@@ -719,6 +719,25 @@ u8 primary_effect_setter()
             battle_participants[bank_to_apply].status2.multiple_turn_move = 1;
             locked_move[bank_to_apply] = current_move;
             break;
+        case 0x38: //flame burst
+            if(battle_flags.double_battle)
+            {
+                u8 target_ally=bank_attacker^0x3;
+                if(is_bank_present(target_ally) && !check_ability(target_ally,ABILITY_MAGIC_GUARD))
+                {
+                    damage_loc = battle_participants[target_ally].max_hp>>4;
+                    if(damage_loc==0)
+                    {
+                        damage_loc=1;
+                    }
+                    new_battlestruct->various.active_bank=bank_attacker;
+                    bank_attacker=target_ally;
+                    battlescript_push();
+                    battlescripts_curr_instruction = &flameburst_bs;
+                }
+
+            }
+            break;
     }
     *move_effect = 0;
     if(matcher==battlescripts_curr_instruction)
@@ -728,7 +747,7 @@ u8 primary_effect_setter()
 }
 
 #define INC_END_EVENTS battle_scripting.cmd49_state_tracker++;
-#define case_max 34
+#define case_max 35
 
 void clear_twoturn(u8 bank)
 {
@@ -1161,7 +1180,32 @@ void atk49_move_end_turn()
                 effect = 1;
             INC_END_EVENTS
             break;
-        case 33: //in battle end turn forme change
+        case 33: //meloetta
+            if(current_move==MOVE_RELIC_SONG)
+            {
+                u16 *species = &battle_participants[bank_attacker].poke_species;
+                if(*species == POKE_MELOETTA_ARIA)
+                {
+                    effect=1;
+                    new_battlestruct->various.var1 = POKE_MELOETTA_PIROUETTE;
+
+                }
+                else if(*species == POKE_MELOETTA_PIROUETTE)
+                {
+                    effect=1;
+                    new_battlestruct->various.var1 = POKE_MELOETTA_ARIA;
+                }
+                if(effect)
+                {
+
+                    battle_scripting.active_bank=bank_attacker;
+                    battlescript_push();
+                    battlescripts_curr_instruction = &zen_change_bs;
+                }
+            }
+            INC_END_EVENTS
+            break;
+        case 34: //in battle end turn form(e) change
             {
                 for (u8 i = 0; i < no_of_all_banks; i++)
                 {
@@ -2507,6 +2551,11 @@ void revert_form_change(u8 mega_revert, u8 teamID, u8 side, struct pokemon* poke
     {
         u16 Aegi = POKE_AEGISLASH_SHIELD;
         set_attributes(poke, ATTR_SPECIES, &Aegi);
+    }
+    else if (species == POKE_ZEN_MODE)
+    {
+        u16 Darm = POKE_DARMANITAN;
+        set_attributes(poke, ATTR_SPECIES, &Darm);
     }
     return;
 }

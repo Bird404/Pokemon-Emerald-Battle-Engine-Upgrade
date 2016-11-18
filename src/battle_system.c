@@ -2344,6 +2344,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 if (hp_condition(bank, 1) && !move_turn && !new_battlestruct->bank_affecting[bank_target].heal_block)
                 {
                     effect = HP_RESTORE_ITEM;
+                    eaten_berry = true;
                     if (quality > battle_participants[bank].max_hp - battle_participants[bank].current_hp)
                         quality = battle_participants[bank].max_hp - battle_participants[bank].current_hp;
                     damage_loc = quality;
@@ -2356,6 +2357,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 if (hp_condition(bank, 1) && !move_turn && !new_battlestruct->bank_affecting[bank_target].heal_block)
                 {
                     effect = HP_RESTORE_ITEM;
+                    eaten_berry = true;
                     s32 damage = battle_participants[bank].max_hp >> 2;
                     if (damage > battle_participants[bank].max_hp - battle_participants[bank].current_hp)
                         damage = battle_participants[bank].max_hp - battle_participants[bank].current_hp;
