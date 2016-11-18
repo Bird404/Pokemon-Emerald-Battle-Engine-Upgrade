@@ -171,6 +171,7 @@ extern void* bugsteal_bs;
 extern void* skydrop_tooheavy_bs;
 extern void* illusion_wore_off_bs;
 extern void* aegislash_change_bs;
+extern void* zen_change_bs;
 extern void* protean_bs;
 extern void* gem_bs;
 extern void* telepathy_bs;
