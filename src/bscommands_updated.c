@@ -1161,54 +1161,85 @@ void atk49_move_end_turn()
                 effect = 1;
             INC_END_EVENTS
             break;
-        case 33: //forecast's or flower gift's ability changing
+        case 33: //in battle end turn forme change
             {
                 for (u8 i = 0; i < no_of_all_banks; i++)
                 {
                     u16* species = &battle_participants[i].poke_species;
                     battle_scripting.active_bank = i;
-                    if (*species == POKE_CASTFORM)
+                    if(!battle_participants[i].status2.transformed)
                     {
-                        if (castform_form[i] == 0 && check_ability(i, ABILITY_FORECAST)) //castform is in default form and has the ability
+                        switch(*species)
                         {
-                            u8 form_to_switch = castform_switch(i);
-                            if (form_to_switch)
+                        case POKE_CASTFORM :
+                            if (castform_form[i] == 0 && check_ability(i, ABILITY_FORECAST)) //castform is in default form and has the ability
+                            {
+                                u8 form_to_switch = castform_switch(i);
+                                if (form_to_switch)
+                                {
+                                    effect = 1;
+                                    battle_stuff_ptr->castform_switch_form = form_to_switch - 1;
+                                    battlescript_push();
+                                    battlescripts_curr_instruction = (void*) (0x082DB4AF);
+                                }
+                            }
+                            break;
+                        case POKE_CHERRIM_SUNSHINE :
+                            if (!check_ability(i, ABILITY_FLOWER_GIFT))
                             {
                                 effect = 1;
-                                battle_stuff_ptr->castform_switch_form = form_to_switch - 1;
+                                new_battlestruct->bank_affecting[i].sunshine_form = 0;
+                                *species = POKE_CHERRIM;
+                                active_bank = i;
+                                prepare_setattributes_in_battle(0, REQUEST_SPECIES_BATTLE, 0, 2, species);
+                                mark_buffer_bank_for_execution(i);
                                 battlescript_push();
-                                battlescripts_curr_instruction = (void*) (0x082DB4AF);
-                                break;
+                                battlescripts_curr_instruction = &cherrimswitch2_bs;
                             }
+                            break;
+                        case POKE_CHERRIM:
+                            if (check_ability(i, ABILITY_FLOWER_GIFT) && try_cherrim_change(i))
+                            {
+                                effect = 1;
+                                battlescript_push();
+                                battlescripts_curr_instruction = &cherrimswitch2_bs;
+                            }
+                            break;
+                        case POKE_DARMANITAN:
+                            if(hp_condition(i,1) && check_ability(i,ABILITY_ZEN_MODE))
+                            {
+                                //new_battlestruct->various.active_bank=active_bank;
+                                effect = 1;
+                                new_battlestruct->various.var1 = POKE_ZEN_MODE;
+                                battle_scripting.active_bank=i;
+                                battlescript_push();
+                                battlescripts_curr_instruction = &zen_change_bs;
+                            }
+                            break;
+                        case POKE_ZEN_MODE:
+                            if(!hp_condition(i,1) || !check_ability(i,ABILITY_ZEN_MODE))
+                            {
+                                effect = 1;
+                                new_battlestruct->various.var1 = POKE_DARMANITAN;
+                                battle_scripting.active_bank=i;
+                                battlescript_push();
+                                battlescripts_curr_instruction = &zen_change_bs;
+                            }
+                            break;
                         }
-                    }
-                    else if (*species == POKE_CHERRIM_SUNSHINE && !check_ability(i, ABILITY_FLOWER_GIFT))
-                    {
-                        effect = 1;
-                        new_battlestruct->bank_affecting[i].sunshine_form = 0;
-                        *species = POKE_CHERRIM;
-                        active_bank = i;
-                        prepare_setattributes_in_battle(0, REQUEST_SPECIES_BATTLE, 0, 2, species);
-                        mark_buffer_bank_for_execution(i);
-                        battlescript_push();
-                        battlescripts_curr_instruction = &cherrimswitch2_bs;
-                        break;
-                    }
-                    else if (*species == POKE_CHERRIM && check_ability(i, ABILITY_FLOWER_GIFT))
-                    {
-                        if (try_cherrim_change(i))
+                        if(effect)
                         {
-                            effect = 1;
-                            battlescript_push();
-                            battlescripts_curr_instruction = &cherrimswitch2_bs;
                             break;
                         }
                     }
                 }
-                if (effect == 0)
+                if (!effect)
+                {
                     INC_END_EVENTS
+                }
             }
             break;
+
         default:
             battle_scripting.cmd49_state_tracker = case_max;
         }
@@ -2112,16 +2143,6 @@ void atk0C_datahpupdate()
                             protect_structs[bank].mirrorcoat_target = bank_attacker;
                         }
                     }
-                    u16 species =  battle_participants[active_bank].poke_species;
-                    if(hp_condition(active_bank,1) && battle_participants[active_bank].ability_id==ABILITY_ZEN_MODE && species!=POKE_ZEN_MODE
-                       && !battle_participants[active_bank].status2.transformed)
-                    {
-                        //new_battlestruct->various.active_bank=active_bank;
-                        battle_scripting.active_bank=active_bank;
-                        battlescript_push();
-                        battlescripts_curr_instruction = &zen_change_bs;
-                    }
-
                 }
                 else //damage is added
                 {

@@ -2701,7 +2701,7 @@ void setup_form_change_buffers(u8 bank, u16 target_species)
 
 void setup_zen_buffers()
 {
-    setup_form_change_buffers(battle_scripting.active_bank,POKE_ZEN_MODE);
+    setup_form_change_buffers(battle_scripting.active_bank,new_battlestruct->various.var1);
 }
 
 void in_battle_form_change(u8 bank, bool change_hp, bool change_type)
