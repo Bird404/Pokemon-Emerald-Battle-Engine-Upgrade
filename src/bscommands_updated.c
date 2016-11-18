@@ -747,7 +747,7 @@ u8 primary_effect_setter()
 }
 
 #define INC_END_EVENTS battle_scripting.cmd49_state_tracker++;
-#define case_max 35
+#define case_max 34
 
 void clear_twoturn(u8 bank)
 {
@@ -777,7 +777,10 @@ void atk49_move_end_turn()
     {
         switch (battle_scripting.cmd49_state_tracker)
         {
-        case 0: //spiky shield recoil
+        case 0: //safe attacker bank
+            new_battlestruct->various.cmd49_safeattacker_bank = bank_attacker;
+            INC_END_EVENTS
+        case 1: //spiky shield recoil
             if (new_battlestruct->bank_affecting[bank_attacker].spikyshield_damage && attacker_struct->current_hp && not_magicguard(bank_attacker))
             {
                 effect = 1;
@@ -798,7 +801,7 @@ void atk49_move_end_turn()
             }
             INC_END_EVENTS
             break;
-        case 1: //rage checker
+        case 2: //rage checker
             if (target_struct->current_hp && target_struct->status2.raged && bank_target != bank_attacker &&
                 is_bank_from_opponent_side(bank_target) != is_bank_from_opponent_side(bank_attacker) && MOVE_WORKED && TARGET_TURN_DAMAGED &&
                 DAMAGING_MOVE(current_move) && target_struct->atk_buff != 0xC)
@@ -810,7 +813,7 @@ void atk49_move_end_turn()
             }
             INC_END_EVENTS
             break;
-        case 2: //defrosting via fire type move
+        case 3: //defrosting via fire type move
             if (target_struct->current_hp && target_struct->status.flags.freeze && TARGET_TURN_DAMAGED && MOVE_WORKED
                 && (current_move==MOVE_SCALD || current_move_type == TYPE_FIRE))
             {
@@ -824,37 +827,37 @@ void atk49_move_end_turn()
             }
             INC_END_EVENTS
             break;
-        case 3: // user ability activation on strike
+        case 4: // user ability activation on strike
             if(ability_battle_effects(10,bank_attacker,0,0,0))
                 effect=1;
             INC_END_EVENTS
             break;
-        case 4: // user items activation on strike (setting life orb bit or accumulating shell bell hp
+        case 5: // user items activation on strike (setting life orb bit or accumulating shell bell hp
             if(item_battle_effects(4,bank_attacker,0))
                 effect=1;
             INC_END_EVENTS
             break;
-        case 5: //target's synchronize activation
+        case 6: //target's synchronize activation
             if (ability_battle_effects(7, bank_target, 0, 0, 0))
                 effect = 1;
             INC_END_EVENTS
             break;
-        case 6: //target's ability activation on strike
+        case 7: //target's ability activation on strike
             if (ability_battle_effects(4, bank_target, 0, 0, 0))
                 effect = 1;
             INC_END_EVENTS
             break;
-        case 7: //target's items activation on strike
+        case 8: //target's items activation on strike
             if (item_battle_effects(2, bank_target, 0))
                 effect = 1;
             INC_END_EVENTS
             break;
-        case 8: //attacker synchronize activation
+        case 9: //attacker synchronize activation
             if (ability_battle_effects(8, bank_attacker, 0, 0, 0))
                 effect = 1;
             INC_END_EVENTS
             break;
-        case 9: //held items
+        case 10: //held items
             {
                 for (u8 i = 0; i < no_of_all_banks; i++)
                 {
@@ -868,7 +871,7 @@ void atk49_move_end_turn()
             }
             INC_END_EVENTS;
             break;
-        case 10: //choice move update
+        case 11: //choice move update
         {
             u16 attacker_item = get_item_effect(bank_attacker, 1);
             u16* choice_move = &battle_stuff_ptr->choiced_move[bank_attacker];
@@ -886,7 +889,7 @@ void atk49_move_end_turn()
             INC_END_EVENTS
             break;
         }
-        case 11: //hide user sprite in a semi invulnerable state
+        case 12: //hide user sprite in a semi invulnerable state
             if(SEMI_INVULNERABLE(bank_attacker) && (hitmarker & 80))
             {
                 active_bank=bank_attacker;
@@ -895,7 +898,7 @@ void atk49_move_end_turn()
             }
             INC_END_EVENTS
             break;
-        case 12: //refresh/restore user sprite in second turn of dive
+        case 13: //refresh/restore user sprite in second turn of dive
             if(!MOVE_WORKED || !SEMI_INVULNERABLE(bank_attacker) || check_failure_due_to_status(bank_attacker))
             {
                 active_bank=bank_attacker;
@@ -906,7 +909,7 @@ void atk49_move_end_turn()
             }
             INC_END_EVENTS
             break;
-        case 13: //refresh/restore defender's sprite
+        case 14: //refresh/restore defender's sprite
             if(!special_statuses[bank_target].restored_bank_sprite && (bank_target<no_of_all_banks) &&
                !(SEMI_INVULNERABLE(bank_target)))
             {
@@ -916,24 +919,11 @@ void atk49_move_end_turn()
                 clear_twoturn(bank_target);
             }
             INC_END_EVENTS
-            new_battlestruct->various.active_bank = bank_attacker;
-        case 14: //item move end turn
+        case 15: //item move end turn
             if (multihit_counter!=0 && multihit_counter!=1 && item_battle_effects(3, 0, 0))
             {
                 effect = 1;
                 break;
-            }
-            INC_END_EVENTS
-        case 15: //restore attacker_bank cheek pouch and berry adder
-            if(multihit_counter!=0 && multihit_counter!=1)
-            {
-                for (u8 i = 0; i < no_of_all_banks; i++)
-                {
-                    if (berry_eaten(0, i))
-                        effect = 1;
-                }
-                if(effect)
-                    break;
             }
             INC_END_EVENTS
         case 16: //status immunities
@@ -956,6 +946,7 @@ void atk49_move_end_turn()
             }
             INC_END_EVENTS
         case 18: //clear turn bits
+            bank_attacker = new_battlestruct->various.cmd49_safeattacker_bank;
             new_battlestruct->various.magicbounce = 0; //avoids endless loops if magic bounce meets magic bounce or magic coat
             new_battlestruct->various.protean_msg = 0; //protean message
             new_battlestruct->various.gem_boost = 0; //gem boost
@@ -1037,6 +1028,7 @@ void atk49_move_end_turn()
             INC_END_EVENTS;
             break;
         case 23: //color change
+            bank_attacker = new_battlestruct->various.cmd49_safeattacker_bank;
             if (ability_battle_effects(21, bank_target, 0, 0, 0))
                 effect = 1;
             INC_END_EVENTS
@@ -1132,29 +1124,15 @@ void atk49_move_end_turn()
                 pos = get_move_position(bank_attacker, last_used_move);
             if (pos != -1)
                 new_battlestruct->bank_affecting[bank_attacker].usedmoves |= bits_table[pos];
-            new_battlestruct->various.active_bank = bank_attacker;
             INC_END_EVENTS
         case 28: //item move end turn
-            new_battlestruct->various.active_bank=bank_attacker;
             if ((multihit_counter==0 || multihit_counter==1) && item_battle_effects(3, 0, 0))
             {
                 effect = 1;
                 break;
             }
             INC_END_EVENTS
-        case 29: //bank cheek pouch and berry adder
-            if (multihit_counter==0 || multihit_counter==1)
-            {
-                for (u8 i = 0; i < no_of_all_banks; i++)
-                {
-                    if (berry_eaten(MOVE_TURN, i))
-                        effect = 1;
-                }
-                if(effect)
-                    break;
-            }
-            INC_END_EVENTS
-        case 30: //status immunities
+        case 29: //status immunities
             bank_attacker = new_battlestruct->various.active_bank;
             if ((multihit_counter==0 || multihit_counter==1) && ability_battle_effects(5, 0, 0, 0, 0))
             {
@@ -1162,7 +1140,7 @@ void atk49_move_end_turn()
                 break;
             }
             INC_END_EVENTS
-        case 31: // clear substitute bits
+        case 30: // clear substitute bits
             if (multihit_counter==0 || multihit_counter==1)
             {
                 for (u8 i = 0; i < no_of_all_banks; i++)
@@ -1175,13 +1153,15 @@ void atk49_move_end_turn()
             }
             INC_END_EVENTS
             break;
-        case 32: //pickpocket ability activation on strike
+        case 31: //pickpocket ability activation on strike
+            bank_attacker = new_battlestruct->various.cmd49_safeattacker_bank;
             if (ability_battle_effects(22, bank_target, 0, 0, 0))
                 effect = 1;
             INC_END_EVENTS
             break;
-        case 33: //meloetta
-            if(current_move==MOVE_RELIC_SONG)
+        case 32: //meloetta
+            bank_attacker = new_battlestruct->various.cmd49_safeattacker_bank;
+            if(MOVE_WORKED && current_move==MOVE_RELIC_SONG && !battle_participants[bank_attacker].status2.transformed)
             {
                 u16 *species = &battle_participants[bank_attacker].poke_species;
                 if(*species == POKE_MELOETTA_ARIA)
@@ -1197,7 +1177,7 @@ void atk49_move_end_turn()
                 }
                 if(effect)
                 {
-
+                    new_battlestruct->various.var2 = 0x21E;
                     battle_scripting.active_bank=bank_attacker;
                     battlescript_push();
                     battlescripts_curr_instruction = &zen_change_bs;
@@ -1205,7 +1185,7 @@ void atk49_move_end_turn()
             }
             INC_END_EVENTS
             break;
-        case 34: //in battle end turn form(e) change
+        case 33: //in battle end turn form(e) change
             {
                 for (u8 i = 0; i < no_of_all_banks; i++)
                 {
@@ -1252,12 +1232,13 @@ void atk49_move_end_turn()
                         case POKE_DARMANITAN:
                             if(hp_condition(i,1) && check_ability(i,ABILITY_ZEN_MODE))
                             {
-                                //new_battlestruct->various.active_bank=active_bank;
                                 effect = 1;
                                 new_battlestruct->various.var1 = POKE_ZEN_MODE;
+                                new_battlestruct->various.var2 = 0x21C;
                                 battle_scripting.active_bank=i;
                                 battlescript_push();
                                 battlescripts_curr_instruction = &zen_change_bs;
+
                             }
                             break;
                         case POKE_ZEN_MODE:
@@ -1266,6 +1247,7 @@ void atk49_move_end_turn()
                                 effect = 1;
                                 new_battlestruct->various.var1 = POKE_DARMANITAN;
                                 battle_scripting.active_bank=i;
+                                new_battlestruct->various.var2 = 0x21D;
                                 battlescript_push();
                                 battlescripts_curr_instruction = &zen_change_bs;
                             }
@@ -1647,9 +1629,25 @@ u8 immune_to_powder_moves(u8 def_bank, u16 move)
     return immune;
 }
 
-u8 is_in_parental_bond_banlist()
+u8 parental_ban_list[] = {23,39,47,66,67,70,71,98,116,125,142,157,0xFF};
+
+bool is_in_parental_bond_banlist()
 {
-    return 0;
+    u8 effect = move_table[current_move].script_id;
+    bool is_banned = false;
+    for(u8 i=0; parental_ban_list[i]!=0xFF; i++)
+    {
+        if(effect == parental_ban_list[i])
+        {
+            is_banned=true;
+            break;
+        }
+    }
+    if(current_move==MOVE_ENDEAVOR || current_move==MOVE_FINAL_GAMBIT)
+    {
+        is_banned=true;
+    }
+    return is_banned;
 }
 
 void check_and_set_parental_bond()
@@ -1659,10 +1657,12 @@ void check_and_set_parental_bond()
         if(does_move_target_multiple() || is_in_parental_bond_banlist())
         {
             new_battlestruct->various.parental_bond_mode=PBOND_DONT_SET;
+        }
+        else if(DAMAGING_MOVE(current_move))
+        {
+            new_battlestruct->various.parental_bond_mode=PBOND_PARENT;
             multihit_counter = 2;
         }
-        if(DAMAGING_MOVE(current_move))
-            new_battlestruct->various.parental_bond_mode=PBOND_PARENT;
     }
 }
 
@@ -1832,9 +1832,10 @@ void atk6A_remove_item()
     battlescripts_curr_instruction += 2;
     u16* item = &battle_participants[bank].held_item;
     battle_stuff_ptr->used_held_items[bank] = *item;
-    *item = 0;
+
     active_bank = bank;
-    if (symbiosis_effect(bank) == 0)
+    *item=0;
+    if(!berry_eaten(bank, true) && !(symbiosis_effect(bank)))
     {
         prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, item);
         mark_buffer_bank_for_execution(bank);
@@ -2546,16 +2547,25 @@ void revert_form_change(u8 mega_revert, u8 teamID, u8 side, struct pokemon* poke
     {
         u16 Cherrim = POKE_CHERRIM;
         set_attributes(poke, ATTR_SPECIES, &Cherrim);
+        calculate_stats_pokekmon(poke);
     }
     else if (species == POKE_AEGISLASH_BLADE)
     {
         u16 Aegi = POKE_AEGISLASH_SHIELD;
         set_attributes(poke, ATTR_SPECIES, &Aegi);
+        calculate_stats_pokekmon(poke);
     }
     else if (species == POKE_ZEN_MODE)
     {
         u16 Darm = POKE_DARMANITAN;
         set_attributes(poke, ATTR_SPECIES, &Darm);
+        calculate_stats_pokekmon(poke);
+    }
+    else if (species == POKE_MELOETTA_PIROUETTE)
+    {
+        u16 Aria = POKE_MELOETTA_ARIA;
+        set_attributes(poke, ATTR_SPECIES, &Aria);
+        calculate_stats_pokekmon(poke);
     }
     return;
 }

@@ -9,7 +9,7 @@ u8 count_party_pokemon(u8 bank);
 void revert_form_change(u8 mega_revert, u8 teamID, u8 side, struct pokemon* poke);
 u8 check_ability(u8 bank, u8 ability);
 void copy_status_condition_text(u8 bank, u8 confusion);
-u8 setup_berry_consume_buffers(u8 bank);
+void setup_berry_consume_buffers(u8 bank);
 
 bool load_weather_from_overworld()
 {

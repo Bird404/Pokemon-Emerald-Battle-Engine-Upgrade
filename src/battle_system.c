@@ -2570,7 +2570,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
 
 u8 not_magicguard(u8 bank);
 
-u8 berry_eaten(enum call_mode how_to_call, u8 bank)
+u8 berry_eaten(u8 bank, bool from_remove_item)
 {
     u8 cheek_pouch = 0;
     if (new_battlestruct->bank_affecting[bank].eaten_berry)
@@ -2581,19 +2581,19 @@ u8 berry_eaten(enum call_mode how_to_call, u8 bank)
             cheek_pouch = 1;
             s32 damage = __udivsi3(battle_participants[bank].max_hp, 3);
             if (damage == 0)
+            {
                 damage = 1;
+            }
             damage_loc = damage * -1;
 
-            if (how_to_call == MOVE_TURN)
+            if(from_remove_item)
             {
-                battlescript_push();
-                battlescripts_curr_instruction = &cheekpouch_bs;
-                battle_scripting.active_bank = bank;
+                battlescripts_curr_instruction -=2;
             }
-            else
-            {
-                call_bc_move_exec(&cheekpouch2_bs);
-            }
+            battlescript_push();
+            battlescripts_curr_instruction = &cheekpouch_bs;
+            battle_scripting.active_bank = bank;
+
             record_usage_of_ability(bank, ABILITY_CHEEK_POUCH);
         }
     }
@@ -2972,9 +2972,7 @@ u8 battle_turn_move_effects()
                     if (item_battle_effects(1, active_bank, 0))
                         effect = 1;
                     break;
-                case 5: //cheeck pouch
-                    if (berry_eaten(BATTLE_TURN, active_bank))
-                        effect = 1;
+                case 5:
                     break;
                 case 6:
                     break;
@@ -3269,8 +3267,6 @@ u8 battle_turn_move_effects()
                         effect = 1;
                     break;
                 case 27: //cheeck pouch again
-                    if (berry_eaten(BATTLE_TURN, active_bank))
-                        effect = 1;
                     break;
                 case 28: //toxic/flame orb
                     if (item_battle_effects(5, active_bank, 0))

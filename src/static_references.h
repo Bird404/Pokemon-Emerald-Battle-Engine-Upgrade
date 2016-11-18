@@ -91,7 +91,6 @@ extern void* aromaveilprevents_bs;
 extern void* statloss_bs;
 extern void* symbiosispass_bs;
 extern void* cheekpouch_bs;
-extern void* cheekpouch2_bs;
 extern void* no_effect_bs;
 extern void* lunardance_bs;
 extern void* leechseed_updated_bs;

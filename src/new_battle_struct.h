@@ -99,6 +99,7 @@ struct various{
     u8 eaten_berry_player : 6;
     u8 eaten_berry_opponent : 6;
     u8 active_bank : 2;
+    u8 cmd49_safeattacker_bank: 2;
     u8 inverse_battle : 1;
     u8 magicbounce : 1;
     u8 stormdrain : 1;

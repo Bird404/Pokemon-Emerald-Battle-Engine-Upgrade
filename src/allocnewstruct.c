@@ -21,6 +21,7 @@ void free_new_struct()
     for (u8 i = 0; i < 6; i++)
     {
         revert_form_change(1, i, 0, &party_player[i]);
+        revert_form_change(0, i, 0, &party_player[i]);
     }
     free(battle_stuff_ptr);
     free(new_battlestruct);
