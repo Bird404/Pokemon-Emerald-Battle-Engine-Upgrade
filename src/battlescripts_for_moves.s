@@ -256,6 +256,12 @@ battlescripts_table:
 .word FAIRYLOCK			@173 Fairy Lock
 .word BELCH             @174 Only able to execute after Berry Consumption
 .word FLAME_BURST       @175 Flame Burst
+.word DAMAGE_TRAP       @176 Thousand Waves, Spirit Shackle etc.
+.word DRAGON_TAIL       @177 Dragon Tail, Circle Throw etc.
+
+DAMAGE_TRAP:
+	setbyte EffectChooser 0x39
+	goto_cmd ATTACKING_MOVE
 
 FLAME_BURST:
 	setbyte EffectChooser 0x38
@@ -2196,3 +2202,41 @@ ATTACK_ANIM:
 	seteffectwithchance
 	faintpokemon bank_target 0x0 0x0 @faint target
 	goto_cmd ENDTURN
+
+
+DRAGON_TAIL:
+	jumpifsecondarystatus bank_target 0x1000000 ATTACKING_MOVE
+	attackcanceler
+	accuracycheck MOVE_MISSED 0x0
+	attackstring
+	critcalc
+	damagecalc
+	damageadjustment
+	attackstring
+	ppreduce
+	attackanimation
+	waitanimation
+	effectiveness_sound
+	hitanim bank_target
+	waitstate
+	graphicalhpupdate bank_target
+	datahpupdate bank_target
+	critmessage
+	waitmessage 0x40
+	resultmessage
+	waitmessage 0x40
+	seteffectwithchance
+	faintpokemon bank_target 0x0 0x0 @faint target
+	setbyte EndTurnTracker 0
+	cmd49 0x0 0x0
+	jumpifbyte 0x4 0x0202427C 0x29 DRAGON_TAIL_END
+	jumpifability bank_target 0x15 DRAGON_TAIL_END
+	jumpifspecialstatus3 bank_target 0x400 0x0 DRAGON_TAIL_END
+	jumpifword 0x4 0x2022FEC 0x40000 DRAGON_TAIL_END
+	setbyte 0x20241EA 0x12
+	setbyte 0x20241EB 0x0
+	setbyte EndTurnTracker 34
+	forcerandomswitch DRAGON_TAIL_END
+
+DRAGON_TAIL_END:
+	end_cmd

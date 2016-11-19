@@ -694,7 +694,7 @@ u8 primary_effect_setter()
         case 0x36: //berry eating
             {
                 u16* berry = &battle_participants[bank_to_apply].held_item;
-                if (!substitute && MOVE_WORKED && *berry && get_item_pocket_id(*berry) == 4 && current_hp)
+                if (!substitute && *berry && get_item_pocket_id(*berry) == 4 && current_hp)
                 {
 
                     bool arg = (move_table[current_move].arg2 == 0xA);
@@ -738,7 +738,14 @@ u8 primary_effect_setter()
 
             }
             break;
-    }
+        case 0x39: // thousand waves
+            if(!substitute && !battle_participants[bank_target].status2.cant_escape)
+            {
+                battlescript_push();
+                battlescripts_curr_instruction = &damagetrap_bs;
+            }
+            break;
+        }
     *move_effect = 0;
     if(matcher==battlescripts_curr_instruction)
         return 0;

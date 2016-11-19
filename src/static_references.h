@@ -175,5 +175,6 @@ extern void* protean_bs;
 extern void* gem_bs;
 extern void* telepathy_bs;
 extern void* flameburst_bs;
+extern void* damagetrap_bs;
 
 #endif /* static_references */
