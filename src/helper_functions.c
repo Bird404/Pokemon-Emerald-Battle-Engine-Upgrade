@@ -531,7 +531,6 @@ void damagecalc2()
     u32 damage = 0;
     type_effectiveness_calc(current_move, get_attacking_move_type(), bank_attacker, bank_target, 1);
     move_outcome.super_effective = 0;
-    move_outcome.not_very_effective = 0;
     switch (current_move)
     {
     case MOVE_DRAGON_RAGE:
@@ -559,6 +558,7 @@ void damagecalc2()
             battlescripts_curr_instruction = (void*) 0x082D9F1A;
             return;
         }
+        move_outcome.not_very_effective = 0;
         damage = battle_participants[bank_target].current_hp - battle_participants[bank_attacker].current_hp;
         break;
     }
