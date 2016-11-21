@@ -1,8 +1,8 @@
 GEN 4:
 Healing Wish
-Tailwind
+Tailwind (Complete)
 Metal Burst (Complete)
-Embargo
+Embargo (Complete)
 Fling
 Psycho Shift
 Trump Card
@@ -16,7 +16,7 @@ Magnet Rise (Reserved MRDS)
 Rock Wrecker (Reserved MRDS) (Complete)
 Magnet Bomb
 Stone Edge (Reserved MRDS)
-Captivate
+Captivate (Complete)
 Stealth Rock (Reserved MRDS)
 Chatter
 Judgment
@@ -27,7 +27,7 @@ Heal Order (Reserved MRDS) (Complete)
 Double Hit
 Roar of Time
 Spacial Rend (Reserved MRDS)
-Lunar Dance
+Lunar Dance (Complete)
 Crush Grip
 Magma Storm (Reserved MRDS)
 Dark Void
@@ -40,7 +40,7 @@ Wide Guard
 Guard Split
 Power Split
 Psyshock
-venoshock
+Venoshock (Complete)
 Autotomize
 Rage Powder (Reserved MRDS)
 Telekinesis
@@ -80,7 +80,7 @@ Fire Pledge
 Grass Pledge
 Frost Breath
 Dragon Tail
-Work Up 
+Work Up (Complete)
 Electroweb (Reserved MRDS)
 Dual Chop
 Heart Stamp (Reserved MRDS)
