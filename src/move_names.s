@@ -5,7 +5,7 @@
 .include "asm_defines.s"
 
 move_names_table:
-.byte Dash, Termin, Space, Space, Space, Space, Space, Space, Space, Space, Space, Space, Space
+.byte Dash, Dash, Termin, Space, Space, Space, Space, Space, Space, Space, Space, Space, Space
 .byte P_, o_, u_, n_, d_, Termin, Space, Space, Space, Space, Space, Space, Space
 .byte K_, a_, r_, a_, t_, e_, Space, C_, h_, o_, p_, Termin, Space
 .byte D_, o_, u_, b_, l_, e_, s_, l_, a_, p_, Termin, Space, Space

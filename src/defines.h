@@ -3,11 +3,6 @@
 
 #include "types.h"
 
-#define ALL_POKES 412 //number of all pokemon
-#define ALL_ITEMS 377 //number of all items
-#define NUM_OF_EVOS 5 //number of evolutions per pokemon
-#define KEYSTONE 0x4 //mega item that the player has to posses in order to mega evolve
-
 enum poke_sprite{
     SPRITE_BACK = 0,
     SPRITE_FRONT = 1
@@ -28,6 +23,7 @@ enum poke_gender{
 #include "./defines/pokes.h"
 #include "./defines/flavours.h"
 
+#include "config.h"
 #include "battle_structs.h"
 #include "battle_locations.h"
 #include "new_battle_struct.h"
@@ -149,12 +145,7 @@ enum poke_gender{
 
 #define RELATIVE_X 3
 #define BASE_X 4
-#define SINGLES_HEALTHBOX_X 120
-#define DBL_HB_0_X 120
-#define DBL_HB_2_X 132
-#define SINGLES_HEALTHBOX_Y 90
-#define DBL_HB_0_Y 75
-#define DBL_HB_2_Y 100
+
 #define TRIGGER_NUM_IGNORED_COLORS 4
 
 #define DISABLED_INDICATOR 1
