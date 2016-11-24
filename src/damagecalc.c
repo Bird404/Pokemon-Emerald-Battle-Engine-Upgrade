@@ -113,25 +113,15 @@ extern u8 is_of_type(u8 bank, u8 type);
 
 u8 count_stat_increases(u8 bank, u8 eva_acc)
 {
-    u8* stat_ptr = &battle_participants[bank].atk_buff;
+    u8* atk_ptr = &battle_participants[bank].atk_buff;
     u8 increases = 0;
-    for (u8 i = 0; i < 5; i++)
+    for (u8 i = 0; i < 7; i++)
     {
-        stat_ptr += i;
+        u8* stat_ptr = atk_ptr + i;
         if (*stat_ptr > 6)
         {
-            increases += *stat_ptr - 6;
-        }
-    }
-    if (eva_acc)
-    {
-        if (*stat_ptr > 6)
-        {
-            increases += *stat_ptr - 6;
-        }
-        if (*(stat_ptr + 1) > 6)
-        {
-            increases += *stat_ptr - 6;
+            if (i <= 5 || (i > 5 && eva_acc))
+                increases += (*stat_ptr - 6);
         }
     }
     return increases;

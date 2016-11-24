@@ -25,4 +25,4 @@
 #define POKE_MELOETTA_PIROUETTE 0x7
 
 
-#endif /* OONFIG_H */
+#endif /* CONFIG_H */

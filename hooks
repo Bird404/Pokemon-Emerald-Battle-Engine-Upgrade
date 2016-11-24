@@ -53,3 +53,4 @@ read_recorded_battle_byte 08185054 1
 update_battle_record 08184FBC 2
 return_0_nop 080475E4 0
 return_0_nop 080472A8 0
+explosion_like_switch_fix 08041922 0

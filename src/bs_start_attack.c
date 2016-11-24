@@ -107,7 +107,7 @@ u8 get_target_of_move(u16 move, u8 target_given, u8 adjust)
             case 8:
             case 64:
                 result_target = target_side;
-                if (absent_bank_flags & bits_table[result_target])
+                if (!is_bank_present(result_target))
                     result_target ^= 2;
                 break;
             case 32:

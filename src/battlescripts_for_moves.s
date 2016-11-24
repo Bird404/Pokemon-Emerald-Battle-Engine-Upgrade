@@ -2247,26 +2247,17 @@ FINAL_GAMBIT:
 	accuracycheck MOVE_MISSED 0x0
 	callasm_cmd 24 @damage calc2
 	jumpifbyte 0x4 0x0202427C 0x29 SUCCESS_MOVE_ATTACK
+	damageadjustment
 	attackstring
 	ppreduce
+	setuserhptozero
+	callasm_cmd 123 @set hp bar to 0
 	attackanimation
 	waitanimation
-	effectiveness_sound
 	hitanim bank_target
 	waitstate
-	graphicalhpupdate 0x1
-	datahpupdate 0x1
-	faintpokemon 0x1 0x0 0x0 @faint user
-	callasm_cmd 24 
-	damageadjustment
 	graphicalhpupdate bank_target
 	datahpupdate bank_target
-	critmessage
-	waitmessage 0x40
-	resultmessage
-	waitmessage 0x40
-	seteffectwithchance
 	faintpokemon bank_target 0x0 0x0 @faint target
+	faintpokemon bank_attacker 0x0 0x0 @faint user
 	goto_cmd ENDTURN
-
-

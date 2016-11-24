@@ -666,4 +666,15 @@ void handle_bug_bite()
     setup_berry_consume_buffers(bank);
 }
 
-
+u8 count_alive_mons(u8 bank)
+{
+    struct pokemon* poke = get_party_ptr(bank);
+    u8 pokes_amount = 0;
+    for (u8 i = 0; i < 6; i++)
+    {
+        struct pokemon* checking_poke = &poke[i];
+        if (is_poke_valid(checking_poke) && get_attributes(checking_poke, ATTR_CURRENT_HP, 0))
+            pokes_amount++;
+    }
+    return pokes_amount;
+}

@@ -1043,7 +1043,7 @@ void atk49_move_end_turn()
         case 24: //dual target moves
             if(!(hitmarker&HITMARKER_IMMOBILE_DUE_TO_STATUS) && move_table[current_move].target==move_target_both && battle_flags.double_battle &&
                !protect_structs[bank_attacker].flag0_onlystruggle && !(hitmarker&HITMARKER_NO_ATTACKSTRING)
-               && battle_participants[bank_target^2].current_hp)
+               && is_bank_present(bank_target ^ 2))
             {
                 bank_target=bank_target^2;
                 hitmarker|=HITMARKER_NO_ATTACKSTRING;
@@ -1692,6 +1692,12 @@ void atk00_move_canceller()
     {
         hitmarker |= 0x80000;
         battlescripts_curr_instruction = (void*) 0x082D8A4E; //bs_endturn and end
+        return;
+    }
+    u8 move_target = move_table[current_move].target;
+    if (!is_bank_present(bank_target) && (move_target == move_target_depends || move_target == move_target_selected || (move_target == move_target_foes_and_ally && !battle_flags.double_battle) || (move_target == move_target_both && !is_bank_present(bank_target ^ 2))))
+    {
+        battlescripts_curr_instruction = (void*) 0x082D9F1A; //no target, but it failed
         return;
     }
     else if (check_if_cannot_attack())

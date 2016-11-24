@@ -114,13 +114,6 @@ u8 ai_get_item_effect(u8 bank, u8 negating_effect)
     }
 }
 
-u16 get_bank_chosen_move(u8 bank)
-{
-    if (bank == 3) //the only bank that gets to choose move after its partner already did
-        return battle_participants[1].moves[battle_stuff_ptr->chosen_move_position[1]];
-    return 0;
-}
-
 u8 does_bank_know_move(u8 bank, u16 move)
 {
     for (u8 i = 0; i < 4; i++)
@@ -1373,4 +1366,30 @@ void tai81_hasmovewithaccuracylower() //u8 bank, u8 acc
     else
         *var = 0;
     tai_current_instruction += 3;
+}
+
+void tai82_getpartnerchosenmove()
+{
+    u16 move = 0;
+    if (tai_bank == 3)
+        move = battle_participants[1].moves[battle_stuff_ptr->chosen_move_position[1]];
+    AI_STATE->var = move;
+    tai_current_instruction++;
+}
+
+void tai83_hasanydamagingmoves() //u8 bank
+{
+    u8 bank = get_ai_bank(read_byte(tai_current_instruction + 1));
+    u8 has = 0;
+    for (u8 i = 0; i < 4; i++)
+    {
+        u16 move = ai_get_move(bank, i);
+        if (move && DAMAGING_MOVE(move))
+        {
+            has = 1;
+            break;
+        }
+    }
+    AI_STATE->var = has;
+    tai_current_instruction += 2;
 }

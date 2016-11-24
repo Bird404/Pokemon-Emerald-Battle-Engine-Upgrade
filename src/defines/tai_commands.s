@@ -756,3 +756,12 @@ jumpifbytevarEQ 0x1 \jumpifabilityPtr
 .byte \hasmovewithaccuracylowerbank
 .byte \hasmovewithaccuracyloweracc
 .endm
+
+.macro getpartnerchosenmove
+.byte 0x82
+.endm
+
+.macro hasanydamagingmoves hasanydamagingmovesbank
+.byte 0x83
+.byte \hasanydamagingmovesbank
+.endm

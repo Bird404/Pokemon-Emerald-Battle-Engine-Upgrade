@@ -972,6 +972,30 @@ TAI_SCRIPT_3: @ENCOURAGE status moves if it's a first turn; bitfield 0x8
 	jumpifrandLT 0x50 END_LOCATION
 	scoreupdate 2
 	return_cmd
+	
+TAI_SCRIPT_7: @Act Smart During Double Battles
+	jumpiftargetisally CONSIDER_MOVE_ON_ALLY
+	getpartnerchosenmove
+	jumpifwordvarEQ MOVE_HELPING_HAND PARTNER_CHOSE_HELPING_HAND
+	return_cmd
+PARTNER_CHOSE_HELPING_HAND:
+	getmovesplit
+	jumpifbytevarEQ SPLIT_STATUS POINTS_MINUS12
+	return_cmd
+CONSIDER_MOVE_ON_ALLY:
+	jumpifmove MOVE_HELPING_HAND CONSIDER_HELPINGHAND
+	goto_cmd POINTS_MINUS30
+CONSIDER_HELPINGHAND:
+	getpartnerchosenmove
+	jumpifwordvarEQ 0x0 HELPING_HAND_IFPARTNERCANATTACK
+	getvarmovepower
+	jumpifbytevarEQ 0x0 POINTS_MINUS10
+	scoreupdate 1
+	return_cmd
+HELPING_HAND_IFPARTNERCANATTACK:
+	hasanydamagingmoves bank_aipartner
+	jumpifbytevarEQ 0x0 POINTS_MINUS10
+	return_cmd
 
 .align 2
 tai_command_table:
@@ -1105,3 +1129,5 @@ tai_command_table:
 .word tai7F_isintruantturn + 1 			@0x7F
 .word tai80_getmoveeffectchance + 1 	@0x80
 .word tai81_hasmovewithaccuracylower + 1 	@0x81
+.word tai82_getpartnerchosenmove + 1 		@0x82
+.word tai83_hasanydamagingmoves + 1 	@0x83
