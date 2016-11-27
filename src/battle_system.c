@@ -3200,14 +3200,14 @@ u8 battle_turn_move_effects()
                         }
                     }
                     break;
-                case 20: //healblock
+                case 20: //heal block
                     if (ptr_to_struct->heal_block)
                     {
                         ptr_to_struct->heal_block--;
                         if (ptr_to_struct->heal_block == 0)
                         {
                             effect = 1;
-
+                            call_bc_move_exec(&healblock_end_bs2);
                         }
                     }
                     break;
@@ -3294,7 +3294,7 @@ u8 battle_turn_move_effects()
             if (effect != 5) //check for uproar
                  *tracker += 1;
             #define TRACKER_MAX 30
-            if (*tracker == TRACKER_MAX)
+            if (*tracker >= TRACKER_MAX)
             {
                 *tracker = 0;
                 *bank +=1;

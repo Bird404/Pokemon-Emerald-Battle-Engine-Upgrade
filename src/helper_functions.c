@@ -78,7 +78,7 @@ u8 pickpocket_text[] = {0xFD, 16, 0, 0xE7, 0xE8, 0xE3, 0xE0, 0xD9, 0, 0xFD, 15, 
 /*0x1A4*/ u8 rockyhelmet_text[] = {BuffCharac, 15, Space, i_, s_, Space, h_, u_, r_, t_, Space, b_, y_, JumpLine, BuffCharac, 16, Apos, Space, BuffCharac, 22, Exclam, 0xFF};
 /*0x1A5*/ u8 popped_text[] = {BuffCharac, 16, Apos, Space, BuffCharac, 22, Space, p_, o_, p_, p_, e_, d_, Exclam, 0xFF};
 /*0x1A6*/ u8 fellinlove_text[] = {BuffCharac, 15, Space, f_,e_,l_,l_, Space, i_, n_, Space, l_, o_, v_, e_, JumpLine, w_, i_, t_, h_, Space, BuffCharac, 16, Exclam, 0xFF};
-/*0x1A7*/ u8 healblockend_text[] = {H_, e_, a_, l_, Space, B_, l_, o_, c_, k_, Space, f_, o_, r_, BuffCharac, 18, JumpLine, h_, a_, s_, Space, e_, n_, d_, e_, d_, Exclam, 0xFF};
+/*0x1A7*/ u8 healblockend_text[] = {BuffCharac, 18, Apos, s_, Space, H_, e_, a_, l_, Space, B_, l_, o_, c_, k_, JumpLine, w_, o_, r_, e_, Space, o_, f_, f_, Exclam, 0xFF};
 /*0x1A8*/ u8 magicbounce_text[] = {BuffCharac, 15, Apos, s_, Space, BuffCharac, 20, JumpLine, w_, a_, s_, Space, b_, o_, u_, n_, c_, e_, d_, Space, b_, a_, c_, k_, Space, b_, y_, Space, BuffCharac, 25, Exclam, 0xFF};
 /*0x1A9*/ u8 angerpoint_text[] = {0xFD, 0x10, Apos, s_, 0, 0xFD, 0x19, 0 ,m_, a_, x_, e_, d_, 0, i_, t_, s_, 0xFE, a_, t_, t_, a_, c_, k_, Exclam, 0xFF};
 /*0x1AA*/ u8 stealhrock_text[] = {P_, o_, i_, n_, t_, e_, d_, Space, s_, t_, o_, n_, e_, s_, Space, d_, u_, g_, Space, i_, n_, t_, o_, JumpLine, BuffCharac, 16, Exclam, 0xFF};
@@ -2784,6 +2784,11 @@ void attackerhp_to_zero()
     mark_buffer_bank_for_execution(active_bank);
 }
 
+void reset_bg2x()
+{
+    bg2X_battle = 0;
+}
+
 void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*/, &change_attacker_item /*2*/, &try_to_lower_def /*3*/, &try_to_raise_spd /*4*/,
 &changestatvar1 /*5*/, &changestatvar2 /*6*/, &frisk_target_item /*7*/, &set_stat_msg_buffer /*8*/, &set_type_msg_buffer /*9*/, &set_team_msg_buffer /*10*/, &bad_dreams_damage_calc /*11*/,
 &weaknesspolicy /*12*/, &mentalherb /*13*/, &placeholder0x14 /*14*/, &hazards_bank_switcher /*15*/, &hazards_bank_return /*16*/, &leechseed_update /*17*/,
@@ -2807,7 +2812,7 @@ void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*
 &canusefling /*107*/, &happyhour_effect /*108*/, &canuseskydrop /*109*/, &skydropup /*110*/, &canusefairylock /*111*/, &healthbox_target_update /*112*/,
 &return_hitmarker_animation /*113*/, &transformed_species_to_0 /*114*/, &aegi_change /*115*/, &set_transfrom_palchange /*116*/, &bug_bite_end_tasks /*117*/,
 &type_stat_form_change/*118*/, &setup_zen_buffers/*119*/, &belch_canceler/*120*/, &attacker_bank_exchange/*121*/, &print_from_nbsvar2/*122*/,
-&attackerhp_to_zero /*123*/};
+&attackerhp_to_zero /*123*/, &reset_bg2x /*124*/};
 
 void callasm_cmd()
 {
@@ -2817,4 +2822,12 @@ void callasm_cmd()
     battlescripts_curr_instruction += 3;
     command = callasm_table[(command_id_ms<<8)+command_id_ls];
     command();
+}
+
+void anim6_swap_banks()
+{
+    u8 placeholder = animation_bank_attacker;
+    animation_bank_attacker = animation_bank_target;
+    animation_bank_target = placeholder;
+    move_anim_cursor++;
 }

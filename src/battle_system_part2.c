@@ -10,6 +10,7 @@ void revert_form_change(u8 mega_revert, u8 teamID, u8 side, struct pokemon* poke
 u8 check_ability(u8 bank, u8 ability);
 void copy_status_condition_text(u8 bank, u8 confusion);
 void setup_berry_consume_buffers(u8 bank);
+u16 get_item_extra_param(u16 item);
 
 bool load_weather_from_overworld()
 {
@@ -265,6 +266,7 @@ void b_load_sprite(struct pokemon* poke, u8 bank, struct sprite_table* sprites)
 void b_load_sprite_player(struct pokemon* poke, u8 bank)
 {
     b_load_sprite(poke, bank, back_sprites);
+    new_battlestruct->various.sent_in_player |= (bits_table[battle_team_id_by_side[bank]]);
 }
 
 void b_load_sprite_opponent(struct pokemon* poke, u8 bank)
@@ -311,7 +313,6 @@ u8 return_0_nop()
 {
     return 0;
 }
-
 
 u8 heal_and_confuse_berry_bug_bite(u8 bank, u8 item_effect, u8 quality)
 {
@@ -677,4 +678,86 @@ u8 count_alive_mons(u8 bank)
             pokes_amount++;
     }
     return pokes_amount;
+}
+
+void give_one_ev(struct pokemon* poke, u8 attr)
+{
+    u16 stat = get_attributes(poke, attr, 0);
+    if (stat < 252)
+    {
+        stat++;
+        set_attributes(poke, attr, &stat);
+    }
+}
+
+void evs_update(struct pokemon *poke, u16 defeated_species)
+{
+    u16 evs_total = 0;
+    for (u8 i = 0; i < 6; i++)
+    {
+        evs_total += get_attributes(poke, ATTR_HP_EV, 0);
+    }
+    u8 pokerus = specific_pokerus_check(poke, 0);
+    u8 power_item = 0xFF;
+    u16 item = (get_attributes(poke, ATTR_HELD_ITEM, 0));
+    if (get_item_x12_battle_function(item) == ITEM_EFFECT_MACHOBRACE)
+    {
+        power_item = (u8) get_item_extra_param(item);
+    }
+    struct poke_basestats* stats = &basestat_table->poke_stats[defeated_species];
+    for (u8 curr_stat = 0; curr_stat < 6; curr_stat++)
+    {
+        u8 to_add;
+        u8 power_bonus = 0;
+        switch (curr_stat)
+        {
+            case 0:
+                to_add = stats->evs_hp;
+                break;
+            case 1:
+                to_add = stats->evs_atk;
+                break;
+            case 2:
+                to_add = stats->evs_def;
+                break;
+            case 3:
+                to_add = stats->evs_spd;
+                break;
+            case 4:
+                to_add = stats->evs_spatk;
+                break;
+            case 5:
+                to_add = stats->evs_spdef;
+                break;
+        }
+        if (pokerus)
+            to_add *= 2;
+        if (power_item == 0)
+            to_add *= 2;
+        else if (item && power_item < 7 && to_add)
+        {
+            power_bonus = 4;
+            if (pokerus)
+                power_bonus *= 2;
+            item = 0;
+        }
+        while (to_add > 0 || power_bonus > 0)
+        {
+            if (evs_total >= 510)
+                return;
+            if (to_add)
+            {
+                give_one_ev(poke, ATTR_HP_EV + curr_stat);
+                to_add--;
+                evs_total++;
+            }
+            else if (power_bonus)
+            {
+                give_one_ev(poke, ATTR_HP_EV + (power_item - 1));
+                power_bonus--;
+                evs_total++;
+            }
+        }
+    }
+    return;
 }

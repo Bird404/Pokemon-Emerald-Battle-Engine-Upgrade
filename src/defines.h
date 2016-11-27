@@ -41,6 +41,19 @@ enum poke_gender{
 #define STAT_ACCURACY 6
 #define STAT_EVASION 7
 
+#define BACKGROUND_GRASS 0x0
+#define BACKGROUND_LONG_GRASS 0x1
+#define BACKGROUND_SAND 0x2
+#define BACKGROUND_UNDERWATER 0x3
+#define BACKGROUND_WATER 0x4
+#define BACKGROUND_POND 0x5
+#define BACKGROUND_ROCK 0x6
+#define BACKGROUND_CAVE 0x7
+#define BACKGROUND_INDOORS 0x8
+#define BACKGROUND_INDOORS_2 0x9
+
+#define POKE_BURMY(species) (species == POKE_BURMY_PLANT || species == POKE_BURMY_SAND || species == POKE_BURMY_TRASH)
+
 #define MOVE_WORKED !(move_outcome.failed || move_outcome.missed || move_outcome.not_affected)
 #define TARGET_TURN_DAMAGED (special_statuses[bank_target].moveturn_losthp)
 #define DAMAGING_MOVE(move) (move_table[move].split!=2)

@@ -15,6 +15,9 @@ decompression_buffer = 0x0201C000;
 battle_graphics = 0x020244D0;
 PiD_pbs = 0x020244BC;
 
+bg2X_battle = 0x02022E1C;
+bg2Y_battle = 0x02022E1E;
+
 front_sprites = 0x08000128;
 back_sprites = 0x0800012C;
 nick_male_sign = 0x085ED22E;
@@ -23,6 +26,9 @@ nick_genderless_sign = 0x085ED238;
 castform_form = 0x020244E4;
 
 randomly_chosen_move = 0x020241EE;
+
+prepare_party_mail_to_give = 0x080D4420|1;
+specific_pokerus_check = 0x0806DDE4|1;
 
 text_Wild_ = 0x085CBD85;
 text_Foe_ = 0x085CBD8B;

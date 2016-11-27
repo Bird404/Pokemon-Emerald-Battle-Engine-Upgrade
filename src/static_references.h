@@ -72,6 +72,7 @@ extern void* mentalherb_endmove_bs;
 extern void* disable_end_bs;
 extern void* encore_end_bs;
 extern void* healblock_end_bs;
+extern void* healblock_end_bs2;
 extern void* magicbounce_bs;
 extern void* angerpoint_bs;
 extern void* spikes_bs;

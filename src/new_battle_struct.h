@@ -118,6 +118,7 @@ struct various{
     u8 switch_in_cos_switch : 1; //and not because a poke fainted or it is the first one
     u8 protean_msg : 1;
     u8 recorded_mega : 1;
+    u8 sent_in_player : 6;
 };
 
 #define PBOND_PARENT 2

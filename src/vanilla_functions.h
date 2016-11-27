@@ -124,6 +124,8 @@ u8 get_bank_identity(u8 bank);
 void pal_fade_control_reset_maybe();
 u8 fadescreen_related(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u16 arg4);
 void quit_recorded_battle();
+u8 prepare_party_mail_to_give(struct pokemon* poke, u16 item);
+u8 specific_pokerus_check(struct pokemon* poke, u8 caseid);
 
 u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);

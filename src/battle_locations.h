@@ -89,6 +89,8 @@ u8 viewing_recorded_battle;
 u16 no_of_recorded_bytes[4];
 u16 var_800D_lastresult;
 u16 randomly_chosen_move;
+s16 bg2X_battle;
+s16 bg2Y_battle;
 
 u32 poison_status_flag;
 u32 sleep_status_flag;

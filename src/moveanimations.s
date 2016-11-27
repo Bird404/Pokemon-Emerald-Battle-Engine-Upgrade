@@ -1379,7 +1379,18 @@ TRUMP_CARD_animation:
 .byte 0x8
 
 HEAL_BLOCK_animation:
-.byte 0x8
+	loadparticle 0x27A3
+	loadparticle 0x272F
+	swapbanks
+	call_cmd 0x082D79DF
+	waitanimation
+	launchtask 0x08116620 + 1 0xA 0x5
+	.hword 0x2, 3, 0x3, 0x10, 0
+	pause_cmd 0x5A
+	launchtask 0x08116620 + 1 0xA 0x5
+	.hword 0x2, 1, 0x10, 0, 0
+	swapbanks
+	endanimation
 
 .align 2
 WRING_OUT_animation:

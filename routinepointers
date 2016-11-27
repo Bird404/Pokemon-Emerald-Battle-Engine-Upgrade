@@ -52,6 +52,8 @@ atkE1_intimidate_loop 0831C094
 atkE2_switchout_abilities 0831C098
 atkE4_secretpowereffect 0831C0A0
 atkEB_set_type_to_terrain 0831C0BC
+###new animation commands
+anim6_swap_banks 08525EB0
 ###start attack
 bs_start_attack 0831BC0C
 ###pre attacks

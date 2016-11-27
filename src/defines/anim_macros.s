@@ -34,7 +34,11 @@
 .byte 0x5
 .endm
 
-@no 6,7 commands
+.macro swapbanks @new command
+.byte 0x6
+.endm
+
+@no 7th command
 
 .macro endanimation
 .byte 0x8
