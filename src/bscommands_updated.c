@@ -188,7 +188,7 @@ void atk96_weather_damage()
     s32 damage = 0;
     u8 ability = battle_participants[bank_attacker].ability_id;
     u8 ability_effect = has_ability_effect(bank_attacker, 0, 1);
-    if (weather_abilities_effect() && !(get_item_effect(bank_attacker, 1) == ITEM_EFFECT_SAFETYGOOGLES) && !(ability_effect && ability == ABILITY_MAGIC_GUARD) &&!(absent_bank_flags & bits_table[bank_attacker]))
+    if (weather_abilities_effect() && !(get_item_effect(bank_attacker, 1) == ITEM_EFFECT_SAFETYGOOGLES) && !(ability_effect && ability == ABILITY_MAGIC_GUARD) && is_bank_present(bank_attacker))
     {
         if (battle_weather.flags.sandstorm || battle_weather.flags.permament_sandstorm)
         {
@@ -1068,9 +1068,9 @@ void atk49_move_end_turn()
                     break;
                 }
                 u8 next_target=bank_target+1;
-                while(next_target<no_of_all_banks && ((absent_bank_flags & bits_table[next_target]) || next_target==bank_attacker))
+                while (next_target < no_of_all_banks && (!is_bank_present(next_target) || next_target == bank_attacker))
                     next_target++;
-                if(next_target<no_of_all_banks && battle_participants[next_target].current_hp)
+                if(is_bank_present(next_target))
                 {
                     bank_target=next_target;
                     hitmarker|=HITMARKER_NO_ATTACKSTRING;
@@ -1538,7 +1538,7 @@ u8 check_if_cannot_attack()
                         battle_scripting.bide_damage = taken_damage[bank_attacker] * 2;
                         battlescripts_curr_instruction = (void*) 0x82DAD7C;
                         bank_target = hurt_by[bank_attacker];
-                        if (absent_bank_flags & bits_table[bank_target]) //poke's not longer on the battlefield
+                        if (!is_bank_present(bank_target)) //poke's not longer on the battlefield
                             bank_target = get_target_of_move(MOVE_BIDE, 1, 1);
                     }
                 }
