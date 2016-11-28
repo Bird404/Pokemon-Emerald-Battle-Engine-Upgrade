@@ -722,7 +722,7 @@ u8 primary_effect_setter()
         case 0x38: //flame burst
             if(battle_flags.double_battle)
             {
-                u8 target_ally=bank_attacker^0x3;
+                u8 target_ally=bank_target^0x2;
                 if(is_bank_present(target_ally) && !check_ability(target_ally,ABILITY_MAGIC_GUARD))
                 {
                     damage_loc = battle_participants[target_ally].max_hp>>4;
