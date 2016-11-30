@@ -246,7 +246,10 @@ void b_load_sprite(struct pokemon* poke, u8 bank, struct sprite_table* sprites)
             sprite_load = &load_poke_sprite;
         TiD = get_attributes(poke, ATTR_TID, 0);
     }
-    sprite_load(&sprites->p_sprite[species].sprite, battle_graphics.graphics_loc->decompressed_sprite[bank], species, PiD, SPRITE_BACK);
+    enum poke_sprite sprite = SPRITE_BACK;
+    if (sprites == front_sprites)
+        sprite = SPRITE_FRONT;
+    sprite_load(&sprites->p_sprite[species].sprite, battle_graphics.graphics_loc->decompressed_sprite[bank], species, PiD, sprite);
     void* poke_pal = poke_get_pal(species, TiD, PiD);
     LZ77UnCompWram(poke_pal, &decompression_buffer[0]);
     u16 pal_adder = 256 + bank * 16;
