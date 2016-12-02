@@ -1736,6 +1736,7 @@ ATTACK_SWITCH:
 	critcalc
 	damagecalc
 	damageadjustment
+	jumpifbyte 0x4 MoveOutcome OutcomeFailed | OutcomeMissed | OutcomeNotaffected ATTACK_ANIM
 	attackanimation
 	waitanimation
 	effectiveness_sound
