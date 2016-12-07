@@ -1569,7 +1569,7 @@ ELECTRIFY_MOVE:
 ATTACKCLEARSTATCHANGES:
 	setbyte EffectChooser 12
 	attackcanceler
-	accuracycheck MOVE_FAILED 0xFFFF
+	accuracycheck MOVE_FAILED 0x0
 	critcalc
 	damagecalc
 	goto_cmd SUCCESS_MOVE_ATTACK
