@@ -115,7 +115,7 @@ animation_bank_target = 0x02038437;
 move_anim_cursor = 0x020383F0;
 another_active_bank = 0x0202420F;
 
-previously_used_move = 0x02024240;
+sketchable_move_used = 0x02024240;
 attacked_by = 0x2024270;
 move_hit_with_pbs = 0x2024250;
 move_type_hit_with_pbs = 0x2024258;

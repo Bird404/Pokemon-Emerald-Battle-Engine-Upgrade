@@ -491,6 +491,8 @@ bool check_focus(u8 bank)
     return is_bank_focusing;
 }
 
+u16 get_move_from_pledge(u8 bank);
+
 void bs_start_attack()
 {
     u8 mode=0;  //mode 0 - get type with adjusting chosen target
@@ -564,7 +566,15 @@ void bs_start_attack()
                 }
                 else
                 {
-                    current_move=chosen_move_by_banks[bank_attacker];
+                    u16 pledge_move=get_move_from_pledge(bank_attacker);
+                    if(pledge_move)
+                    {
+                        current_move=pledge_move;
+                    }
+                    else
+                    {
+                        current_move=chosen_move_by_banks[bank_attacker];
+                    }
                     last_used_move=chosen_move_by_banks[bank_attacker];
                     if(chosen_move_by_banks[bank_attacker]!=attacker_struct->moves[current_move_position])
                         mode=1;

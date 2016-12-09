@@ -69,10 +69,7 @@ struct side_affecting{
     u8 wide_guard : 1;
     u8 quick_guard : 1;
     u8 crafty_shield : 1;
-    u8 combo_waterpledge : 1;
-    u8 combo_firepledge : 1;
-    u8 combo_grasspledge : 1;
-    u8 swamp_spd_halving : 3;
+    u8 swamp_spd_reduce : 3;
     u8 sea_of_fire : 3;
     u8 rainbow : 3;
     u8 mat_block : 1;
@@ -80,6 +77,7 @@ struct side_affecting{
     u8 lunardance_done : 1;
     u8 echo_voice_counter : 3;
     u8 ally_fainted_last_turn : 2;
+    u8 pledge_effect : 2; //1 for grass, 2 for fire , 3 for water
 };
 
 struct field_affecting{

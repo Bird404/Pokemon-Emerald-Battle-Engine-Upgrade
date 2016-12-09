@@ -258,7 +258,8 @@ battlescripts_table:
 .word FLAME_BURST       @175 Flame Burst
 .word DAMAGE_TRAP       @176 Thousand Waves, Spirit Shackle etc.
 .word DRAGON_TAIL       @177 Dragon Tail, Circle Throw etc.
-.word FINAL_GAMBIT      @178 Dragon Tail, Circle Throw etc.
+.word FINAL_GAMBIT      @178 Final Gambit
+.word PLEDGE_EFFECT     @179 Pledge Moves
 
 DAMAGE_TRAP:
 	setbyte EffectChooser 0x39
@@ -2180,6 +2181,8 @@ FIXED_DAMAGE:
 
 ATTACKING_MOVE:
 	attackcanceler
+.global CANCELER_FAIL
+CANCELER_FAIL:
 	accuracycheck MOVE_MISSED 0x0
 SUCCESS_MOVE_ATTACK_WITH_CALC:
 	attackstring
@@ -2261,4 +2264,13 @@ FINAL_GAMBIT:
 	datahpupdate bank_target
 	faintpokemon bank_target 0x0 0x0 @faint target
 	faintpokemon bank_attacker 0x0 0x0 @faint user
+	goto_cmd ENDTURN
+
+PLEDGE_EFFECT:
+	attackcanceler
+	callasm_cmd 125
+	waitmessage 0x40
+	callasm_cmd 128
+	printstring 0x21F
+	waitmessage 0x40
 	goto_cmd ENDTURN

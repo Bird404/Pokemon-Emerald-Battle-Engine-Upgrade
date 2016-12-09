@@ -32,7 +32,7 @@ u8 animation_bank_attacker;
 u8 animation_bank_target;
 u8 turn_order[4];
 u16 battle_team_id_by_side[4];
-u16 previously_used_move[4];
+u16 sketchable_move_used[4];
 u16 calling_move_used[4];
 u16 current_move_used[4];
 u8 attacked_by[4];

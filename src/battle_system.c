@@ -2691,7 +2691,7 @@ u8 can_lose_item(u8 bank, u8 stickyhold_check, u8 sticky_message)
 u8 calculate_effect_chance(u8 bank, u16 move)
 {
     u8 effect = move_table[move].effect_chance;
-    if (check_ability(bank, ABILITY_SERENE_GRACE))
+    if (check_ability(bank, ABILITY_SERENE_GRACE) || new_battlestruct->side_affecting[bank&1].rainbow)
         effect *= 2;
     if (effect >= 100 || move == MOVE_SECRET_POWER)
         return 1;
@@ -3343,6 +3343,8 @@ u8 update_turn_counters()
         switch (*statetracker)
         {
         case 0: //trick room
+            new_battlestruct->side_affecting[0].pledge_effect=0;
+            new_battlestruct->side_affecting[1].pledge_effect=0;
             if (new_battlestruct->field_affecting.trick_room)
             {
                 new_battlestruct->field_affecting.trick_room--;
@@ -3610,7 +3612,76 @@ u8 update_turn_counters()
                 *statetracker +=1;
             }
             break;
-        case 15: //wish
+        case 15: //swamp
+            while (*sidebank <= 1 && effect == 0)
+            {
+                if (new_battlestruct->side_affecting[*sidebank].swamp_spd_reduce)
+                {
+                    new_battlestruct->side_affecting[*sidebank].swamp_spd_reduce--;
+                    if (new_battlestruct->side_affecting[*sidebank].swamp_spd_reduce == 0)
+                    {
+                        battle_scripting.active_bank = *sidebank;
+                        effect = 1;
+                        call_bc_move_exec(&end_pledge_effect_bs);
+                        new_battlestruct->various.var2=0x227;
+                        break;
+                    }
+                }
+                *sidebank+=1;
+            }
+            if (effect == 0)
+            {
+                *sidebank = 0;
+                *statetracker +=1;
+            }
+            break;
+        case 16: //sea of fire
+            while (*sidebank <= 1 && effect == 0)
+            {
+                if (new_battlestruct->side_affecting[*sidebank].sea_of_fire)
+                {
+                    new_battlestruct->side_affecting[*sidebank].sea_of_fire--;
+                    if (new_battlestruct->side_affecting[*sidebank].sea_of_fire == 0)
+                    {
+                        battle_scripting.active_bank = *sidebank;
+                        effect = 1;
+                        call_bc_move_exec(&end_pledge_effect_bs);
+                        new_battlestruct->various.var2=0x228;
+                        break;
+                    }
+                }
+                *sidebank+=1;
+            }
+            if (effect == 0)
+            {
+                *sidebank = 0;
+                *statetracker +=1;
+            }
+            break;
+        case 17: //rainbow
+            while (*sidebank <= 1 && effect == 0)
+            {
+                if (new_battlestruct->side_affecting[*sidebank].rainbow)
+                {
+                    new_battlestruct->side_affecting[*sidebank].rainbow--;
+                    if (new_battlestruct->side_affecting[*sidebank].rainbow == 0)
+                    {
+                       battle_scripting.active_bank = *sidebank;
+                        effect = 1;
+                        call_bc_move_exec(&end_pledge_effect_bs);
+                        new_battlestruct->various.var2=0x229;
+                        break;
+                    }
+                }
+                *sidebank+=1;
+            }
+            if (effect == 0)
+            {
+                *sidebank = 0;
+                *statetracker +=1;
+            }
+            break;
+        case 18: //wish
             while (*sidebank < no_of_all_banks && effect == 0)
             {
                 if (battle_effects_duration.wish_duration[*sidebank])
@@ -3632,7 +3703,7 @@ u8 update_turn_counters()
                 *statetracker +=1;
             }
             break;
-        case 16: //rain
+        case 19: //rain
             if (battle_weather.flags.rain || battle_weather.flags.downpour || battle_weather.flags.heavy_rain || battle_weather.flags.permament_rain)
             {
                 effect = 1;
@@ -3657,7 +3728,7 @@ u8 update_turn_counters()
             *sidebank = 0;
             *statetracker += 1;
             break;
-        case 17: //new struct
+        case 20: //new struct
             while (*sidebank >= 1)
             {
                 if (new_battlestruct->side_affecting[*sidebank].ally_fainted_last_turn)
@@ -3668,7 +3739,7 @@ u8 update_turn_counters()
             }
             *sidebank = 0;
             *statetracker += 1;
-        case 18: //sun
+        case 21: //sun
             if (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)
             {
                 effect = 1;
@@ -3683,7 +3754,7 @@ u8 update_turn_counters()
             }
             *statetracker += 1;
             break;
-        case 19: //darude
+        case 22: //darude
             if (battle_weather.flags.sandstorm || battle_weather.flags.permament_sandstorm)
             {
                 effect = 1;
@@ -3700,7 +3771,7 @@ u8 update_turn_counters()
             }
             *statetracker += 1;
             break;
-        case 20: //hail
+        case 23: //hail
             if (battle_weather.flags.hail || battle_weather.flags.permament_hail)
             {
                 effect = 1;
@@ -3717,7 +3788,7 @@ u8 update_turn_counters()
             }
             *statetracker += 1;
             break;
-        case 21: //fog
+        case 24: //fog
             if (battle_weather.flags.fog || battle_weather.flags.permament_fog)
             {
                 effect = 1;
@@ -3738,7 +3809,7 @@ u8 update_turn_counters()
         default:
             *statetracker += 1;
         }
-        if (*statetracker > 22 && effect == 0)
+        if (*statetracker > 25 && effect == 0)
             break;
     }
     return effect;

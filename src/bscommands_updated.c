@@ -969,7 +969,7 @@ void atk49_move_end_turn()
                 hitmarker &= 0xFFFFEFFF;
             }
             if(hitmarker & HITMARKER_ATTACKSTRING_PRINTED) //used by sketch
-                previously_used_move[bank_attacker]=last_used_move;
+                sketchable_move_used[bank_attacker]=last_used_move;
             if (!(absent_bank_flags & bits_table[bank_attacker] & battle_stuff_ptr->absent_bank_flags_prev_turn) && last_move!=MOVE_BATON_PASS)
             {
                 if((hitmarker & HITMARKER_OBEYS))
@@ -2690,8 +2690,52 @@ void atkE4_secretpowereffect()
     return;
 }
 
+
 void atk15_setmoveeffectchance()
 {
+    if(MOVE_WORKED && TARGET_TURN_DAMAGED /*&& !affected_by_substitute(bank_target)*/)
+    {
+        u8 chosen_effect=new_battlestruct->side_affecting[bank_attacker&1].pledge_effect;
+        bool effect_of_pledge=false;
+        switch(chosen_effect)
+        {
+        case 1:
+            if(!new_battlestruct->side_affecting[bank_target&1].swamp_spd_reduce)
+            {
+                battlescripts_curr_instruction++;
+                new_battlestruct->side_affecting[bank_target&1].swamp_spd_reduce=5;
+                battlescript_push();
+                battlescripts_curr_instruction = &swamp_bs;
+                effect_of_pledge=true;
+            }
+            break;
+        case 2:
+            if(!new_battlestruct->side_affecting[bank_target&1].sea_of_fire)
+            {
+                battlescripts_curr_instruction++;
+                new_battlestruct->side_affecting[bank_target&1].sea_of_fire=5;
+                battlescript_push();
+                battlescripts_curr_instruction = &fire_sea_bs;
+                effect_of_pledge=true;
+            }
+            break;
+        case 3:
+            if(!new_battlestruct->side_affecting[bank_attacker&1].rainbow)
+            {
+                battlescripts_curr_instruction++;
+                new_battlestruct->side_affecting[bank_attacker&1].rainbow=5;
+                battlescript_push();
+                battlescripts_curr_instruction = &rainbow_bs;
+                effect_of_pledge=true;
+            }
+            break;
+        }
+        if(effect_of_pledge)
+        {
+            return;
+        }
+    }
+
     u8 percent = move_table[current_move].effect_chance;
     u8 chance;
     if (current_move == MOVE_SECRET_POWER)
@@ -2793,13 +2837,21 @@ void atk02_attackstring()
         }
         else
         {
+            battlescripts_curr_instruction++;
             if (!((hitmarker & HITMARKER_NO_ATTACKSTRING) || (hitmarker & HITMARKER_ATTACKSTRING_PRINTED)))
             {
-                b_std_message(4, bank_attacker);
+                if(new_battlestruct->side_affecting[bank_attacker&1].pledge_effect)
+                {
+                    battlescript_push();
+                    battlescripts_curr_instruction = &combined_move_bs;
+                }
+                else
+                {
+                    b_std_message(4, bank_attacker);
+                    battle_communication_struct.is_message_displayed = 1;
+                }
                 hitmarker |= HITMARKER_ATTACKSTRING_PRINTED;
             }
-            battlescripts_curr_instruction++;
-            battle_communication_struct.is_message_displayed = 0;
         }
     }
     return;

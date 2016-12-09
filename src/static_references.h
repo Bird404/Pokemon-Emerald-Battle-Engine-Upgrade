@@ -130,6 +130,7 @@ extern void* attackingstatschange_bs;
 extern void* return_bs;
 extern void* frisk_bs();
 extern void* bad_dreams_bs();
+extern void* CANCELER_FAIL();
 extern void* incinerateberry_bs;
 extern void* magnetrise_end_return_bs;
 extern void* telekinesis_end_return_bs;
@@ -177,5 +178,9 @@ extern void* gem_bs;
 extern void* telepathy_bs;
 extern void* flameburst_bs;
 extern void* damagetrap_bs;
-
+extern void* combined_move_bs;
+extern void* fire_sea_bs;
+extern void* swamp_bs;
+extern void* rainbow_bs;
+extern void* end_pledge_effect_bs;
 #endif /* static_references */

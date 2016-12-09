@@ -140,7 +140,7 @@ u16 get_speed(u8 bank)
         speed = percent_boost(speed, 50);
         break;
      case ITEM_EFFECT_QUICKPOWDER:
-        if (battle_participants[bank].poke_species == POKE_DITTO && battle_participants[bank].status2.transformed == 0)
+        if (battle_participants[bank].poke_species == POKE_DITTO && !battle_participants[bank].status2.transformed)
             speed <<= 1;
         break;
     }
@@ -180,15 +180,18 @@ u16 get_speed(u8 bank)
             break;
         }
     }
-    //paralysis
-    if (battle_participants[bank].status.flags.paralysis)
-        speed >>= 2;
     //tailwind
     if (new_battlestruct->side_affecting[is_bank_from_opponent_side(bank)].tailwind)
-        speed <<= 1;
+        speed <<=1;
     //unburden
     if (status3[bank].unburden)
         speed <<=1;
+    //swamp
+    if (new_battlestruct->side_affecting[is_bank_from_opponent_side(bank)].swamp_spd_reduce)
+        speed >>=2;
+    //paralysis
+    if (battle_participants[bank].status.flags.paralysis)
+        speed >>=2;
     speed = __udivsi3(speed * stat_buffs[battle_participants[bank].spd_buff].dividend, stat_buffs[battle_participants[bank].spd_buff].divisor);
 
     return speed;
@@ -202,19 +205,9 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
     switch (move)
     {
         case MOVE_GRASS_PLEDGE:
-            if (chosen_move_by_banks[atk_ally_bank] == MOVE_FIRE_PLEDGE || chosen_move_by_banks[atk_ally_bank] == MOVE_WATER_PLEDGE)
-            {
-                base_power = 150;
-            }
-            break;
         case MOVE_FIRE_PLEDGE:
-            if (chosen_move_by_banks[atk_ally_bank] == MOVE_GRASS_PLEDGE || chosen_move_by_banks[atk_ally_bank] == MOVE_WATER_PLEDGE)
-            {
-                base_power = 150;
-            }
-            break;
         case MOVE_WATER_PLEDGE:
-            if (chosen_move_by_banks[atk_ally_bank] == MOVE_FIRE_PLEDGE || chosen_move_by_banks[atk_ally_bank] == MOVE_GRASS_PLEDGE)
+            if (new_battlestruct->side_affecting[atk_bank&1].pledge_effect)
             {
                 base_power = 150;
             }

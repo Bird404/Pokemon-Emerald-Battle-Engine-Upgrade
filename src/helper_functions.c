@@ -52,12 +52,10 @@ u8 downloadatk_text[] = {0xFD, 0x13, 0xB4, 0xE7, 0x0, 0xFD, 0x1A, 0, 0xE6, 0xD5,
 u8 downloadspatk_text[] = {0xFD, 0x13, 0xB4, 0xE7, 0x0, 0xFD, 0x1A, 0, 0xE6, 0xD5, 0xDD, 0xE7, 0xD9, 0xD8, 0x00, 0xDD, 0xE8, 0xE7, 0xFE, 0xCD, 0xE4, 0xAD, 0, 0xBB, 0xE8, 0xE8, 0xD5, 0xD7, 0xDF, 0xAB, 0xFF};
 u8 absorbabilityboost_text[] = {0xFD, 0x10, 0xB4, 0xE7, 0, 0xFD, 0x19, 0, 0xE6, 0xD5, 0xDD, 0xE7, 0xD9, 0xD8, 0x00, 0xDD, 0xE8, 0xE7, 0xFE, 0xFD, 0x0, 0xAB ,0xFF};
 u8 absorbabilityimmune_text[] = {0xFD, 0x10, 0xB4, 0xE7, 0, 0xFD, 0x19, 0, 0xE1, 0xD5, 0xDF, 0xD9, 0xE7, 0x00, 0xDD, 0xE8, 0xFE, 0xDD, 0xE1, 0xE1, 0xE9, 0xE2, 0xD9, 0x00, 0xE8, 0xE3, 0x00, 0xFD, 0x00, 0xAE, 0xE8, 0xED, 0xE4, 0xD9, 0x00, 0xE1, 0xE3, 0xEA, 0xD9, 0xE7, 0xAB, 0xFF};
-u8 userteam_text[] = {Y_, o_, u_, r_, 0, t_, e_, a_, m_, Termin};
-u8 foeteam_text[] = {T_, h_, e_, 0, f_, o_, e_, Apos, s_, 0, t_, e_, a_, m_, Termin};
-//u8 userteam_lc_text[] = {y_, o_, u_, r_, 0, t_, e_, a_, m_, Termin};
-//u8 foeteam_lc_text[] = {t_, h_, e_, 0, f_, o_, e_, Apos, s_, 0, t_, e_, a_, m_, Termin};
-u8 aftermath_text[] = {0xFD, 15, 0, 0xDD, 0xE7, 0x0, 0xDC, 0xE9, 0xE6, 0xE8, 0x00, 0xD6, 0xED, 0xFE, 0xFD, 16, 0xB4, 0xE7, 0, 0xFD, 25, 0xAB, 0xFF};
-u8 pickpocket_text[] = {0xFD, 16, 0, 0xE7, 0xE8, 0xE3, 0xE0, 0xD9, 0, 0xFD, 15, 0xB4, 0xE7, 0xFE, 0xFD, 22, 0xAB, 0xFF};
+/*0x190*/u8 userteam_text[] = {Y_, o_, u_, r_, 0, t_, e_, a_, m_, Termin};
+/*0x191*/u8 foeteam_text[] = {T_, h_, e_, 0, f_, o_, e_, Apos, s_, 0, t_, e_, a_, m_, Termin};
+/*0x192*/u8 aftermath_text[] = {0xFD, 15, 0, 0xDD, 0xE7, 0x0, 0xDC, 0xE9, 0xE6, 0xE8, 0x00, 0xD6, 0xED, 0xFE, 0xFD, 16, 0xB4, 0xE7, 0, 0xFD, 25, 0xAB, 0xFF};
+/*0x193*/u8 pickpocket_text[] = {0xFD, 16, 0, 0xE7, 0xE8, 0xE3, 0xE0, 0xD9, 0, 0xFD, 15, 0xB4, 0xE7, 0xFE, 0xFD, 22, 0xAB, 0xFF};
 /*0x194*/ u8 mummy_text[] = {0xFD, 15, 0xB4, 0xE7, 0, 0xD5, 0xD6, 0xDD, 0xE0, 0xDD, 0xE8, 0xED, 0xFE, 0xD6, 0xD9, 0xD7, 0xD5, 0xE1, 0xD9, 0, 0xFD, 24, 0xAB, 0xFF};
 /*0x195*/ u8 target_ability[] = {0xFD, 16, 0xB4, 0xE7, 0, 0xFD, 25, 0xAB, 0xFF};
 /*0x196*/ u8 cursedbody_text[] = {0xFD, 16, 0xB4, 0xE7, 0, 0xFD, 25, 0, 0xD8, 0xDD, 0xE7, 0xD5, 0xD6, 0xE0, 0xD9, 0xD8, 0xFE, 0xFD, 15, 0xB4, 0xE7, 0, 0xFD, 0, 0xAB, 0xFF};
@@ -201,8 +199,25 @@ u8 pickpocket_text[] = {0xFD, 16, 0, 0xE7, 0xE8, 0xE3, 0xE0, 0xD9, 0, 0xFD, 15, 
 /*0x21D*/ u8 zen_end_text[] = {Z_, e_, n_, Space, M_, o_, d_, e_, Space, e_, n_, d_, e_, d_, Exclam, 0xFF};
 /*0x21E*/ u8 form_change_text[] = {0xFD, 0xF, Space, t_, r_, a_, n_, s_, f_, o_, r_, m_, e_, d_, Exclam, 0xFF};
 
+/*0x21F*/ u8 partner_wait_text[] = {0xFD, 0xF, Space, i_, s_, Space, w_, a_, i_, t_, i_, n_, g_, JumpLine, f_, o_, r_, Space, 0xFD, 0x13, Apos, s_, Space, m_, o_, v_, e_, Dot, Dot, Dot, Termin};
+/*0x220*/ u8 combined_move_text[] = {T_, h_, e_, Space, t_, w_, o_, Space, m_, o_, v_, e_, s_, Space, h_, a_, v_, e_, Space, b_ ,e_, c_, o_, m_, e_, Space, o_, n_, e_, Exclam, JumpLine,
+                                    I_, t_, Apos, s_, Space, a_, Space, c_, o_, m_, b_, i_, n_, e_, d_, Space, m_, o_, v_, e_, Exclam, Termin};
+/*0x221*/u8 userteam_lc_text[] = {y_, o_, u_, r_, 0, t_, e_, a_, m_, Termin};
+/*0x222*/u8 foeteam_lc_text[] = {t_, h_, e_, 0, f_, o_, e_, Apos, s_, 0, t_, e_, a_, m_, Termin};
+/*0x223*/u8 fire_sea_text[] = {A_, Space, s_, e_, a_, Space, o_, f_, Space, f_, i_, r_, e_, Space, e_, n_, v_, e_, l_, o_, p_, e_, d_, JumpLine, Space, 0xFD, 0x0, Exclam, Termin};
+/*0x224*/u8 fire_sea_hurt_text[] = {0xFD, 0x13, Space, i_, s_, Space, h_, u_, r_, t_, JumpLine, b_, y_, Space, t_, h_, e_, Space, s_, e_, a_, Space, o_, f_, Space, f_, i_, r_, e_, Exclam, Termin};
+/*0x225*/u8 swamp_text[] = {A_, Space, s_, w_, a_, m_, p_, Space, e_, n_, v_, e_, l_, o_, p_, e_, d_, JumpLine, Space, 0xFD, 0x0, Exclam, Termin};
+/*0x226*/u8 rainbow_text[] = {A_, Space, r_, a_, i_, n_, b_, o_, w_, Space, a_, p_, p_, e_, a_, r_, e_, d_, Space, i_, n_, Space, t_, h_, e_, Space, s_, k_, y_, JumpLine,
+o_, n_, Space, 0xFD, 0x0, Apos, s_, Space, s_, i_, d_, e_, Exclam, Termin};
+/*0x227*/u8 swamp_end_text[] = {T_, h_, e_, Space, s_, w_, a_, m_, p_, Space, a_, r_, o_, u_, n_, d_, JumpLine,
+                                0xFD, 0x0, Space, d_, i_, s_,  a_, p_, p_, e_, a_, r_, e_, d_, Exclam, Termin};
+/*0x228*/u8 fire_sea_end_text[] = {T_, h_, e_, Space, s_, e_, a_, Space, o_, f_, Space, f_, i_, r_, e_, Space, a_, r_, o_, u_, n_, d_, JumpLine,
+                                0xFD, 0x0, Space, d_, i_, s_,  a_, p_, p_, e_, a_, r_, e_, d_, Exclam, Termin};
+/*0x229*/u8 rainbow_end_text[] = {T_, h_, e_, Space, r_, a_, i_, n_, b_, o_, w_, Space, o_, v_, e_, r_, JumpLine,
+                                0xFD, 0x0, Space, d_, i_, s_,  a_, p_, p_, e_, a_, r_, e_, d_, Exclam, Termin};
+
 void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activation_text, &heavyrain_activation_text, &mysticalaircurrent_activation_text, &forewarn_text, &slowstart_text, &anticipation_text, &dryskin_damage_text, &solarpower_text, &harvest_text, &healer_text, &pickup_text, &moldbreaker_text, &turboblaze_text, &terravolt_text, &downloadatk_text,
-&downloadspatk_text, &absorbabilityboost_text , &absorbabilityimmune_text, &userteam_text/*0x190*/, &foeteam_text/*0x191*/,
+&downloadspatk_text, &absorbabilityboost_text , &absorbabilityimmune_text, &userteam_text, &foeteam_text,
 &aftermath_text, &pickpocket_text, &mummy_text, &target_ability, &cursedbody_text, &drastically_text, &pressure_text, &unnerve_text, &aurabreak_text, &fairyaura_text, &darkaura_text, &frisk_text, //0x19D
 &hurtbyitem_text, &got_burned_text, &got_badlypoisoned_text, &airballoon_text, &bad_dreams_text, &item_text, &rockyhelmet_text, &popped_text, &fellinlove_text, &healblockend_text, &magicbounce_text,
 &angerpoint_text, &stealhrock_text, &stickyweb_text, &gotpoisoned_text, &absorbed_spikes_text, &lost_some_hp_text, &tauntended_text, &tormentended_text,
@@ -222,7 +237,9 @@ void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activ
 &quash_text, &allyswitch_text, &topsyturvy_text, &bestow_text, &statushealpoison_text, &statushealburn_text, &statushealpar_text,
 &statushealslp_text, &statushealfrz_text, &primal_reversion_text, &congrats_player_text, &happyhour_text, &skydrop1_text, &skydrop2_text,
 &skydroptooheavy_text, &fairylock_text, &illusion_off_text, &protean_text, &gem_text, &telepathy_text, &flame_burst_text, &zen_mode_text,
-&zen_end_text, &form_change_text};
+&zen_end_text, &form_change_text, &partner_wait_text, &combined_move_text, &userteam_lc_text, &foeteam_lc_text, &fire_sea_text, &fire_sea_hurt_text,
+&swamp_text, &rainbow_text, &swamp_end_text, &fire_sea_end_text, &rainbow_end_text};
+
 
 void battle_string_loader(u16 string_id)
 {
@@ -372,6 +389,18 @@ void set_team_msg_buffer()
     else
         battle_text_buff1[2] = 0x91;
     battle_text_buff1[3] = 0x1;
+    battle_text_buff1[4] = 0xFF;
+}
+
+void set_team_msg_buffer_lc()
+{
+    battle_text_buff1[0] = 0xFD;
+    battle_text_buff1[1] = 0;
+    if (is_bank_from_opponent_side(battle_scripting.active_bank))
+        battle_text_buff1[2] = 0x22;
+    else
+        battle_text_buff1[2] = 0x21;
+    battle_text_buff1[3] = 0x2;
     battle_text_buff1[4] = 0xFF;
 }
 
@@ -1415,6 +1444,26 @@ void naturalgift()
         battlescripts_curr_instruction += 4;
 }
 
+void slot_bank2_turn_after_bank1(u8 bank1_turn, u8 bank2_turn, u8 bank2)
+{
+    if (bank1_turn == 0 && bank2_turn == 2)
+    {
+        turn_order[2] = turn_order[1];
+        turn_order[1] = bank2;
+    }
+    else if (bank1_turn == 0 && bank2_turn == 3)
+    {
+        turn_order[3] = turn_order[2];
+        turn_order[2] = turn_order[1];
+        turn_order[1] = bank2;
+    }
+    else //attacker == 1 target == 3
+    {
+        turn_order[3] = turn_order[2];
+        turn_order[2] = bank2;
+    }
+}
+
 void afteryou_check() //0 - first, 1 - second, 2 - third, 3 - fourth
 {
     u8 target_turn = get_bank_turn_order(bank_target);
@@ -1424,22 +1473,7 @@ void afteryou_check() //0 - first, 1 - second, 2 - third, 3 - fourth
     else
     {
         battlescripts_curr_instruction += 4;
-        if (attacker_turn == 0 && target_turn == 2)
-        {
-            turn_order[2] = turn_order[1];
-            turn_order[1] = bank_target;
-        }
-        else if (attacker_turn == 0 && target_turn == 3)
-        {
-            turn_order[3] = turn_order[2];
-            turn_order[2] = turn_order[1];
-            turn_order[1] = bank_target;
-        }
-        else //attacker == 1 target == 3
-        {
-            turn_order[3] = turn_order[2];
-            turn_order[2] = bank_target;
-        }
+        slot_bank2_turn_after_bank1(attacker_turn,target_turn,bank_target);
     }
 }
 
@@ -2789,6 +2823,125 @@ void reset_bg2x()
     bg2X_battle = 0;
 }
 
+void print_attack_message()
+{
+    current_move = chosen_move_by_banks[bank_attacker];
+    b_std_message(4, bank_attacker);
+    battle_communication_struct.is_message_displayed = 1;
+}
+
+void check_and_set_pledge()
+{
+    u8 pledge_effect=0;
+    u8 bank_ally=bank_attacker^2;
+    u16 first_mon_move=current_move;
+    u16 second_mon_move=0;
+    if(battle_flags.double_battle)
+    {
+        if(get_bank_turn_order(bank_ally)>get_bank_turn_order(bank_attacker))
+        {
+            if(is_bank_present(bank_ally) && get_bank_turn_order(bank_ally)>get_bank_turn_order(bank_attacker) &&
+               menu_choice_pbs[bank_ally]==0)
+            {
+                second_mon_move=chosen_move_by_banks[bank_ally];
+            }
+        }
+        if(first_mon_move==MOVE_GRASS_PLEDGE)
+        {
+            if(second_mon_move==MOVE_WATER_PLEDGE)
+            {
+                pledge_effect=1;
+            }
+            else if(second_mon_move==MOVE_FIRE_PLEDGE)
+            {
+                pledge_effect=2;
+            }
+        }
+        else if(first_mon_move==MOVE_WATER_PLEDGE)
+        {
+            if(second_mon_move==MOVE_FIRE_PLEDGE)
+            {
+                pledge_effect=3;
+            }
+            else if(second_mon_move==MOVE_GRASS_PLEDGE)
+            {
+                pledge_effect=1;
+            }
+        }
+        else if(first_mon_move==MOVE_FIRE_PLEDGE)
+        {
+            if(second_mon_move==MOVE_GRASS_PLEDGE)
+            {
+                pledge_effect=2;
+            }
+            else if(second_mon_move==MOVE_WATER_PLEDGE)
+            {
+                pledge_effect=3;
+            }
+        }
+    }
+    if(pledge_effect)
+    {
+        new_battlestruct->side_affecting[bank_ally&1].pledge_effect=pledge_effect;
+        print_attack_message();
+        slot_bank2_turn_after_bank1(get_bank_turn_order(bank_attacker),get_bank_turn_order(bank_ally),bank_ally);
+    }
+    else
+    {
+        battlescripts_curr_instruction=(void *)CANCELER_FAIL;
+    }
+}
+
+u16 get_move_from_pledge(u8 bank)
+{
+    switch(new_battlestruct->side_affecting[bank&1].pledge_effect)
+    {
+        case 1:
+            return MOVE_GRASS_PLEDGE;
+        case 2:
+            return MOVE_FIRE_PLEDGE;
+        case 3:
+            return MOVE_WATER_PLEDGE;
+    }
+    return 0;
+}
+
+void set_message_bank_buffer_to_ally()
+{
+    battle_scripting.active_bank=bank_attacker^2;
+}
+
+void print_combined_attack_message()
+{
+    current_move=get_move_from_pledge(bank_attacker);
+    b_std_message(0x220, bank_attacker);
+    battle_communication_struct.is_message_displayed = 1;
+}
+
+void set_fire_sea()
+{
+    battle_scripting.active_bank=bank_target;
+    set_team_msg_buffer_lc();
+    b_std_message(0x223, 0);
+    battle_communication_struct.is_message_displayed = 1;
+}
+
+void set_swamp()
+{
+    battle_scripting.active_bank=bank_target;
+    set_team_msg_buffer_lc();
+    b_std_message(0x225, 0);
+    battle_communication_struct.is_message_displayed = 1;
+}
+
+void set_rainbow()
+{
+    battle_scripting.active_bank=bank_attacker;
+    set_team_msg_buffer_lc();
+    b_std_message(0x226, 0);
+    battle_communication_struct.is_message_displayed = 1;
+}
+
 void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*/, &change_attacker_item /*2*/, &try_to_lower_def /*3*/, &try_to_raise_spd /*4*/,
 &changestatvar1 /*5*/, &changestatvar2 /*6*/, &frisk_target_item /*7*/, &set_stat_msg_buffer /*8*/, &set_type_msg_buffer /*9*/, &set_team_msg_buffer /*10*/, &bad_dreams_damage_calc /*11*/,
 &weaknesspolicy /*12*/, &mentalherb /*13*/, &placeholder0x14 /*14*/, &hazards_bank_switcher /*15*/, &hazards_bank_return /*16*/, &leechseed_update /*17*/,
@@ -2812,7 +2965,8 @@ void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*
 &canusefling /*107*/, &happyhour_effect /*108*/, &canuseskydrop /*109*/, &skydropup /*110*/, &canusefairylock /*111*/, &healthbox_target_update /*112*/,
 &return_hitmarker_animation /*113*/, &transformed_species_to_0 /*114*/, &aegi_change /*115*/, &set_transfrom_palchange /*116*/, &bug_bite_end_tasks /*117*/,
 &type_stat_form_change/*118*/, &setup_zen_buffers/*119*/, &belch_canceler/*120*/, &attacker_bank_exchange/*121*/, &print_from_nbsvar2/*122*/,
-&attackerhp_to_zero /*123*/, &reset_bg2x /*124*/};
+&attackerhp_to_zero /*123*/, &reset_bg2x /*124*/, &check_and_set_pledge/*125*/, &print_combined_attack_message/*126*/, &print_attack_message/*127*/,
+&set_message_bank_buffer_to_ally /*128*/, &set_fire_sea /*129*/, &set_swamp /*130*/, &set_rainbow/*131*/, &set_team_msg_buffer_lc/*132*/};
 
 void callasm_cmd()
 {
