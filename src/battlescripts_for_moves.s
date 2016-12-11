@@ -273,9 +273,7 @@ BELCH:
 	attackcanceler
 	callasm_cmd 120
 	accuracycheck MOVE_FAILED 0x0
-	critcalc
-	damagecalc
-	goto_cmd SUCCESS_MOVE_ATTACK
+	goto_cmd SUCCESS_MOVE_ATTACK_WITH_CALC
 
 TRANSFROM_MOVE_BS:
 	callasm_cmd 116
@@ -1346,9 +1344,7 @@ FAKEOUT:
 	jumpifnotfirstturn MOVE_FAILED
 	accuracycheck MOVE_MISSED 0x0
 	setbyte EffectChooser 0x88
-	critcalc
-	damagecalc
-	goto_cmd SUCCESS_MOVE_ATTACK
+	goto_cmd SUCCESS_MOVE_ATTACK_WITH_CALC
 	
 SETYAWN:
 	goto_cmd 0x082DA337
@@ -1359,12 +1355,13 @@ FURYCUTTER:
 	jumpiftypenotaffected FURYCUTTERNOTAFFECTED
 	furycutterdamagecalculation
 	critcalc
-	
-	goto_cmd SUCCESS_MOVE_ATTACK
+	goto_cmd SUCCESS_MOVE_ATTACK_WITH_CALC
+
 FURYCUTTERMISS:
 	orbyte MoveOutcome OutcomeMissed
 FURYCUTTERNOTAFFECTED:
 	furycutterdamagecalculation
+	goto_cmd SUCCESS_MOVE_ATTACK
 	
 SETDISABLE:
 	attackcanceler
@@ -1532,9 +1529,7 @@ ATTACK_ONLYIFSHARETYPE:
 	callasm_cmd 63 @jump if user and target don't share type
 	.word MOVE_FAILED
 	accuracycheck MOVE_MISSED 0x0
-	critcalc
-	damagecalc
-	goto_cmd SUCCESS_MOVE_ATTACK
+	goto_cmd SUCCESS_MOVE_ATTACK_WITH_CALC
 
 FOLLOWME:
 	attackcanceler
@@ -1571,9 +1566,7 @@ ATTACKCLEARSTATCHANGES:
 	setbyte EffectChooser 12
 	attackcanceler
 	accuracycheck MOVE_FAILED 0x0
-	critcalc
-	damagecalc
-	goto_cmd SUCCESS_MOVE_ATTACK
+	goto_cmd SUCCESS_MOVE_ATTACK_WITH_CALC
 
 CHANGEALLYSTAT:
 	attackcanceler
@@ -1722,11 +1715,7 @@ ATTACK_ONLYIF_TARGET_ATTACKS:
 	callasm_cmd 48 @checks if target chose an attacking move
 	.word MOVE_FAILED
 	accuracycheck MOVE_MISSED 0x0
-	attackstring
-	ppreduce
-	critcalc
-	damagecalc
-	goto_cmd SUCCESS_MOVE_ATTACK
+	goto_cmd SUCCESS_MOVE_ATTACK_WITH_CALC
 
 ATTACK_SWITCH:
 	attackcanceler
@@ -1785,12 +1774,13 @@ ATTACK_PROTECTION_BREAK:
 	accuracycheck MOVE_MISSED 0x0
 	attackstring
 	ppreduce
-	callasm_cmd 47 @breaks protection
-	call PROTECTION_BROKEN_MESSAGE
 	critcalc
 	damagecalc
 	damageadjustment
-	goto_cmd SUCCESS_MOVE_ATTACK
+	jumpifbyte 0x4 MoveOutcome OutcomeFailed | OutcomeMissed | OutcomeNotaffected ATTACK_ANIM
+	callasm_cmd 47 @breaks protection
+	call PROTECTION_BROKEN_MESSAGE
+	goto_cmd ATTACK_ANIM
 	
 PROTECTION_BROKEN_MESSAGE:
 	jumpifbyte Equals MultiStringChooser 0x2 JUSTRETURN
@@ -1956,6 +1946,8 @@ FAINT_HEAL:
 CRASH_ATTACK:
 	attackcanceler
 	accuracycheck CRASHED 0x0
+	attackstring
+	ppreduce
 	critcalc
 	damagecalc
 	jumpiftypenotaffected CRASHED
@@ -1983,12 +1975,12 @@ ATTACK_FLINCH_CHANCE:
 	attackcanceler
 ATTACK_FLINCH_CHANCE_CANCELLER_DONE:
 	accuracycheck MOVE_MISSED 0x0
+	attackstring
+	ppreduce
 	setbyte EffectChooser 8
 	critcalc
 	damagecalc
 	damageadjustment
-	attackstring
-	ppreduce
 	attackanimation
 	waitanimation
 	effectiveness_sound
@@ -2179,6 +2171,12 @@ FIXED_DAMAGE:
 	callasm_cmd 24 @damage calc2
 	goto_cmd SUCCESS_MOVE_ATTACK
 
+SUCCESS_MOVE_ATTACK:
+	damageadjustment
+	attackstring
+	ppreduce
+	goto_cmd ATTACK_ANIM	
+
 ATTACKING_MOVE:
 	attackcanceler
 .global CANCELER_FAIL
@@ -2186,12 +2184,10 @@ CANCELER_FAIL:
 	accuracycheck MOVE_MISSED 0x0
 SUCCESS_MOVE_ATTACK_WITH_CALC:
 	attackstring
+	ppreduce
 	critcalc
 	damagecalc
-SUCCESS_MOVE_ATTACK:
 	damageadjustment
-	attackstring
-	ppreduce
 ATTACK_ANIM:
 	attackanimation
 	waitanimation
@@ -2210,15 +2206,14 @@ ATTACK_ANIM:
 
 
 DRAGON_TAIL:
-	jumpifsecondarystatus bank_target 0x1000000 ATTACKING_MOVE
+	jumpifsubstituteaffects ATTACKING_MOVE
 	attackcanceler
 	accuracycheck MOVE_MISSED 0x0
 	attackstring
+	ppreduce
 	critcalc
 	damagecalc
 	damageadjustment
-	attackstring
-	ppreduce
 	attackanimation
 	waitanimation
 	effectiveness_sound
@@ -2234,6 +2229,7 @@ DRAGON_TAIL:
 	faintpokemon bank_target 0x0 0x0 @faint target
 	setbyte EndTurnTracker 0
 	cmd49 0x0 0x0
+	jumpiffainted bank_target DRAGON_TAIL_END
 	jumpifbyte 0x4 0x0202427C 0x29 DRAGON_TAIL_END
 	jumpifability bank_target 0x15 DRAGON_TAIL_END
 	jumpifspecialstatus3 bank_target 0x400 0x0 DRAGON_TAIL_END

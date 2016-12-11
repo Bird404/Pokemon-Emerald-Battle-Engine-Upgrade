@@ -144,5 +144,6 @@
 #define ITEM_EFFECT_PRIMALORB 0x8D
 #define ITEM_EFFECT_SHEDSHELL 0x8E
 #define ITEM_EFFECT_GEM 0x8F //the extra is the type it boosts
+#define ITEM_EFFECT_DAM_REDUX_BERRY 0x90 //the extra is the type it resists
 
 #endif /* ITEM_BATTLE_EFFECTS_H_H */

@@ -113,6 +113,8 @@ struct various{
     u8 ate_bonus : 1;
     u8 gem_boost : 1;
     u8 happyhour_bonus : 1;
+    u8 berry_damage_redux : 1;
+    u8 trigger_symbiosis: 1;
     u8 switch_in_cos_switch : 1; //and not because a poke fainted or it is the first one
     u8 protean_msg : 1;
     u8 recorded_mega : 1;

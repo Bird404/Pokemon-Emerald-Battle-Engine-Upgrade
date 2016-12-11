@@ -15,7 +15,7 @@ u8 cant_poison(u8 bank, u8 self_inflicted);
 u8 get_attacking_move_type();
 u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn);
 u8 percent_chance(u8 percent);
-void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank);
+void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u16 chained_effectiveness);
 u8 find_move_in_table(u16 move, u16 table_ptr[]);
 u8 protect_affects(u16 move, u8 set);
 u8 berry_eaten(u8 how_tocall, u8 bank);
@@ -35,6 +35,14 @@ u8 try_cherrim_change(u8 bank);
 u8 check_move_limitations(u8 bank, u8 not_usable_moves, u8 limitations);
 u32 accuracy_percent(u16 move, u8 bankatk, u8 bankdef);
 void handle_bug_bite();
+
+void set_unburden(u8 bank)
+{
+    if(check_ability(bank,ABILITY_UNBURDEN))
+    {
+        status3[bank].unburden=1;
+    }
+}
 
 void atk7D_set_rain()
 {
@@ -638,6 +646,7 @@ u8 primary_effect_setter()
                 battlescript_push();
                 battlescripts_curr_instruction = (void*) 0x082DB168;
                 battle_stuff_ptr->choiced_move[bank_to_apply] = 0;
+                set_unburden(bank_target);
             }
             break;
         case 0x30: //recoil
@@ -1489,7 +1498,7 @@ u8 check_if_cannot_attack()
                     battlescripts_curr_instruction = (void*) 0x82DB2BD;
                     battle_communication_struct.multistring_chooser = 1;
                     bank_target = bank_attacker;
-                    damage_calc(MOVE_POUND, TYPE_EGG, bank_attacker, bank_attacker);
+                    damage_calc(MOVE_POUND, TYPE_EGG, bank_attacker, bank_attacker, 0x64);
                     protect_structs[bank_attacker].flag1_confusion_self_damage = 1;
                     hitmarker |= 0x80000;
                 }
@@ -1814,9 +1823,9 @@ void atk88_drain_damage()
 u8 symbiosis_effect(u8 bank)
 {
     u8 symbiosis = 0;
-    if (new_battlestruct->bank_affecting[bank].item_used)
+    if (new_battlestruct->various.trigger_symbiosis)
     {
-        new_battlestruct->bank_affecting[bank].item_used = 0;
+        new_battlestruct->various.trigger_symbiosis = 0;
         u8 ally_bank = bank ^ 2;
         if (ability_battle_effects(20, bank, ABILITY_STATIC, 0, 0) && battle_participants[bank].held_item == 0 && battle_participants[ally_bank].held_item)
         {
@@ -1839,13 +1848,20 @@ u8 symbiosis_effect(u8 bank)
     return symbiosis;
 }
 
+void setup_berry_consume_buffers(u8 bank);
+
 void atk6A_remove_item()
 {
     u8 bank = get_battle_bank(read_byte(battlescripts_curr_instruction + 1));
     battlescripts_curr_instruction += 2;
     u16* item = &battle_participants[bank].held_item;
-    battle_stuff_ptr->used_held_items[bank] = *item;
-
+    if(*item)
+    {
+        new_battlestruct->various.trigger_symbiosis = 1;
+        set_unburden(bank);
+        battle_stuff_ptr->used_held_items[bank] = *item;
+        new_battlestruct->various.recently_used_item = *item;
+    }
     active_bank = bank;
     *item=0;
     if(!berry_eaten(bank, true) && !(symbiosis_effect(bank)))
@@ -1853,7 +1869,6 @@ void atk6A_remove_item()
         prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, item);
         mark_buffer_bank_for_execution(bank);
     }
-    return;
 }
 
 void atkA3_disable_move()
@@ -2806,7 +2821,6 @@ void atk02_attackstring()
     if (!battle_execution_buffer)
     {
         u8 type = get_attacking_move_type();
-        u16 item = battle_participants[bank_attacker].held_item;
         if (check_ability(bank_attacker, ABILITY_PROTEAN) && current_move != MOVE_STRUGGLE && !move_outcome.failed && !new_battlestruct->various.protean_msg)
         {
             new_battlestruct->various.protean_msg = 1;
@@ -2822,18 +2836,6 @@ void atk02_attackstring()
                 battlescript_push();
                 battlescripts_curr_instruction = &protean_bs;
             }
-        }
-        else if (MOVE_WORKED && DAMAGING_MOVE(current_move) && item && get_item_effect(bank_attacker, 1) == ITEM_EFFECT_GEM && get_item_extra_param(item) == type && current_move != MOVE_STRUGGLE && current_move != MOVE_WATER_PLEDGE && current_move != MOVE_FIRE_PLEDGE && current_move != MOVE_GRASS_PLEDGE)
-        {
-            last_used_item = item;
-            new_battlestruct->various.gem_boost = 1;
-            battle_text_buff1[0] = 0xFD;
-            battle_text_buff1[1] = 0x2;
-            battle_text_buff1[2] = current_move;
-            battle_text_buff1[3] = current_move >> 8;
-            battle_text_buff1[4] = 0xFF;
-            battlescript_push();
-            battlescripts_curr_instruction = &gem_bs;
         }
         else
         {

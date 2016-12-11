@@ -205,7 +205,7 @@ u8 absorbabilityimmune_text[] = {0xFD, 0x10, 0xB4, 0xE7, 0, 0xFD, 0x19, 0, 0xE1,
 /*0x221*/u8 userteam_lc_text[] = {y_, o_, u_, r_, 0, t_, e_, a_, m_, Termin};
 /*0x222*/u8 foeteam_lc_text[] = {t_, h_, e_, 0, f_, o_, e_, Apos, s_, 0, t_, e_, a_, m_, Termin};
 /*0x223*/u8 fire_sea_text[] = {A_, Space, s_, e_, a_, Space, o_, f_, Space, f_, i_, r_, e_, Space, e_, n_, v_, e_, l_, o_, p_, e_, d_, JumpLine, Space, 0xFD, 0x0, Exclam, Termin};
-/*0x224*/u8 fire_sea_hurt_text[] = {0xFD, 0x13, Space, i_, s_, Space, h_, u_, r_, t_, JumpLine, b_, y_, Space, t_, h_, e_, Space, s_, e_, a_, Space, o_, f_, Space, f_, i_, r_, e_, Exclam, Termin};
+/*0x224*/u8 fire_sea_hurt_text[] = {0xFD, 0xF, Space, i_, s_, Space, h_, u_, r_, t_, JumpLine, b_, y_, Space, t_, h_, e_, Space, s_, e_, a_, Space, o_, f_, Space, f_, i_, r_, e_, Exclam, Termin};
 /*0x225*/u8 swamp_text[] = {A_, Space, s_, w_, a_, m_, p_, Space, e_, n_, v_, e_, l_, o_, p_, e_, d_, JumpLine, Space, 0xFD, 0x0, Exclam, Termin};
 /*0x226*/u8 rainbow_text[] = {A_, Space, r_, a_, i_, n_, b_, o_, w_, Space, a_, p_, p_, e_, a_, r_, e_, d_, Space, i_, n_, Space, t_, h_, e_, Space, s_, k_, y_, JumpLine,
 o_, n_, Space, 0xFD, 0x0, Apos, s_, Space, s_, i_, d_, e_, Exclam, Termin};
@@ -215,6 +215,7 @@ o_, n_, Space, 0xFD, 0x0, Apos, s_, Space, s_, i_, d_, e_, Exclam, Termin};
                                 0xFD, 0x0, Space, d_, i_, s_,  a_, p_, p_, e_, a_, r_, e_, d_, Exclam, Termin};
 /*0x229*/u8 rainbow_end_text[] = {T_, h_, e_, Space, r_, a_, i_, n_, b_, o_, w_, Space, o_, v_, e_, r_, JumpLine,
                                 0xFD, 0x0, Space, d_, i_, s_,  a_, p_, p_, e_, a_, r_, e_, d_, Exclam, Termin};
+/*0x22A*/u8 berry_redux_text[] = {0xFD, 0x10, Apos, s_, Space, 0xFD, 0x16, JumpLine, r_, e_, d_, u_, c_, e_, d_, Space, 0xFD, 0x14, Apos, s_, Space, p_, o_, w_, e_, r_, Exclam, Termin};
 
 void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activation_text, &heavyrain_activation_text, &mysticalaircurrent_activation_text, &forewarn_text, &slowstart_text, &anticipation_text, &dryskin_damage_text, &solarpower_text, &harvest_text, &healer_text, &pickup_text, &moldbreaker_text, &turboblaze_text, &terravolt_text, &downloadatk_text,
 &downloadspatk_text, &absorbabilityboost_text , &absorbabilityimmune_text, &userteam_text, &foeteam_text,
@@ -238,7 +239,7 @@ void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activ
 &statushealslp_text, &statushealfrz_text, &primal_reversion_text, &congrats_player_text, &happyhour_text, &skydrop1_text, &skydrop2_text,
 &skydroptooheavy_text, &fairylock_text, &illusion_off_text, &protean_text, &gem_text, &telepathy_text, &flame_burst_text, &zen_mode_text,
 &zen_end_text, &form_change_text, &partner_wait_text, &combined_move_text, &userteam_lc_text, &foeteam_lc_text, &fire_sea_text, &fire_sea_hurt_text,
-&swamp_text, &rainbow_text, &swamp_end_text, &fire_sea_end_text, &rainbow_end_text};
+&swamp_text, &rainbow_text, &swamp_end_text, &fire_sea_end_text, &rainbow_end_text, &berry_redux_text};
 
 
 void battle_string_loader(u16 string_id)
@@ -594,6 +595,7 @@ void damagecalc2()
     if (damage < 1)
         damage = 1;
     damage_loc = damage;
+
     return;
 }
 
@@ -1457,7 +1459,7 @@ void slot_bank2_turn_after_bank1(u8 bank1_turn, u8 bank2_turn, u8 bank2)
         turn_order[2] = turn_order[1];
         turn_order[1] = bank2;
     }
-    else //attacker == 1 target == 3
+    else if (bank1_turn == 1 && bank2_turn ==3)//attacker == 1 target == 3
     {
         turn_order[3] = turn_order[2];
         turn_order[2] = bank2;

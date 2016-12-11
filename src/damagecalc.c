@@ -8,6 +8,7 @@
 u8 get_airborne_state(u8 bank, u8 mode, u8 check_levitate);
 u8 can_lose_item(u8 bank, u8 stickyholdcheck, u8 sticky_message);
 u8 is_item_a_plate(u16 item);
+u16 get_item_extra_param(u16 item);
 
 struct natural_gift{
     u8 move_power;
@@ -1154,11 +1155,10 @@ u16 get_def_stat(u16 move, u8 atk_bank, u8 def_bank)
 u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8 effects_handling_and_recording);
 u8 does_move_target_multiple();
 
-void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
+void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u16 chained_effectiveness)
 {
     damage_loc = 0;
     u16 base_power = apply_base_power_modifiers(move, move_type, atk_bank, def_bank, get_base_power(move, atk_bank, def_bank));
-    u16 chained_effectiveness=type_effectiveness_calc(move, move_type, atk_bank,def_bank,1);
     if (chained_effectiveness==0) // avoid wastage of time in case of non effective moves
         return;
     u16 atk_stat = get_attack_stat(move, move_type, atk_bank, def_bank);
@@ -1267,6 +1267,16 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
         final_modifier = chain_modifier(final_modifier, 0x14CD);
     }
 
+    if(get_item_effect(def_bank,1)==ITEM_EFFECT_DAM_REDUX_BERRY)
+    {
+        u8 type_to_resist = get_item_extra_param(battle_participants[def_bank].held_item);
+        if(type_to_resist==move_type && (move_outcome.super_effective || type_to_resist==TYPE_NORMAL))
+        {
+            final_modifier = chain_modifier(final_modifier, 0x800);
+            new_battlestruct->various.berry_damage_redux=1;
+        }
+    }
+
     if ((move == MOVE_STEAMROLLER || move == MOVE_STOMP) && status3[def_bank].minimized)
     {
         final_modifier = chain_modifier(final_modifier, 0x2000);
@@ -1279,7 +1289,12 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
     {
         final_modifier = chain_modifier(final_modifier, 0x2000);
     }
+
     damage = apply_modifier(final_modifier, damage);
+    if(damage==0)
+    {
+        damage=1;
+    }
     damage_loc = damage;
 }
 
@@ -1288,7 +1303,22 @@ u8 get_attacking_move_type();
 void damage_calc_cmd_05()
 {
     u8 move_type=get_attacking_move_type();
-    damage_calc(current_move, move_type, bank_attacker, bank_target);
+    u16 item = battle_participants[bank_attacker].held_item;
+    u16 chained_effectiveness=type_effectiveness_calc(current_move, move_type, bank_attacker,bank_target,1);
+    if (MOVE_WORKED && DAMAGING_MOVE(current_move) && item && get_item_effect(bank_attacker, 1) == ITEM_EFFECT_GEM && get_item_extra_param(item) == move_type && current_move != MOVE_STRUGGLE && current_move != MOVE_WATER_PLEDGE && current_move != MOVE_FIRE_PLEDGE && current_move != MOVE_GRASS_PLEDGE)
+    {
+        last_used_item = item;
+        new_battlestruct->various.gem_boost = 1;
+        battle_text_buff1[0] = 0xFD;
+        battle_text_buff1[1] = 0x2;
+        battle_text_buff1[2] = current_move;
+        battle_text_buff1[3] = current_move >> 8;
+        battle_text_buff1[4] = 0xFF;
+        battlescript_push();
+        battlescripts_curr_instruction = &gem_bs;
+        return;
+    }
+    damage_calc(current_move, move_type, bank_attacker, bank_target, chained_effectiveness);
     if(new_battlestruct->various.parental_bond_mode==PBOND_CHILD)
     {
         damage_loc=damage_loc>>1;

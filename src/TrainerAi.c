@@ -10,7 +10,7 @@ u8 learnsanydamagingmove(u16 poke);
 u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8 effects_handling_and_recording);
 u8 calculate_move_type(u8 bank, u16 move, u8 set_bonus);
 void critcalc_cmd4();
-void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank);
+void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u16 chained_effectiveness);
 void damagecalc2();
 u8 affected_by_substitute(u8 substitute_bank);
 u8 find_move_in_table(u16 move, u16 table_ptr[]);
@@ -190,7 +190,10 @@ u32 ai_calculate_damage(u8 atk_bank, u8 def_bank, u16 move)
     if (script_ID == 1) //fixed damage
         damagecalc2();
     else
-        damage_calc(move, move_type, atk_bank, def_bank);
+    {
+        u16 chained_effectiveness=type_effectiveness_calc(move, move_type, atk_bank,def_bank,0);
+        damage_calc(move, move_type, atk_bank, def_bank, chained_effectiveness);
+    }
     battlescripts_curr_instruction = bs_inst;
     u8 no_of_hits = 1;
     if (script_ID == 67) //hits two times
