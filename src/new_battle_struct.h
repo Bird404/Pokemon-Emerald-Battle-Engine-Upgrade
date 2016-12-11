@@ -30,7 +30,6 @@ struct bank_affecting{
     u8 kingsshield_damage : 1;
     u8 spikyshield_damage : 1;
     u8 grassyterrain_heal : 1;
-    u8 item_used : 1;
     u8 slowstart_duration : 3;
     u8 aegislash_form : 2; //0 = not aegi, 1 = defensive, 2 = attacking
     u8 killer_bank : 2;
