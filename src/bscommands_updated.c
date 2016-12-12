@@ -595,14 +595,11 @@ u8 primary_effect_setter()
             }
             break;
          case 13: //steal item
-            if(!substitute && battle_participants[bank_attacker].current_hp)
+            if(!substitute && battle_participants[bank_attacker].current_hp && !battle_flags.flag_x4000000)
             {
                 u16* targets_item = &applier_bank->held_item;
                 u16* attackers_item = &battle_participants[bank_attacker].held_item;
-                u8 stickymsg = 0;
-                //if (primary || certain)
-                    //stickymsg = 1;
-                if (*targets_item && *attackers_item == 0 && can_lose_item(bank_target, 1, stickymsg))
+                if (*targets_item && !CHECK_KNOCKED_OFF(bank_target) && *attackers_item == 0 && can_lose_item(bank_target, 1, 1))
                 {
                     battlescript_push();
                     battlescripts_curr_instruction = (void*) 0x82DB422;
