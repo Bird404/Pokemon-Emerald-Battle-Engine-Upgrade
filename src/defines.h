@@ -62,6 +62,8 @@ enum poke_gender{
 #define AEGISLASH_ID(species) (species == POKE_AEGISLASH_BLADE || species == POKE_AEGISLASH_SHIELD)
 #define SEMI_INVULNERABLE(bank) (status3[bank].underground || status3[bank].underwater || status3[bank].on_air || status3[bank].phantomforce || new_battlestruct->bank_affecting[bank].sky_drop_attacker || new_battlestruct->bank_affecting[bank].sky_drop_target)
 #define MUST_HIT(bank_atk, bank_def) (status3[bank_def].always_hits && disable_structs[bank_def].always_hits_bank == bank_atk)
+#define CHECK_KNOCKED_OFF(bank) (battle_effects_duration.knocked_off_pokes[is_bank_from_opponent_side(bank)] & bits_table[battle_team_id_by_side[bank]])
+#define SET_KNOCKED_OFF(bank) (battle_effects_duration.knocked_off_pokes[is_bank_from_opponent_side(bank)] |= bits_table[battle_team_id_by_side[bank]])
 
 #define REQUEST_SPECIES_BATTLE 0x1
 #define REQUEST_HELDITEM_BATTLE 0x2
