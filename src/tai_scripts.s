@@ -610,6 +610,10 @@ IS_TARGET_UNABLETOESCAPE:
 	jumpifstatus2 bank_target STATUS2_WRAPPED | STATUS2_TRAPPED AI_VAR_RETURN_1
 	abilitypreventsescape bank_ai bank_target
 	return_cmd
+IS_AI_UNABLETOESCAPE:	
+	jumpifstatus2 bank_ai STATUS2_WRAPPED | STATUS2_TRAPPED AI_VAR_RETURN_1
+	abilitypreventsescape bank_target bank_ai
+	return_cmd
 AI_VAR_RETURN_0:
 	setbytevar 0x0
 	return_cmd
@@ -996,6 +1000,11 @@ HELPING_HAND_IFPARTNERCANATTACK:
 	hasanydamagingmoves bank_aipartner
 	jumpifbytevarEQ 0x0 POINTS_MINUS10
 	return_cmd
+	
+TAI_SCRIPT_1D: @roaming
+	call_cmd IS_AI_UNABLETOESCAPE
+	jumpifbytevarEQ 0x1 END_LOCATION
+	flee
 
 .align 2
 tai_command_table:
