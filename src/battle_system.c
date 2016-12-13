@@ -2207,14 +2207,16 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 {
                     effect = NO_COMMON_ITEM_EFFECT;
                     battle_scripting.field11 = 0;
-                    call_bc_move_exec(&weaknesspolicy_bs);
+                    battlescript_push();
+                    battlescripts_curr_instruction = &weaknesspolicy_bs;
+                    bank_partner_def = bank;
                 }
             }
             break;
         case ITEM_EFFECT_REDCARD:
             battle_scripting.active_bank = bank_attacker;
         case ITEM_EFFECT_EJECTBUTTON:
-            if ((MOVE_WORKED && TARGET_TURN_DAMAGED) && battle_participants[bank].current_hp)
+            if ((MOVE_WORKED && TARGET_TURN_DAMAGED) && battle_participants[bank].current_hp && multihit_counter <= 1)
             {
                 void* current_instruction = battlescripts_curr_instruction;
                 battlescripts_curr_instruction = &can_switch_bs;
@@ -2223,7 +2225,8 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 {
                     effect = NO_COMMON_ITEM_EFFECT;
                     battlescripts_curr_instruction = current_instruction;
-                    call_bc_move_exec(&ejectbutton_bs);
+                    battlescript_push();
+                    battlescripts_curr_instruction = &ejectbutton_bs;
                 }
                 else
                      battlescripts_curr_instruction = current_instruction;
@@ -2237,7 +2240,8 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 if (damage_loc == 0)
                     damage_loc = 1;
                 effect = NO_COMMON_ITEM_EFFECT;
-                call_bc_move_exec(&rockyhelmet_bs);
+                battlescript_push();
+                battlescripts_curr_instruction = &rockyhelmet_bs;
                 record_usage_of_item(bank, ITEM_EFFECT_ROCKYHELMET);
             }
             break;
@@ -2255,7 +2259,8 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 active_bank = bank_attacker;
                 prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, attacker_item);
                 mark_buffer_bank_for_execution(active_bank);
-                call_bc_move_exec(&stickybarbswap);
+                battlescript_push();
+                battlescripts_curr_instruction = &stickybarbswap;
                 bank = bank_attacker;
             }
             break;
@@ -2263,7 +2268,8 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             if (MOVE_WORKED && TARGET_TURN_DAMAGED)
             {
                 effect = NO_COMMON_ITEM_EFFECT;
-                call_bc_move_exec(&balloonpops_bs);
+                battlescript_push();
+                battlescripts_curr_instruction = &balloonpops_bs;
             }
             break;
         case ITEM_EFFECT_DESTINYKNOT:
@@ -2273,7 +2279,8 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 {
                     battle_participants[bank_attacker].status2.in_love |= bits_table[bank];
                     effect = NO_COMMON_ITEM_EFFECT;
-                    call_bc_move_exec(&destinyknot_bs);
+                    battlescript_push();
+                    battlescripts_curr_instruction = &destinyknot_bs;
                 }
             }
             break;
@@ -2287,7 +2294,9 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             break;
             STATRAISE:
                 effect = NO_COMMON_ITEM_EFFECT;
-                call_bc_move_exec(&statraise_bs);
+                bank_partner_def = bank;
+                battlescript_push();
+                battlescripts_curr_instruction = &statraise_bs;
                 battle_scripting.field11 = 0;
             break;
         case ITEM_EFFECT_CELLBATTERY:
