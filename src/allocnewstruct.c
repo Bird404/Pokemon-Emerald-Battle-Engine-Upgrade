@@ -9,7 +9,7 @@ void alloc_new_struct()
     battle_stuff_ptr = (struct battle_stuff*) malloc_and_clear(0x2A4);
     new_battlestruct = (struct new_battle_struct*) malloc_and_clear(sizeof(struct new_battle_struct));
     //apply Egg Type
-    for (u8 i = 0; i < no_of_all_banks; i++)
+    for (u8 i = 0; i < 4; i++)
     {
         new_battlestruct->bank_affecting[i].type3 = TYPE_EGG;
     }
