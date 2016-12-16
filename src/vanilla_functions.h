@@ -3,6 +3,7 @@
 
 #include "types.h"
 
+char *int_to_str(char *buffer, u8 lvl, u8 a, u8 b);
 u8 get_item_x12_battle_function(u16 item_id);
 u8 get_item_quality(u16 item_id);
 void execute_battle_script(void* ptr_to_battlescript);

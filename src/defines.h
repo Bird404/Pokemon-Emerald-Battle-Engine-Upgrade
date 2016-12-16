@@ -164,6 +164,7 @@ enum poke_gender{
 #define TRIGGER_NUM_IGNORED_COLORS 4
 
 #define DISABLED_INDICATOR 1
+#define PRIMAL_CHECK_COMPLETE 2
 
 enum call_mode
 {

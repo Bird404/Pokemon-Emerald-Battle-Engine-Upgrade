@@ -124,7 +124,7 @@ u8 can_set_mega_trigger(u8 bank)
     {
         res=true;
     }
-    if(res && checkitem(KEYSTONE, 1) && (get_mega_species(bank,0xFB) || get_mega_species(bank,0xFC)))
+    if(res && /*checkitem(KEYSTONE, 1) &&*/ (get_mega_species(bank,0xFB) || get_mega_species(bank,0xFC)))
     {
         if (get_mega_species(bank,0xFB))
         {

@@ -37,15 +37,29 @@ bool handle_primal_reversion(u8 bank)
             perform_reversion = true;
             struct battle_participant* bank_struct = &battle_participants[bank];
             u8 banks_side = is_bank_from_opponent_side(bank);
+            u8 objid = new_battlestruct->mega_related.indicator_id_pbs[bank];
+            if(reversion_mode==ALPHA_REVERSION)
+            {
+                objects[objid].final_oam.attr2+=2;
+                execute_battle_script(&alpha_primal_reversion_bs);
+            }
+            else if(reversion_mode==OMEGA_REVERSION)
+            {
+                objects[objid].final_oam.attr2+=1;
+                execute_battle_script(&omega_primal_reversion_bs);
+            }
             struct pokemon* poke_address;
             if (banks_side == 1)
             {
                 poke_address = &party_opponent[battle_team_id_by_side[bank]];
+                new_battlestruct->mega_related.ai_party_mega_check|=bits_table[battle_team_id_by_side[bank]];
             }
             else
             {
                 poke_address = &party_player[battle_team_id_by_side[bank]];
+                new_battlestruct->mega_related.party_mega_check|=bits_table[battle_team_id_by_side[bank]];
             }
+            objects[objid].private[PRIMAL_CHECK_COMPLETE]=true;
             set_attributes(poke_address, ATTR_SPECIES, &primal_species);
             calculate_stats_pokekmon(poke_address);
             bank_struct->atk = get_attributes(poke_address, ATTR_ATTACK, 0);
@@ -67,14 +81,6 @@ bool handle_primal_reversion(u8 bank)
 
             new_battlestruct->various.active_bank = bank;
             bank_attacker = bank;
-            if(reversion_mode==ALPHA_REVERSION)
-            {
-                execute_battle_script(&alpha_primal_reversion_bs);
-            }
-            else if(reversion_mode==OMEGA_REVERSION)
-            {
-                execute_battle_script(&omega_primal_reversion_bs);
-            }
 
         }
     }

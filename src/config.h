@@ -24,6 +24,9 @@
 #define POKE_BURMY_SAND             1009
 #define POKE_BURMY_TRASH            1010
 
+//mega primal species
+#define POKE_MEGA_RAYQUAZA          1011
+
 //only change these if you want to adjust the position of mega icons or if you want to change the HP bars
 #define SINGLES_HEALTHBOX_X 120
 #define DBL_HB_0_X 120

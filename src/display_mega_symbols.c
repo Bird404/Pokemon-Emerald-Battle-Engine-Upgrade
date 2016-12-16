@@ -1,10 +1,13 @@
 #include "defines.h"
 #include "megaimages/indicators.h"
 #include "megaimages/mega_trigger.h"
+u16 get_item_extra_param(u16 item);
+u8 get_reversion_type(u8 bank, u16 target_species);
 
 //resource gfx_healthbar = {0x083EF524, 0x80, 0x1234};
 struct image_resource gfx_indicator = {indicatorsTiles, 0x80, 0x1234};
 struct image_resource pal_indicator = {indicatorsPal, 0x1234};
+
 struct image_resource gfx_trigger = {mega_triggerTiles, 0x400, 0x2345};
 struct image_resource gfx_trigger_dbl = {mega_triggerTilesDbl, 0x400, 0x2345};
 struct image_resource pal_trigger = {mega_triggerPal, 0x2345};
@@ -226,6 +229,20 @@ u8 hide_trigger()
     return can_b_button_work;
 }
 
+bool not_mega_or_primal(u8 bank)
+{
+    bool not_mega=false;
+    if ((bank&1) && (!(new_battlestruct->mega_related.ai_party_mega_check&bits_table[battle_team_id_by_side[bank]])))
+    {
+        not_mega=true;
+    }
+    else if (!(bank&1) && (!(new_battlestruct->mega_related.party_mega_check&bits_table[battle_team_id_by_side[bank]])))
+    {
+        not_mega=true;
+    }
+    return not_mega;
+}
+
 void healthbar_indicator_callback(struct object *self)
 {
     if(!self->private[DISABLED_INDICATOR])
@@ -233,8 +250,7 @@ void healthbar_indicator_callback(struct object *self)
         u8 bank=self->private[0];
         struct object healthbox = objects[healthbox_obj_id_pbs[bank]];
 
-        if(battle_outcome || (healthbox.invisible) || ((bank&1) && !(new_battlestruct->mega_related.ai_party_mega_check&bits_table[battle_team_id_by_side[bank]]))
-           || (!(bank&1) && !(new_battlestruct->mega_related.party_mega_check&bits_table[battle_team_id_by_side[bank]])))
+        if(battle_outcome || (healthbox.invisible) || not_mega_or_primal(bank))
         {
             self->pos1.x=-8;
             return;
@@ -245,15 +261,31 @@ void healthbar_indicator_callback(struct object *self)
             self->pos1.x=-8;
             return;
         }
+        if(!self->private[PRIMAL_CHECK_COMPLETE])
+        {
+            self->private[PRIMAL_CHECK_COMPLETE]=1;
+            if(get_item_effect(bank,0)==ITEM_EFFECT_PRIMALORB)
+            {
+                u8 quality = get_item_quality(battle_participants[bank].held_item);
+                if(quality==1 || quality==2)
+                {
+                    self->final_oam.attr2+=(3-quality);
+                }
+            }
+        }
+        u8 lvl=battle_participants[bank].level;
+        char buf[10];
+        u8 stringlen = int_to_str(buf, lvl, 0, 3) - buf;
 
         if(bank&1)
         {
-            self->pos1.x=healthbox.pos1.x+36;
+            self->pos1.x=healthbox.pos1.x+36 + 14 - 5 * stringlen;
         }
         else
         {
-            self->pos1.x=healthbox.pos1.x+44;
+            self->pos1.x=healthbox.pos1.x+44 + 14 - 5 * stringlen;
         }
+
         self->pos2.x=healthbox.pos2.x;
         self->pos1.y=healthbox.pos1.y-5;
         // Mirror healthbox priority
@@ -368,46 +400,37 @@ void healthbar_shake(struct object *parent_object)
         obj_delete_and_free_tiles(parent_object);
     }
 }
-
 void gpu_pal_obj_alloc_tag_and_apply(void *);
 void gpu_tile_obj_decompress_alloc_tag_and_upload(void *);
 u8 template_instanciate_forward_search(struct template *template, u16 x, u8 y, u8 derp);
 
 void healthbar_load_graphics(u8 state)
 {
-
     u8 objid;
-    if (state == 2)
+    if (state==2)
     {
+        gpu_pal_obj_alloc_tag_and_apply(&pal_indicator);
+        gpu_tile_obj_decompress_alloc_tag_and_upload(&gfx_indicator);
+        if(battle_flags.double_battle)
+        {
+            gpu_pal_obj_alloc_tag_and_apply(&pal_trigger_dbl);
+            gpu_tile_obj_decompress_alloc_tag_and_upload(&gfx_trigger_dbl);
+        }
+        else
+        {
+            gpu_pal_obj_alloc_tag_and_apply(&pal_trigger);
+            gpu_tile_obj_decompress_alloc_tag_and_upload(&gfx_trigger);
+        }
 
+        // Create a Mega Indicator for every bank
 
-    gpu_pal_obj_alloc_tag_and_apply(&pal_indicator);
-    gpu_tile_obj_decompress_alloc_tag_and_upload(&gfx_indicator);
-    if(battle_flags.double_battle)
-    {
-        gpu_pal_obj_alloc_tag_and_apply(&pal_trigger_dbl);
-        gpu_tile_obj_decompress_alloc_tag_and_upload(&gfx_trigger_dbl);
-    }
-    else
-    {
-        gpu_pal_obj_alloc_tag_and_apply(&pal_trigger);
-        gpu_tile_obj_decompress_alloc_tag_and_upload(&gfx_trigger);
-    }
-
-    // Create a Mega Indicator for every bank
-
-    u8 bank;
-    for (bank = 0; bank < no_of_all_banks; ++bank) {
-        objid = template_instanciate_forward_search(&template_indicator, 1, 0, 1);
-      objects[objid].private[0] = bank;
-      new_battlestruct->mega_related.indicator_id_pbs[bank]=objid;
-    }
-
-
-    objid=template_instanciate_forward_search(&template_trigger, 10, 0, 1);
-    new_battlestruct->mega_related.trigger_id=objid;
-
-
+        u8 bank;
+        for (bank = 0; bank < no_of_all_banks; ++bank)
+        {
+            objid = template_instanciate_forward_search(&template_indicator, 1, 0, 1);
+            objects[objid].private[0] = bank;
+        new_battlestruct->mega_related.indicator_id_pbs[bank]=objid;
+        }
     }
 }
 
