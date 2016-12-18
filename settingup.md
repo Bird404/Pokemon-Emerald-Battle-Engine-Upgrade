@@ -1,4 +1,6 @@
+Instructions for PGE: https://github.com/Gamer2020/PokemonGameEditor/blob/master/Docs/settingup.md
 
+Instructions for G3T here:
 To enable Megas:
 
 	1. Open the config.h files in the src folder. In line 9, change the keystone index to the item index of your liking. Player has to posses that item in order to mega evolve. Build file after the change.
