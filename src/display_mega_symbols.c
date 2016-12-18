@@ -427,8 +427,10 @@ void healthbar_load_graphics(u8 state)
         {
             objid = template_instanciate_forward_search(&template_indicator, 1, 0, 1);
             objects[objid].private[0] = bank;
-        new_battlestruct->mega_related.indicator_id_pbs[bank]=objid;
+            new_battlestruct->mega_related.indicator_id_pbs[bank]=objid;
         }
+
+        new_battlestruct->mega_related.trigger_id = template_instanciate_forward_search(&template_trigger, 130, 90, 1);
     }
 }
 
