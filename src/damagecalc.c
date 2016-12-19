@@ -607,6 +607,12 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
                 modifier = chain_modifier(modifier, 0x1800);
             }
             break;
+        case ABILITY_WATER_BUBBLE:
+            if (move_type == TYPE_WATER)
+            {
+                modifier = chain_modifier(modifier, 0x1400);
+            }
+            break;
         }
     }
 
@@ -627,6 +633,7 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
         switch (battle_participants[def_bank].ability_id)
         {
         case ABILITY_HEATPROOF:
+        case ABILITY_WATER_BUBBLE:
             if (move_type == TYPE_FIRE)
             {
                 modifier = chain_modifier(modifier, 0x800);
