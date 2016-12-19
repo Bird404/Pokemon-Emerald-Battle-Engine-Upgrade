@@ -311,23 +311,20 @@ u8 calculate_move_type(u8 bank, u16 move, u8 set_bonus)
                 move_type=TYPE_ICE;
                 ate=1;
                 break;
-	    case ABILITY_GALVANIZE:
-		move_type=TYPE_ELECTRIC;
-		ate=1;
-		break;
+            case ABILITY_GALVANIZE:
+            move_type=TYPE_ELECTRIC;
+            ate=1;
+            break;
             }
         }
-	
-	for (u8 i = 0; &sound_moves[i] != 0xFFFF; i++)
-	{
-	    if(move_type == TYPE_EGG && has_ability_effect(bank,0,1) && current_move == &sound_moves[i])
-	    {
-		    move_type=TYPE_WATER;
-		    break;
-	    }
-	}
+
         if(ate && set_bonus)
             new_battlestruct->various.ate_bonus=1;
+
+        if(find_move_in_table(current_move, &sound_moves[0]) && check_ability(bank,ABILITY_LIQUID_VOICE) && move_type==TYPE_EGG)
+        {
+            move_type=TYPE_WATER;
+        }
     }
     if((new_battlestruct->field_affecting.ion_deluge)
        && (move_table[move].type==TYPE_NORMAL || check_ability(bank,ABILITY_NORMALIZE)))
