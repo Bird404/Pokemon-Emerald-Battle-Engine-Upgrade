@@ -537,7 +537,6 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
     u8 adder=0;
     u8 move_effect=0;
     u8 contact =move_table[curr_move].move_flags.flags.makes_contact;
-    if (check_ability(
     switch (switch_id)
     {
     case 0: //switch-in abilities
