@@ -7,8 +7,15 @@ import hashlib
 import subprocess
 import sys
 
-PATH = 'C://devkitPro//devkitARM//bin'
-PREFIX = '//arm-none-eabi-'
+PathVar = os.environ.get('Path')
+Paths = PathVar.split(';')
+PATH = ""
+for candidatePath in Paths:
+    if "devkitARM" in candidatePath:
+        PATH = candidatePath
+        break
+
+PREFIX = '/arm-none-eabi-'
 AS = (PATH + PREFIX + 'as')
 CC = (PATH + PREFIX + 'gcc')
 LD = (PATH + PREFIX + 'ld')
@@ -64,23 +71,26 @@ def run_glob(globstr, fn):
 	return map(fn, files)
 	
 def main():
-	globs = {
-		'**/*.s': process_assembly,
-		'**/*.c': process_c
-	}
-	
-	# Create output directory
-	try:
-		os.makedirs(BUILD)
-	except FileExistsError:
-		pass
-	
-	# Gather source files and process them
-	objects = itertools.starmap(run_glob, globs.items())
-	
-	# Link and extract raw binary
-	linked = link(itertools.chain.from_iterable(objects))
-	objcopy(linked)
+        if(len(PATH)>2):
+                globs = {
+                        '**/*.s': process_assembly,
+                        '**/*.c': process_c
+                }
+                
+                # Create output directory
+                try:
+                        os.makedirs(BUILD)
+                except FileExistsError:
+                        pass
+                
+                # Gather source files and process them
+                objects = itertools.starmap(run_glob, globs.items())
+                
+                # Link and extract raw binary
+                linked = link(itertools.chain.from_iterable(objects))
+                objcopy(linked)
+        else:
+                print('DevKit does not exist in your Path variable')
 	
 if __name__ == '__main__':
 	main()

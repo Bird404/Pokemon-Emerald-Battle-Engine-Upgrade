@@ -14,11 +14,9 @@ After downloading and before proceeding to install make sure that the 'add to pa
 
 - To decide the offsets where you want to insert the code:
 
-* make sure that value of PATH variable set in line 10 of the 'build' file matches that path of bin folder of devkitarm (important for non windows users).
+* in the 'insert' file in the folder 'scripts' change default=0xF00000 to the location you want to insert the Upgrade data (let it be X)
 
-* in the 'linker.ld' file change 'ORIGIN = 0x08F00000' to whatever location you want
-
-* in the 'insert' file in the folder 'scripts' change default=0xF00000 to the same location you used before but without the bus(08-prefix)
+* in the 'linker.ld' file change 'ORIGIN = 0x08F00000' to X+0x8000000 (for e.g if default=0x1A10000 then ORIGIN = 0x9a10000)
 
 - Run the cmd.exe in the main folder.
 You can do this by typing 'cmd' and hitting enter in the url address or selecting 'run command prompt from here' from right clciking on empty space while holding the shift key
