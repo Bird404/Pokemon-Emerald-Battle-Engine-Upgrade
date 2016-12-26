@@ -179,9 +179,9 @@ u32 accuracy_percent(u16 move, u8 bankatk, u8 bankdef)
 void accuracy_calc()
 {
     u32 jump_loc = read_word(battlescripts_curr_instruction + 1);
-    s16 arg = read_hword(battlescripts_curr_instruction + 5);
+    s16 arg = (s16) read_hword(battlescripts_curr_instruction + 5);
     u16 checked_move=current_move;
-    if ((arg + 2) > 1)
+    if (arg == 0)
     {
         if(new_battlestruct->various.parental_bond_mode==PBOND_CHILD)
         {
