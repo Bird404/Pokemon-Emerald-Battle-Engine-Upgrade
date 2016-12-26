@@ -58,7 +58,7 @@ def process_assembly(in_file):
 	
 def process_c(in_file):
 	'''Compile C'''
-	print ('Compiling %s' % in_file, end="")
+	print ('Compiling %s' % in_file)
 	out_file = make_output_file(in_file)
 	cmd = [CC] + CFLAGS + ['-c', in_file, '-o', out_file]
 	run_command(cmd)
