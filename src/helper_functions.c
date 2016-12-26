@@ -2419,19 +2419,29 @@ void flowershield_effect()
 void canuselastresort()
 {
     s8 lastresort_pos = get_move_position(bank_attacker, current_move);
+    u8 known_moves = 0;
+    u8 fail = 0;
     if (lastresort_pos != -1)
     {
+        u16* move_ptr = &battle_participants[bank_attacker].moves[0];
         for (u8 i = 0; i < 4; i++)
         {
-            u16* move_ptr = &battle_participants[bank_attacker].moves[0];
-            if (*move_ptr && i != lastresort_pos && (new_battlestruct->bank_affecting[bank_attacker].usedmoves & bits_table[i]))
+            u16 move = move_ptr[i];
+            if (move)
             {
-                battlescripts_curr_instruction += 4;
-                return;
+                known_moves++;
+                if (i != lastresort_pos && !(new_battlestruct->bank_affecting[bank_attacker].usedmoves & bits_table[i]))
+                {
+                    fail = 1;
+                    break;
+                }
             }
         }
     }
-    battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    if (fail || known_moves <= 1)
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else
+        battlescripts_curr_instruction += 4;
 }
 
 void topsyturvy_effect()

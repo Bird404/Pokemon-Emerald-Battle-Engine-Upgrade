@@ -765,3 +765,8 @@ jumpifbytevarEQ 0x1 \jumpifabilityPtr
 .byte 0x83
 .byte \hasanydamagingmovesbank
 .endm
+
+.macro jumpifcantusemove jumpifcantusemoveptr
+.byte 0x84
+.word \jumpifcantusemoveptr
+.endm

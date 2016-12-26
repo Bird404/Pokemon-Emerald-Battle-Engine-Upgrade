@@ -186,10 +186,16 @@ DISCOURAGE_STUPIDMOVEEFFECTS:
 	jumpifmovescriptEQ 162 DISCOURAGE_RAINDANCE
 	jumpifmovescriptEQ 163 DISCOURAGE_SUNNYDAY
 	jumpifmovescriptEQ 164 DISCOURAGE_HAIL
+	jumpifmovescriptEQ 165 DISCOURAGE_THAT_MAY_FAIL @Magnetic Flux
 	jumpifmovescriptEQ 166 DISCOURAGE_VENOMDRENCH
+	jumpifmovescriptEQ 168 DISCOURAGE_THAT_MAY_FAIL @Last Resort
 	jumpifmovescriptEQ 172 POINTS_MINUS8 @Happy Hour
 	jumpifmovescriptEQ 173 DISCOURAGE_FAIRYLOCK
+	jumpifmovescriptEQ 174 DISCOURAGE_THAT_MAY_FAIL @Belch
 	goto_cmd END_LOCATION
+DISCOURAGE_THAT_MAY_FAIL:
+	jumpifcantusemove POINTS_MINUS10
+	return_cmd
 DISCOURAGE_PERISHSONG:
 	jumpifstatus3 bank_target STATUS3_PERISHSONG POINTS_MINUS10
 	return_cmd
@@ -1140,3 +1146,4 @@ tai_command_table:
 .word tai81_hasmovewithaccuracylower + 1 	@0x81
 .word tai82_getpartnerchosenmove + 1 		@0x82
 .word tai83_hasanydamagingmoves + 1 	@0x83
+.word tai84_jumpifcantusemove + 1		@0x84

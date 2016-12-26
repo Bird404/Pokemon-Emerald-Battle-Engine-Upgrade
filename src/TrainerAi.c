@@ -15,6 +15,9 @@ void damagecalc2();
 u8 affected_by_substitute(u8 substitute_bank);
 u8 find_move_in_table(u16 move, u16 table_ptr[]);
 u8 get_first_to_strike(u8 bank1, u8 bank2, u8 ignore_priority);
+void canuselastresort();
+void belch_canceler();
+void can_magneticflux_work();
 
 #define AI_STATE battle_resources->tai_state
 
@@ -1395,4 +1398,38 @@ void tai83_hasanydamagingmoves() //u8 bank
     }
     AI_STATE->var = has;
     tai_current_instruction += 2;
+}
+
+void tai84_jumpifcantusemove()
+{
+    u8 can = 1;
+    bank_attacker = tai_bank;
+    void* saved_battlescript_ptr = battlescripts_curr_instruction;
+    void* ptr = (void*) 0x08000000;
+    battlescripts_curr_instruction = ptr;
+    u16 move = AI_STATE->curr_move;
+    switch (move)
+    {
+    case MOVE_LAST_RESORT:
+        current_move = move;
+        canuselastresort();
+        if (battlescripts_curr_instruction != (ptr + 4))
+            can = 0;
+        break;
+    case MOVE_BELCH:
+        belch_canceler();
+        if (battlescripts_curr_instruction != (ptr))
+            can = 0;
+        break;
+    case MOVE_MAGNETIC_FLUX:
+        can_magneticflux_work();
+        if (battlescripts_curr_instruction != (ptr + 4))
+            can = 0;
+        break;
+    }
+    battlescripts_curr_instruction = saved_battlescript_ptr;
+    if (can)
+        tai_current_instruction += 5;
+    else
+        tai_current_instruction = (void*) (read_word(tai_current_instruction + 1));
 }
