@@ -11,7 +11,7 @@ u8 healblock_forbidden_moves(u16 move, u8 with_leechseed);
 u8 gravity_forbidden_move(u16 move);
 u8 embargo_forbidden_move(u16 move);
 u16 get_item_extra_param(u16 item);
-u16 get_mega_species(u16 species);
+u16 get_mega_species(u8 bank, u8 chosen_method);
 struct pokemon* get_party_ptr(u8 bank);
 u8 is_poke_valid(struct pokemon* poke);
 u8 is_bank_present(u8 bank);
@@ -2630,8 +2630,24 @@ void effect_stat_change(void* pointer)
 
 u8 canlose_megastone(u8 bank, u16 item)
 {
-    if (get_item_x12_battle_function(item) == ITEM_EFFECT_MEGASTONE && get_item_extra_param(item) == get_mega_species(battle_participants[bank].poke_species))
-        return 0;
+    if (get_item_x12_battle_function(item) == ITEM_EFFECT_MEGASTONE)
+    {
+        u16* item_ptr = &battle_participants[bank].held_item;
+        u16 holding_item = *item_ptr;
+        *item_ptr = item;
+        u8 ret = 1;
+        u8 evo_byte;
+        if (is_bank_from_opponent_side(bank))
+            evo_byte = new_battlestruct->mega_related.ai_party_mega_check;
+        else
+            evo_byte = new_battlestruct->mega_related.party_mega_check;
+        if (get_mega_species(bank, 0xFB) || evo_byte & bits_table[battle_team_id_by_side[bank]])
+        {
+            ret = 0;
+        }
+        *item_ptr = holding_item;
+        return ret;
+    }
     return 1;
 }
 
