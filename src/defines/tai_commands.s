@@ -770,3 +770,14 @@ jumpifbytevarEQ 0x1 \jumpifabilityPtr
 .byte 0x84
 .word \jumpifcantusemoveptr
 .endm
+
+.macro canmultiplestatwork
+.byte 0x85
+.endm
+
+.macro jumpifhasattackingmovewithtype jumpifhasattackingmovewithtypebank jumpifhasattackingmovewithtypetype jumpifhasattackingmovewithtypeptr
+.byte 0x86
+.byte \jumpifhasattackingmovewithtypebank
+.byte \jumpifhasattackingmovewithtypetype
+.word \jumpifhasattackingmovewithtypeptr
+.endm

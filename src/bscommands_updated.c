@@ -459,7 +459,6 @@ void switchin_newstruct_update()
     side_ptr->sticky_web_done = 0;
     side_ptr->toxic_spikes_done = 0;
     side_ptr->lunardance_done = 0;
-
     return;
 }
 
@@ -1403,7 +1402,7 @@ u8 check_if_cannot_attack()
             }
             break;
         case 3: //check truant
-            if (check_ability(bank_attacker, ABILITY_TRUANT) && disable_structs[bank_attacker].truant_counter & 1)
+            if (check_ability(bank_attacker, ABILITY_TRUANT) && (disable_structs[bank_attacker].truant_counter & 0x80))
             {
                 battle_communication_struct.multistring_chooser = 0;
                 battlescripts_curr_instruction = (void*) 0x082DB6AD;

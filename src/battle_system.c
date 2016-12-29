@@ -986,7 +986,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 }
                 break;
             case ABILITY_TRUANT:
-                disable_structs[bank].truant_counter ^= 1;
+                disable_structs[bank].truant_counter ^= 0x80;
                 break;
             case ABILITY_MOODY:
                 {
@@ -2013,10 +2013,13 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
         switch (item_effect)
         {
         case ITEM_EFFECT_AMULETCOIN:
-            if (!is_bank_from_opponent_side(bank))
             {
-                battle_stuff_ptr->money_multiplier = 2;
-                effect = NO_COMMON_ITEM_EFFECT;
+                u8* money_multiplier = &battle_stuff_ptr->money_multiplier;
+                if (!is_bank_from_opponent_side(bank) && *money_multiplier != 2)
+                {
+                    *money_multiplier = 2;
+                    effect = NO_COMMON_ITEM_EFFECT;
+                }
             }
             break;
         case ITEM_EFFECT_WHITEHERB:

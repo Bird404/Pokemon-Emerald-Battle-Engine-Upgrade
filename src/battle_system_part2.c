@@ -11,6 +11,7 @@ u8 check_ability(u8 bank, u8 ability);
 void copy_status_condition_text(u8 bank, u8 confusion);
 void setup_berry_consume_buffers(u8 bank);
 u16 get_item_extra_param(u16 item);
+void b_load_sprite_player(struct pokemon* poke, u8 bank);
 
 bool load_weather_from_overworld()
 {
@@ -104,6 +105,8 @@ u8 try_illusion_change(struct pokemon* poke, u8 bank)
         get_attributes(masquerade_as, ATTR_NAME, &new_battlestruct->bank_affecting[bank].illusion_nick);
         new_battlestruct->bank_affecting[bank].illusion_ball = get_attributes(masquerade_as, ATTR_POKEBALL, 0);
         battle_participants[bank].status2.transformed = 1;
+        if (bank == 2) //for some reason it doesn't load correctly this sprite
+            b_load_sprite_player(poke, bank);
         return 1;
     }
     return 0;
@@ -147,10 +150,9 @@ void update_pokenick_in_healthbox(u8 objectID, struct pokemon* poke)
 
     u16 species;
     enum poke_gender gender;
-    u16 transform_species = get_transform_species(bank);
-    if (transform_species)
+    if (new_battlestruct->bank_affecting[bank].illusion_on)
     {
-        species = transform_species;
+        species = get_transform_species(bank);
         gender = gender_from_pid(species, PiD_pbs[bank]);
     }
     else
@@ -461,7 +463,6 @@ bool handle_leppa(u8 bank, u8 quality, enum call_mode calling_mode)
     }
     return effect;
 }
-
 
 bool handle_leppa_bugbite(u8 bank, u8 quality)
 {

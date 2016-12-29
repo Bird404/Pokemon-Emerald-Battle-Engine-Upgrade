@@ -1426,10 +1426,61 @@ void tai84_jumpifcantusemove()
         if (battlescripts_curr_instruction != (ptr + 4))
             can = 0;
         break;
+    case MOVE_ENDEAVOR:
+        if ((s16) (battle_participants[bank_target].current_hp - battle_participants[bank_attacker].current_hp) <= 0)
+            can = 0;
+        break;
     }
     battlescripts_curr_instruction = saved_battlescript_ptr;
     if (can)
         tai_current_instruction += 5;
     else
         tai_current_instruction = (void*) (read_word(tai_current_instruction + 1));
+}
+
+void tai85_canmultiplestatwork()
+{
+    u8 bank;
+    u8 max;
+    u16 move = AI_STATE->curr_move;
+    if (move_table[move].target == move_target_user)
+        bank = bank_attacker;
+    else
+        bank = bank_target;
+    if (move_table[move].arg2 >= 0x90)
+        max = 0;
+    else
+        max = 0xC;
+    u8 can = 0;
+    u8 stats_to_change = move_table[move].arg1;
+    for (u8 i = 0; i < 7; i++)
+    {
+        if (stats_to_change & bits_table[i])
+        {
+            u8* stat = &battle_participants[bank].atk_buff + i;
+            if (*stat != max)
+            {
+                can = 1;
+                break;
+            }
+        }
+    }
+    AI_STATE->var = can;
+    tai_current_instruction++;
+}
+
+void tai86_jumpifhasattackingmovewithtype() //u8 bank, u8 type, void* ptr
+{
+    u8 bank = get_ai_bank(read_byte(tai_current_instruction + 1));
+    u8 type = read_byte(tai_current_instruction + 2);
+    for (u8 i = 0; i < 4; i++)
+    {
+        u16 move = ai_get_move(bank, i);
+        if (move && move_table[move].type == type && DAMAGING_MOVE(move))
+        {
+            tai_current_instruction = (void*) (read_word(tai_current_instruction + 3));
+            return;
+        }
+    }
+    tai_current_instruction += 7;
 }

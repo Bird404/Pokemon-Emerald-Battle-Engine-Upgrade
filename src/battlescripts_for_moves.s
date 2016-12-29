@@ -169,7 +169,7 @@ battlescripts_table:
 .word 0x082D8D75 		@86 Haze
 .word 0x082D94BA		@87 Metronome
 .word 0x082D8C62 		@88 Mirror Move
-.word 0x082D8BF9 		@89 Dream Eater
+.word 0x082D8BF9		@89 Dream Eater
 .word NIGHTMARE			@90 Nightmare
 .word TRANSFROM_MOVE_BS		@91 Transform
 .word USELESS_MOVES		@92 Splash, Hold Hands, Celebrate

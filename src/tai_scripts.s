@@ -89,8 +89,11 @@ DISCOURAGE_MOVES_ON_SEMIINVULNERABLE:
 	jumpifbytevarEQ 0x1 DISCOURAGE_STUPIDMOVEEFFECTS
 	goto_cmd POINTS_MINUS10
 DISCOURAGE_STUPIDMOVEEFFECTS:
+	jumpifmovescriptEQ 1 DISCOURAGE_THAT_MAY_FAIL	@Endeavour
 	jumpifmovescriptEQ 2 DISCOURAGE_ONESTATUSER
 	jumpifmovescriptEQ 3 DISCOURAGE_ONESTATTARGET
+	jumpifmovescriptEQ 6 DISCOURAGE_MULTIPLESTATSCHANGE
+	jumpifmovescriptEQ 7 DISCOURAGE_MULTIPLESTATSCHANGE
 	jumpifmovescriptEQ 9 DISCOURAGE_CONFUSION
 	jumpifmovescriptEQ 12 DISCOURAGE_SLEEP
 	jumpifmovescriptEQ 13 DISCOURAGE_POISON
@@ -180,6 +183,8 @@ DISCOURAGE_STUPIDMOVEEFFECTS:
 	jumpifmovescriptEQ 151 DISCOURAGE_TERRAINS
 	jumpifmovescriptEQ 153 DISCOURAGE_TELEKINESIS
 	jumpifmovescriptEQ 155 DISCOURAGE_SOAK
+	jumpifmovescriptEQ 156 DISCOURAGE_SHELLSMASH
+	jumpifmovescriptEQ 158 DISCOURAGE_SHIFTGEAR
 	jumpifmovescriptEQ 159 DISCOURAGE_QUASH
 	jumpifmovescriptEQ 160 DISCOURAGE_FAKEOUT
 	jumpifmovescriptEQ 161 DISCOURAGE_SANDSTORM
@@ -193,6 +198,24 @@ DISCOURAGE_STUPIDMOVEEFFECTS:
 	jumpifmovescriptEQ 173 DISCOURAGE_FAIRYLOCK
 	jumpifmovescriptEQ 174 DISCOURAGE_THAT_MAY_FAIL @Belch
 	goto_cmd END_LOCATION
+DISCOURAGE_SHIFTGEAR:
+	jumpifstatbuffNE bank_ai STAT_ATK 0xC END_LOCATION
+	jumpifstatbuffEQ bank_ai STAT_SPD 0xC POINTS_MINUS10
+	return_cmd
+DISCOURAGE_SHELLSMASH:
+	jumpifability bank_ai 1 ABILITY_CONTRARY DISCOURAGE_SHELLSMASH_CONTRARY
+	jumpifstatbuffNE bank_ai STAT_ATK 0xC END_LOCATION
+	jumpifstatbuffNE bank_ai STAT_SP_ATK 0xC END_LOCATION
+	jumpifstatbuffEQ bank_ai STAT_SPD 0xC POINTS_MINUS10
+	return_cmd
+DISCOURAGE_SHELLSMASH_CONTRARY:
+	jumpifstatbuffNE bank_ai STAT_DEF 0xC END_LOCATION
+	jumpifstatbuffEQ bank_ai STAT_SP_DEF 0xC POINTS_MINUS10
+	return_cmd
+DISCOURAGE_MULTIPLESTATSCHANGE:
+	canmultiplestatwork
+	jumpifbytevarEQ 0x0 POINTS_MINUS10
+	return_cmd
 DISCOURAGE_THAT_MAY_FAIL:
 	jumpifcantusemove POINTS_MINUS10
 	return_cmd
@@ -216,7 +239,7 @@ DISCOURAGE_FAIRYLOCK:
 	return_cmd
 DISCOURAGE_VENOMDRENCH:
 	jumpifnostatus bank_target STATUS_BAD_POISON | STATUS_POISON POINTS_MINUS10
-	return_cmd
+	goto_cmd DISCOURAGE_MULTIPLESTATSCHANGE
 DISCOURAGE_FAKEOUT:
 	jumpifnofirstturnfor bank_ai POINTS_MINUS8
 	return_cmd
@@ -643,20 +666,43 @@ LOGIC_BASED_ON_MOVEEFFECTS:
 	jumpifmovescriptEQ 16 LOGIC_APPLYSTATCONDITION
 	jumpifmovescriptEQ 19 LOGIC_RECOIL
 	jumpifmovescriptEQ 25 LOGIC_HPHEAL
+	jumpifmovescriptEQ 27 LOGIC_CHARGE
 	jumpifmovescriptEQ 29 LOGIC_HPHEAL	@Roost
+	jumpifmovescriptEQ 31 LOGIC_IDENTYFING
 	jumpifmovescriptEQ 34 LOGIC_PROTECT
 	jumpifmovescriptEQ 40 LOGIC_WRAP
 	jumpifmovescriptEQ 64 LOGIC_MEANLOOK
 	jumpifmovescriptEQ 65 LOGIC_PERISHSONG
 	jumpifmovescriptEQ 70 LOGIC_ONEHITKO
 	jumpifmovescriptEQ 72 LOGIC_ROAR
+	jumpifmovescriptEQ 83 LOGIC_DEFENSECURL
 	jumpifmovescriptEQ 93 LOGIC_REST
 	jumpifmovescriptEQ 100 LOGIC_LOCKON
 	jumpifmovescriptEQ 102 LOGIC_BELLYDRUM
 	jumpifmovescriptEQ 104 LOGIC_CURSE
 	jumpifmovescriptEQ 113 LOGIC_RAPIDSPIN
 	jumpifmovescriptEQ 120 LOGIC_FOCUSPUNCH
+	jumpifmovescriptEQ 130 LOGIC_BRICKBREAK
 	jumpifmovescriptEQ 163 LOGIC_SUNNYDAY
+	return_cmd
+LOGIC_IDENTYFING:
+	call_cmd CAN_TARGET_FAINT_USER
+	jumpifbytevarEQ 0x1 POINTS_MINUS2
+	jumpifstatbuffGE bank_target STAT_EVASION 7 POINTS_PLUS2
+	return_cmd
+LOGIC_CHARGE:
+	call_cmd LOGIC_ONESTATUSER
+	jumpifstatus3 bank_ai STATUS3_CHARGED END_LOCATION
+	jumpifhasattackingmovewithtype bank_ai TYPE_ELECTRIC POINTS_PLUS1
+	return_cmd
+LOGIC_DEFENSECURL:
+	call_cmd LOGIC_ONESTATUSER
+	jumpifstatus2 bank_ai STATUS2_CURLED END_LOCATION
+	jumpifhasmove bank_ai MOVE_ROLLOUT POINTS_PLUS1
+	jumpifhasmove bank_ai MOVE_ICE_BALL POINTS_PLUS1
+	return_cmd
+LOGIC_BRICKBREAK:
+	jumpifsideaffecting bank_target SIDE_REFLECT | SIDE_LIGHTSCREEN POINTS_PLUS1
 	return_cmd
 LOGIC_ONEHITKO:
 	islockon_on bank_ai bank_target
@@ -693,6 +739,7 @@ LOGIC_SUNNYDAY:
 	jumpifability bank_ai 1 ABILITY_CHLOROPHYLL POINTS_PLUS2
 	jumpifhasmove bank_ai MOVE_SOLAR_BEAM POINTS_PLUS2
 	jumpifhasmove bank_ai MOVE_GROWTH POINTS_PLUS2
+	jumpifhasmove bank_ai MOVE_SYNTHESIS POINTS_PLUS2
 	isoftype bank_ai TYPE_FIRE
 	jumpifbytevarEQ 0x1 POINTS_PLUS2
 	return_cmd
@@ -1147,3 +1194,5 @@ tai_command_table:
 .word tai82_getpartnerchosenmove + 1 		@0x82
 .word tai83_hasanydamagingmoves + 1 	@0x83
 .word tai84_jumpifcantusemove + 1		@0x84
+.word tai85_canmultiplestatwork + 1 	@0x85
+.word tai86_jumpifhasattackingmovewithtype + 1 		@0x86
