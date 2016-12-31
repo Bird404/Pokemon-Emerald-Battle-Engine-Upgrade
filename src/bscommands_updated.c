@@ -2846,7 +2846,7 @@ void atk02_attackstring()
                 else
                 {
                     b_std_message(4, bank_attacker);
-                    battle_communication_struct.is_message_displayed = 1;
+                    battle_communication_struct.is_message_displayed = 0;
                 }
                 hitmarker |= HITMARKER_ATTACKSTRING_PRINTED;
             }
