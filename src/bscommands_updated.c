@@ -594,20 +594,32 @@ u8 primary_effect_setter()
             }
             break;
          case 13: //steal item
-            if(!substitute && battle_participants[bank_attacker].current_hp && !battle_flags.flag_x4000000)
+            if(!substitute && battle_participants[bank_attacker].current_hp && !battle_flags.flag_x4000000
+               && !WILD_ATTACKER)
             {
                 u16* targets_item = &applier_bank->held_item;
                 u16* attackers_item = &battle_participants[bank_attacker].held_item;
                 if (*targets_item && !CHECK_KNOCKED_OFF(bank_target) && *attackers_item == 0 && can_lose_item(bank_target, 1, 1))
                 {
+                    if (!ITEM_STEAL && !is_bank_from_opponent_side(bank_attacker))
+                    {
+                        new_battlestruct->various.returns_item |= bits_table[battle_team_id_by_side[bank_attacker]];
+                    }
                     battlescript_push();
                     battlescripts_curr_instruction = (void*) 0x82DB422;
                     last_used_item = *targets_item;
                     *attackers_item = *targets_item;
                     *targets_item = 0;
-                    active_bank = bank_to_apply;
-                    prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, targets_item);
-                    mark_buffer_bank_for_execution(active_bank);
+                    if (is_bank_from_opponent_side(bank_attacker)) //save player's item
+                    {
+                         SET_KNOCKED_OFF(bank_target);
+                    }
+                    else
+                    {
+                        active_bank = bank_target;
+                        prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, targets_item);
+                        mark_buffer_bank_for_execution(active_bank);
+                    }
                     active_bank = bank_attacker;
                     prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, attackers_item);
                     mark_buffer_bank_for_execution(active_bank);
@@ -963,8 +975,8 @@ void atk49_move_end_turn()
             new_battlestruct->various.protean_msg = 0; //protean message
             new_battlestruct->various.gem_boost = 0; //gem boost
             battle_stuff_ptr->synchronize_effect_chooser = 0;
+            new_battlestruct->various.gravity_levitate = 0; //gravity levitate message
             INC_END_EVENTS
-            break;
         case 19: //setup buffer for conversion, sketch etc.
             if(hitmarker & HITMARKER_PURSUIT_TRAP)
             {
@@ -2921,4 +2933,50 @@ void atk78_explodeifnotdamp()
         }
     }
     battlescripts_curr_instruction++;
+}
+
+void atkD2_itemswap()
+{
+    if (!battle_flags.flag_x4000000 && !WILD_ATTACKER)
+    {
+        u16* target_item = &battle_participants[bank_target].held_item;
+        u16* attacker_item = &battle_participants[bank_attacker].held_item;
+        if (!(*target_item == 0 && *attacker_item == 0) && can_lose_item(bank_attacker, 0, 0) && can_lose_item(bank_target, 1, 1))
+        {
+            battle_text_buff1[0] = 0xFD;
+            battle_text_buff1[1] = 0xA;
+            battle_text_buff1[2] = *target_item;
+            battle_text_buff1[3] = *target_item >> 0x8;
+            battle_text_buff1[4] = 0xFF;
+            battle_text_buff2[0] = 0xFD;
+            battle_text_buff2[1] = 0xA;
+            battle_text_buff2[2] = *attacker_item;
+            battle_text_buff2[3] = *attacker_item >> 0x8;
+            battle_text_buff2[4] = 0xFF;
+            u8* string_chooser = &battle_communication_struct.multistring_chooser;
+            if (*target_item == 0)
+                *string_chooser = 1;
+            else if (*attacker_item == 0)
+                *string_chooser = 0;
+            else
+                *string_chooser = 2;
+            battlescripts_curr_instruction += 5;
+            battle_stuff_ptr->changed_held_items[bank_attacker] = *target_item;
+            active_bank = bank_attacker;
+            prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, target_item);
+            mark_buffer_bank_for_execution(bank_attacker);
+            active_bank = bank_target;
+            *target_item = *attacker_item;
+            *attacker_item = 0;
+            prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, target_item);
+            mark_buffer_bank_for_execution(bank_target);
+            #if ITEM_SWAP == false //set items to return later
+            u8 bank = bank_attacker;
+            if (is_bank_from_opponent_side(bank_attacker))
+                bank = bank_target;
+            new_battlestruct->various.returns_swap |= bits_table[battle_team_id_by_side[bank]];
+            #endif // ITEM_SWAP
+        }
+    }
+    battlescripts_curr_instruction = (void*) (read_word(battlescripts_curr_instruction + 1));
 }

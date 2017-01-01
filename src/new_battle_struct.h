@@ -118,6 +118,12 @@ struct various{
     u8 protean_msg : 1;
     u8 recorded_mega : 1;
     u8 sent_in_player : 6;
+    u8 returns_item : 6;
+    u8 gravity_levitate : 1;
+    #if ITEM_SWAP == false
+    u16 original_held_item[6];
+    u8 returns_swap : 6;
+    #endif // ITEMS_SWAP
 };
 
 #define PBOND_PARENT 2

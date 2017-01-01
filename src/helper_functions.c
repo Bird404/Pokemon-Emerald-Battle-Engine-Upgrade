@@ -1077,8 +1077,9 @@ void gravity_ender()
             instruction = &gravitybringsdown_bs;
             effect = 1;
         }
-        else if (check_ability(i, ABILITY_LEVITATE))
+        else if (check_ability(i, ABILITY_LEVITATE) && !new_battlestruct->various.gravity_levitate)
         {
+            new_battlestruct->various.gravity_levitate = 1;
             bank_attacker = i;
             instruction = &gravitybringsdown_bs;
             effect = 1;
@@ -1092,7 +1093,9 @@ void gravity_ender()
         battlescripts_curr_instruction = instruction;
     }
     else if (!effect)
+    {
         bank_attacker = new_battlestruct->various.var2;
+    }
     return;
 }
 

@@ -13,6 +13,13 @@ void alloc_new_struct()
     {
         new_battlestruct->bank_affecting[i].type3 = TYPE_EGG;
     }
+    #if ITEM_SWAP == false
+    for (u8 i = 0; i < 6; i++)
+    {
+        struct pokemon* poke = &party_player[i];
+        new_battlestruct->various.original_held_item[i] = get_attributes(poke, ATTR_HELD_ITEM, 0);
+    }
+    #endif // ITEM_SWAP
 }
 
 void try_burmy_change(u8 id, struct pokemon* poke)
@@ -51,6 +58,19 @@ void free_new_struct()
         #if STAT_RECALC == true
             calculate_stats_pokekmon(poke);
         #endif // STAT_RECALC
+        #if ITEMS_STEAL == false //return stolen items
+            if (new_battlestruct->various.returns_item & bits_table[i])
+            {
+                u16 zero = 0;
+                set_attributes(poke, ATTR_HELD_ITEM, &zero);
+            }
+        #endif // ITEMS_STEAL
+        #if ITEM_SWAP == false //return swapped item
+            if (new_battlestruct->various.returns_swap & bits_table[i])
+            {
+                set_attributes(poke, ATTR_HELD_ITEM, &new_battlestruct->various.original_held_item[i]);
+            }
+        #endif // ITEM_SWAP
     }
     free(battle_stuff_ptr);
     free(new_battlestruct);

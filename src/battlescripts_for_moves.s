@@ -2204,7 +2204,6 @@ ATTACK_ANIM:
 	faintpokemon bank_target 0x0 0x0 @faint target
 	goto_cmd ENDTURN
 
-
 DRAGON_TAIL:
 	jumpifsubstituteaffects ATTACKING_MOVE
 	attackcanceler

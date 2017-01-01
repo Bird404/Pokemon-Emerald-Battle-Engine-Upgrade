@@ -417,12 +417,12 @@ u8 check_mega_evo(u8 bank)
                 objects[new_battlestruct->mega_related.trigger_id].private[ANIM_STATE]=DISABLE;
             }
         }
-        else if (!(new_battlestruct->mega_related.evo_happened_pbs & bits_table[bank]))
+        else if(!(new_battlestruct->mega_related.evo_happened_pbs & (bits_table[bank] | bits_table[bank ^ 2])))
         {
             bank_mega_mode=ai_mega_mode;
             if(bank_mega_mode)
             {
-                (new_battlestruct->mega_related.evo_happened_pbs) |= bits_table[bank];
+                new_battlestruct->mega_related.evo_happened_pbs |= bits_table[bank];
             }
         }
     }
@@ -464,7 +464,8 @@ u8 check_mega_evo(u8 bank)
         battle_text_buff1[2] = mega_species;
         battle_text_buff1[3] = mega_species >> 8;
         battle_text_buff1[4] = 0xFF;
-        status3[bank].switchinlock=0;;
+        status3[bank].switchinlock=0;
+
         if(bank_mega_mode==2)
         {
             execute_battle_script(&fervent_evolution_script);
