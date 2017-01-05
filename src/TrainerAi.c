@@ -847,7 +847,7 @@ void tai6B_sharetype() //u8 bank1, u8 bank2
         }
     }
     AI_STATE->var = same_type;
-    tai_current_instruction++;
+    tai_current_instruction += 3;
 }
 
 void tai6C_isbankpresent() //u8 bank
