@@ -6,6 +6,14 @@
 #include "new_battle_struct.h"
 #include "static_references.h"
 
+enum drive_types
+{
+    DOUSE_DRIVE_EFFECT=1,
+    BURN_DRIVE_EFFECT,
+    CHILL_DRIVE_EFFECT,
+    SHOCK_DRIVE_EFFECT
+};
+
 u32 get_item_extra_param(u16 item);
 u16 get_mega_species(u8 bank, u8 chosen_method);
 u8 weather_abilities_effect();
@@ -193,78 +201,9 @@ u8 calculate_move_type(u8 bank, u16 move, u8 set_bonus)
             break;
         case MOVE_JUDGMENT:
             {
-                if((u16)get_item_extra_param(battle_participants[bank].held_item) == 1)//PLATE CHECK
+                if(get_item_effect(bank,1) == ITEM_EFFECT_PLATES)
                 {
-                	switch (get_item_effect(bank,1))
-                    {
-                    case ITEM_EFFECT_DRAGONFANG://DRACOPLATE
-                        move_type=TYPE_DRAGON;
-                        break;
-
-                    case ITEM_EFFECT_BLACKGLASSES://DREADPLATE
-                        move_type=TYPE_DARK;
-                        break;
-
-                    case ITEM_EFFECT_SOFTSAND://EARTHPLATE
-                        move_type=TYPE_GROUND;
-                        break;
-
-                    case ITEM_EFFECT_BLACKBELT://FISTPLATE
-                        move_type=TYPE_FIGHTING;
-                        break;
-
-                    case ITEM_EFFECT_CHARCOAL://FLAMEPLATE
-                        move_type=TYPE_FIRE;
-                        break;
-
-                    case ITEM_EFFECT_NEVERMELTICE://ICICLEPLATE
-                        move_type=TYPE_ICE;
-                        break;
-
-                    case ITEM_EFFECT_SILVERPOWDER://INSECTPLATE
-                        move_type=TYPE_BUG;
-                        break;
-
-                    case ITEM_EFFECT_METALCOAT://IRONPLATE
-                        move_type=TYPE_STEEL;
-                        break;
-
-                    case ITEM_EFFECT_MIRACLESEED://MEADOWPLATE
-                        move_type=TYPE_GRASS;
-                        break;
-
-                    case ITEM_EFFECT_TWISTEDSPOON://MINDPLATE
-                        move_type=TYPE_PSYCHIC;
-                        break;
-
-                    case ITEM_EFFECT_PIXIEPLATE:
-                        move_type=TYPE_FAIRY;
-                        break;
-
-                    case ITEM_EFFECT_SHARPBEAK://SKYPLATE
-                        move_type=TYPE_FLYING;
-                        break;
-
-                    case ITEM_EFFECT_MYSTICWATER://SPLASHPLATE
-                        move_type=TYPE_WATER;
-                        break;
-
-                    case ITEM_EFFECT_SPELLTAG://SPOOKYPLATE
-                        move_type=TYPE_GHOST;
-                        break;
-
-                    case ITEM_EFFECT_HARDSTONE://STONEPLATE
-                        move_type=TYPE_ROCK;
-                        break;
-
-                    case ITEM_EFFECT_POISONBARB://TOXICPLATE
-                        move_type=TYPE_POISON;
-                        break;
-
-                    case ITEM_EFFECT_MAGNET://ZAPPLATE
-                        move_type=TYPE_ELECTRIC;
-                        break;
-                    }
+                    move_type=(u16)get_item_extra_param(battle_participants[bank].held_item);
                 }
 		    }
             break;
@@ -274,19 +213,19 @@ u8 calculate_move_type(u8 bank, u16 move, u8 set_bonus)
                 {
                 	switch ((u16)get_item_extra_param(battle_participants[bank].held_item))
                     {
-                    case 1://DOUSEDRIVE
+                    case DOUSE_DRIVE_EFFECT://DOUSEDRIVE
                         move_type=TYPE_WATER;
                         break;
 
-                    case 2://BURNDRIVE
+                    case BURN_DRIVE_EFFECT://BURNDRIVE
                         move_type=TYPE_FIRE;
                         break;
 
-                    case 3://CHILLDRIVE
+                    case CHILL_DRIVE_EFFECT://CHILLDRIVE
                         move_type=TYPE_ICE;
                         break;
 
-                    case 4://SHOCKDRIVE
+                    case SHOCK_DRIVE_EFFECT://SHOCKDRIVE
                         move_type=TYPE_ELECTRIC;
                         break;
                     }

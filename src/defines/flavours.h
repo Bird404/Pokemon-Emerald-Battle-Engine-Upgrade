@@ -1,14 +1,19 @@
 #ifndef FLAVOURS_H
 #define FLAVOURS_H
 
-#define SPICY_PREFERENCE 0
-#define DRY_PREFERENCE 1
-#define SWEET_PREFERENCE 2
-#define BITTER_PREFERENCE 3
-#define SOUR_PREFERENCE 4
+enum poke_flavours
+{
+    SPICY_PREFERENCE, //0
+    DRY_PREFERENCE, //1
+    SWEET_PREFERENCE, //2
+    BITTER_PREFERENCE, //3
+    SOUR_PREFERENCE //4
+};
 
-#define FLAVOUR_NEUTRAL 0
-#define FLAVOUR_LIKED 1
-#define FLAVOUR_DISLIKED 0xFF
-
+enum poke_flavour_status
+{
+    FLAVOUR_NEUTRAL,
+    FLAVOUR_LIKED,
+    FLAVOUR_DISLIKED=0xFF
+};
 #endif /* FLAVOURS_H */

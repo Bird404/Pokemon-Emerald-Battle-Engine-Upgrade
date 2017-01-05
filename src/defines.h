@@ -141,31 +141,42 @@ enum poke_gender{
 #define z_ 0xEE
 
 //Mega icons related
-#define BANK_TO_ATTACH_TRIGGER 0
+enum mega_trigger_properties
+{
+    BANK_TO_ATTACH_TRIGGER,
+    ANIM_STATE,
+    PALLET_STATE,
+    RELATIVE_X,
+    BASE_X
+};
 
-#define ANIM_STATE 1
-#define HIDE 0
-#define POS_BEHIND_HPBAR 1
-#define SLIDE_OUT 2
-#define SLIDE_IN 3
-#define DISABLE 4
-#define SLIDED_OUT 5
-#define HIDDEN 6
-#define DISABLED 7
+enum mega_trigger_animation_states
+{
+    HIDE,
+    POS_BEHIND_HPBAR,
+    SLIDE_OUT,
+    SLIDE_IN,
+    DISABLE,
+    SLIDED_OUT,
+    HIDDEN,
+    DISABLED
+};
 
-#define PALLET_STATE 2
-#define REGULAR 0
-#define LIGHT_UP_TRIGGER 1
-#define TRIGGER_ON 2
-#define REVERT_COLORS 3
-
-#define RELATIVE_X 3
-#define BASE_X 4
+enum mega_trigger_pallet_states
+{
+    REGULAR,
+    LIGHT_UP_TRIGGER,
+    TRIGGER_ON,
+    REVERT_COLORS
+};
 
 #define TRIGGER_NUM_IGNORED_COLORS 4
 
-#define DISABLED_INDICATOR 1
-#define PRIMAL_CHECK_COMPLETE 2
+enum mega_indicator_properties
+{
+    DISABLED_INDICATOR=1,
+    PRIMAL_CHECK_COMPLETE
+};
 
 enum call_mode
 {

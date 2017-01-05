@@ -691,7 +691,7 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
             modifier = chain_modifier(modifier, 0x1333);
         }
         break;
-    case ITEM_EFFECT_PIXIEPLATE:
+    case ITEM_EFFECT_PINKRIBBON:
         if (move_type == TYPE_FAIRY)
         {
             modifier = chain_modifier(modifier, quality_atk_modifier);
@@ -799,6 +799,11 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
             modifier = chain_modifier(modifier, quality_atk_modifier);
         }
         break;
+    case ITEM_EFFECT_PLATES:
+        if(move_type == (u16)get_item_extra_param(battle_participants[bank_attacker].held_item))
+        {
+            modifier = chain_modifier(modifier, quality_atk_modifier);
+        }
     }
 
     switch (move)
