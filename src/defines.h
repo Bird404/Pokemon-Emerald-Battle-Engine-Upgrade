@@ -64,7 +64,7 @@ enum poke_gender{
 #define MUST_HIT(bank_atk, bank_def) (status3[bank_def].always_hits && disable_structs[bank_def].always_hits_bank == bank_atk)
 #define CHECK_KNOCKED_OFF(bank) (battle_effects_duration.knocked_off_pokes[is_bank_from_opponent_side(bank)] & bits_table[battle_team_id_by_side[bank]])
 #define SET_KNOCKED_OFF(bank) (battle_effects_duration.knocked_off_pokes[is_bank_from_opponent_side(bank)] |= bits_table[battle_team_id_by_side[bank]])
-#define WILD_ATTACKER (!(battle_flags.trainer && !battle_flags.link && (bank_attacker & 1) && !(bank_target & 1)))
+#define WILD_ATTACKER (!battle_flags.trainer && !battle_flags.link && (bank_attacker & 1) && !(bank_target & 1))
 
 #define REQUEST_SPECIES_BATTLE 0x1
 #define REQUEST_HELDITEM_BATTLE 0x2
