@@ -211,7 +211,6 @@ memcpy = 0x082E93D4|1;
 is_bank_from_opponent_side = 0x080A6A30|1;
 get_bank_turn_order = 0x08048728|1;
 read_word = 0x080842DC|1;
-read_byte = 0x080B1274|1;
 hidden_power_calc = 0x08054400|1;
 get_battle_bank = 0x0803F3CC|1;
 execute_battle_script = 0x08044498|1;

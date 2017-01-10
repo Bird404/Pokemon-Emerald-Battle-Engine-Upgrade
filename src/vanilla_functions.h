@@ -11,7 +11,6 @@ void record_usage_of_ability(u8 bank, u8 ability);
 u8 castform_switch(u8 bank);
 u8 is_bank_from_opponent_side(u8 bank);
 void* display_string_in_battle(void*);
-u8 read_byte(void*);
 s16 read_hword(void*);
 u32 read_word(void*);
 u16 rng();
