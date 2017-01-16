@@ -699,7 +699,7 @@ void evs_update(struct pokemon *poke, u16 defeated_species)
     u16 evs_total = 0;
     for (u8 i = 0; i < 6; i++)
     {
-        evs_total += get_attributes(poke, ATTR_HP_EV, 0);
+        evs_total += get_attributes(poke, ATTR_HP_EV+i, 0);
     }
     u8 pokerus = specific_pokerus_check(poke, 0);
     u8 power_item = 0xFF;
@@ -738,7 +738,7 @@ void evs_update(struct pokemon *poke, u16 defeated_species)
             to_add *= 2;
         if (power_item == 0)
             to_add *= 2;
-        else if (item && power_item < 7 && to_add)
+        else if (item && (power_item-1)==curr_stat)
         {
             power_bonus = 4;
             if (pokerus)
