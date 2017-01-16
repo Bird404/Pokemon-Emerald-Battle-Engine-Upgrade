@@ -16,4 +16,6 @@ Makefile text eol=lf
 
 *.h linguist-language=C
 *.c linguist-language=C
-*.slinguist-language=Assembly
+*.py linguist-language=Python
+*.ld linguist-language=Linker Script
+*.s linguist-language=Assembly
