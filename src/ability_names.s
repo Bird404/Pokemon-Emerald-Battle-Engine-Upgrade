@@ -1,9 +1,9 @@
 .text
 .thumb
-.align 2
 
 .include "asm_defines.s"
 
+.global ability_names_table
 ability_names_table:
 .byte Dash, Dash, Dash, Dash, Dash, Dash, Dash, Termin, Space, Space, Space, Space, Space
 .byte S_, t_, e_, n_, c_, h_, Termin, Space, Space, Space, Space, Space, Space
