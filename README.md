@@ -14,14 +14,14 @@ After downloading and before proceeding to install make sure that the 'add to pa
 
 - To decide the offsets where you want to insert the code:
 
-* in the 'insert' file in the folder 'scripts' change default=0xF00000 to the location you want to insert the Upgrade data (let it be X)
+* in the 'insert.py' file in the folder 'scripts' change default=0xF00000 to the location you want to insert the Upgrade data (let it be X)
 
 * in the 'linker.ld' file change 'ORIGIN = 0x08F00000' to X+0x8000000 (for e.g if default=0x1A10000 then ORIGIN = 0x9a10000)
 
 - Run the cmd.exe in the main folder.
 You can do this by typing 'cmd' and hitting enter in the url address or selecting 'run command prompt from here' from right clciking on empty space while holding the shift key
 
-- In command prompt window, type 'python scripts//build', press Enter and then 'python scripts//insert' or 'python scripts//insert --debug>offsets.txt'(the latter will create a file with all functions and tables' addresses), press Enter.
+- In command prompt window, type 'python scripts//build.py', press Enter and then 'python scripts//insert' or 'python scripts//insert.py --debug>offsets.txt'(the latter will create a file with all functions and tables' addresses), press Enter.
 A new gba file will appear named as test.gba.
 That is your resultant file.
 
