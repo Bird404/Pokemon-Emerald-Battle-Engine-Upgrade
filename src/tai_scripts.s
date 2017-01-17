@@ -614,7 +614,7 @@ DISCOURAGE_THIRDTYPEADD:
 	jumpifcantaddthirdtype bank_target END_LOCATION
 	goto_cmd POINTS_MINUS10
 	
-TAI_SCRIPT_1: @ENCOURAGE a fatal move; bitfield 0x2
+TAI_SCRIPT_2: @ENCOURAGE a fatal move; bitfield 0x4
 	jumpiftargetisally END_LOCATION
 	jumpifattackerhasnodamagingmoves END_LOCATION
 	jumpiffatal ENCOURAGE_FATAL
@@ -626,6 +626,8 @@ ENCOURAGE_FATAL:
 	scoreupdate 2
 	return_cmd
 MOST_POWERFUL_MOVE:
+	jumpifhasnostatusmoves bank_ai POINTS_PLUS3
+	jumpifstatusmovesnotworthusing bank_ai POINTS_PLUS3
 	getbestdamagelefthp bank_ai bank_target
 	jumpifbytevarLT 11 POINTS_PLUS2
 	jumpifbytevarLT 31 POINTS_PLUS1
@@ -650,7 +652,7 @@ AI_VAR_RETURN_1:
 	setbytevar 0x1
 	return_cmd
 	
-TAI_SCRIPT_2: @encourage moves that make most sense; bitfield 0x4
+TAI_SCRIPT_1: @encourage moves that make most sense; bitfield 0x2
 	jumpiftargetisally END_LOCATION
 	call_cmd LOGIC_BASED_ON_HELDITEM
 	call_cmd LOGIC_BASED_ON_ABILITIES
@@ -1196,3 +1198,5 @@ tai_command_table:
 .word tai84_jumpifcantusemove + 1		@0x84
 .word tai85_canmultiplestatwork + 1 	@0x85
 .word tai86_jumpifhasattackingmovewithtype + 1 		@0x86
+.word tai87_jumpifhasnostatusmoves + 1		@0x87
+.word tai88_jumpifstatusmovesnotworthusing + 1 		@0x88

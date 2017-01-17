@@ -781,3 +781,15 @@ jumpifbytevarEQ 0x1 \jumpifabilityPtr
 .byte \jumpifhasattackingmovewithtypetype
 .word \jumpifhasattackingmovewithtypeptr
 .endm
+
+.macro jumpifhasnostatusmoves jumpifhasnostatusmovesbank jumpifhasnostatusmovesptr
+.byte 0x87
+.byte \jumpifhasnostatusmovesbank
+.word \jumpifhasnostatusmovesptr
+.endm
+
+.macro jumpifstatusmovesnotworthusing jumpifstatusmovesnotworthusingbank jumpifstatusmovesnotworthusingptr
+.byte 0x88
+.byte \jumpifstatusmovesnotworthusingbank
+.word \jumpifstatusmovesnotworthusingptr
+.endm

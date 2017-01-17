@@ -149,7 +149,7 @@ struct b_stuff_duration{
 extern struct b_stuff_duration battle_effects_duration;
 
 struct b_enigma_berry{
-    u8 field0[7];
+    u8 berry_name[7];
     u8 battle_effect_x12;
     u8 field8[18];
     u8 quality;
@@ -191,6 +191,9 @@ struct b_scripting{
     u8 field20;
     u8 field21;
     u8 field22;
+    u8 field23;
+    u8 field24;
+    u8 field25;
 };
 
 extern struct b_scripting battle_scripting;
@@ -404,7 +407,9 @@ struct battle_history{
 };
 
 struct b_resources_secretbaseinfo{
-    u8 todolater;
+    u8 field0;
+    u8 field1;
+    u8 trainer_name[6];
 };
 
 struct battlescript_stack{
@@ -414,7 +419,7 @@ struct battlescript_stack{
 };
 
 struct b_resources_table{
-    struct b_resources_field0 *secretbase_opponent;
+    struct b_resources_secretbaseinfo *secretbase_opponent;
     struct ability_flags *ability_flags_ptr;
     struct battlescript_stack *battlescript_stack;
     void* battle_callback1_stack;
@@ -889,6 +894,13 @@ struct saveblock1{
 
 extern struct saveblock1* sav1;
 
+struct saveblock2{
+    u8 name[8];
+    u8 gender;
+};
+
+extern struct saveblock2* sav2;
+
 struct battle_record_pbs{
     u8 action[664];
 };
@@ -899,5 +911,34 @@ struct stat_fractions{
     u8 dividend;
     u8 divisor;
 };
+
+struct battle_link{
+    u8 field_0[8];
+    u8 trainer_name[8];
+    u8 field_10[8];
+    u16 bank_id;
+    u16 field_1A;
+};
+
+extern struct battle_link battle_link_pbs[4];
+
+struct trainer_data{
+    u8 custom_moves : 1;
+    u8 custom_item : 1;
+    u8 class;
+    u8 music : 7;
+    u8 gender : 1;
+    u8 sprite;
+    u8 name[10];
+    u8 field_E;
+    u16 items[4];
+    u8 flags[4];
+    u32 ai_scripts;
+    u8 poke_number;
+    u8 padd[3];
+    struct poke_trainer_data* poke_data;
+};
+
+extern struct trainer_data trainer_table[864];
 
 #endif /* B_STRUCTS */

@@ -66,6 +66,7 @@ enum poke_gender{
 #define SET_KNOCKED_OFF(bank) (battle_effects_duration.knocked_off_pokes[is_bank_from_opponent_side(bank)] |= bits_table[battle_team_id_by_side[bank]])
 #define WILD_ATTACKER (!battle_flags.trainer && !battle_flags.link && (bank_attacker & 1) && !(bank_target & 1))
 #define read_byte(ptr) (*((u8*)(ptr)))
+#define BATTLE_FRONTIER_BATTLE (battle_flags.frontier_general || battle_flags.battle_dome || battle_flags.battle_palace || battle_flags.battle_arena || battle_flags.battle_factory || battle_flags.flag_x100000 || battle_flags.battle_pyramid)
 
 #define REQUEST_SPECIES_BATTLE 0x1
 #define REQUEST_HELDITEM_BATTLE 0x2

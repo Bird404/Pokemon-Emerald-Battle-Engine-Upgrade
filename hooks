@@ -1,6 +1,4 @@
 display_custom_text	0814E6C0	1
-nature_color_display_one 081C37A0 2
-nature_color_display_two 081C3864 2
 battlestringhook	0814F6B6	0
 item_battle_effects	080444DC	3
 alloc_new_struct_hook 08056F3E 2
@@ -34,15 +32,6 @@ tai_should_switch 08063614 0
 b_load_sprite_player 0805DD7C 2
 b_load_sprite_opponent 0805DC0C 2
 illusion_throw_different_ball 080754C4 1
-illusion_playername1 0814E92C 0
-illusion_playername2 0814E994 0
-illusion_opponentname1 0814E960 0
-illusion_opponentname2 0814E9C8 0
-illusion_attacker_name 0814EBB0 0
-illusion_attacker_name_with_prefix 0814EC38 0
-illusion_target_name_with_prefix 0814ECD4 0
-illusion_active_with_prefix 0814EE0C 0
-illusion_scripting_active_with_prefix 0814EEA8 0
 illusion_on_player_switch_in 0805B28E 1
 illusion_on_opponent_switch_in 08061416 1
 anim_spritechange_pal 0805E70A 0
@@ -55,3 +44,4 @@ return_0_nop 080475E4 0
 return_0_nop 080472A8 0
 explosion_like_switch_fix 08041922 0
 evs_update 0806DADC 2
+battle_string_decoder 0814E764 2

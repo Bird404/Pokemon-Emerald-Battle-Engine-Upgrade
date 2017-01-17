@@ -13,6 +13,8 @@ void setup_berry_consume_buffers(u8 bank);
 u16 get_item_extra_param(u16 item);
 void b_load_sprite_player(struct pokemon* poke, u8 bank);
 
+extern u8 ability_names_table[250][13];
+
 bool load_weather_from_overworld()
 {
     bool is_weather_loaded = false;
@@ -117,18 +119,6 @@ u16 get_transform_species(u8 bank)
     return battle_graphics.graphics_data->species_info[bank]->transformed_species;
 }
 
-void* get_poke_nick(u8 bank, void* dst)
-{
-    struct pokemon* illusion_to_happen_later = get_poke_to_illusion_into(get_bank_poke_ptr(bank), bank);
-    if (new_battlestruct->bank_affecting[bank].illusion_on)
-        strcpy_xFF_terminated_0(dst, &new_battlestruct->bank_affecting[bank].illusion_nick);
-    else if (illusion_to_happen_later)
-        get_attributes(illusion_to_happen_later, ATTR_NAME, dst);
-    else
-        get_attributes(get_bank_poke_ptr(bank), ATTR_NAME, dst);
-    return shorten_str_to_10(dst);
-}
-
 void* get_poke_nick2(struct pokemon* poke, u8 bank, void* dst)
 {
     struct pokemon* illusion_to_happen_later = get_poke_to_illusion_into(poke, bank);
@@ -139,6 +129,23 @@ void* get_poke_nick2(struct pokemon* poke, u8 bank, void* dst)
     else
         get_attributes(poke, ATTR_NAME, dst);
     return shorten_str_to_10(dst);
+}
+
+void* get_poke_nick(u8 bank, void* dst)
+{
+    struct pokemon* poke = get_bank_poke_ptr(bank);
+    return get_poke_nick2(poke, bank, dst);
+}
+
+void* get_poke_nick_link(u8 linkID, u8 to_xor, void* dst)
+{
+    u8 bank = battle_link_pbs[linkID].bank_id ^ to_xor;
+    struct pokemon* poke;
+    if (to_xor & 1)
+        poke = party_opponent;
+    else
+        poke = party_player;
+    return get_poke_nick2(&poke[battle_team_id_by_side[bank]], bank, dst);
 }
 
 void update_pokenick_in_healthbox(u8 objectID, struct pokemon* poke)
@@ -188,8 +195,9 @@ u8 b_get_ball_to_throw(struct pokemon* poke, u8 bank)
     return get_attributes(poke, ATTR_POKEBALL, 0);
 }
 
-u8 get_poke_nick_prefix(u8 bank, u8* prefix_dst, u8 adder)
+void* get_poke_nick_prefix(u8 bank, u8* dst)
 {
+    u8 i = 0;
     if (is_bank_from_opponent_side(bank))
     {
         u8* prefix;
@@ -197,21 +205,393 @@ u8 get_poke_nick_prefix(u8 bank, u8* prefix_dst, u8 adder)
             prefix = (u8*) &text_Foe_;
         else
             prefix = (u8*) &text_Wild_;
-        do
+        while (prefix[i] != 0xFF)
         {
-            *(prefix_dst + adder) = *prefix;
-            prefix++;
-            adder++;
-        } while (*prefix != 0xFF);
+            dst[i] = prefix[i];
+            i++;
+        }
     }
-    return adder;
+    return &dst[i];
 }
 
-u8 get_poke_nick_with_prefix(u8 bank, void* nick_dst, void* prefix_dst, u8 adder)
+void* get_poke_nick_with_prefix(u8 bank, void* dst)
 {
-    adder = get_poke_nick_prefix(bank, prefix_dst, adder);
-    get_poke_nick(bank, nick_dst);
-    return adder;
+    return get_poke_nick(bank, get_poke_nick_prefix(bank, dst));
+}
+
+void* get_ability_name_ptr(enum poke_abilities ability)
+{
+    return ability_names_table[ability];
+}
+
+void* get_trainerclass_ptr(u8 classID)
+{
+    return trainerclass_names[classID];
+}
+
+void* get_link_trainername(u8 linkID, u8 to_xor)
+{
+    u8 bank = battle_link_pbs[linkID].bank_id ^ to_xor;
+    return battle_link_pbs[get_linkpbs_id(bank)].trainer_name;
+}
+
+u16 battle_string_decoder(u8* src, u8* dst)
+{
+    u8 link_id = link_get_multiplayer_id();
+    if (battle_flags.flag_x2000000)
+        link_id = battle_some_link_id;
+    u32 dst_id = 0;
+    u32 src_id = 0;
+    while(src[src_id] != 0xFF)
+    {
+        u8 curr_char = src[src_id];
+        src_id++;
+        if (curr_char == 0xFD) //decode string
+        {
+            u8 text[20];
+            u8* string = NULL;
+            curr_char = src[src_id];
+            src_id++;
+            switch (curr_char) //fd char decoding
+            {
+            case 0:
+                if (battle_text_buff1[0] == 0xFD)
+                {
+                    fdecoder_for_battle_strings(battle_text_buff1, text);
+                    string = text;
+                }
+                else
+                {
+                   string = get_status_text(battle_text_buff1);
+                    if (!string)
+                        string = battle_text_buff1;
+                }
+                break;
+            case 1:
+                if (battle_text_buff2[0] == 0xFD)
+                {
+                    fdecoder_for_battle_strings(battle_text_buff2, text);
+                    string = text;
+                }
+                else
+                    string = battle_text_buff2;
+                break;
+            case 52:
+                if (battle_text_buff3[0] == 0xFD)
+                {
+                    fdecoder_for_battle_strings(battle_text_buff3, text);
+                    string = text;
+                }
+                else
+                    string = battle_text_buff3;
+                break;
+            case 2: //copy script text buffer1
+                string = script_text_buffer1;
+                break;
+            case 3: //copy script text buffer2
+                string = script_text_buffer2;
+                break;
+            case 4: //copy script text buffer3
+                string = script_text_buffer3;
+                break;
+            case 5: //player first poke name
+                get_poke_nick(get_bank_by_player_ai(0), text);
+                string = text;
+                break;
+            case 6: //opponent first poke name
+                get_poke_nick(get_bank_by_player_ai(1), text);
+                string = text;
+                break;
+            case 7: //player second poke name
+                get_poke_nick(get_bank_by_player_ai(2), text);
+                string = text;
+                break;
+            case 8: //opponent second poke name
+                get_poke_nick(get_bank_by_player_ai(3), text);
+                string = text;
+                break;
+            case 9: //link first player pokemon
+                get_poke_nick_link(link_id, 0, text);
+                string = text;
+                break;
+            case 10: //link first opponent pokemon
+                get_poke_nick_link(link_id, 1, text);
+                string = text;
+                break;
+            case 11: //link second player pokemon
+                get_poke_nick_link(link_id, 2, text);
+                string = text;
+                break;
+            case 12: //link opponent player pokemon
+                get_poke_nick_link(link_id, 3, text);
+                string = text;
+                break;
+            case 13: //todo
+                break;
+            case 14: //attacker name
+                get_poke_nick(bank_attacker, text);
+                string = text;
+                break;
+            case 15: //attacker name with prefix
+                get_poke_nick_with_prefix(bank_attacker, text);
+                string = text;
+                break;
+            case 16: //target name with prefix
+                get_poke_nick_with_prefix(bank_target, text);
+                string = text;
+                break;
+            case 17: //target partner name with prefix
+                get_poke_nick_with_prefix(bank_partner_def, text);
+                string = text;
+                break;
+            case 18: //active name with prefix
+                get_poke_nick_with_prefix(active_bank, text);
+                string = text;
+                break;
+            case 19: //scripting active name with prefix
+                get_poke_nick_with_prefix(battle_scripting.active_bank, text);
+                string = text;
+                break;
+            case 20: //todo
+                break;
+            case 21: //todo
+                break;
+            case 22: //get last used item
+                if ((battle_flags.link || battle_flags.flag_x2000000) && last_used_item == ITEM_ENIGMABERRY)
+                {
+                    u8 field25 = battle_scripting.field25;
+                    u8 enigma = 1;
+                    if (battle_flags.player_partner)
+                    {
+                        if (battle_link_pbs[field25].bank_id == another_active_bank)
+                            enigma = 0;
+                    }
+                    else if (field25 == 0)
+                    {
+                        if (!(another_active_bank & 1))
+                            enigma = 0;
+                    }
+                    else if (another_active_bank & 1)
+                        enigma = 0;
+                    if (enigma)
+                        string = text_ENIGMA_BERRY;
+                    else
+                    {
+                        strcpy_xFF_terminated_0(text, enigma_berry_battle[another_active_bank].berry_name);
+                        str_append(text, text__BERRY);
+                        string = text;
+                    }
+                }
+                else
+                {
+                    buffer_item(last_used_item, text);
+                    string = text;
+                }
+                break;
+            case 23: //last used ability
+                string = get_ability_name_ptr(last_used_ability);
+                break;
+            case 24: //attackers ability
+                string = get_ability_name_ptr(abilities_by_banks[bank_attacker]);
+                break;
+            case 25: //targets ability
+                string = get_ability_name_ptr(abilities_by_banks[bank_target]);
+                break;
+            case 26: //scripting actives ability
+                string = get_ability_name_ptr(abilities_by_banks[battle_scripting.active_bank]);
+                break;
+            case 27: //def partners ability
+                string = get_ability_name_ptr(abilities_by_banks[bank_partner_def]);
+                break;
+            case 28: //trainer A class
+                {
+                    u8 classID;
+                    u16 trainerA = var_8015_trainer_opponent_A;
+                    if (battle_flags.secret_base)
+                        classID = get_secretbase_trainerclass();
+                    else if (trainerA == 0xC00)
+                        classID = get_trainerxC00_trainerclass();
+                    else if (BATTLE_FRONTIER_BATTLE)
+                        classID = get_frontier_opponent_class(trainerA);
+                    else if (battle_flags.flag_x4000000)
+                        classID = get_x4000000_trainerclass(trainerA);
+                    else if (battle_flags.flagx800)
+                        classID = get_x800_trainerclass();
+                    else
+                        classID = trainer_table[trainerA].class;
+                    string = get_trainerclass_ptr(classID);
+                }
+                break;
+            case 29: //trainer A name
+                if (battle_flags.secret_base)
+                    string = battle_resources->secretbase_opponent->trainer_name;
+                else if (var_8015_trainer_opponent_A == 0xC00)
+                    string = battle_link_pbs[link_id ^ 1].trainer_name;
+                else if (BATTLE_FRONTIER_BATTLE)
+                {
+                    get_frontier_trainer_name(text, var_8015_trainer_opponent_A);
+                    string = text;
+                }
+                else if (battle_flags.flag_x4000000)
+                {
+                    get_x4000000_trainername(text, var_8015_trainer_opponent_A);
+                    string = text;
+                }
+                else if (battle_flags.flagx800)
+                {
+                    get_x800_trainername(text);
+                    string = text;
+                }
+                else
+                    string = trainer_table[var_8015_trainer_opponent_A].name;
+                break;
+            case 30: //link player 1 name
+                string = get_link_trainername(link_id, 0);
+                break;
+            case 31: //link player 2 name
+                string = get_link_trainername(link_id, 2);
+                break;
+            case 32: //link player 3 name
+                string = get_link_trainername(link_id, 1);
+                break;
+            case 33: //link player 4 name
+                string = get_link_trainername(link_id, 3);
+                break;
+            case 34: //scripting active link name
+                string = battle_link_pbs[get_linkpbs_id(battle_scripting.active_bank)].trainer_name;
+                break;
+            case 35: //players name
+                string = sav2->name;
+                break;
+            case 36: //trainer A lose text
+                if (BATTLE_FRONTIER_BATTLE)
+                    get_frontier_opponent_battleend_text(var_8015_trainer_opponent_A, 2);
+                else if (battle_flags.flag_x4000000)
+                    x4000000_get_battle_text(var_8015_trainer_opponent_A, 4);
+                else
+                    copy_opponent_a_lose_text();
+                string = displayed_string_ov;
+                break;
+            case 37: //trainer A win text
+                if (BATTLE_FRONTIER_BATTLE)
+                {
+                    get_frontier_opponent_battleend_text(var_8015_trainer_opponent_A, 1);
+                    string = displayed_string_ov;
+                }
+                else if (battle_flags.flag_x4000000)
+                {
+                    x4000000_get_battle_text(var_8015_trainer_opponent_A, 3);
+                    string = displayed_string_ov;
+                }
+                break;
+            case 38: //todo
+                break;
+            case 39: //PC system creator's name
+                string = text_someones;
+                if (getflag(0x8AB))
+                    string = text_LANETTES;
+                break;
+            case 40: //attacker foe/ally
+                string = text_Ally;
+                if (is_bank_from_opponent_side(bank_attacker))
+                    string = text_Foe;
+                break;
+            case 41: //target foe/ally
+                string = text_Ally;
+                if (is_bank_from_opponent_side(bank_target))
+                    string = text_Foe;
+                break;
+            case 42: //attacker foe_/ally_
+            case 44:
+                string = text_Ally_;
+                if (is_bank_from_opponent_side(bank_attacker))
+                    string = text_Foe_;
+                break;
+            case 43: //target foe_/ally_
+            case 45:
+                string = text_Ally_;
+                if (is_bank_from_opponent_side(bank_target))
+                    string = text_Foe_;
+                break;
+            case 46: //trainer B class
+                {
+                    u8 class_id;
+                    if (BATTLE_FRONTIER_BATTLE)
+                        class_id = get_frontier_opponent_class(trainer_opponent_B);
+                    else if (battle_flags.flag_x4000000)
+                        class_id = get_x4000000_trainerclass(trainer_opponent_B);
+                    else
+                        class_id = trainer_table[trainer_opponent_B].class;
+                    string = get_trainerclass_ptr(class_id);
+                }
+                break;
+            case 47: //trainer B name
+                if (BATTLE_FRONTIER_BATTLE)
+                {
+                    get_frontier_trainer_name(text, trainer_opponent_B);
+                    string = text;
+                }
+                else if (battle_flags.flag_x4000000)
+                {
+                    get_x4000000_trainername(text, trainer_opponent_B);
+                    string = text;
+                }
+                else
+                    string = trainer_table[trainer_opponent_B].name;
+                break;
+            case 48: //trainer B lose text
+                if (BATTLE_FRONTIER_BATTLE)
+                    get_frontier_opponent_battleend_text(trainer_opponent_B, 2);
+                else if (battle_flags.flag_x4000000)
+                    x4000000_get_battle_text(trainer_opponent_B, 4);
+                else
+                    copy_opponent_b_lose_text();
+                string = displayed_string_ov;
+                break;
+            case 49: //trainer B win text
+                if (BATTLE_FRONTIER_BATTLE)
+                {
+                    get_frontier_opponent_battleend_text(trainer_opponent_B, 1);
+                    string = displayed_string_ov;
+                }
+                else if (battle_flags.flag_x4000000)
+                {
+                    x4000000_get_battle_text(trainer_opponent_B, 3);
+                    string = displayed_string_ov;
+                }
+                break;
+            case 50: //partner trainer class
+                string = get_trainerclass_ptr(get_frontier_opponent_class(partner_trainer));
+                break;
+            case 51: //partner trainer name
+                get_frontier_trainer_name(text, partner_trainer);
+                string = text;
+                break;
+            }
+            if (string) //copy decoded string
+            {
+                for (u32 i = 0; string[i] != 0xFF; i++)
+                {
+                    dst[dst_id] = string[i];
+                    dst_id++;
+                }
+                if (curr_char == 36 || curr_char == 37 || curr_char == 48 || curr_char == 49) //slow win/lose text down
+                {
+                    dst[dst_id] = 0xFC;
+                    dst[dst_id + 1] = 9;
+                    dst_id += 2;
+                }
+            }
+        }
+        else //just copy character
+        {
+            dst[dst_id] = curr_char;
+            dst_id++;
+        }
+    }
+    dst[dst_id] = 0xFF;
+    dst_id++;
+    return dst_id;
 }
 
 void update_transform_sprite_pal(u8 bank, u16 pal_arg1)
@@ -711,7 +1091,7 @@ void evs_update(struct pokemon *poke, u16 defeated_species)
     struct poke_basestats* stats = &basestat_table->poke_stats[defeated_species];
     for (u8 curr_stat = 0; curr_stat < 6; curr_stat++)
     {
-        u8 to_add;
+        u8 to_add = 0;
         u8 power_bonus = 0;
         switch (curr_stat)
         {

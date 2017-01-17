@@ -1484,3 +1484,33 @@ void tai86_jumpifhasattackingmovewithtype() //u8 bank, u8 type, void* ptr
     }
     tai_current_instruction += 7;
 }
+
+void tai87_jumpifhasnostatusmoves() //u8 bank, void* ptr
+{
+    u8 bank = get_ai_bank(read_byte(tai_current_instruction + 1));
+    for (u8 i = 0; i < 4; i++)
+    {
+        u16 move = ai_get_move(bank, i);
+        if (move && !DAMAGING_MOVE(move))
+        {
+            tai_current_instruction += 6;
+            return;
+        }
+    }
+    tai_current_instruction = (void*) (read_word(tai_current_instruction + 2));
+}
+
+void tai88_jumpifstatusmovesnotworthusing() //u8 bank, void* ptr
+{
+    u8 bank = get_ai_bank(read_byte(tai_current_instruction + 1));
+    for (u8 i = 0; i < 4; i++)
+    {
+        u16 move = ai_get_move(bank, i);
+        if (move && !DAMAGING_MOVE(move) && AI_STATE->score[i] >= 100)
+        {
+            tai_current_instruction += 6;
+            return;
+        }
+    }
+    tai_current_instruction = (void*) (read_word(tai_current_instruction + 2));
+}
