@@ -8,10 +8,18 @@
 #define NUM_OF_EVOS     5       //number of evolutions per pokemon
 #define KEYSTONE        0x4     //mega item that the player has to posses in order to mega evolve
 
-#define EXP_CAPTURE     true    //set to false if you don't want to receive exp from catching pokes
-#define STAT_RECALC     false   //set to true if you want all pokemon having their stats recalculated at the end of the battle
-#define ITEM_STEAL      false   //if true player is able to steal other trainers' items, if false the stolen item will disappear at the end of the battle
-#define ITEM_SWAP       false   //if true player's item will be that that was switched, if false the switched item that a pokemon originally had returns to it
+#define EXP_CAPTURE         true    //set to false if you don't want to receive exp from catching pokes
+#define STAT_RECALC         false   //set to true if you want all pokemon having their stats recalculated at the end of the battle
+#define ITEM_STEAL          false   //if true player is able to steal other trainers' items, if false the stolen item will disappear at the end of the battle
+#define ITEM_SWAP           false   //if true player's item will be that that was switched, if false the switched item that a pokemon originally had returns to it
+#define MAX_LEVEL           100     //highest possible level
+#define EXP_DIVIDE          true    //if true exp will be divided among pokemon(if two pokemon participite they'll get 50 % each), set to false if you want gen6-style exp
+#define GENVI_EXPSHARE      false    //set to true if you want EXPSHARE to act like in gen6
+#define EXPSHARE_FLAG       0x900   //flag that must be set for GENVI expshare to work
+#define DISABLED_EXP_FLAG   0x0   //if that flag is set, receiving exp is disabled, if flag is 0 it has no effect
+#define DISABLED_EVS_FLAG   0x0     //if that flag is set, receiving EVS points is disabled, if flag is 0 it has no effect; this and above flag can be the same
+#define DOUBLE_WILD_BATTLES true    //set to false if you don't want have them in your hack at all
+#define DOUBLE_WILD_TILES   1      //amount of tiles double wild battles are possible on
 
 //form indexes
 #define POKE_CHERRIM                1000

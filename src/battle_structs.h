@@ -218,7 +218,7 @@ struct battle_stuff{
     u8 end_turn_statetracker2; //0x3
     u16 trapped_move[4]; //0x4 - 0xB
     u8 move_target[4]; //0xC - 0xF
-    u8 field_10; //0x10
+    u8 expgetter_id; //0x10
     u8 field_11; //0x11
     u8 field_12; //0x12
     u8 dynamic_move_type; //0x13
@@ -229,16 +229,37 @@ struct battle_stuff{
     u8 money_multiplier; //0x4A
     u8 field_4B; //0x4B
     u8 switch_in_ability_bank_counter; //0x4C
-    u8 field_4D[7]; //0x4D-0x53
+    u8 field_4D; //0x4D
+    u8 field_4E; //0x4E
+    u8 field_4F; //0x4F
+    u16 exp;    //0x50
+    u8 field_52; //0x52
+    u8 sentin_pokes; //0x53
     u8 field_54; //0x54
     u8 field_55; //0x55
     u8 field_56; //0x56
     u8 field_57; //0x57
-    u8 field_58[4];
-    u8 field_5C[35];
+    u8 field_58[4]; //0x58 - 0x5B
+    u8 field_5C[17]; //0x5C - 0x6C
+    u8 caught_nick[15]; //0x6D - 0x7B
+    u8 safari_rate; //0x7C
+    u8 field_7D; //0x7D
+    u8 field_7E; //0x7E
     u8 castform_switch_form; //0x7F
     u8 chosen_move_position[4]; //0x80
-    u8 field_84[13]; //0x84-0x90
+    u8 field_84; //0x84
+    u8 field_85; //0x85
+    u8 field_86; //0x86
+    u8 field_87; //0x87
+    u8 field_88; //0x88
+    u8 field_89; //0x89
+    u8 field_8A; //0x8A
+    u8 field_8B; //0x8B
+    u8 field_8C; //0x8C
+    u8 field_8D; //0x8D
+    u8 field_8E; //0x8E
+    u8 expgetter_bank; //0x8F
+    u8 field_90; //0x90
     u8 absent_bank_flags_prev_turn; //0x91
     u8 field_92[6]; //0x92-0x97
     u16 mirror_moves_pbs[4]; //0x98-0x9F
@@ -256,7 +277,7 @@ struct battle_stuff{
     u8 field_DC; //0xDC
     u8 field_DD; //0xDD
     u8 field_DE; //0xDE
-    u8 field_DF; //0xDF
+    u8 got_exp_from; //0xDF
     struct mirror_move_set_per_bank mirror_move_set_pbs[4]; //0xE0-0xFF
     struct palette castform_pal[4]; //0x100 - 0x179
     u8 field_180[34]; //0x180 - 0x1A1
@@ -418,12 +439,22 @@ struct battlescript_stack{
     u8 undefined[3];
 };
 
+struct lvlup_stats{
+    u16 hp;
+    u16 atk;
+    u16 def;
+    u16 spd;
+    u16 spatk;
+    u16 spdef;
+    u16 field_C;
+};
+
 struct b_resources_table{
     struct b_resources_secretbaseinfo *secretbase_opponent;
     struct ability_flags *ability_flags_ptr;
     struct battlescript_stack *battlescript_stack;
     void* battle_callback1_stack;
-    void* field_10;
+    struct lvlup_stats *before_lvl_up;
     struct tai_state *tai_state;
     struct battle_history *battle_history;
     void* taiscripts_stack;
@@ -742,11 +773,7 @@ struct poke_basestats{
     u8 padding2;
 };
 
-struct basestat_data{
-    struct poke_basestats poke_stats[ALL_POKES];
-};
-
-extern struct basestat_data* basestat_table;
+extern struct poke_basestats (*basestat_table)[ALL_POKES];
 
 struct battle_info_struct
 {
@@ -755,17 +782,19 @@ struct battle_info_struct
     u8 field2;
     u8 field3;
     u8 field4;
-    u8 field5;
+    u8 flags;
     u16 user_team_species;
     u8 pokemon_name_string_1[11];
     u8 battle_turn_counter;
-    u8 pokemon_name_string_2[11];
-    u8 pad;
-    u16 logged;
-    u16 user_team_move;
-    u16 ai_team_move;
-    u16 ai_team_species;
-    u16 caught_species;
+    u8 pokemon_name_string_2[11]; //0x14
+    u8 pad; //0x1F
+    u16 logged; //0x20
+    u16 user_team_move; //0x22
+    u16 ai_team_move; //0x24
+    u16 ai_team_species; //0x26
+    u16 caught_species; //0x28
+    u8 caught_name[10];
+    u8 catch_attempts[11];
 };
 
 extern struct battle_info_struct battle_trace;
@@ -867,6 +896,19 @@ struct pokenames_all{
 
 extern struct pokenames_all* poke_name_table;
 
+struct button{
+    u16 A : 1;
+    u16 B : 1;
+    u16 SELECT : 1;
+    u16 START : 1;
+    u16 RIGHT : 1;
+    u16 LEFT : 1;
+    u16 UP : 1;
+    u16 DOWN : 1;
+    u16 R : 1;
+    u16 L : 1;
+};
+
 struct superstate{
     void* callback1;
     void* callback2;
@@ -878,12 +920,40 @@ struct superstate{
     u32 bits_to_wait_for;
     u32 some_timer;
     u32 field24;
+    u16 buttons0;
+    u16 buttons1;
+    u16 buttons2;
+    struct button pressed_buttons;
 };
 
 extern struct superstate super;
 
+struct warp{
+    u8 map_bank;
+    u8 map_no;
+    s16 x_coords;
+    s16 y_coords;
+    u16 field6;
+};
+
 struct saveblock1{
-    u8 will_do_later_if_needed[0x234];
+    s16 x_coords;
+    s16 y_coords;
+    u8 map_bank;
+    u8 map_no;
+    u8 field_6[14];
+    struct warp empty_warp;
+    struct warp healing_spot;
+    struct warp escape_place;
+    u16 map_song;
+    u8 ov_weather;
+    u8 weather_specifier;
+    u8 flash_on_map;
+    u8 field_31;
+    u16 map_footer_no;
+    u8 field_34[496];
+    u8 field_224[15];
+    u8 field_233;
     u8 poke_quantity;
     u8 alignment_padding[3];
     struct pokemon player_party[6];
@@ -940,5 +1010,17 @@ struct trainer_data{
 };
 
 extern struct trainer_data trainer_table[864];
+
+struct fadescreen_exec{
+    u16 BLDCNT;
+    u8 field2;
+    u8 field3;
+    u16 BLDY;
+    u8 field6;
+    u8 flags : 7;
+    u8 is_fading : 1;
+};
+
+extern struct fadescreen_exec fadescreen_info;
 
 #endif /* B_STRUCTS */

@@ -2980,3 +2980,303 @@ void atkD2_itemswap()
     }
     battlescripts_curr_instruction = (void*) (read_word(battlescripts_curr_instruction + 1));
 }
+
+void give_one_ev(struct pokemon* poke, u8 attr)
+{
+    u16 stat = get_attributes(poke, attr, 0);
+    if (stat < 252)
+    {
+        stat++;
+        set_attributes(poke, attr, &stat);
+    }
+}
+
+void evs_update(struct pokemon *poke, u16 defeated_species)
+{
+    u16 evs_total = 0;
+    for (u8 i = 0; i < 6; i++)
+    {
+        evs_total += get_attributes(poke, ATTR_HP_EV+i, 0);
+    }
+    u8 pokerus = specific_pokerus_check(poke, 0);
+    u8 power_item = 0xFF;
+    u16 item = (get_attributes(poke, ATTR_HELD_ITEM, 0));
+    if (get_item_battle_function(item) == ITEM_EFFECT_MACHOBRACE)
+    {
+        power_item = (u8) get_item_extra_param(item);
+    }
+    struct poke_basestats* stats = &((*basestat_table)[defeated_species]);
+    for (u8 curr_stat = 0; curr_stat < 6; curr_stat++)
+    {
+        u8 to_add = 0;
+        u8 power_bonus = 0;
+        switch (curr_stat)
+        {
+            case 0:
+                to_add = stats->evs_hp;
+                break;
+            case 1:
+                to_add = stats->evs_atk;
+                break;
+            case 2:
+                to_add = stats->evs_def;
+                break;
+            case 3:
+                to_add = stats->evs_spd;
+                break;
+            case 4:
+                to_add = stats->evs_spatk;
+                break;
+            case 5:
+                to_add = stats->evs_spdef;
+                break;
+        }
+        if (pokerus)
+            to_add *= 2;
+        if (power_item == 0)
+            to_add *= 2;
+        else if (item && (power_item-1)==curr_stat)
+        {
+            power_bonus = 4;
+            if (pokerus)
+                power_bonus *= 2;
+            item = 0;
+        }
+        while (to_add > 0 || power_bonus > 0)
+        {
+            if (evs_total >= 510)
+                return;
+            if (to_add)
+            {
+                give_one_ev(poke, ATTR_HP_EV + curr_stat);
+                to_add--;
+                evs_total++;
+            }
+            else if (power_bonus)
+            {
+                give_one_ev(poke, ATTR_HP_EV + (power_item - 1));
+                power_bonus--;
+                evs_total++;
+            }
+        }
+    }
+    return;
+}
+
+void atk23_exp_evs_lvlup(void)
+{
+    #define exp_for_poke damage_loc
+    if (battle_execution_buffer) {return;} // wait for the things to get done
+    u8* tracker = &battle_scripting.cmd23_state_tracker;
+    u16* sentin_exp = &battle_stuff_ptr->exp;
+    u8 bank = get_battle_bank(read_byte(battlescripts_curr_instruction + 1));
+    bank_partner_atk = bank;
+    u8* exp_getter_id = &battle_stuff_ptr->expgetter_id;
+    switch (*tracker)
+    {
+    case 0: //check if poke should get exp
+        if (!is_bank_from_opponent_side(bank) || BATTLE_FRONTIER_BATTLE || battle_flags.safari || battle_flags.flagx800 || battle_flags.link || battle_flags.flag_x2000000 || battle_flags.flag_x4000000)
+        {
+            *tracker = 6; //set last case
+            break;
+        }
+        battle_stuff_ptr->got_exp_from |= bits_table[battle_team_id_by_side[bank]];
+        (*tracker)++;
+    case 1: //get exp and pokes that will get exp
+        {
+            u8 via_expshare = 0;
+            u8 via_sentin = 0;
+            u8 sent_in = sent_pokes_to_opponent[bank >> 1];
+            for (u8 i = 0; i < 6; i++)
+            {
+                struct pokemon* poke = &party_player[i];
+                if (get_attributes(poke, ATTR_CURRENT_HP, 0))
+                {
+                    if (sent_in & bits_table[i])
+                        via_sentin++;
+                    if (GETS_VIA_EXPSHARE(get_item_battle_function(get_attributes(poke, ATTR_HELD_ITEM, 0))))
+                        via_expshare++;
+                }
+                else
+                    sent_in &= ~(bits_table[i]); //no exp for that poke
+            }
+            struct battle_participant* oppponent = &battle_participants[bank];
+            u16 exp = (*basestat_table)[oppponent->poke_species].exp_yield * oppponent->level / 7;
+            if (EXP_DIVIDE == true && via_expshare)
+            {
+                exp /= 2;
+            }
+            if (EXP_DIVIDE == true)
+                *sentin_exp = ATLEAST_ONE(exp / via_sentin);
+            else
+                *sentin_exp = ATLEAST_ONE(exp);
+            if (EXP_DIVIDE == true)
+                expshare_exp = ATLEAST_ONE(exp / via_expshare);
+            else
+                expshare_exp = ATLEAST_ONE(exp);
+            *exp_getter_id = 0;
+            battle_stuff_ptr->sentin_pokes = sent_in;
+            (*tracker)++;
+        }
+    case 2: //loop; set exp value to the poke in expgetter_id and print message
+        {
+            u8* sentin_pokes = &battle_stuff_ptr->sentin_pokes;
+            struct pokemon* poke = &party_player[*exp_getter_id];
+            u8 held_item = get_item_battle_function(get_attributes(poke, ATTR_HELD_ITEM, 0));
+            if (get_attributes(poke, ATTR_CURRENT_HP, 0) && (GETS_VIA_EXPSHARE(held_item) || *sentin_pokes & 1))
+            {
+                //update evs
+                if (!DISABLED_EVS_FLAG || !getflag(DISABLED_EVS_FLAG))
+                    evs_update(poke, battle_participants[bank].poke_species);
+
+                if (get_attributes(poke, ATTR_LEVEL, 0) < MAX_LEVEL && (!DISABLED_EXP_FLAG || !getflag(DISABLED_EXP_FLAG))) //apply experience
+                {
+                    if (battle_flags.trainer && !battle_stuff_ptr->field_12)
+                    {
+                        //play music TODO
+                    }
+                    if (*sentin_pokes & 1)
+                        exp_for_poke = *sentin_exp;
+                    else
+                        exp_for_poke = 0;
+                    if (GETS_VIA_EXPSHARE(held_item))
+                    {
+                        if (EXP_DIVIDE == false && *sentin_pokes & 1)
+                            exp_for_poke = *sentin_exp;
+                        else
+                            exp_for_poke += expshare_exp;
+                        if (EXP_DIVIDE == false && !(*sentin_pokes & 1))
+                            exp_for_poke /= 2;
+                    }
+                    if (held_item == ITEM_EFFECT_LUCKYEGG)
+                        exp_for_poke = PERCENT_100(exp_for_poke, 150);
+                    if (battle_flags.trainer)
+                        exp_for_poke = PERCENT_100(exp_for_poke, 150);
+                    u16 bs_id = 0x149;
+                    if (is_poke_traded(poke) && !battle_flags.player_ingame_partner && (*sentin_exp & 1))
+                    {
+                        exp_for_poke = PERCENT_100(exp_for_poke, 150);
+                        bs_id++;
+                    }
+                    battle_stuff_ptr->expgetter_bank = 0;
+                    if (battle_flags.double_battle && is_bank_present(2) && battle_team_id_by_side[2] == *exp_getter_id)
+                        battle_stuff_ptr->expgetter_bank = 2;
+
+                    //buffer poke name
+                    battle_text_buff1[0] = 0xFD;
+                    battle_text_buff1[1] = 4;
+                    battle_text_buff1[2] = battle_stuff_ptr->expgetter_bank;
+                    battle_text_buff1[3] = *exp_getter_id;
+                    battle_text_buff1[4] = 0xFF;
+
+                    //buffer 'gained' or 'gained a boosted'
+                    battle_text_buff2[0] = 0xFD;
+                    battle_text_buff2[1] = 0;
+                    battle_text_buff2[2] = bs_id;
+                    battle_text_buff2[3] = bs_id >> 8;
+                    battle_text_buff2[4] = 0xFF;
+
+                    //buffer exp number
+                    battle_text_buff3[0] = 0xFD;
+                    battle_text_buff3[1] = 1;
+                    battle_text_buff3[2] = 2; //halfword
+                    battle_text_buff3[3] = 5; //max digits
+                    battle_text_buff3[4] = exp_for_poke;
+                    battle_text_buff3[5] = exp_for_poke >> 8;
+                    battle_text_buff3[6] = 0xFF;
+
+                    b_std_message(0xD, battle_stuff_ptr->expgetter_bank);
+
+                    (*tracker)++;
+                }
+                else
+                    *tracker = 5; //just got evs
+            }
+            else
+            {
+                *tracker = 5;
+            }
+            (*sentin_pokes) >>= 1; //clear bits so it won't try to give experience to that poke again
+        }
+        break;
+    case 3: //give exp and move expbar
+        active_bank = battle_stuff_ptr->expgetter_bank;
+        battle_bufferB[active_bank].command_id = 0;
+        u16* lvl_stats = &battle_resources->before_lvl_up->hp;
+        struct pokemon* poke = &party_player[*exp_getter_id];
+        for (u8 i = 0; i < 6; i++)
+        {
+            lvl_stats[i] = get_attributes(poke, ATTR_TOTAL_HP + i, 0);
+        }
+        prepare_exp_receiving(0, *exp_getter_id, exp_for_poke);
+        mark_buffer_bank_for_execution(active_bank);
+        (*tracker)++;
+        break;
+    case 4: //lvl up if necessary
+        {
+            active_bank = battle_stuff_ptr->expgetter_bank;
+            u8* bufferB = &battle_bufferB[active_bank].command_id;
+            if (bufferB[0] == 0x21 && bufferB[1] == 0xB) //prepare lvl up box
+            {
+                //get poke name
+                battle_text_buff1[0] = 0xFD;
+                battle_text_buff1[1] = 4;
+                battle_text_buff1[2] = active_bank;
+                battle_text_buff1[3] = *exp_getter_id;
+                battle_text_buff1[4] = 0xFF;
+
+                //get level
+                battle_text_buff2[0] = 0xFD;
+                battle_text_buff2[1] = 1;
+                battle_text_buff2[2] = 1;
+                battle_text_buff2[3] = 3;
+                struct pokemon* poke = &party_player[*exp_getter_id];
+                u8 level = get_attributes(poke, ATTR_LEVEL, 0);
+                battle_text_buff2[4] = level;
+                battle_text_buff2[5] = 0xFF;
+
+                happiness_algorithm(poke, 0); //add happiness because of level up
+
+                battlescript_push();
+                battlescripts_curr_instruction = (void*)(0x082DABBD); //push level up battlescript
+
+                exp_for_poke = read_hword(&bufferB[2]); //exp for another lvl
+
+                struct battle_participant* lvluper = NULL; //get changed stats via level up
+                if (battle_team_id_by_side[0] == *exp_getter_id || (battle_team_id_by_side[2] == *exp_getter_id && battle_flags.double_battle))
+                    lvluper = &battle_participants[active_bank];
+                if (lvluper)
+                {
+                    lvluper->level = level;
+                    lvluper->current_hp = get_attributes(poke, ATTR_CURRENT_HP, 0);
+                    lvluper->max_hp = get_attributes(poke, ATTR_TOTAL_HP, 0);
+                    u16* stats = &lvluper->atk;
+                    for (u8 i = 0; i < 5; i++)
+                    {
+                        stats[i] = get_attributes(poke, ATTR_ATTACK + i, 0);
+                    }
+                }
+            }
+            else
+                exp_for_poke = 0;
+            (*tracker)++;
+        }
+        break;
+    case 5: //check if we should give exp again(lvl up), increment looper or exit
+        if (exp_for_poke)
+            *tracker = 3; //give exp again
+        else
+        {
+            (*exp_getter_id)++;
+            if (*exp_getter_id > 5)
+                *tracker = 6; //finish exp giving
+            else
+                *tracker = 2; //looper increment
+        }
+        break;
+    case 6: //exp giving finished
+    default:
+        battlescripts_curr_instruction += 2;
+        break;
+    }
+}

@@ -89,8 +89,8 @@ u8 ai_get_ability(u8 bank, u8 gastro)
         u16 species = ai_get_species(bank);
         if (recorded_ability)
             ability = recorded_ability;
-        else if (!has_poke_hidden_ability(species) && !basestat_table->poke_stats[species].ability2) //poke has only one ability
-            ability = basestat_table->poke_stats[species].ability1;
+        else if (!has_poke_hidden_ability(species) && !(*basestat_table)[species].ability2) //poke has only one ability
+            ability = (*basestat_table)[species].ability1;
         else if (is_ability_preventing_switching(bank, bank ^ 1) || is_ability_preventing_switching(bank, bank ^ 1 ^ 2)) //check if bank prevents escape
             ability = battle_participants[bank].ability_id;
         else
@@ -980,7 +980,7 @@ u8 has_any_move_with_split(u8 bank, u8 split)
 u8 get_base_stat(u8 bank, u8 stat)
 {
     u16 species = ai_get_species(bank);
-    u8* stat_value = stat + (&basestat_table->poke_stats[species].base_hp);
+    u8* stat_value = stat + &((*basestat_table)[species].base_hp);
     return *stat_value;
 }
 

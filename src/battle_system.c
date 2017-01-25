@@ -55,7 +55,7 @@ u8 get_item_effect(u8 bank, u8 check_negating_effects)
     }
     else
     {
-        return get_item_x12_battle_function(battle_participants[bank].held_item);
+        return get_item_battle_function(battle_participants[bank].held_item);
     }
 }
 
@@ -2633,7 +2633,7 @@ void effect_stat_change(void* pointer)
 
 u8 canlose_megastone(u8 bank, u16 item)
 {
-    if (get_item_x12_battle_function(item) == ITEM_EFFECT_MEGASTONE)
+    if (get_item_battle_function(item) == ITEM_EFFECT_MEGASTONE)
     {
         u16* item_ptr = &battle_participants[bank].held_item;
         u16 holding_item = *item_ptr;

@@ -6,7 +6,7 @@ illusion_throw_different_ball:
 	mov r4, r0 @r4 contains poke's data ptr
 	mov r1, r5 @r5 contains poke's bank
 	bl b_get_ball_to_throw
-	ldr r2, =(ball_index_to_processing_id)
+	ldr r2, =(itemID_to_ballID)
 	bl r2_caller
 	mov r4, r0
 	ldr r2, =(0x080754D8 | 1)

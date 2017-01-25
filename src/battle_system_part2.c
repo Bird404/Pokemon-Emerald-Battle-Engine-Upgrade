@@ -336,6 +336,10 @@ u16 battle_string_decoder(u8* src, u8* dst)
                 get_poke_nick_with_prefix(bank_attacker, text);
                 string = text;
                 break;
+            case 53: //target name
+                get_poke_nick(bank_target, text);
+                string = text;
+                break;
             case 16: //target name with prefix
                 get_poke_nick_with_prefix(bank_target, text);
                 string = text;
@@ -912,7 +916,7 @@ void handle_bug_bite()
 {
     u8 bank = bank_attacker;
     u8 effect= 0;
-    u8 item_effect=get_item_x12_battle_function(last_used_item);
+    u8 item_effect=get_item_battle_function(last_used_item);
     u8 quality=get_item_quality(last_used_item);
     switch(item_effect)
     {
@@ -1062,86 +1066,4 @@ u8 count_alive_mons(u8 bank)
             pokes_amount++;
     }
     return pokes_amount;
-}
-
-void give_one_ev(struct pokemon* poke, u8 attr)
-{
-    u16 stat = get_attributes(poke, attr, 0);
-    if (stat < 252)
-    {
-        stat++;
-        set_attributes(poke, attr, &stat);
-    }
-}
-
-void evs_update(struct pokemon *poke, u16 defeated_species)
-{
-    u16 evs_total = 0;
-    for (u8 i = 0; i < 6; i++)
-    {
-        evs_total += get_attributes(poke, ATTR_HP_EV+i, 0);
-    }
-    u8 pokerus = specific_pokerus_check(poke, 0);
-    u8 power_item = 0xFF;
-    u16 item = (get_attributes(poke, ATTR_HELD_ITEM, 0));
-    if (get_item_x12_battle_function(item) == ITEM_EFFECT_MACHOBRACE)
-    {
-        power_item = (u8) get_item_extra_param(item);
-    }
-    struct poke_basestats* stats = &basestat_table->poke_stats[defeated_species];
-    for (u8 curr_stat = 0; curr_stat < 6; curr_stat++)
-    {
-        u8 to_add = 0;
-        u8 power_bonus = 0;
-        switch (curr_stat)
-        {
-            case 0:
-                to_add = stats->evs_hp;
-                break;
-            case 1:
-                to_add = stats->evs_atk;
-                break;
-            case 2:
-                to_add = stats->evs_def;
-                break;
-            case 3:
-                to_add = stats->evs_spd;
-                break;
-            case 4:
-                to_add = stats->evs_spatk;
-                break;
-            case 5:
-                to_add = stats->evs_spdef;
-                break;
-        }
-        if (pokerus)
-            to_add *= 2;
-        if (power_item == 0)
-            to_add *= 2;
-        else if (item && (power_item-1)==curr_stat)
-        {
-            power_bonus = 4;
-            if (pokerus)
-                power_bonus *= 2;
-            item = 0;
-        }
-        while (to_add > 0 || power_bonus > 0)
-        {
-            if (evs_total >= 510)
-                return;
-            if (to_add)
-            {
-                give_one_ev(poke, ATTR_HP_EV + curr_stat);
-                to_add--;
-                evs_total++;
-            }
-            else if (power_bonus)
-            {
-                give_one_ev(poke, ATTR_HP_EV + (power_item - 1));
-                power_bonus--;
-                evs_total++;
-            }
-        }
-    }
-    return;
 }

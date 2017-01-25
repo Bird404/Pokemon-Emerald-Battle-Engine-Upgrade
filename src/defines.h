@@ -14,6 +14,62 @@ enum poke_gender{
     POKE_GENDERLESS = 0xFF
 };
 
+enum menu_action{
+    ACTION_MOVE, //0x0
+    ACTION_ITEM, //0x1
+    ACTION_SWITCH, //0x2
+    ACTION_RUN, //0x3
+};
+
+enum item_pocket{
+    POCKET_ITEMS = 1,
+    POCKET_BALLS, //0x2
+    POCKET_TMS, //0x3
+    POCKET_BERRIES, //0x4
+    POCKET_KEYITEMS, //0x5
+};
+
+enum ball_index{
+    BALL_POKE, //0x0
+    BALL_GREAT, //0x1
+    BALL_SAFARI, //0x2
+    BALL_ULTRA, //0x3
+    BALL_MASTER, //0x4
+    BALL_NET, //0x5
+    BALL_DIVE, //0x6
+    BALL_NEST, //0x7
+    BALL_REPEAT, //0x8
+    BALL_TIMER, //0x9
+    BALL_LUXURY, //0xA
+    BALL_PREMIER, //0xB
+    //new balls
+    BALL_LEVEL, //0xC
+    BALL_LURE, //0xD
+    BALL_MOON, //0xE
+    BALL_FRIEND, //0xF
+    BALL_LOVE, //0x10
+    BALL_HEAVY, //0x11
+    BALL_FAST, //0x12
+    BALL_SPORT, //0x13
+    BALL_DUSK, //0x14
+    BALL_QUICK, //0x15
+    BALL_HEAL, //0x16
+    BALL_CHERISH, //0x17
+    BALL_PARK, //0x18
+    BALL_DREAM, //0x19
+    BALL_BEAST, //0x1A
+};
+
+enum map_type{
+    MAP_TOWN = 1,
+    MAP_CITY, //0x2
+    MAP_ROUTE, //0x3
+    MAP_CAVE, //0x4
+    MAP_UNDERWATER, //0x5
+    MAP_INSIDE = 8,
+    MAP_SECRETBASE, //0x9
+};
+
 #include "./defines/poke_types.h"
 #include "./defines/abilities.h"
 #include "./defines/moves.h"
@@ -64,9 +120,15 @@ enum poke_gender{
 #define MUST_HIT(bank_atk, bank_def) (status3[bank_def].always_hits && disable_structs[bank_def].always_hits_bank == bank_atk)
 #define CHECK_KNOCKED_OFF(bank) (battle_effects_duration.knocked_off_pokes[is_bank_from_opponent_side(bank)] & bits_table[battle_team_id_by_side[bank]])
 #define SET_KNOCKED_OFF(bank) (battle_effects_duration.knocked_off_pokes[is_bank_from_opponent_side(bank)] |= bits_table[battle_team_id_by_side[bank]])
+#define WILD_DOUBLE_BATTLE (battle_flags.double_battle && !battle_flags.trainer && !battle_flags.link)
 #define WILD_ATTACKER (!battle_flags.trainer && !battle_flags.link && (bank_attacker & 1) && !(bank_target & 1))
 #define read_byte(ptr) (*((u8*)(ptr)))
+#define read_hword(ptr) (read_byte(ptr) | ((read_byte(ptr + 1)) << 8))
 #define BATTLE_FRONTIER_BATTLE (battle_flags.frontier_general || battle_flags.battle_dome || battle_flags.battle_palace || battle_flags.battle_arena || battle_flags.battle_factory || battle_flags.flag_x100000 || battle_flags.battle_pyramid)
+#define ATLEAST_ONE(value)(value ? value : 1)
+#define PERCENT_100(value, percent)((value * percent) / 100)
+#define GETS_VIA_EXPSHARE(held_item)((GENVI_EXPSHARE == false && held_item == ITEM_EFFECT_EXPSHARE) || (GENVI_EXPSHARE == true && checkitem(ITEM_EXPSHARE, 1) && getflag(EXPSHARE_FLAG)))
+#define SET_u32(ptr, val)((*(u32*)(ptr) = 0))
 
 #define REQUEST_SPECIES_BATTLE 0x1
 #define REQUEST_HELDITEM_BATTLE 0x2
@@ -85,6 +147,8 @@ enum poke_gender{
 #define Termin 0xFF
 #define Dash 0xAE
 #define Slash 0xBA
+
+#define wait_for_pressed_key 0xFC, 0x09
 
 #define Poke_e 0x1B
 

@@ -68,7 +68,7 @@ bool handle_primal_reversion(u8 bank)
             bank_struct->sp_atk = get_attributes(poke_address, ATTR_SPECIAL_ATTACK, 0);
             bank_struct->sp_def = get_attributes(poke_address, ATTR_SPECIAL_DEFENCE, 0);
             bank_struct->poke_species = primal_species;
-            struct poke_basestats* PokeStats = &basestat_table->poke_stats[primal_species];
+            struct poke_basestats* PokeStats = &((*basestat_table)[primal_species]);
             bank_struct->type1 = PokeStats->type1;
             bank_struct->type2 = PokeStats->type2;
             // The ability 1 and ability 2 of the primal species in the base stat table should both be set and

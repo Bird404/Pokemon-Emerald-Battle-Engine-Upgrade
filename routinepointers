@@ -14,6 +14,7 @@ atk0C_datahpupdate 0831BD40
 atk0F_resultmessage 0831BD4C
 atk13_printfromtable 0831BD5C
 atk15_setmoveeffectchance 0831BD64
+atk23_exp_evs_lvlup 0831BD9C
 atk42_jump_if_type 0831BE18
 atk47_graphical_statchange 0831BE2C
 atk49_move_end_turn 0831BE34
@@ -53,6 +54,11 @@ atkE1_intimidate_loop 0831C094
 atkE2_switchout_abilities 0831C098
 atkE4_secretpowereffect 0831C0A0
 atkEB_set_type_to_terrain 0831C0BC
+atkEF_ballthrow 0831C0CC
+atkF0_copy_caught_poke 0831C0D0
+atkF1_setpoke_as_caught 0831C0D4
+atkF2_display_dex_info 0831C0D8
+atkF3_nickname_caught_poke 0831C0DC
 ###new animation commands
 anim6_swap_banks 08525EB0
 ###start attack

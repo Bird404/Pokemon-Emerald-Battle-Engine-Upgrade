@@ -495,7 +495,7 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
                     }
                 }
                 u16 species = get_attributes(&poke[poke_index], ATTR_SPECIES, 0);
-                base_power = basestat_table->poke_stats[species].base_atk / 10 + 5;
+                base_power = (*basestat_table)[species].base_atk / 10 + 5;
             }
             break;
     }

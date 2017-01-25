@@ -1,4 +1,5 @@
 #include "defines.h"
+#include <string.h>
 
 void revert_form_change(u8 mega_revert, u8 teamID, u8 side, struct pokemon* poke);
 u16 try_illusion_change(u8 bank, struct pokemon* poke);
@@ -6,7 +7,7 @@ struct pokemon* get_party_ptr(u8 bank);
 
 void alloc_new_struct()
 {
-    battle_stuff_ptr = (struct battle_stuff*) malloc_and_clear(0x2A4);
+    battle_stuff_ptr = (struct battle_stuff*) malloc_and_clear(sizeof(struct battle_stuff));
     new_battlestruct = (struct new_battle_struct*) malloc_and_clear(sizeof(struct new_battle_struct));
     //apply Egg Type
     for (u8 i = 0; i < 4; i++)
@@ -74,4 +75,6 @@ void free_new_struct()
     }
     free(battle_stuff_ptr);
     free(new_battlestruct);
+    //SET_u32(&battle_flags, 0); //throws a compiler warning, so I used a different solution
+    memset(&battle_flags, 0, sizeof(struct battle_flags)); //it gets optimalized to str r0, #0 anyway
 }

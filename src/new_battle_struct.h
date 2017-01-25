@@ -51,6 +51,7 @@ struct bank_affecting{
     u8 illusion_ball : 6;
     u8 illusion_nick[10];
     u8 transform_pal_changed : 1;
+    u8 skips_turn : 1;
 };
 
 struct side_affecting{

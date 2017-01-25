@@ -2764,10 +2764,9 @@ void in_battle_form_change(u8 bank, bool change_hp, bool change_type)
     struct battle_participant* aegi = &battle_participants[bank];
     if(change_type)
     {
-        struct poke_basestats* PokeStats = &basestat_table->poke_stats[aegi->poke_species];
+        struct poke_basestats* PokeStats = &((*basestat_table)[aegi->poke_species]);
         aegi->type1 = PokeStats->type1;
         aegi->type2 = PokeStats->type2;
-
     }
     if(change_hp)
     {
