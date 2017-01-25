@@ -1,4 +1,5 @@
 #include "defines.h"
+#include "static_references.h"
 
 u8 is_bank_present(u8 bank);
 u8 percent_chance(u8 percent);
@@ -12,7 +13,7 @@ struct double_grass_tile{
 #pragma pack(pop)
 
 struct double_grass_tile double_grass_tiles[DOUBLE_WILD_TILES] = {
-    {0xD, 50}
+    {0xD, 99}
 };
 
 bool doubles_tile_check()
@@ -218,7 +219,7 @@ void atkEF_ballthrow(void)
         if (formula > 254 || ball_no == BALL_MASTER || ball_shakes == 4) //catching successful
         {
             ball_shakes = 4;
-            throw_bs = (void*)(0x082DBD84); //script poke caught
+            throw_bs = &capture_exp_bs; //script poke caught
             set_attributes(get_bank_poke_ptr(catch_bank), ATTR_POKEBALL, &last_used_item);
 
             if (sp86_update_pokemon_quantity() == 6)
