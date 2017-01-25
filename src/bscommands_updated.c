@@ -3063,6 +3063,14 @@ void evs_update(struct pokemon *poke, u16 defeated_species)
     return;
 }
 
+bool is_poke_usable(struct pokemon* poke)
+{
+    u16 species = get_attributes(poke, ATTR_SPECIES, 0);
+    if (species != 0 && species != POKE_CHIMECHO + 1 && get_attributes(poke, ATTR_CURRENT_HP, 0))
+        return 1;
+    return 0;
+}
+
 void atk23_exp_evs_lvlup(void)
 {
     #define exp_for_poke damage_loc
@@ -3090,7 +3098,7 @@ void atk23_exp_evs_lvlup(void)
             for (u8 i = 0; i < 6; i++)
             {
                 struct pokemon* poke = &party_player[i];
-                if (get_attributes(poke, ATTR_CURRENT_HP, 0))
+                if (is_poke_usable(poke))
                 {
                     if (sent_in & bits_table[i])
                         via_sentin++;
@@ -3123,7 +3131,7 @@ void atk23_exp_evs_lvlup(void)
             u8* sentin_pokes = &battle_stuff_ptr->sentin_pokes;
             struct pokemon* poke = &party_player[*exp_getter_id];
             u8 held_item = get_item_battle_function(get_attributes(poke, ATTR_HELD_ITEM, 0));
-            if (get_attributes(poke, ATTR_CURRENT_HP, 0) && (GETS_VIA_EXPSHARE(held_item) || *sentin_pokes & 1))
+            if (is_poke_usable(poke) && (GETS_VIA_EXPSHARE(held_item) || *sentin_pokes & 1))
             {
                 //update evs
                 if (!DISABLED_EVS_FLAG || !getflag(DISABLED_EVS_FLAG))
