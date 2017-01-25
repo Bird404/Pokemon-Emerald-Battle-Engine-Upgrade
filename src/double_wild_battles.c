@@ -11,7 +11,7 @@ struct double_grass_tile{
 };
 #pragma pack(pop)
 
-const struct double_grass_tile double_grass_tiles[DOUBLE_WILD_TILES] = {
+struct double_grass_tile double_grass_tiles[DOUBLE_WILD_TILES] = {
     {0xD, 50}
 };
 
