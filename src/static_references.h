@@ -185,4 +185,6 @@ extern void* rainbow_bs;
 extern void* end_pledge_effect_bs;
 extern void* sea_of_fire_hurt_bs;
 extern void* berry_redux_bs;
+
+extern void* capture_exp_bs;
 #endif /* static_references */
