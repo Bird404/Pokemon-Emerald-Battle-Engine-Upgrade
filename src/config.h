@@ -18,7 +18,7 @@
 #define EXPSHARE_FLAG       0x900   //flag that must be set for GENVI expshare to work
 #define DISABLED_EXP_FLAG   0x0   //if that flag is set, receiving exp is disabled, if flag is 0 it has no effect
 #define DISABLED_EVS_FLAG   0x0     //if that flag is set, receiving EVS points is disabled, if flag is 0 it has no effect; this and above flag can be the same
-#define DOUBLE_WILD_BATTLES true    //set to false if you don't want have them in your hack at all
+#define DOUBLE_WILD_BATTLES false    //set to false if you don't want to have them in your hack at all, set to true if you want
 #define DOUBLE_WILD_TILES   1      //amount of tiles double wild battles are possible on
 
 //form indexes
