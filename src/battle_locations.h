@@ -110,6 +110,7 @@ u16 expshare_exp;
 u8 bank_in_menu;
 u8 old_curr_full_box_id;
 s16 battle_BG3_X;
+u8 leveled_up_in_battle;
 
 u32 poison_status_flag;
 u32 sleep_status_flag;

@@ -3250,6 +3250,8 @@ void atk23_exp_evs_lvlup(void)
 
                 exp_for_poke = read_hword(&bufferB[2]); //exp for another lvl
 
+                leveled_up_in_battle |= bits_table[*exp_getter_id]; //set poke as leveled up, so it can evolve after it
+
                 struct battle_participant* lvluper = NULL; //get changed stats via level up
                 if (battle_team_id_by_side[0] == *exp_getter_id || (battle_team_id_by_side[2] == *exp_getter_id && battle_flags.double_battle))
                     lvluper = &battle_participants[active_bank];

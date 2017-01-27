@@ -386,3 +386,39 @@ void atkF3_nickname_caught_poke(void)
         break;
     }
 }
+
+void oac_wild_poke_enters(struct object* obj)
+{
+    if (fadescreen_related(0x10000 << obj->private[0], 0, 0xA, 0xA, 0x2108))
+    {
+        obj_change_img_if_possible(obj, 0);
+        obj->callback = oac_wild_poke_enters_move_right;
+    }
+}
+
+void slide_healthbox(u8 bank)
+{
+    prepare_healthbox_sliding(bank);
+    set_healthbox_visible(healthbox_obj_id_pbs[bank]);
+}
+
+void oac_wild_poke_enters_fade_to_normal(struct object* obj)
+{
+    if (obj->bitfield2 & 0x10)
+    {
+        u8 bank = obj->private[0];
+        if (fadescreen_related(0x10000 << bank, 0, 0xA, 0, 0x2108))
+        {
+            //synchronize healthox sliding
+            if (bank == 3)
+            {
+                slide_healthbox(bank);
+                slide_healthbox(1);
+            }
+            else if (!WILD_DOUBLE_BATTLE)
+                slide_healthbox(1);
+            obj_change_img_if_possible(obj, 0);
+            obj->callback = oac_wild_poke_animate_after_fading;
+        }
+    }
+}

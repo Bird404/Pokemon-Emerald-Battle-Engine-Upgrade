@@ -9,6 +9,7 @@ battle_link_pbs = 0x020229E8;
 trainerclass_names = 0x0830FCD4;
 trainer_table = 0x08310030;
 fadescreen_info = 0x02037FD4;
+leveled_up_in_battle = 0x03005D54;
 
 quit_recorded_battle = 0x080384E4|1;
 pal_fade_control_reset_maybe = 0x080A1FD0|1;
@@ -69,6 +70,11 @@ sub_80A2390 = 0x080A2390|1;
 battle_display_rbox = 0x0814F9EC|1;
 prepare_string_inserter = 0x080E2D78|1;
 cur_map_get_blockid_at = 0x08088224|1;
+obj_change_img_if_possible = 0x080081C0|1;
+oac_wild_poke_enters_move_right = 0x0803980C|1;
+prepare_healthbox_sliding = 0x08076918|1;
+set_healthbox_visible = 0x080729D0|1;
+oac_wild_poke_animate_after_fading = 0x08039894|1;
 
 script_text_buffer1 = 0x02021CC4;
 script_text_buffer2 = 0x02021DC4;

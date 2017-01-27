@@ -858,7 +858,8 @@ struct b_species_info{
     u16 flag_x20 : 1; //0x20
     u16 flag_x40 : 1; //0x40
     u16 flag_x80 : 1; //0x80
-    u16 pal_change : 1; //0x100
+    u16 flag_x100 : 1; //0x100
+    u16 pal_change : 1; //0x200
     u16 transformed_species;
 };
 

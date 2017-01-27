@@ -611,8 +611,7 @@ void update_transform_sprite_pal(u8 bank, u16 pal_arg1)
 void b_load_sprite(struct pokemon* poke, u8 bank, struct sprite_table* sprites)
 {
     u16 species;
-    u32 PiD;
-    u32 TiD;
+    u32 PiD, TiD;
     u16 transform_species = get_transform_species(bank);
     void (*sprite_load) (void* sprite_ptr, void* dst, u16 species_no, u32 PiD, enum poke_sprite);
     if (transform_species)
@@ -637,10 +636,10 @@ void b_load_sprite(struct pokemon* poke, u8 bank, struct sprite_table* sprites)
         sprite = SPRITE_FRONT;
     sprite_load(&sprites->p_sprite[species].sprite, battle_graphics.graphics_loc->decompressed_sprite[get_bank_identity(bank)], species, PiD, sprite);
     void* poke_pal = poke_get_pal(species, TiD, PiD);
-    LZ77UnCompWram(poke_pal, &decompression_buffer[0]);
+    LZ77UnCompWram(poke_pal, decompression_buffer);
     u16 pal_adder = 256 + bank * 16;
-    gpu_pal_apply((struct palette*) (&decompression_buffer), pal_adder, 0x20);
-    gpu_pal_apply((struct palette*) (&decompression_buffer), 0x80 + bank * 16, 0x20);
+    gpu_pal_apply((struct palette*) (decompression_buffer), pal_adder, 0x20);
+    gpu_pal_apply((struct palette*) (decompression_buffer), 0x80 + bank * 16, 0x20);
     if (species == POKE_CASTFORM)
     {
         LZ77UnCompWram(poke_pal, &battle_stuff_ptr->castform_pal);

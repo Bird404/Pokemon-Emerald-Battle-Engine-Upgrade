@@ -49,3 +49,5 @@ pokeball_chosen 080FE394 1
 ignore_action_for_second 0803BFD0 0
 can_run_from_double 0803ED80 0
 throw_at_correct_poke 0805BC36 0
+oac_wild_poke_enters 080397DC 1
+oac_wild_poke_enters_fade_to_normal 08039838 1
