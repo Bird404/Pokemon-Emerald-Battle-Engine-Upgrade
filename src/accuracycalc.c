@@ -111,7 +111,7 @@ u32 accuracy_percent(u16 move, u8 bankatk, u8 bankdef)
             accuracy_buff = 6;
 
         u8 move_accuracy = move_table[move].accuracy;
-        if (has_ability_effect(bankdef, 1, 1) && battle_participants[bankdef].ability_id == ABILITY_WONDER_SKIN && move_accuracy > 50)
+        if (has_ability_effect(bankdef, 1, 1) && battle_participants[bankdef].ability_id == ABILITY_WONDER_SKIN && !DAMAGING_MOVE(move) && move_accuracy > 50)
             move_accuracy = 50;
         else if ((move == MOVE_THUNDER || move == MOVE_HURRICANE) && weather_abilities_effect() && (battle_weather.flags.sun || battle_weather.flags.harsh_sun || battle_weather.flags.permament_sun))
             move_accuracy = 50;
