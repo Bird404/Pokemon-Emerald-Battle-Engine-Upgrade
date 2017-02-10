@@ -59,7 +59,7 @@ u8 get_item_effect(u8 bank, u8 check_negating_effects)
     }
 }
 
-u8 is_of_type(u8 bank, u8 type)
+bool is_of_type(u8 bank, u8 type)
 {
     if (battle_participants[bank].type1 == type || battle_participants[bank].type2 == type || new_battlestruct->bank_affecting[bank].type3 == type)
         return true;
@@ -75,14 +75,7 @@ void set_type(u8 bank, u8 type)
     return;
 }
 
-u32 two_options_rand(u32 option1, u32 option2)
-{
-    if (rng() & 1)
-        return option1;
-    return option2;
-}
-
-u8 weather_abilities_effect()
+bool weather_abilities_effect()
 {
     if (ability_battle_effects(19, 0, ABILITY_AIR_LOCK, 0, 0) || ability_battle_effects(19, 0, ABILITY_CLOUD_NINE, 0, 0))
         return false;
@@ -90,43 +83,10 @@ u8 weather_abilities_effect()
         return true;
 }
 
-u32 get_1_16_of_max_hp(u8 bank)
+bool percent_chance(u8 percent)
 {
-    u32 num = (battle_participants[bank].max_hp) >> 4;
-    if (num < 1)
-    {
-        num = 1;
-    }
-    return num;
-}
-
-u32 get_1_8_of_max_hp(u8 bank)
-{
-    u32 num = (battle_participants[bank].max_hp) >> 3;
-    if (num < 1)
-    {
-        num = 1;
-    }
-    return num;
-}
-
-u32 get_1_4_of_max_hp(u8 bank)
-{
-    u32 num = (battle_participants[bank].max_hp) >> 2;
-    if (num < 1)
-    {
-        num = 1;
-    }
-    return num;
-}
-
-u8 percent_chance(u8 percent)
-{
-    u8 num = __umodsi3(rng(), 100) + 1;
-    if (num <= percent)
-        return true;
-    else
-        return false;
+    if (__umodsi3(rng(), 100) + 1 <= percent) {return true;}
+    return false;
 }
 
 s8 get_move_position(u8 bank, u16 move)
@@ -405,7 +365,7 @@ u16 get_forewarn_move(u8 bank)
                 }
                 else if (move_table[curr_move].base_power == best_power)
                 {
-                    most_powerful_move = two_options_rand(most_powerful_move, curr_move);
+                    most_powerful_move = COIN_FLIP(most_powerful_move, curr_move);
                 }
                 else if (move_table[curr_move].base_power == 1)
                 {
@@ -439,7 +399,7 @@ u16 get_forewarn_move(u8 bank)
                         }
                         else if (curr_power == best_power)
                         {
-                            most_powerful_move = two_options_rand(most_powerful_move, curr_move);
+                            most_powerful_move = COIN_FLIP(most_powerful_move, curr_move);
                         }
                     }
             }
@@ -601,7 +561,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                         spdef_sum += battle_participants[i].sp_def;
                     }
                 }
-                if ((def_sum == spdef_sum && two_options_rand(0, 1)) || (spdef_sum < def_sum))
+                if ((def_sum == spdef_sum && COIN_FLIP(0, 1)) || (spdef_sum < def_sum))
                 {
                     battle_participants[bank].sp_atk_buff++;
                     script_ptr = &downloadspatk_bs;
@@ -775,7 +735,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     u16 hp2=battle_participants[active_bank^2].current_hp;
                     if(hp1==0 && hp2==0)
                         break;
-                    if(hp1==0 || (hp2!=0 && two_options_rand(0,1)))
+                    if(hp1==0 || (hp2!=0 && COIN_FLIP(0,1)))
                         active_bank=active_bank^2;
                 }
                 else if (hp1==0)
@@ -912,7 +872,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             case ABILITY_HARVEST:
                 if (get_item_pocket_id(battle_stuff_ptr->used_held_items[bank]) == 4 && !battle_participants[bank].held_item)
                 {
-                    if ((weather_abilities_effect() && (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)) || two_options_rand(0, 1) == 0)
+                    if ((weather_abilities_effect() && (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)) || COIN_FLIP(0, 1) == 0)
                     {
                         effect = true;
                         execute_battle_script(&harvest_bs);
@@ -2172,15 +2132,10 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 goto STICKYBARB;
             }
         case ITEM_EFFECT_LEFTOVERS:
-            if (battle_participants[bank].max_hp != battle_participants[bank].current_hp && !move_turn && !new_battlestruct->bank_affecting[bank_target].heal_block)
+            if (battle_participants[bank].max_hp != battle_participants[bank].current_hp && battle_participants[bank].current_hp && !move_turn && !new_battlestruct->bank_affecting[bank_target].heal_block)
             {
                 effect = HP_RESTORE_ITEM;
-                s32 damage = battle_participants[bank].max_hp >> 4;
-                if (damage == 0)
-                    damage = 1;
-                if (damage > battle_participants[bank].max_hp - battle_participants[bank].current_hp)
-                    damage = battle_participants[bank].max_hp - battle_participants[bank].current_hp;
-                damage_loc = damage * -1;
+                damage_loc = get_1_16_of_max_hp(bank) * -1;
                 call_bc_move_exec((void*)0x082DB7F1);
                 record_usage_of_item(bank, get_item_effect(bank, 0));
             }
@@ -2240,9 +2195,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             if (move_table[current_move].move_flags.flags.makes_contact && (MOVE_WORKED && TARGET_TURN_DAMAGED)
                  && !(battle_participants[bank_attacker].status2.substitute) && battle_participants[bank_attacker].current_hp)
             {
-                damage_loc = __udivsi3(battle_participants[bank_attacker].max_hp, 6);
-                if (damage_loc == 0)
-                    damage_loc = 1;
+                damage_loc = ATLEAST_ONE(battle_participants[bank_attacker].max_hp / 6);
                 effect = NO_COMMON_ITEM_EFFECT;
                 battlescript_push();
                 battlescripts_curr_instruction = &rockyhelmet_bs;
@@ -2564,12 +2517,7 @@ u8 berry_eaten(u8 bank, bool from_remove_item)
         if (check_ability(bank, ABILITY_RUN_AWAY) && battle_participants[bank].current_hp != battle_participants[bank].max_hp)
         {
             cheek_pouch = 1;
-            s32 damage = __udivsi3(battle_participants[bank].max_hp, 3);
-            if (damage == 0)
-            {
-                damage = 1;
-            }
-            damage_loc = damage * -1;
+            damage_loc = ATLEAST_ONE(battle_participants[bank].max_hp / 3) * -1;
 
             if(from_remove_item)
             {
@@ -3061,12 +3009,7 @@ u8 battle_turn_move_effects()
                             battle_scripting.field10 = trapped_move;
                             battle_scripting.field11 = trapped_move >> 8;
                             if (get_item_effect(new_battlestruct->bank_affecting[active_bank].wrap_bank, 1) == ITEM_EFFECT_BINDINGBAND)
-                            {
-                                u32 damage = __udivsi3(attacker_struct->max_hp, 6);
-                                if (damage == 0)
-                                    damage = 1;
-                                damage_loc = damage;
-                            }
+                                damage_loc = ATLEAST_ONE(attacker_struct->max_hp / 6);
                             else
                                 damage_loc = get_1_8_of_max_hp(active_bank);
 

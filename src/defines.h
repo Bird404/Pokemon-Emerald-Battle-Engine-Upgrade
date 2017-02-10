@@ -2,6 +2,7 @@
 #define DEFINES_H
 
 #include "types.h"
+#include "config.h"
 
 enum poke_sprite{
     SPRITE_BACK = 0,
@@ -43,6 +44,7 @@ enum ball_index{
     BALL_LUXURY, //0xA
     BALL_PREMIER, //0xB
     //new balls
+    #if EXPANDED_POKEBALLS == true
     BALL_LEVEL, //0xC
     BALL_LURE, //0xD
     BALL_MOON, //0xE
@@ -58,6 +60,7 @@ enum ball_index{
     BALL_PARK, //0x18
     BALL_DREAM, //0x19
     BALL_BEAST, //0x1A
+    #endif // EXPANDED_POKEBALLS
 };
 
 enum map_type{
@@ -79,7 +82,6 @@ enum map_type{
 #include "./defines/pokes.h"
 #include "./defines/flavours.h"
 
-#include "config.h"
 #include "battle_structs.h"
 #include "battle_locations.h"
 #include "new_battle_struct.h"
@@ -129,6 +131,11 @@ enum map_type{
 #define PERCENT_100(value, percent)((value * percent) / 100)
 #define GETS_VIA_EXPSHARE(held_item)((GENVI_EXPSHARE == false && held_item == ITEM_EFFECT_EXPSHARE) || (GENVI_EXPSHARE == true && checkitem(ITEM_EXPSHARE, 1) && getflag(EXPSHARE_FLAG)))
 #define SET_u32(ptr, val)((*(u32*)(ptr) = 0))
+#define GET_EVO_TABLE(species)((*evo_table)[species])
+#define COIN_FLIP(option1, option2)((rng() & 1) ? option1 : option2)
+#define get_1_16_of_max_hp(bank)(ATLEAST_ONE(battle_participants[bank].max_hp >> 4))
+#define get_1_8_of_max_hp(bank)(ATLEAST_ONE(battle_participants[bank].max_hp >> 3))
+#define get_1_4_of_max_hp(bank)(ATLEAST_ONE(battle_participants[bank].max_hp >> 2))
 
 #define REQUEST_SPECIES_BATTLE 0x1
 #define REQUEST_HELDITEM_BATTLE 0x2

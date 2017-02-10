@@ -3,7 +3,6 @@
 
 u16 get_speed(u8 bank);
 u8 percent_chance(u8 percent);
-u32 two_options_rand(u32 option1, u32 option2);
 u8 hp_condition(u8 bank, u8 percent);
 
 u8 check_ability(u8 bank, u8 ability)
@@ -22,8 +21,6 @@ s8 get_priority(u16 move, u8 bank)
         priority++;
     return priority;
 }
-
-u32 get_1_4_of_max_hp(u8 bank);
 
 s8 get_bracket_alteration_factor(u8 bank, u8 item_effect) // will be used for quick claw message
 {

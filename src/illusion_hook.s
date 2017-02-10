@@ -2,15 +2,10 @@
 .thumb
 .align 2
 
-illusion_throw_different_ball:
-	mov r4, r0 @r4 contains poke's data ptr
-	mov r1, r5 @r5 contains poke's bank
+illusion_throw_different_ball: @r0 contains bank
 	bl b_get_ball_to_throw
-	ldr r2, =(itemID_to_ballID)
-	bl r2_caller
 	mov r4, r0
-	ldr r2, =(0x080754D8 | 1)
-
+	ldr r2, =(0x080754DA | 1)
 r2_caller:
 	bx r2
 	

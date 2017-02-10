@@ -27,12 +27,12 @@ struct fling fling_table[] = { {ITEM_CHOICEBAND, 10, 0}, {ITEM_BRIGHTPOWDER, 10,
 
 struct stat_fractions stat_buffs[] = { {2, 8}, {2, 7}, {2, 6}, {2, 5}, {2, 4}, {2, 3}, {2, 2}, {3, 2}, {4, 2}, {5, 2}, {6, 2}, {7, 2}, {8, 2} };;;;;;;;;;;;;;
 
-u8 can_evolve(u16 poke_species)
+u8 can_evolve(u16 species)
 {
-    struct evolutions_of_poke* PokeEvo = &evo_table->poke_evo[poke_species];
+    struct evolution_sub* evo = GET_EVO_TABLE(species);
     for (u8 i = 0; i < NUM_OF_EVOS; i++)
     {
-        u8 method = PokeEvo->evos[i].method;
+        u8 method = evo[i].method;
         if (method != 0 && method < 0xFA)
         {
             return true;
@@ -43,12 +43,12 @@ u8 can_evolve(u16 poke_species)
 
 u32 percent_boost(u32 number, u16 percent)
 {
-    return __udivsi3(number * (100 + percent), 100);
+    return number * (100 + percent) / 100;
 }
 
 u32 percent_lose(u32 number, u16 percent)
 {
-    return __udivsi3(number * (100 - percent), 100);
+    return number * (100 - percent) / 100;
 }
 
 u16 chain_modifier(u16 curr_modifier, u16 new_modifier)
@@ -80,7 +80,7 @@ u32 apply_modifier(u16 modifier, u32 value)
 
 u16 percent_to_modifier(u8 percent) //20 gives exactly 0x1333, 30 is short on 1
 {
-    return 0x1000 + __udivsi3(percent * 819, 20);
+    return 0x1000 + (percent * 819 / 20);
 }
 
 s16 get_poke_weight(u8 bank)
@@ -94,7 +94,7 @@ s16 get_poke_weight(u8 bank)
                 poke_weight *= 2;
                 break;
             case ABILITY_LIGHT_METAL:
-                poke_weight >>= 1;
+                poke_weight /= 2;
                 break;
         }
     }
@@ -183,17 +183,17 @@ u16 get_speed(u8 bank)
     }
     //tailwind
     if (new_battlestruct->side_affecting[is_bank_from_opponent_side(bank)].tailwind)
-        speed <<=1;
+        speed *= 2;
     //unburden
     if (status3[bank].unburden)
-        speed <<=1;
+        speed *= 2;
     //swamp
     if (new_battlestruct->side_affecting[is_bank_from_opponent_side(bank)].swamp_spd_reduce)
-        speed >>=2;
+        speed /= 4;
     //paralysis
     if (battle_participants[bank].status.flags.paralysis)
-        speed >>=2;
-    speed = __udivsi3(speed * stat_buffs[battle_participants[bank].spd_buff].dividend, stat_buffs[battle_participants[bank].spd_buff].divisor);
+        speed /= 4;
+    speed = (speed * stat_buffs[battle_participants[bank].spd_buff].dividend / stat_buffs[battle_participants[bank].spd_buff].divisor);
 
     return speed;
 }
@@ -327,16 +327,7 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
             break;
         case MOVE_WRING_OUT:
         case MOVE_CRUSH_GRIP:
-            {
-                u16 wringout_power = __udivsi3(battle_participants[def_bank].current_hp, battle_participants[def_bank].max_hp);
-                wringout_power = 120 * wringout_power;
-                if (wringout_power < 1)
-                {
-                    wringout_power = 1;
-                }
-                base_power = wringout_power;
-                break;
-            }
+            base_power = ATLEAST_ONE(120 * battle_participants[def_bank].current_hp / battle_participants[def_bank].max_hp);
             break;
         case MOVE_HEX:
             if (battle_participants[def_bank].status.int_status)
@@ -409,7 +400,7 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
         case MOVE_HEAT_CRASH:
         case MOVE_HEAVY_SLAM:
             {
-                u16 weight_difference = __udivsi3(get_poke_weight(atk_bank), get_poke_weight(def_bank));
+                u16 weight_difference = get_poke_weight(atk_bank) / get_poke_weight(def_bank);
 
                 if (weight_difference >= 5)
                     base_power = 120;
@@ -432,7 +423,7 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
             base_power = base_power + 20 * count_stat_increases(atk_bank, 1);
             break;
         case MOVE_ELECTRO_BALL:
-            switch (__udivsi3(get_speed(atk_bank), get_speed(def_bank)))
+            switch (get_speed(atk_bank) / get_speed(def_bank))
                 {
                 case 0:
                     base_power = 40;
@@ -442,15 +433,17 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
                     break;
                 case 2:
                     base_power = 80;
+                    break;
                 case 3:
                     base_power = 120;
+                    break;
                 default:
                     base_power = 150;
                     break;
                 }
             break;
         case MOVE_GYRO_BALL:
-            base_power =  __udivsi3(25 * get_speed(def_bank), get_speed(atk_bank)) + 1;
+            base_power = (25 * get_speed(def_bank) / get_speed(atk_bank)) + 1;
             if (base_power > 150)
                 base_power = 150;
             break;
@@ -921,14 +914,14 @@ u16 get_attack_stat(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
         attack_boost = 6;
     }
 
-    attack_stat = __udivsi3(attack_stat * stat_buffs[attack_boost].dividend, stat_buffs[attack_boost].divisor);
+    attack_stat = (attack_stat * stat_buffs[attack_boost].dividend / stat_buffs[attack_boost].divisor);
 
     //final modifications
     u16 modifier = 0x1000;
     if (has_ability_effect(atk_bank, 0, 1))
     {
         u8 pinch_abilities;
-        if (battle_participants[atk_bank].current_hp >= __udivsi3(battle_participants[atk_bank].max_hp, 3))
+        if (battle_participants[atk_bank].current_hp >= (battle_participants[atk_bank].max_hp / 3))
             pinch_abilities = false;
         else
             pinch_abilities = true;
@@ -1101,7 +1094,7 @@ u16 get_def_stat(u16 move, u8 atk_bank, u8 def_bank)
     else if (crit_loc == 2 && def_boost > 6)
         def_boost = 6;
 
-    def_stat = __udivsi3(def_stat * stat_buffs[def_boost].dividend, stat_buffs[def_boost].divisor);
+    def_stat = def_stat * stat_buffs[def_boost].dividend / stat_buffs[def_boost].divisor;
 
     u16 modifier = 0x1000;
 
@@ -1227,11 +1220,10 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u16 chained_e
     //burn
     if (battle_participants[atk_bank].status.flags.burn && move_table[move].split == MOVE_PHYSICAL && move != MOVE_FACADE && !(has_ability_effect(atk_bank, 0, 1) && battle_participants[atk_bank].ability_id == ABILITY_GUTS))
     {
-        damage >>= 1;
+        damage /= 2;
     }
     //at least one check
-    if (damage < 1)
-        damage = 1;
+    damage = ATLEAST_ONE(damage);
     //final modifiers
     u8 move_split = move_table[move].split;
     if ((side_affecting_halfword[def_bank & 1].reflect_on && move_split == MOVE_PHYSICAL) ||(side_affecting_halfword[def_bank & 1].light_screen_on && move_split == MOVE_SPECIAL))
@@ -1308,11 +1300,7 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u16 chained_e
     }
 
     damage = apply_modifier(final_modifier, damage);
-    if(damage==0)
-    {
-        damage=1;
-    }
-    damage_loc = damage;
+    damage_loc = ATLEAST_ONE(damage);
 }
 
 u8 get_attacking_move_type();

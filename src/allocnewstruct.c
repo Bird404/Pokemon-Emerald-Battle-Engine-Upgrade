@@ -20,6 +20,16 @@ void alloc_new_struct()
         struct pokemon* poke = &party_player[i];
         new_battlestruct->various.original_held_item[i] = get_attributes(poke, ATTR_HELD_ITEM, 0);
     }
+    if (INVERSE_FLAG && getflag(INVERSE_FLAG))
+    {
+        new_battlestruct->various.inverse_battle = 1;
+        clearflag(INVERSE_FLAG);
+    }
+    if (FISHING_FLAG && getflag(FISHING_FLAG))
+    {
+        new_battlestruct->various.fishing_battle = 1;
+        clearflag(FISHING_FLAG);
+    }
     #endif // ITEM_SWAP
 }
 

@@ -3,7 +3,6 @@
 
 u8 check_ability(u8 bank, u8 ability);
 u8 get_airborne_state(u8 bank, u8 mode, u8 check_levitate);
-u16 get_1_16_of_max_hp(u8 bank);
 u8 item_battle_effects(u8 switchid, u8 bank, u8 moveturn);
 u8 affected_by_substitute(u8 substitute_bank);
 u8 change_stats(s8 arg1, s8 arg2, s8 arg3, void* battlescript_if_fails);
@@ -404,8 +403,6 @@ void set_team_msg_buffer_lc()
     battle_text_buff1[3] = 0x2;
     battle_text_buff1[4] = 0xFF;
 }
-
-u32 get_1_8_of_max_hp(u8 bank);
 
 void bad_dreams_damage_calc()
 {

@@ -19,18 +19,16 @@ u16 get_mega_species(u8 bank, u8 chosen_method);
 u8 weather_abilities_effect();
 u8 find_move_in_table(u16 move, u16 table_ptr[]);
 void setup_berry_consume_buffers(u8 bank);
+u8 get_attacking_move_type();
+u8 check_ability(u8 bank, u8 ability);
+u16 get_speed(u8 bank);
 
-u8 is_bank_present(u8 bank)
+bool is_bank_present(u8 bank)
 {
     if((absent_bank_flags & bits_table[bank]) || battle_participants[bank].current_hp == 0 || bank >= no_of_all_banks)
         return 0;
     return 1;
 }
-
-u32 two_options_rand(u32 option1, u32 option2);
-u8 get_attacking_move_type();
-u8 check_ability(u8 bank, u8 ability);
-u16 get_speed(u8 bank);
 
 u8 get_target_of_move(u16 move, u8 target_given, u8 adjust)
 {
@@ -72,7 +70,7 @@ u8 get_target_of_move(u16 move, u8 target_given, u8 adjust)
                         else if (!target_alive && target_partner_alive)
                             result_target=target_partner;
                         else
-                            result_target=two_options_rand(target_side,target_partner);
+                            result_target=COIN_FLIP(target_side,target_partner);
                     }
                     u16 move_type = get_attacking_move_type();
                     u8 ability = 0;

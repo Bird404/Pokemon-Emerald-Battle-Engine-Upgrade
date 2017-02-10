@@ -188,11 +188,17 @@ void update_pokenick_in_healthbox(u8 objectID, struct pokemon* poke)
     str_append(string_loc, gender_sign);
 }
 
-u8 b_get_ball_to_throw(struct pokemon* poke, u8 bank)
+u16 b_get_ball_to_throw(u8 bank)
 {
+    u8 pokeball;
     if (new_battlestruct->bank_affecting[bank].illusion_on)
-        return new_battlestruct->bank_affecting[bank].illusion_ball;
-    return get_attributes(poke, ATTR_POKEBALL, 0);
+        pokeball = new_battlestruct->bank_affecting[bank].illusion_ball;
+    else
+        pokeball = get_attributes(get_bank_poke_ptr(bank), ATTR_POKEBALL, 0);
+    if (!EXPANDED_POKEBALLS)
+        return itemID_to_ballID(pokeball);
+    else
+        return pokeball;
 }
 
 void* get_poke_nick_prefix(u8 bank, u8* dst)

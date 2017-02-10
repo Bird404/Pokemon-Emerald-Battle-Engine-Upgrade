@@ -12,12 +12,12 @@ u8 get_reversion_type(u8 bank, u16 target_species)
 {
     u16 species = battle_participants[bank].poke_species;
     u8 reversion_type = 0;
-    struct evolutions_of_poke* PokeEvo = &evo_table->poke_evo[species];
+    struct evolution_sub* evos = GET_EVO_TABLE(species);
     for(u8 i=0; i<NUM_OF_EVOS; i++)
     {
-        if (PokeEvo->evos[i].method==0xFD && PokeEvo->evos[i].poke==target_species)
+        if (evos[i].method==0xFD && evos[i].poke==target_species)
         {
-            reversion_type=PokeEvo->evos[i].paramter;
+            reversion_type=evos[i].paramter;
             break;
         }
     }

@@ -49,13 +49,13 @@ u8 text_impossible_to_aim[] = {I_, t_, Apos, s_, Space, i_, m_, p_, o_, s_, s_, 
 
 void pokeball_chosen(u8 taskID)
 {
-    bool pyramid = is_in_battle_pyramid();
     void* fail_msg = NULL;
     if (WILD_DOUBLE_BATTLE &&
         ((is_bank_present(1) && is_bank_present(3)) || (bank_in_menu == 2))) //wild double battle and (two pokes are alive or using pokeball via second pokemon)
             fail_msg = text_impossible_to_aim;
     else if (is_team_and_pc_full()) //full box
         fail_msg = text_BOX_IS_FULL;
+    bool pyramid = is_in_battle_pyramid();
     if (fail_msg)
     {
         if (pyramid)
@@ -94,15 +94,147 @@ bool is_poke_caught(u16 species)
     return get_or_set_pokedex_flags(species_to_national_dex(species), 1);
 }
 
+bool is_poke_ultrabeast(u16 species)
+{
+    return 0;
+}
+
+u32 calc_ball_formula(enum ball_index ball_no, struct battle_participant* catching)
+{
+    u8 multiplier = 10;
+    u8 catchrate = (*basestat_table)[catching->poke_species].catch_rate;
+    switch (ball_no)
+    {
+    //case BALL_PREMIER: case BALL_LUXURY: case BALL_POKE: case BALL_MASTER:
+    //case BALL_FRIEND: case BALL_HEAL: case BALL_CHERISH:
+    default: multiplier = 10;
+        break;
+    case BALL_SAFARI:
+        catchrate = battle_stuff_ptr->safari_rate * 1275 / 100;
+    case BALL_GREAT:
+    #if EXPANDED_POKEBALLS
+    case BALL_SPORT:
+    #endif // EXPANDED_POKEBALLS
+        multiplier = 15;
+        break;
+    case BALL_ULTRA:
+        multiplier = 20;
+        break;
+    case BALL_NET:
+        if (catching->type1 == TYPE_BUG || catching->type1 == TYPE_WATER || catching->type2 == TYPE_BUG || catching->type2 == TYPE_WATER)
+            multiplier = 35;
+        break;
+    case BALL_DIVE:
+        if (sav1_get_map_type() == MAP_UNDERWATER)
+            multiplier = 35;
+        break;
+    case BALL_NEST:
+        {
+            u8 level = catching->level;
+            if (level <= 30)
+                multiplier = 40 - level;
+        }
+        break;
+    case BALL_REPEAT:
+        if (is_poke_caught(catching->poke_species))
+            multiplier = 35;
+        break;
+    case BALL_TIMER:
+        multiplier = battle_trace.battle_turn_counter + 10;
+        if (multiplier > 40)
+            multiplier = 40;
+        break;
+    #if EXPANDED_POKEBALLS == true
+    case BALL_LEVEL:
+        {
+            u8 opp_level = catching->level;
+            u8 pl_level = battle_participants[bank_attacker].level;
+            if (opp_level >= pl_level)
+                multiplier = 10;
+            else if (pl_level < opp_level * 2)
+                multiplier = 20;
+            else if (pl_level < opp_level * 3)
+                multiplier = 40;
+            else
+                multiplier = 80;
+        }
+        break;
+    case BALL_FAST:
+        if ((*basestat_table)[catching->poke_species].base_spd >= 100)
+            multiplier = 40;
+        break;
+    case BALL_LOVE:
+        {
+            struct battle_participant* catcher = &battle_participants[bank_attacker];
+            u16 species = catcher->poke_species;
+            if (species == catching->poke_species)
+            {
+                u8 gender1 = gender_from_pid(species, catcher->pid);
+                u8 gender2 = gender_from_pid(species, catching->pid);
+                if (gender1 != 0xFF && gender2 != 0xFF && gender1 != gender2)
+                    multiplier = 80;
+            }
+        }
+        break;
+    case BALL_QUICK:
+        if (battle_trace.battle_turn_counter == 0)
+            multiplier = 40;
+        break;
+    case BALL_HEAVY:
+        {
+            u16 weight = get_height_or_weight(species_to_national_dex(catching->poke_species), 1);
+            s16 changed_rate = catchrate;
+            if (weight < 1024) {changed_rate -= 20;}
+            else if (weight < 2048) {}
+            else if (weight < 3072) {changed_rate += 20;}
+            else if (weight < 4096) {changed_rate += 30;}
+            else {changed_rate += 40;}
+            if (changed_rate >= 0 && changed_rate <= 255) {catchrate = changed_rate;}
+        }
+        break;
+    case BALL_LURE:
+        if (new_battlestruct->various.fishing_battle)
+            multiplier = 30;
+        break;
+    case BALL_DUSK:
+        if (curr_mapheader.type == MAP_CAVE)
+            multiplier = 35;
+        break;
+    case BALL_MOON:
+        {
+            struct evolution_sub* evo = GET_EVO_TABLE(catching->poke_species);
+            for (u8 i = 0; i < NUM_OF_EVOS; i++)
+            {
+                if (evo[i].method == 7 && evo[i].paramter == ITEM_MOONSTONE)
+                {
+                    multiplier = 40;
+                    break;
+                }
+            }
+        }
+        break;
+    case BALL_BEAST:
+        if (is_poke_ultrabeast(catching->poke_species))
+            multiplier = 50;
+        break;
+    #endif // EXPANDED_POKEBALLS
+    }
+    u16 hp_max = catching->max_hp * 3;
+    u32 formula = (catchrate * multiplier / 10) * (hp_max - catching->current_hp * 2) / hp_max;
+    if (catching->status.flags.sleep || catching->status.flags.freeze)
+        formula *= 2;
+    else if (catching->status.int_status)
+        formula = PERCENT_100(formula, 150);
+    return 1048560 / Sqrt(Sqrt(16711680 / formula));
+}
+
 void atkEF_ballthrow(void)
 {
     if (battle_execution_buffer){return;}
 
     u8 catch_bank = bank_attacker ^ 1;
-    if (!is_bank_present(catch_bank))
-    {
-        catch_bank ^= 2;
-    }
+    if (!is_bank_present(catch_bank)) {catch_bank ^= 2;}
+
     bank_target = catch_bank;
     active_bank = bank_attacker;
     u8 ball_shakes;
@@ -119,88 +251,7 @@ void atkEF_ballthrow(void)
     }
     else
     {
-        u8 multiplier = 10;
-        struct battle_participant* catching = &battle_participants[catch_bank];
-        u8 catchrate = (*basestat_table)[catching->poke_species].catch_rate;
         enum ball_index ball_no = itemID_to_ballID(last_used_item);
-        switch (ball_no)
-        {
-        case BALL_PREMIER:
-        case BALL_LUXURY:
-        case BALL_POKE:
-        default:
-            multiplier = 10;
-            break;
-        case BALL_SAFARI:
-            catchrate = battle_stuff_ptr->safari_rate * 1275 / 100;
-        case BALL_GREAT:
-            multiplier = 15;
-            break;
-        case BALL_ULTRA:
-            multiplier = 20;
-            break;
-        case BALL_NET:
-            if (catching->type1 == TYPE_BUG || catching->type1 == TYPE_WATER || catching->type2 == TYPE_BUG || catching->type2 == TYPE_WATER)
-                multiplier = 35;
-            break;
-        case BALL_DIVE:
-            if (sav1_get_map_type() == MAP_UNDERWATER)
-                multiplier = 35;
-            break;
-        case BALL_NEST:
-            {
-                u8 level = catching->level;
-                if (level <= 30)
-                    multiplier = 40 - level;
-            }
-            break;
-        case BALL_REPEAT:
-            if (is_poke_caught(catching->poke_species))
-                multiplier = 35;
-            break;
-        case BALL_TIMER:
-            multiplier = battle_trace.battle_turn_counter + 10;
-            if (multiplier > 40)
-                multiplier = 40;
-            break;
-        case BALL_LEVEL:
-            {
-                u8 opp_level = catching->level;
-                u8 pl_level = battle_participants[bank_attacker].level;
-                if (opp_level >= pl_level)
-                    multiplier = 10;
-                else if (pl_level < opp_level * 2)
-                    multiplier = 20;
-                else if (pl_level < opp_level * 3)
-                    multiplier = 40;
-                else
-                    multiplier = 80;
-            }
-            break;
-        case BALL_FAST:
-            if ((*basestat_table)[catching->poke_species].base_spd >= 100)
-                multiplier = 40;
-            break;
-        case BALL_LOVE:
-            {
-                struct battle_participant* catcher = &battle_participants[bank_attacker];
-                u16 species = catcher->poke_species;
-                if (species == catching->poke_species)
-                {
-                    u8 gender1 = gender_from_pid(species, catcher->pid);
-                    u8 gender2 = gender_from_pid(species, catching->pid);
-                    if (gender1 != 0xFF && gender2 != 0xFF && gender1 != gender2)
-                        multiplier = 80;
-                }
-            }
-            break;
-        }
-        u16 hp_max = catching->max_hp * 3;
-        u32 formula = (catchrate * multiplier / 10) * (hp_max - catching->current_hp * 2) / hp_max;
-        if (catching->status.flags.sleep || catching->status.flags.freeze)
-            formula *= 2;
-        else if (catching->status.int_status)
-            formula = PERCENT_100(formula, 150);
         if (ball_no == BALL_MASTER)
             battle_trace.flags |= 2;
         else if (last_used_item < 11)
@@ -209,19 +260,33 @@ void atkEF_ballthrow(void)
             if (*attempt < 254)
                 (*attempt)++;
         }
-
         //calculate ball shakes
-        u32 shakes = 1048560 / Sqrt(Sqrt(16711680 / formula));
+        u32 formula = calc_ball_formula(ball_no, &battle_participants[catch_bank]);
         ball_shakes = 0;
-        while (rng() < shakes && ball_shakes <= 3)
+        while (rng() < formula && ball_shakes <= 3)
                 ball_shakes++;
         u8* string_chooser = &battle_communication_struct.multistring_chooser;
-        if (formula > 254 || ball_no == BALL_MASTER || ball_shakes == 4) //catching successful
+        if (ball_no == BALL_MASTER || ball_shakes == 4) //catching successful
         {
             ball_shakes = 4;
             throw_bs = &capture_exp_bs; //script poke caught
-            set_attributes(get_bank_poke_ptr(catch_bank), ATTR_POKEBALL, &last_used_item);
-
+            struct pokemon* poke = get_bank_poke_ptr(catch_bank);
+            set_attributes(poke, ATTR_POKEBALL, &last_used_item);
+            #if EXPANDED_POKEBALLS == true
+            if (ball_no == BALL_FRIEND)
+            {
+                u8 happiness = 200;
+                set_attributes(poke, ATTR_HAPPINESS, &happiness);
+            }
+            else if (ball_no == BALL_HEAL)
+            {
+                poke_restore_pp(poke);
+                u32 value = 0;
+                set_attributes(poke, ATTR_STATUS_AILMENT, &value);
+                value = get_attributes(poke, ATTR_TOTAL_HP, 0);
+                set_attributes(poke, ATTR_CURRENT_HP, &value);
+            }
+            #endif // EXPANDED_POKEBALLS
             if (sp86_update_pokemon_quantity() == 6)
                 *string_chooser = 0;
             else

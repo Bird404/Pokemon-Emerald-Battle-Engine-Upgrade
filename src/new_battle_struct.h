@@ -99,6 +99,7 @@ struct various{
     u8 active_bank : 2;
     u8 cmd49_safeattacker_bank: 2;
     u8 inverse_battle : 1;
+    u8 fishing_battle : 1;
     u8 magicbounce : 1;
     u8 stormdrain : 1;
     u16 var1;

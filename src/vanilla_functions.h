@@ -3,7 +3,8 @@
 
 #include "types.h"
 
-char *int_to_str(char *buffer, u8 lvl, u8 a, u8 b);
+void* int_to_str(void* buffer, s32 num, u8 format, u8 max_digits);
+void* u_int_to_str(void* buffer, u32 num, u8 format, u8 max_digits);
 u8 get_item_battle_function(u16 item_id);
 u8 get_item_quality(u16 item_id);
 void execute_battle_script(void* ptr_to_battlescript);
@@ -132,6 +133,7 @@ void fdecoder_for_battle_strings(void* src, void* dst);
 u8 get_bank_by_player_ai(u8 id);
 void buffer_item(u16 itemID, void* dst);
 bool getflag(u16 flagID);
+void clearflag(u16 flagID);
 void* copy_opponent_a_lose_text();
 void* copy_opponent_b_lose_text();
 void get_frontier_opponent_battleend_text(u16 trainerID, u8 textID);
@@ -190,6 +192,8 @@ void oac_wild_poke_enters_move_right(struct object*);
 void oac_wild_poke_animate_after_fading(struct object*);
 void prepare_healthbox_sliding(u8 bank);
 void set_healthbox_visible(u8 object);
+void poke_restore_pp(struct pokemon*);
+bool not_in_battle();
 
 u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);

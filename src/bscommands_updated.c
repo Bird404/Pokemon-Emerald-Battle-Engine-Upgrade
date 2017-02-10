@@ -4,8 +4,6 @@
 
 u8 hp_condition(u8 bank, u8 percent);
 u8 check_ability(u8 bank, u8 ability);
-u16 get_1_4_of_max_hp(u8 bank);
-u16 get_1_8_of_max_hp(u8 bank);
 u32 percent_lose(u32 number, u16 percent);
 u32 percent_boost(u32 number, u16 percent);
 u8 is_of_type(u8 bank, u8 type);
@@ -2441,7 +2439,7 @@ void atk9E_metronome_chooser()
     do
     {
         current_move = __umodsi3(rng(), MOVE_MAX) + 1;
-    } while(find_move_in_table(current_move, &metronome_forbidden_moves[0]));
+    } while(find_move_in_table(current_move, metronome_forbidden_moves));
 
     hitmarker &= 0xFFFFFBFF;
     battlescripts_curr_instruction = get_move_battlescript_ptr(current_move);
@@ -3044,7 +3042,7 @@ void evs_update(struct pokemon *poke, u16 defeated_species)
         }
         while (to_add > 0 || power_bonus > 0)
         {
-            if (evs_total >= 510)
+            if (evs_total >= MAX_EVS)
                 return;
             if (to_add)
             {

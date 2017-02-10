@@ -31,7 +31,7 @@ choose_self_or_ally_right 08057B38 1
 tai_should_switch 08063614 0
 b_load_sprite_player 0805DD7C 2
 b_load_sprite_opponent 0805DC0C 2
-illusion_throw_different_ball 080754C4 1
+illusion_throw_different_ball 08075490 1
 illusion_on_player_switch_in 0805B28E 1
 illusion_on_opponent_switch_in 08061416 1
 anim_spritechange_pal 0805E70A 0

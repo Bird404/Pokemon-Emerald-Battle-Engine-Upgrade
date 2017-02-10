@@ -827,25 +827,18 @@ extern struct item_data* item_table;
 //Evolution table
 
 struct evolution_sub{
-    u16 method;
+    u8 method;
     u16 paramter;
     u16 poke;
-    u16 padding;
+    u8 pad1;
+    u8 pad2;
 };
 
-struct evolutions_of_poke{
-    struct evolution_sub evos[NUM_OF_EVOS];
-};
-
-struct evolution_all_pokes{
-    struct evolutions_of_poke poke_evo[ALL_POKES];
-};
-
-extern struct evolution_all_pokes* evo_table;
+extern struct evolution_sub (*evo_table)[ALL_POKES][NUM_OF_EVOS];
 
 struct b_graphics_loc{
     void* beg_decompressed_sprites; //ptr to the decompressed sprite of the first pokemon
-    void* decompressed_sprite[4];
+    void* decompressed_sprite[4]; //four pointers to decompressed sprites
 };
 
 struct b_species_info{
@@ -1023,5 +1016,24 @@ struct fadescreen_exec{
 };
 
 extern struct fadescreen_exec fadescreen_info;
+
+struct mapheader{
+    void* footer;
+    void* events;
+    void* scripts;
+    void* connections;
+    u16 music_id;
+    u16 footer_id;
+    u8 name;
+    u8 light;
+    u8 weather;
+    u8 type;
+    u8 field_18;
+    u8 can_dig;
+    u8 show_name;
+    u8 battletype;
+};
+
+extern struct mapheader curr_mapheader;
 
 #endif /* B_STRUCTS */
