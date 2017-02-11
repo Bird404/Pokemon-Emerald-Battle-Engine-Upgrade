@@ -273,7 +273,7 @@ void healthbar_indicator_callback(struct object *self)
         }
         u8 lvl=battle_participants[bank].level;
         char buf[10];
-        u8 stringlen = int_to_str(buf, lvl, 0, 3) - buf;
+        u8 stringlen = (u8)(int_to_str(buf, lvl, 0, 3) - (void *)buf);
 
         if(bank&1)
         {
