@@ -12,9 +12,9 @@ Installation instructions:
   (click 'Clone or Download', then 'Download Zip')
 
 4. Get your ROM, rename it BPEE0.gba and place it the main(master) folder.
-  Go to step 5 in case you are installing for the first time and don't want specify the freespace area yourself or otherwise step 7,
+  Go to step 5 (in case you are installing for the first time and don't want specify the freespace offset yourself) or otherwise got o step 7,
 
-5. Run the cmd.exe in the main folder and type 'python scripts//make.py'
+5. Run the cmd.exe in the main folder and type 'python scripts//make.py'.
   You can do this by typing 'cmd' and hitting enter in the url address or selecting 'run command prompt from here' from right clciking on empty space while holding the shift key
 
 6. Go to step 10 while skipping 7-9. 
