@@ -2,20 +2,19 @@
 
 Installation instructions:
 1. Download devkitpro. Follow the instructions.
-(Note: you can only install devkitARM)
+  (Note: you can only install devkitARM)
 
 2. Download the latest version of python(3.5).
-After downloading and before proceeding to install make sure that the 'add to path' checkbox is ticked, otherwise you'll have to add the python path in the environment variables manually.
+  After downloading and before proceeding to install make sure that the 'add to path' checkbox is ticked, otherwise you'll have to add the python path in the environment variables manually.
 
 3. Download the master folder from this github page
-(click 'Clone or Download', then 'Download Zip')
+  (click 'Clone or Download', then 'Download Zip')
 
 4. Get your ROM, rename it BPEE0.gba and place it the main(master) folder.
+  Go to step 5 in case you are installing for the first time and don't want specify the freespace area yourself or otherwise step 7,
 
-
-Go to step 5 or otherwise step 7,
 5. Run the cmd.exe in the main folder and type 'python scripts//make.py'
-You can do this by typing 'cmd' and hitting enter in the url address or selecting 'run command prompt from here' from right clciking on empty space while holding the shift key
+  You can do this by typing 'cmd' and hitting enter in the url address or selecting 'run command prompt from here' from right clciking on empty space while holding the shift key
 
 6. Go to step 10 while skipping 7-9. 
 
@@ -30,9 +29,9 @@ You can do this by typing 'cmd' and hitting enter in the url address or selectin
 9. In command prompt window, type 'python scripts//build.py', press Enter and then 'python scripts//insert' or 'python scripts//insert.py --debug>offsets.txt'(the latter will create a file with all functions and tables' addresses), press Enter.
 
 10. A new gba file will appear named as test.gba.
-That is your resultant file.
+  That is your resultant file.
 
 If you want to create a INI file for PGE:
 
 11. Place a copy of a valid roms.ini in the master folder and in cmd prompt type 'python scripts\PGEinidump'.
-A corresponding test.ini will be created for test.gba.
+  A corresponding test.ini will be created for test.gba.
