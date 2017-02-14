@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 
 import shutil
+import sys
 import os
 
 ############
 #Options go here.
 ############
 
-CLEAN_REPOINTED_DATA = True #cleans repointed data if true; leaves it if false
-FREE_SPACE = 0xF00001
-BUILD_CODE = True #Set to False if you want to modify and run the build/insert scripts manually
+OFFSET_TO_PUT = 0xF00000
+SEARCH_FREE_SPACE = False #Set to True if you want the script to search for free space;Set to False if you don't want to search for free space as you for example update the engine
+CLEAR_OLD_MOVETABLE = False #Set to True if you want to clear the old move table
+CLEAR_OLD_LEARNSETTABLE = False #Set to True if you want to clear the old learnsets table
 
 #############
 #Options end here.
@@ -19,119 +21,77 @@ BUILD_CODE = True #Set to False if you want to modify and run the build/insert s
 #Functions start here.
 ###############
 
-def end_hex_zero(number):
-	return str(hex(number)).endswith('00')
-
-def align_offset(offset):
-	while end_hex_zero(offset) != True:
-		offset += 1
+def align_x100(offset):
+	mod_x100 = offset % 0x100
+	if mod_x100 != 0x0: #not aligned properly
+		offset += (0x100 - mod_x100)
 	return offset
 
 def find_offset_to_put(rom, needed_bytes, start_loc):
 	offset = start_loc
+	rom.seek(0, 2)
+	max_pos = rom.tell()
 	found_bytes = 0
-	while (found_bytes < needed_bytes):
-		for i in range (0, needed_bytes):
-			rom.seek(offset + i)
-			byte = rom.read(1)
-			if (byte):
-				if (byte != b'\xFF'):
-					offset += i + 1
-					align_offset(offset)
-					found_bytes = 0
-					break
-				found_bytes += 1
-			else:
-				return 0
+	while found_bytes < needed_bytes:
+		if offset + found_bytes >= max_pos:
+			print("End of file reached. Not enough free space.")
+			return 0
+		found_bytes += 1
+		rom.seek(offset + found_bytes)
+		if rom.read(1) != b'\xFF':
+			offset = align_x100(offset + found_bytes)
+			found_bytes = 0
 	return offset
-
-def get_pointer(rom, loc):
-	rom.seek(loc)
-	return int.from_bytes(rom.read(4), byteorder = 'little') - 0x08000000
 	
-def clear_space(rom, loc, bytes):
-	if (CLEAN_REPOINTED_DATA == True):
-		rom.seek(loc)
-		for i in range(0, bytes):
-			rom.write(b'\xFF')
-	
-def update_ptrs(rom, oldptr, newptr):
-	rom.seek(0x0)
-	copy = rom.read(0x1E8000)
-	copy = copy.replace((oldptr + 0x08000000).to_bytes(4, byteorder = 'little'), (newptr + 0x08000000).to_bytes(4, byteorder = 'little'))
-	rom.seek(0x0)
-	rom.write(copy)
-
-def repoint_table(rom, table_address, bytes, offset, name):
-	rom.seek(table_address)
-	to_copy = rom.read(bytes)
-	clear_space(rom, table_address, bytes)
-	rom.seek(offset)
-	rom.write(to_copy)
-	save_table_ptrs(name, offset, 0)
-	update_ptrs(rom, table_address, offset)
-	offset += bytes
-	return offset
-
-def replace_word(file, to_search, replacement):
-	get = 0
-	break_loop = 0
-	to_replace = to_search + " "
-	file.seek(0x0)
-	for line in file:
-		if (break_loop == 1):
-			break
-		for word in line.split():
-			if (word == to_search):
-				get = 1
-			elif (get == 1):
-				to_replace += word
-				break_loop = 1
-				break
-	file.seek(0x0)
+def file_change_line(file_path, line_to_change, replacement):
+	file = open(file_path, 'r+')
 	copy = file.read()
-	copy = copy.replace(to_replace, to_search + " " + replacement)
+	file.seek(0x0)
+	line_no = 1
+	for line in file:
+		if (line_no == line_to_change):
+			copy = copy.replace(line, replacement)
+			break
+		line_no += 1
 	file.seek(0x0)
 	file.write(copy)
+	file.close()
+
+def edit_linker(offset):
+	file_change_line("linker.ld", 4, "\t\trom     : ORIGIN = (0x08000000 + " + hex(offset) + "), LENGTH = 32M\n")
+	
+def edit_insert(offset):
+	file_change_line("./scripts/insert.py", 11, "OFFSET_TO_PUT = " + hex(offset) + '\n')
 		
-def build_insert_code(offset, only_build):
-	linker = open("linker.ld", 'r+')
-	replace_word(linker, '+', hex(offset) + "),")
-	linker.close()
-	if only_build == True:
-		os.system("python scripts//build.py")
-		return
-	else:
-		os.system("python scripts//build.py")
-		insert = open("scripts//insert.py", 'r+')
-		replace_word(insert, "at',", "default=" + hex(offset) + ')')
-		insert.close()
-		os.system("python scripts//insert.py --debug>function_offsets.ini")
-		return
+def build_code():
+	os.system("python scripts//build.py")
+	
+def insert_code():
+	os.system("python scripts//insert.py")
+	
+def clear_from_to(rom, from_, to_):
+	rom.seek(from_)
+	for i in range(0, to_ - from_):
+		rom.write(b'\xFF')
 
 ##############
 #Functions end here.
 ##############
-		
-shutil.copyfile("BPEE0.gba", "test.gba")
-with open("test.gba", 'rb+') as rom:
 
-###############
-#Add your code here.
-###############
-
-
-
-###############
-#End your code here.
-###############
-
-		offset = align_offset(FREE_SPACE)
-		if BUILD_CODE == True:
-			build_insert_code(offset, True)
-			offset = find_offset_to_put(rom, os.stat("build//output.bin").st_size, align_offset(FREE_SPACE))
-			if offset == 0:
-				print("Not enough free space to insert code")
-			else:
-				build_insert_code(offset, False)
-rom.close()
+with open("BPEE0.gba", 'rb+') as rom:
+	offset = OFFSET_TO_PUT
+	if SEARCH_FREE_SPACE == True:
+		offset = find_offset_to_put(rom, 0x50000, align_x100(offset))
+	edit_linker(offset)
+	edit_insert(offset)
+	build_code()
+	insert_code()
+	rom.close()
+	
+with open("test.gba", 'rb+') as new_rom:
+	if CLEAR_OLD_MOVETABLE == True:
+		clear_from_to(new_rom, 0x31C898, 0x31D93C)
+	if CLEAR_OLD_LEARNSETTABLE == True:
+		clear_from_to(new_rom, 0x3230DC, 0x32531C) #clear actual old learnsets
+		clear_from_to(new_rom, 0x32937C, 0x3299EC) #clear pointers to moves
+	new_rom.close()
