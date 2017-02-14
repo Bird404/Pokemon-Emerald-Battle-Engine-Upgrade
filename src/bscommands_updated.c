@@ -599,7 +599,7 @@ u8 primary_effect_setter()
                 u16* attackers_item = &battle_participants[bank_attacker].held_item;
                 if (*targets_item && !CHECK_KNOCKED_OFF(bank_target) && *attackers_item == 0 && can_lose_item(bank_target, 1, 1))
                 {
-                    if (!ITEM_STEAL && !is_bank_from_opponent_side(bank_attacker))
+                    if (!ITEM_STEAL && !is_bank_from_opponent_side(bank_attacker) && battle_flags.trainer)
                     {
                         new_battlestruct->various.returns_item |= bits_table[battle_team_id_by_side[bank_attacker]];
                     }
@@ -2968,12 +2968,13 @@ void atkD2_itemswap()
             *attacker_item = 0;
             prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, target_item);
             mark_buffer_bank_for_execution(bank_target);
-            #if ITEM_SWAP == false //set items to return later
-            u8 bank = bank_attacker;
-            if (is_bank_from_opponent_side(bank_attacker))
-                bank = bank_target;
-            new_battlestruct->various.returns_swap |= bits_table[battle_team_id_by_side[bank]];
-            #endif // ITEM_SWAP
+            if (!ITEM_SWAP && battle_flags.trainer)//set items to return later
+            {
+                u8 bank = bank_attacker;
+                if (is_bank_from_opponent_side(bank_attacker))
+                    bank = bank_target;
+                new_battlestruct->various.returns_swap |= bits_table[battle_team_id_by_side[bank]];
+            }
         }
     }
     battlescripts_curr_instruction = (void*) (read_word(battlescripts_curr_instruction + 1));
