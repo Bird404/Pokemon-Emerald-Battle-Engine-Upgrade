@@ -32,5 +32,5 @@ Installation instructions:
 
 If you want to create a INI file for PGE:
 
-11. Place a copy of a valid roms.ini in the master folder and in cmd prompt type 'python scripts\PGEinidump'.
+11. Place a copy of a valid roms.ini in the master folder and in cmd prompt type 'python scripts\PGEinidump.py'.
   A corresponding test.ini will be created for test.gba.
