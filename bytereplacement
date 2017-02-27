@@ -16,6 +16,13 @@
 ## pokemom type palette tweaks
 08D97BC1 FF 66
 08D97BC8 3D 66
+## Negates encryption substructure pokemon
+0806A236 00 00 10 60 59 68 00 00
+0806A25A 00 00 10 60 19 68 00 00
+0806A27C 00 20 00 00 00 00
+0806A6D8 0B E0
+0806ADFC 0E E0
+0806B3E4 00 00
 ## nop cmd6
 0831BD28 41 06 05 08
 ## smellingsalts text now allows all conditions
