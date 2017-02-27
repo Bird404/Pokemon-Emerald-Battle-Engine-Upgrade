@@ -133,6 +133,7 @@ enum map_type{
 #define SET_u32(ptr, val)((*(u32*)(ptr) = 0))
 #define GET_EVO_TABLE(species)((*evo_table)[species])
 #define COIN_FLIP(option1, option2)((rng() & 1) ? option1 : option2)
+#define GET_CUSTOMFLAG(flagID)((flagID == 0 ? 0 : (getflag(flagID))))
 #define get_1_16_of_max_hp(bank)(ATLEAST_ONE(battle_participants[bank].max_hp >> 4))
 #define get_1_8_of_max_hp(bank)(ATLEAST_ONE(battle_participants[bank].max_hp >> 3))
 #define get_1_4_of_max_hp(bank)(ATLEAST_ONE(battle_participants[bank].max_hp >> 2))

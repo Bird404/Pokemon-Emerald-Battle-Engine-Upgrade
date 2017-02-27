@@ -1,6 +1,9 @@
 .text
 .thumb
 
+@battle flags
+.equ BATTLE_TRAINER, 0x8
+
 @types
 .equ TYPE_NORMAL, 0x0
 .equ TYPE_FIGHTING, 0x1

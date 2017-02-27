@@ -1,9 +1,9 @@
 .text
 .thumb
-.align 2
 
 .include "asm_defines.s"
 
+.global move_names_table
 move_names_table:
 .byte Dash, Dash, Termin, Space, Space, Space, Space, Space, Space, Space, Space, Space, Space
 .byte P_, o_, u_, n_, d_, Termin, Space, Space, Space, Space, Space, Space, Space

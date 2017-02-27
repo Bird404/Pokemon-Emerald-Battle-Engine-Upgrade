@@ -14,6 +14,7 @@ u16 get_item_extra_param(u16 item);
 void b_load_sprite_player(struct pokemon* poke, u8 bank);
 
 extern u8 ability_names_table[250][13];
+extern u8 move_names_table[1025][13];
 
 bool load_weather_from_overworld()
 {
@@ -576,6 +577,9 @@ u16 battle_string_decoder(u8* src, u8* dst)
             case 51: //partner trainer name
                 get_frontier_trainer_name(text, partner_trainer);
                 string = text;
+                break;
+            case 54: //current move
+                string = move_names_table[current_move];
                 break;
             }
             if (string) //copy decoded string

@@ -33,6 +33,8 @@ u8 try_cherrim_change(u8 bank);
 u8 check_move_limitations(u8 bank, u8 not_usable_moves, u8 limitations);
 u32 accuracy_percent(u16 move, u8 bankatk, u8 bankdef);
 void handle_bug_bite();
+u8 is_poke_valid(struct pokemon* poke);
+struct pokemon* get_party_ptr(u8 bank);
 
 void set_unburden(u8 bank)
 {
@@ -1504,7 +1506,7 @@ u8 check_if_cannot_attack()
                     battlescripts_curr_instruction = (void*) 0x82DB2BD;
                     battle_communication_struct.multistring_chooser = 1;
                     bank_target = bank_attacker;
-                    damage_calc(MOVE_POUND, TYPE_EGG, bank_attacker, bank_attacker, 0x64);
+                    damage_calc(MOVE_CONFUSION_DMG, TYPE_EGG, bank_attacker, bank_attacker, 0x64);
                     protect_structs[bank_attacker].flag1_confusion_self_damage = 1;
                     hitmarker |= 0x80000;
                 }
@@ -1721,14 +1723,14 @@ void atk00_move_canceller()
         return;
     else if (immune_to_powder_moves(bank_target, current_move))
         return;
-    else if (battle_participants[bank_attacker].current_pp[current_move_position] == 0 && current_move != MOVE_STRUGGLE && !battle_participants[bank_attacker].status2.multiple_turn_move && ((hitmarker & (HITMARKER_NO_ATTACKSTRING || 0x800000)) == 0) && new_battlestruct->various.magicbounce == 0)
+    else if (!(hitmarker & HITMARKER_NO_PPDEDUCT) && battle_participants[bank_attacker].current_pp[current_move_position] == 0 && current_move != MOVE_STRUGGLE && !battle_participants[bank_attacker].status2.multiple_turn_move && ((hitmarker & (HITMARKER_NO_ATTACKSTRING || 0x800000)) == 0) && new_battlestruct->various.magicbounce == 0)
     {
         move_outcome.missed = 1;
         battlescripts_curr_instruction = (void*) 0x082DB07A; //no pp bs
         return;
     }
     hitmarker &= 0xFF7FFFFF;
-    if ((hitmarker & HITMARKER_OBEYS) == 0 && !battle_participants[bank_attacker].status2.multiple_turn_move)
+    if (!(hitmarker & HITMARKER_OBEYS) && !battle_participants[bank_attacker].status2.multiple_turn_move)
     {
         u8 disobedient = is_poke_disobedient();
         if (disobedient == 2)
@@ -2378,12 +2380,12 @@ u8 can_select_this_random_move(u16 move)
 {
     u8 can = 1;
     u8 script_id = move_table[move].script_id;
-    switch (move)
+    switch (current_move)
     {
     case MOVE_ASSIST:
         if (script_id == 34 || script_id == 73 || script_id == 72 || script_id == 123 || script_id == 99) //fly/dig/dive plus protect-like moves plus roar/whirlwind plus trick/switcheroo plus covet/thief
             can = 0;
-        else if (move == MOVE_BESTOW || move == MOVE_DRAGON_TAIL || move == MOVE_CIRCLE_THROW || move == MOVE_FOCUS_PUNCH || move == MOVE_RAGE_POWDER || move == MOVE_SHADOW_FORCE || move == MOVE_FEINT || move == MOVE_PHANTOM_FORCE || move == MOVE_DESTINY_BOND || move == MOVE_HOLD_HANDS || move == MOVE_TRANSFORM)
+        else if (move == MOVE_BESTOW || move == MOVE_BOUNCE || move == MOVE_DRAGON_TAIL || move == MOVE_CIRCLE_THROW || move == MOVE_FOCUS_PUNCH || move == MOVE_RAGE_POWDER || move == MOVE_SHADOW_FORCE || move == MOVE_FEINT || move == MOVE_PHANTOM_FORCE || move == MOVE_DESTINY_BOND || move == MOVE_HOLD_HANDS || move == MOVE_TRANSFORM)
             can = 0;
         else
             goto SHAREDWITHASSIST;
@@ -2402,9 +2404,46 @@ u8 can_select_this_random_move(u16 move)
     return can;
 }
 
+void atkDE_assistmovechoose(void)
+{
+    struct pokemon* poke = get_party_ptr(bank_attacker);
+    u8 viable_pokes = 0;
+    for (u8 i = 0; i < 6; i++)
+    {
+        if (i != battle_team_id_by_side[bank_attacker] && get_attributes(&poke[i], ATTR_CURRENT_HP, 0) && is_poke_valid(&poke[i]))
+            viable_pokes |= bits_table[i];
+    }
+    while (viable_pokes)
+    {
+        u8 chosen_poke;
+        do {chosen_poke = __umodsi3(rng(), 6);} while(!(viable_pokes & bits_table[chosen_poke])); //choose poke
+        u8 viable_moves = 0;
+        u16 move[4];
+        for (u8 i = 0; i < 4; i++)
+        {
+            move[i] = get_attributes(&poke[chosen_poke], ATTR_ATTACK_1 + i, 0);
+            if (move[i] && can_select_this_random_move(move[i]))
+                viable_moves |= bits_table[i];
+        }
+        if (viable_moves) //move can be found
+        {
+            u8 chosen_move;
+            do {chosen_move = __umodsi3(rng(), 4);} while(!(viable_moves & bits_table[chosen_move])); //choose move
+            randomly_chosen_move = move[chosen_move];
+            hitmarker &= 0xFFFFFBFF;
+            bank_target = get_target_of_move(move[chosen_move], 0, 0);
+            battlescripts_curr_instruction += 5;
+            return;
+        }
+        //no viable moves for this pokemon
+        else {viable_pokes ^= bits_table[chosen_poke];} //we can xor this bit since we know it's set
+    }
+    battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction + 1);
+}
+
 u16 metronome_forbidden_moves[] = {MOVE_AFTER_YOU, MOVE_ASSIST, MOVE_BELCH, MOVE_BESTOW, MOVE_CELEBRATE, MOVE_CHATTER, MOVE_COPYCAT, MOVE_COUNTER, MOVE_COVET, MOVE_CRAFTY_SHIELD, MOVE_DESTINY_BOND, MOVE_DETECT, MOVE_DIAMOND_STORM, MOVE_ENDURE, MOVE_FEINT, MOVE_FOCUS_PUNCH, MOVE_FOLLOW_ME, MOVE_FREEZE_SHOCK, MOVE_HAPPY_HOUR, MOVE_HELPING_HAND, MOVE_HOLD_HANDS, MOVE_HYPERSPACE_HOLE, MOVE_ICE_BURN, MOVE_KINGS_SHIELD, MOVE_LIGHT_OF_RUIN, MOVE_MAT_BLOCK, MOVE_ME_FIRST, MOVE_METRONOME, MOVE_MIMIC, MOVE_MIRROR_COAT, MOVE_MIRROR_MOVE, MOVE_NATURE_POWER, MOVE_PROTECT, MOVE_QUASH, MOVE_QUICK_GUARD, MOVE_RAGE_POWDER, MOVE_RELIC_SONG, MOVE_SECRET_SWORD, MOVE_SKETCH, MOVE_SLEEP_TALK, MOVE_SNARL, MOVE_SNATCH, MOVE_SNORE, MOVE_SPIKY_SHIELD, MOVE_STEAM_ERUPTION, MOVE_STRUGGLE, MOVE_SWITCHEROO, MOVE_TECHNO_BLAST, MOVE_THIEF, MOVE_THOUSAND_ARROWS, MOVE_THOUSAND_WAVES, MOVE_TRANSFORM, MOVE_TRICK, MOVE_VCREATE, MOVE_WIDE_GUARD, 0xFFFF};
 
-void atkA9_sleeptalkmovechoose() //void* success_ptr
+void atkA9_sleeptalkmovechoose(void) //void* success_ptr
 {
     u8 usable_bitfield = 0;
     for (u8 i = 0; i < 4; i++)
@@ -3133,15 +3172,19 @@ void atk23_exp_evs_lvlup(void)
             if (is_poke_usable(poke) && (GETS_VIA_EXPSHARE(held_item) || *sentin_pokes & 1))
             {
                 //update evs
-                if (!DISABLED_EVS_FLAG || !getflag(DISABLED_EVS_FLAG))
+                if (!GET_CUSTOMFLAG(DISABLED_EVS_FLAG))
                     evs_update(poke, battle_participants[bank].poke_species);
 
-                if (get_attributes(poke, ATTR_LEVEL, 0) < MAX_LEVEL && (!DISABLED_EXP_FLAG || !getflag(DISABLED_EXP_FLAG))) //apply experience
+                //play victory music
+                if (!battle_flags.trainer && !is_bank_present(1) && !is_bank_present(3) && (is_bank_present(0) || is_bank_present(2)) && !battle_stuff_ptr->wildvictorysong)
                 {
-                    if (battle_flags.trainer && !battle_stuff_ptr->field_12)
-                    {
-                        //play music TODO
-                    }
+                    stop_battle_music();
+                    play_song_check_flag(0x161);
+                    battle_stuff_ptr->wildvictorysong++;
+                }
+
+                if (get_attributes(poke, ATTR_LEVEL, 0) < MAX_LEVEL && !GET_CUSTOMFLAG(DISABLED_EXP_FLAG)) //apply experience
+                {
                     if (*sentin_pokes & 1)
                         exp_for_poke = *sentin_exp;
                     else

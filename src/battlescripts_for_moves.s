@@ -1,6 +1,5 @@
 .text
 .thumb
-.align 2
 
 .include "asm_defines.s"
 .include "defines/bs_commands.s"

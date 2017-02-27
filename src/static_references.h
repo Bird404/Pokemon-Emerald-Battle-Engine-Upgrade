@@ -187,4 +187,7 @@ extern void* sea_of_fire_hurt_bs;
 extern void* berry_redux_bs;
 
 extern void* capture_exp_bs;
+
+//extern scripts from battlescripts.s file
+extern void* BS_BALL_BLOCK;
 #endif /* static_references */

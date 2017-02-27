@@ -193,7 +193,9 @@ void oac_wild_poke_animate_after_fading(struct object*);
 void prepare_healthbox_sliding(u8 bank);
 void set_healthbox_visible(u8 object);
 void poke_restore_pp(struct pokemon*);
-bool not_in_battle();
+bool not_in_battle(void);
+void stop_battle_music(void);
+void play_song_check_flag(u16 songID);
 
 u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);

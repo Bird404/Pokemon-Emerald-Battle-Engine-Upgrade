@@ -24,6 +24,7 @@
 #define EXPANDED_POKEBALLS  false  //set to true if your hack uses pokeball expansion
 #define INVERSE_FLAG        0x0   //if that flag is set, the battle is inverse
 #define FISHING_FLAG        0x0   //if that flag is set, it's a battle against a hooked up pokemon
+#define CANT_CATCH_FLAG     0x0   //if that flag is set, you can't catch any pokemon, if flag is 0 you always can catch any pokemon
 
 //form indexes
 #define POKE_CHERRIM                1000

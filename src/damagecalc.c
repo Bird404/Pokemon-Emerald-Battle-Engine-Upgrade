@@ -201,7 +201,6 @@ u16 get_speed(u8 bank)
 u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
 {
     u16 base_power = move_table[move].base_power;
-    u8 atk_banks_side = get_battle_side(atk_bank) & 1;
     u8 atk_ally_bank = atk_bank ^ 2;
     switch (move)
     {
@@ -448,7 +447,7 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
                 base_power = 150;
             break;
         case MOVE_ECHOED_VOICE:
-            base_power += 40 * new_battlestruct->side_affecting[atk_banks_side].echo_voice_counter;
+            base_power += 40 * new_battlestruct->field_affecting.echo_voice_counter;
             if (base_power > 200)
                 base_power = 200;
             break;
@@ -1168,9 +1167,8 @@ u8 does_move_target_multiple();
 void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u16 chained_effectiveness)
 {
     damage_loc = 0;
+    if (chained_effectiveness == 0) {return;} // avoid wastage of time in case of non effective moves
     u16 base_power = apply_base_power_modifiers(move, move_type, atk_bank, def_bank, get_base_power(move, atk_bank, def_bank));
-    if (chained_effectiveness==0) // avoid wastage of time in case of non effective moves
-        return;
     u16 atk_stat = get_attack_stat(move, move_type, atk_bank, def_bank);
     u16 def_stat = get_def_stat(move, atk_bank, def_bank);
     u32 damage = ((((2 * battle_participants[atk_bank].level) / 5 + 2) * base_power * atk_stat) / def_stat) / 50 + 2;
@@ -1199,7 +1197,7 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u16 chained_e
         }
     }
     //crit modifier
-    if (crit_loc == 2)
+    if (crit_loc == 2 && move != MOVE_CONFUSION_DMG)
     {
         damage = apply_modifier(0x1800, damage);
     }
@@ -1208,7 +1206,7 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u16 chained_e
 
     u16 final_modifier = 0x1000;
     //stab modifier
-    if (is_of_type(atk_bank, move_type) && move != MOVE_STRUGGLE)
+    if (move_type != TYPE_EGG && is_of_type(atk_bank, move_type) && move != MOVE_STRUGGLE)
     {
         damage = apply_modifier(0x1800, damage);
         if (has_ability_effect(atk_bank, 0, 1) && battle_participants[atk_bank].ability_id == ABILITY_ADAPTABILITY)

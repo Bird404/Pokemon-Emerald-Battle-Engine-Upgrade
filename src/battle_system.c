@@ -3267,22 +3267,21 @@ void move_to_buffer(u16 move)
 
 u8 update_turn_counters()
 {
-    u8 effect = 0;
-    bank_attacker = 0;
-    bank_target = 0;
-    for (; bank_attacker < no_of_all_banks; bank_attacker++)
+    #define TURN_LAST_CASE 26
+    bool effect = 0;
+    for (bank_attacker = 0; bank_attacker < no_of_all_banks; bank_attacker++)
     {
         if (!(absent_bank_flags & bits_table[bank_attacker]))
             break;
     }
-    for (; bank_target < no_of_all_banks; bank_target++)
+    for (bank_target = 0; bank_target < no_of_all_banks; bank_target++)
     {
         if (!(absent_bank_flags & bits_table[bank_target]))
             break;
     }
     u8* statetracker = &battle_stuff_ptr->end_turn_statetracker2;
     u8* sidebank = &battle_stuff_ptr->field_DB;
-    while (effect == 0)
+    while (effect == 0 && *statetracker <= TURN_LAST_CASE)
     {
         switch (*statetracker)
         {
@@ -3707,9 +3706,30 @@ u8 update_turn_counters()
                 }
                 *sidebank += 1;
             }
+            //echo voice
             *sidebank = 0;
             *statetracker += 1;
-        case 21: //sun
+        case 21: //echo voice
+            {
+                bool echo_used = 0;
+                for (u8 i = 0; i < no_of_all_banks; i++)
+                {
+                    if (last_used_moves[i] == MOVE_ECHOED_VOICE)
+                    {
+                        echo_used = 1;
+                        break;
+                    }
+                }
+                if (!echo_used)
+                    new_battlestruct->field_affecting.echo_voice_counter = 0;
+                else
+                {
+                    if (new_battlestruct->field_affecting.echo_voice_counter <= 5)
+                        new_battlestruct->field_affecting.echo_voice_counter++;
+                }
+                *statetracker += 1;
+            }
+        case 22: //sun
             if (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)
             {
                 effect = 1;
@@ -3724,7 +3744,7 @@ u8 update_turn_counters()
             }
             *statetracker += 1;
             break;
-        case 22: //darude
+        case 23: //darude
             if (battle_weather.flags.sandstorm || battle_weather.flags.permament_sandstorm)
             {
                 effect = 1;
@@ -3741,7 +3761,7 @@ u8 update_turn_counters()
             }
             *statetracker += 1;
             break;
-        case 23: //hail
+        case 24: //hail
             if (battle_weather.flags.hail || battle_weather.flags.permament_hail)
             {
                 effect = 1;
@@ -3758,7 +3778,7 @@ u8 update_turn_counters()
             }
             *statetracker += 1;
             break;
-        case 24: //fog
+        case 25: //fog
             if (battle_weather.flags.fog || battle_weather.flags.permament_fog)
             {
                 effect = 1;
@@ -3779,8 +3799,6 @@ u8 update_turn_counters()
         default:
             *statetracker += 1;
         }
-        if (*statetracker > 25 && effect == 0)
-            break;
     }
     return effect;
 }

@@ -13,7 +13,7 @@ struct double_grass_tile{
 #pragma pack(pop)
 
 struct double_grass_tile double_grass_tiles[DOUBLE_WILD_TILES] = {
-    {0xD, 99}
+    {0xD, 70}
 };
 
 bool doubles_tile_check()
@@ -244,10 +244,10 @@ void atkEF_ballthrow(void)
         ball_shakes = 4;
         throw_bs = (void*)(0x082DBDCA); //wally bs script
     }
-    else if (battle_flags.trainer)
+    else if (battle_flags.trainer || GET_CUSTOMFLAG(CANT_CATCH_FLAG))
     {
         ball_shakes = 5;
-        throw_bs = (void*)(0x082DBE02); //trainer blocked ball script
+        throw_bs = &BS_BALL_BLOCK; //trainer blocked ball script
     }
     else
     {

@@ -215,30 +215,31 @@ o_, n_, Space, 0xFD, 0x0, Apos, s_, Space, s_, i_, d_, e_, Exclam, Termin};
 /*0x229*/u8 rainbow_end_text[] = {T_, h_, e_, Space, r_, a_, i_, n_, b_, o_, w_, Space, o_, v_, e_, r_, JumpLine,
                                 0xFD, 0x0, Space, d_, i_, s_,  a_, p_, p_, e_, a_, r_, e_, d_, Exclam, Termin};
 /*0x22A*/u8 berry_redux_text[] = {0xFD, 0x10, Apos, s_, Space, 0xFD, 0x16, JumpLine, r_, e_, d_, u_, c_, e_, d_, Space, 0xFD, 0x14, Apos, s_, Space, p_, o_, w_, e_, r_, Exclam, Termin};
+/*0x22B*/u8 pokeballblock_text[] = {0xFD, 53, Space, b_, l_, o_, c_, k_, e_, d_, Space, t_, h_, e_, Space, B_, a_, l_, l_, Exclam, 0xFF};
 
-void* new_strings_table[] = {&sample_text, &snowwarning_text, &extreme_sun_activation_text, &heavyrain_activation_text, &mysticalaircurrent_activation_text, &forewarn_text, &slowstart_text, &anticipation_text, &dryskin_damage_text, &solarpower_text, &harvest_text, &healer_text, &pickup_text, &moldbreaker_text, &turboblaze_text, &terravolt_text, &downloadatk_text,
-&downloadspatk_text, &absorbabilityboost_text , &absorbabilityimmune_text, &userteam_text, &foeteam_text,
-&aftermath_text, &pickpocket_text, &mummy_text, &target_ability, &cursedbody_text, &drastically_text, &pressure_text, &unnerve_text, &aurabreak_text, &fairyaura_text, &darkaura_text, &frisk_text, //0x19D
-&hurtbyitem_text, &got_burned_text, &got_badlypoisoned_text, &airballoon_text, &bad_dreams_text, &item_text, &rockyhelmet_text, &popped_text, &fellinlove_text, &healblockend_text, &magicbounce_text,
-&angerpoint_text, &stealhrock_text, &stickyweb_text, &gotpoisoned_text, &absorbed_spikes_text, &lost_some_hp_text, &tauntended_text, &tormentended_text,
-&healblockprevents_text, &gravityprevents_text, &embargoprevents_text, &aromaveilprevents_text, &spikyshield_damage, &symbiosispassing_text,
-&restored_hp_text, &replacement_healed_text, &telekinesis_end_text, &embargoend_text, &magnetriseend_text, &wrapped_text,
-&nofiremoves_text, &nowatermoves_text, &trickroom_ends, &magicroom_ends, &wonderoom_ends, &gravity_ends_text, &grassyterainends_text,
-&mistyterrainends_text, &electrerrainends_text, &grassyterrain_heal, &fogcontinues_text, &fogends_text, &obtaineditem,
-&tailwind_begins_text, &luckychant_begins_text, &magnetrise_begins_text, &magicroom_start_text, &trickroom_start_text, &wonderroom_start_text,
-&gravitystarts_text, &telekinesis_start_text, &abilitychange_text, &statswap_text, &heartswap_text, &bugbite_text, &incinerate_text,
-&gravitybringsdown_text, &fellforfeint, &protection_broken, &teamprotection, &becameatype, &targetsabilitybecameattacker,
-&gastro_text, &embargostart_text, &afteryout_text, &powder_text, &powderdamage_text, &statchangesremoved_text, &electify_text,
-&stealthrock2_text, &toxicspikes2_text, &stickyweb2_text, &nimble_text, &iondelugeset_text, &reflecttype_text, &healblock_start_text, &smackdown_text,
-&rapidspinontoxicspikes_text, &rapidspinonstealthrock_text, &rapidspinonstickyweb_text, &powertrick_text, &soak_text, &defogspikes_text,
-&power_text, &guard_text, &psychosplit_text, &stockpileend_text, &geomancy_text, &powerherb_text, &iceburn_text, &freezeshock_text,
-&shadowforce_text, &mistyterrain_text, &grassyterrain_text, &electricterrain_text, &aquaring_text, &aquaringheal_text, &assaultvest_text,
-&gravityprevents2_text, &healblockprevents2_text , &let_it_move_first_text, &mega_evolved_text, &mega_trigger_text, &fervent_trigger_text,
-&quash_text, &allyswitch_text, &topsyturvy_text, &bestow_text, &statushealpoison_text, &statushealburn_text, &statushealpar_text,
-&statushealslp_text, &statushealfrz_text, &primal_reversion_text, &congrats_player_text, &happyhour_text, &skydrop1_text, &skydrop2_text,
-&skydroptooheavy_text, &fairylock_text, &illusion_off_text, &protean_text, &gem_text, &telepathy_text, &flame_burst_text, &zen_mode_text,
-&zen_end_text, &form_change_text, &partner_wait_text, &combined_move_text, &userteam_lc_text, &foeteam_lc_text, &fire_sea_text, &fire_sea_hurt_text,
-&swamp_text, &rainbow_text, &swamp_end_text, &fire_sea_end_text, &rainbow_end_text, &berry_redux_text};
+void* new_strings_table[] = {sample_text, snowwarning_text, extreme_sun_activation_text, heavyrain_activation_text, mysticalaircurrent_activation_text, forewarn_text, slowstart_text, anticipation_text, dryskin_damage_text, solarpower_text, harvest_text, healer_text, pickup_text, moldbreaker_text, turboblaze_text, terravolt_text, downloadatk_text,
+downloadspatk_text, absorbabilityboost_text , absorbabilityimmune_text, userteam_text, foeteam_text,
+aftermath_text, pickpocket_text, mummy_text, target_ability, cursedbody_text, drastically_text, pressure_text, unnerve_text, aurabreak_text, fairyaura_text, darkaura_text, frisk_text, //0x19D
+hurtbyitem_text, got_burned_text, got_badlypoisoned_text, airballoon_text, bad_dreams_text, item_text, rockyhelmet_text, popped_text, fellinlove_text, healblockend_text, magicbounce_text,
+angerpoint_text, stealhrock_text, stickyweb_text, gotpoisoned_text, absorbed_spikes_text, lost_some_hp_text, tauntended_text, tormentended_text,
+healblockprevents_text, gravityprevents_text, embargoprevents_text, aromaveilprevents_text, spikyshield_damage, symbiosispassing_text,
+restored_hp_text, replacement_healed_text, telekinesis_end_text, embargoend_text, magnetriseend_text, wrapped_text,
+nofiremoves_text, nowatermoves_text, trickroom_ends, magicroom_ends, wonderoom_ends, gravity_ends_text, grassyterainends_text,
+mistyterrainends_text, electrerrainends_text, grassyterrain_heal, fogcontinues_text, fogends_text, obtaineditem,
+tailwind_begins_text, luckychant_begins_text, magnetrise_begins_text, magicroom_start_text, trickroom_start_text, wonderroom_start_text,
+gravitystarts_text, telekinesis_start_text, abilitychange_text, statswap_text, heartswap_text, bugbite_text, incinerate_text,
+gravitybringsdown_text, fellforfeint, protection_broken, teamprotection, becameatype, targetsabilitybecameattacker,
+gastro_text, embargostart_text, afteryout_text, powder_text, powderdamage_text, statchangesremoved_text, electify_text,
+stealthrock2_text, toxicspikes2_text, stickyweb2_text, nimble_text, iondelugeset_text, reflecttype_text, healblock_start_text, smackdown_text,
+rapidspinontoxicspikes_text, rapidspinonstealthrock_text, rapidspinonstickyweb_text, powertrick_text, soak_text, defogspikes_text,
+power_text, guard_text, psychosplit_text, stockpileend_text, geomancy_text, powerherb_text, iceburn_text, freezeshock_text,
+shadowforce_text, mistyterrain_text, grassyterrain_text, electricterrain_text, aquaring_text, aquaringheal_text, assaultvest_text,
+gravityprevents2_text, healblockprevents2_text , let_it_move_first_text, mega_evolved_text, mega_trigger_text, fervent_trigger_text,
+quash_text, allyswitch_text, topsyturvy_text, bestow_text, statushealpoison_text, statushealburn_text, statushealpar_text,
+statushealslp_text, statushealfrz_text, primal_reversion_text, congrats_player_text, happyhour_text, skydrop1_text, skydrop2_text,
+skydroptooheavy_text, fairylock_text, illusion_off_text, protean_text, gem_text, telepathy_text, flame_burst_text, zen_mode_text,
+zen_end_text, form_change_text, partner_wait_text, combined_move_text, userteam_lc_text, foeteam_lc_text, fire_sea_text, fire_sea_hurt_text,
+swamp_text, rainbow_text, swamp_end_text, fire_sea_end_text, rainbow_end_text, berry_redux_text, pokeballblock_text};
 
 
 void battle_string_loader(u16 string_id)

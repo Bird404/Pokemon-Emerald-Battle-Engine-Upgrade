@@ -220,7 +220,7 @@ struct battle_stuff{
     u8 move_target[4]; //0xC - 0xF
     u8 expgetter_id; //0x10
     u8 field_11; //0x11
-    u8 field_12; //0x12
+    u8 wildvictorysong; //0x12
     u8 dynamic_move_type; //0x13
     u8 trapper[4];//0x14-0x17
     u8 field_18[48]; //0x18-0x47

@@ -75,7 +75,6 @@ struct side_affecting{
     u8 mat_block : 1;
     u8 lunardance : 1;
     u8 lunardance_done : 1;
-    u8 echo_voice_counter : 3;
     u8 ally_fainted_last_turn : 2;
     u8 pledge_effect : 2; //1 for grass, 2 for fire , 3 for water
 };
@@ -89,6 +88,7 @@ struct field_affecting{
     u32 misty_terrain : 3;
     u32 ion_deluge : 3;
     u32 gravity : 3;
+    u32 echo_voice_counter : 3;
     u32 round_chosen : 1;
     u32 fairy_lock : 2;
 };

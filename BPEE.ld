@@ -78,6 +78,8 @@ prepare_healthbox_sliding = 0x08076918|1;
 set_healthbox_visible = 0x080729D0|1;
 oac_wild_poke_animate_after_fading = 0x08039894|1;
 poke_restore_pp = 0x0806E930|1;
+stop_battle_music = 0x0805EA60|1;
+play_song_check_flag = 0x080A3778|1;
 
 script_text_buffer1 = 0x02021CC4;
 script_text_buffer2 = 0x02021DC4;

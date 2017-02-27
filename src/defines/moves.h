@@ -9,6 +9,7 @@
 #define move_target_foes_and_ally 0x20
 #define move_target_opponent_field 0x40
 
+#define MOVE_CONFUSION_DMG ((sizeof(move_table) / sizeof(struct move_info)))
 #define MOVE_ABSORB 0x47
 #define MOVE_ACID 0x33
 #define MOVE_ACID_ARMOR 0x97
