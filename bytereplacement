@@ -54,6 +54,8 @@
 0805B204 00 00 00 00
 ## Change Nauture power decoder
 085CAAF7 36
+## Change Soundproof'd decoder
+085CB172 36
 ##### Wild Double Battles
 ## When starting a wild battle don't clear battle flags(it's done automatically after the end of a battle)
 080B06D4 00 00
