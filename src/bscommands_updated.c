@@ -1373,11 +1373,8 @@ u8 check_if_cannot_attack()
                 }
                 else
                 {
-                    if (check_ability(bank_attacker, ABILITY_EARLY_BIRD))
-                        attacker_struct->status.flags.sleep -= 2;
-                    else
-                        attacker_struct->status.flags.sleep--;
-                    if (attacker_struct->status.flags.sleep == 0)
+                    attacker_struct->status.flags.sleep--;
+                    if (!attacker_struct->status.flags.sleep || (check_ability(bank_attacker, ABILITY_EARLY_BIRD) && !(--attacker_struct->status.flags.sleep)))
                     {
                         effect = 2;
                         attacker_struct->status2.nightmare = 0;
