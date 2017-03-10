@@ -3672,7 +3672,44 @@ u8 update_turn_counters()
                 *statetracker +=1;
             }
             break;
-        case 19: //rain
+        case 19: //new struct
+            while (*sidebank <= 1)
+            {
+                if (new_battlestruct->side_affecting[*sidebank].ally_fainted_last_turn)
+                {
+                    new_battlestruct->side_affecting[*sidebank].ally_fainted_last_turn--;
+                }
+                //clear protect-like moves
+                new_battlestruct->side_affecting[*sidebank].wide_guard = 0;
+                new_battlestruct->side_affecting[*sidebank].quick_guard = 0;
+                new_battlestruct->side_affecting[*sidebank].crafty_shield = 0;
+                new_battlestruct->side_affecting[*sidebank].mat_block = 0;
+
+                *sidebank += 1;
+            }
+            *sidebank = 0;
+            *statetracker += 1;
+        case 20: //echo voice
+            {
+                bool echo_used = 0;
+                for (u8 i = 0; i < no_of_all_banks; i++)
+                {
+                    if (last_used_moves[i] == MOVE_ECHOED_VOICE)
+                    {
+                        echo_used = 1;
+                        break;
+                    }
+                }
+                if (!echo_used)
+                    new_battlestruct->field_affecting.echo_voice_counter = 0;
+                else
+                {
+                    if (new_battlestruct->field_affecting.echo_voice_counter <= 5)
+                        new_battlestruct->field_affecting.echo_voice_counter++;
+                }
+                *statetracker += 1;
+            }
+        case 21: //rain
             if (battle_weather.flags.rain || battle_weather.flags.downpour || battle_weather.flags.heavy_rain || battle_weather.flags.permament_rain)
             {
                 effect = 1;
@@ -3697,43 +3734,6 @@ u8 update_turn_counters()
             *sidebank = 0;
             *statetracker += 1;
             break;
-        case 20: //new struct
-            while (*sidebank >= 1)
-            {
-                if (new_battlestruct->side_affecting[*sidebank].ally_fainted_last_turn)
-                {
-                    new_battlestruct->side_affecting[*sidebank].ally_fainted_last_turn--;
-                }
-                //clear protect-like moves
-                new_battlestruct->side_affecting[*sidebank].wide_guard = 0;
-                new_battlestruct->side_affecting[*sidebank].quick_guard = 0;
-                new_battlestruct->side_affecting[*sidebank].crafty_shield = 0;
-                new_battlestruct->side_affecting[*sidebank].mat_block = 0;
-
-                *sidebank += 1;
-            }
-            *sidebank = 0;
-            *statetracker += 1;
-        case 21: //echo voice
-            {
-                bool echo_used = 0;
-                for (u8 i = 0; i < no_of_all_banks; i++)
-                {
-                    if (last_used_moves[i] == MOVE_ECHOED_VOICE)
-                    {
-                        echo_used = 1;
-                        break;
-                    }
-                }
-                if (!echo_used)
-                    new_battlestruct->field_affecting.echo_voice_counter = 0;
-                else
-                {
-                    if (new_battlestruct->field_affecting.echo_voice_counter <= 5)
-                        new_battlestruct->field_affecting.echo_voice_counter++;
-                }
-                *statetracker += 1;
-            }
         case 22: //sun
             if (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)
             {
