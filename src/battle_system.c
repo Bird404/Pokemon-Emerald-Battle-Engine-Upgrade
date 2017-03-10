@@ -3704,9 +3704,14 @@ u8 update_turn_counters()
                 {
                     new_battlestruct->side_affecting[*sidebank].ally_fainted_last_turn--;
                 }
+                //clear protect-like moves
+                new_battlestruct->side_affecting[*sidebank].wide_guard = 0;
+                new_battlestruct->side_affecting[*sidebank].quick_guard = 0;
+                new_battlestruct->side_affecting[*sidebank].crafty_shield = 0;
+                new_battlestruct->side_affecting[*sidebank].mat_block = 0;
+
                 *sidebank += 1;
             }
-            //echo voice
             *sidebank = 0;
             *statetracker += 1;
         case 21: //echo voice
