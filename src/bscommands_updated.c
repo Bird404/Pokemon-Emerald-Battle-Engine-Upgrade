@@ -3163,6 +3163,7 @@ void atk23_exp_evs_lvlup(void)
         }
     case 2: //loop; set exp value to the poke in expgetter_id and print message
         {
+            exp_for_poke = 0;
             u8* sentin_pokes = &battle_stuff_ptr->sentin_pokes;
             struct pokemon* poke = &party_player[*exp_getter_id];
             u8 held_item = get_item_battle_function(get_attributes(poke, ATTR_HELD_ITEM, 0));
