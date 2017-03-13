@@ -2,6 +2,8 @@
 #include "megaimages/indicators.h"
 #include "megaimages/mega_trigger.h"
 
+u8 get_item_effect(u8 bank, u8 check_negating_effects);
+
 //resource gfx_healthbar = {0x083EF524, 0x80, 0x1234};
 struct image_resource gfx_indicator = {indicatorsTiles, 0x80, 0x1234};
 struct image_resource pal_indicator = {indicatorsPal, 0x1234};

@@ -25,6 +25,7 @@
 #define INVERSE_FLAG        0x0   //if that flag is set, the battle is inverse
 #define FISHING_FLAG        0x0   //if that flag is set, it's a battle against a hooked up pokemon
 #define CANT_CATCH_FLAG     0x0   //if that flag is set, you can't catch any pokemon, if flag is 0 you always can catch any pokemon
+#define ALLOW_LOSE_FLAG     0x864   //if that flag is set, you can lose a battle and the script will continue
 
 //form indexes
 #define POKE_CHERRIM                1000

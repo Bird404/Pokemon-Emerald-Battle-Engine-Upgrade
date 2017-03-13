@@ -1,6 +1,9 @@
 #include "defines.h"
 #include "static_references.h"
 
+u8 get_item_effect(u8 bank, u8 check_negating_effects);
+u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro);
+
 u16 crit_table[] = {4096, 8192, 32768};
 
 void critcalc_cmd4()

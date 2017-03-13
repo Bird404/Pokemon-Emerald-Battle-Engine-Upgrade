@@ -101,8 +101,8 @@ u8 try_illusion_change(struct pokemon* poke, u8 bank)
     if (masquerade_as)
     {
         new_battlestruct->bank_affecting[bank].illusion_on = 1;
-        battle_graphics.graphics_data->species_info[bank]->pal_change = 0;
-        battle_graphics.graphics_data->species_info[bank]->transformed_species = get_attributes(masquerade_as, ATTR_SPECIES, 0);
+        (*battle_graphics.graphics_data->species_info)[bank].pal_change = 0;
+        (*battle_graphics.graphics_data->species_info)[bank].transformed_species = get_attributes(masquerade_as, ATTR_SPECIES, 0);
         PiD_pbs[bank] = get_attributes(masquerade_as, ATTR_PID, 0);
         new_battlestruct->bank_affecting[bank].transform_tid = get_attributes(masquerade_as, ATTR_TID, 0);
         get_attributes(masquerade_as, ATTR_NAME, &new_battlestruct->bank_affecting[bank].illusion_nick);
@@ -117,7 +117,7 @@ u8 try_illusion_change(struct pokemon* poke, u8 bank)
 
 u16 get_transform_species(u8 bank)
 {
-    return battle_graphics.graphics_data->species_info[bank]->transformed_species;
+    return (*battle_graphics.graphics_data->species_info)[bank].transformed_species;
 }
 
 void* get_poke_nick2(struct pokemon* poke, u8 bank, void* dst)
@@ -363,9 +363,11 @@ u16 battle_string_decoder(u8* src, u8* dst)
                 get_poke_nick_with_prefix(battle_scripting.active_bank, text);
                 string = text;
                 break;
-            case 20: //todo
+            case 20: //move1 in buffer pointer
+                string = move_names_table[(*buffer_moves)[0]];
                 break;
-            case 21: //todo
+            case 21: //move2 in buffer pointer
+                string = move_names_table[(*buffer_moves)[1]];
                 break;
             case 22: //get last used item
                 if ((battle_flags.link || battle_flags.flag_x2000000) && last_used_item == ITEM_ENIGMABERRY)
@@ -494,6 +496,10 @@ u16 battle_string_decoder(u8* src, u8* dst)
                     x4000000_get_battle_text(var_8015_trainer_opponent_A, 3);
                     string = displayed_string_ov;
                 }
+                else if (GET_CUSTOMFLAG(ALLOW_LOSE_FLAG))
+                {
+                    string = opponentwon_text;
+                }
                 break;
             case 38: //todo
                 break;
@@ -581,6 +587,24 @@ u16 battle_string_decoder(u8* src, u8* dst)
             case 54: //current move
                 string = move_names_table[current_move];
                 break;
+            case 55: //lost/drew/won
+                if (battle_outcome == OUTCOME_LOSS)
+                {
+                    u8 lost[] = {l_, o_, s_, t_, Space, a_, g_, a_, i_, n_, s_, t_, 0xFF};
+                    strcpy_xFF_terminated_0(text, lost);
+                }
+                else if (battle_outcome == OUTCOME_WIN)
+                {
+                    u8 won[] = {w_, o_, n_, Space, a_, g_, a_, i_, n_, s_, t_, 0xFF};
+                    strcpy_xFF_terminated_0(text, won);
+                }
+                else if (battle_outcome == OUTCOME_DRAW)
+                {
+                    u8 drew[] = {d_, r_, e_, w_, Space, w_, i_, t_, h_, 0xFF};
+                    strcpy_xFF_terminated_0(text, drew);
+                }
+                string = text;
+                break;
             }
             if (string) //copy decoded string
             {
@@ -610,7 +634,7 @@ u16 battle_string_decoder(u8* src, u8* dst)
 
 void update_transform_sprite_pal(u8 bank, u16 pal_arg1)
 {
-    if (battle_graphics.graphics_data->species_info[bank]->pal_change)
+    if ((*battle_graphics.graphics_data->species_info)[bank].pal_change)
     {
         pal_fade_1(pal_arg1, 0x10, 6, 0x7FFF);
         u32 to_add = (pal_arg1) * 2;
@@ -620,44 +644,53 @@ void update_transform_sprite_pal(u8 bank, u16 pal_arg1)
 
 void b_load_sprite(struct pokemon* poke, u8 bank, struct sprite_table* sprites)
 {
-    u16 species;
-    u32 PiD, TiD;
-    u16 transform_species = get_transform_species(bank);
-    void (*sprite_load) (void* sprite_ptr, void* dst, u16 species_no, u32 PiD, enum poke_sprite);
-    if (transform_species)
+    //load actual sprite
+    if (!new_battlestruct->bank_affecting[bank].caught)
     {
-        species = transform_species;
-        PiD = PiD_pbs[bank];
-        sprite_load = &load_poke_sprite_deoxys_form;
-        TiD = new_battlestruct->bank_affecting[bank].transform_tid;
+        u16 species;
+        u32 PiD, TiD;
+        u16 transform_species = get_transform_species(bank);
+        void (*sprite_load) (void* sprite_ptr, void* dst, u16 species_no, u32 PiD, enum poke_sprite);
+        if (transform_species)
+        {
+            species = transform_species;
+            PiD = PiD_pbs[bank];
+            sprite_load = &load_poke_sprite_deoxys_form;
+            TiD = new_battlestruct->bank_affecting[bank].transform_tid;
+        }
+        else
+        {
+            species = get_attributes(poke, ATTR_SPECIES, 0);
+            PiD = get_attributes(poke, ATTR_PID, 0);
+            if (b_link_related(1, bank))
+                sprite_load = &load_poke_sprite_deoxys_form;
+            else
+                sprite_load = &load_poke_sprite;
+            TiD = get_attributes(poke, ATTR_TID, 0);
+        }
+        enum poke_sprite sprite = SPRITE_BACK;
+        if (sprites == front_sprites)
+            sprite = SPRITE_FRONT;
+        sprite_load(&sprites->p_sprite[species].sprite, battle_graphics.graphics_loc->decompressed_sprite[get_bank_identity(bank)], species, PiD, sprite);
+        void* poke_pal = poke_get_pal(species, TiD, PiD);
+        LZ77UnCompWram(poke_pal, decompression_buffer);
+        u16 pal_adder = 256 + bank * 16;
+        gpu_pal_apply((struct palette*) (decompression_buffer), pal_adder, 0x20);
+        gpu_pal_apply((struct palette*) (decompression_buffer), 0x80 + bank * 16, 0x20);
+        if (species == POKE_CASTFORM)
+        {
+            LZ77UnCompWram(poke_pal, &battle_stuff_ptr->castform_pal);
+            gpu_pal_apply(&battle_stuff_ptr->castform_pal[castform_form[bank]], pal_adder, 0x20);
+        }
+        if (transform_species)
+        {
+            update_transform_sprite_pal(bank,  pal_adder);
+        }
     }
     else
     {
-        species = get_attributes(poke, ATTR_SPECIES, 0);
-        PiD = get_attributes(poke, ATTR_PID, 0);
-        if (b_link_related(1, bank))
-            sprite_load = &load_poke_sprite_deoxys_form;
-        else
-            sprite_load = &load_poke_sprite;
-        TiD = get_attributes(poke, ATTR_TID, 0);
-    }
-    enum poke_sprite sprite = SPRITE_BACK;
-    if (sprites == front_sprites)
-        sprite = SPRITE_FRONT;
-    sprite_load(&sprites->p_sprite[species].sprite, battle_graphics.graphics_loc->decompressed_sprite[get_bank_identity(bank)], species, PiD, sprite);
-    void* poke_pal = poke_get_pal(species, TiD, PiD);
-    LZ77UnCompWram(poke_pal, decompression_buffer);
-    u16 pal_adder = 256 + bank * 16;
-    gpu_pal_apply((struct palette*) (decompression_buffer), pal_adder, 0x20);
-    gpu_pal_apply((struct palette*) (decompression_buffer), 0x80 + bank * 16, 0x20);
-    if (species == POKE_CASTFORM)
-    {
-        LZ77UnCompWram(poke_pal, &battle_stuff_ptr->castform_pal);
-        gpu_pal_apply(&battle_stuff_ptr->castform_pal[castform_form[bank]], pal_adder, 0x20);
-    }
-    if (transform_species)
-    {
-        update_transform_sprite_pal(bank,  pal_adder);
+        //pokemon is caught, set invisibility bit
+        (*battle_graphics.graphics_data->species_info)[bank].invisible = 1;
     }
 }
 

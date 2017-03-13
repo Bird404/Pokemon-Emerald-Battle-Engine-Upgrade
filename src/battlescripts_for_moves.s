@@ -1655,9 +1655,9 @@ ROOMS:
 
 ABILITY_CHANGE:
 	attackcanceler
+	accuracycheck MOVE_MISSED 0xFFFF
 	callasm_cmd 51 @changes abilities
 	.word MOVE_FAILED
-	accuracycheck MOVE_MISSED 0xFFFF
 	attackstring
 	ppreduce
 	attackanimation

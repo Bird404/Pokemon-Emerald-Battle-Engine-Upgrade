@@ -4,6 +4,8 @@
 u16 get_speed(u8 bank);
 u8 percent_chance(u8 percent);
 u8 hp_condition(u8 bank, u8 percent);
+u8 get_item_effect(u8 bank, u8 check_negating_effects);
+u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro);
 
 u8 check_ability(u8 bank, u8 ability)
 {

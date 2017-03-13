@@ -29,6 +29,10 @@ u8 can_lose_item(u8 bank, u8 stickyhold_check, u8 sticky_message);
 u8 canlose_megastone(u8 bank, u16 item);
 void b_load_sprite_opponent(struct pokemon* poke, u8 bank_target);
 void b_load_sprite_player(struct pokemon* poke, u8 bank_target);
+s8 get_move_position(u8 bank, u16 move);
+u8 get_item_effect(u8 bank, u8 check_negating_effects);
+u8 weather_abilities_effect();
+
 extern u8 type_effectiveness_table[TYPE_FAIRY-0x4][TYPE_FAIRY-0x4];
 
 u8 sample_text[] = {0xDD, 0xFF};
@@ -216,6 +220,8 @@ o_, n_, Space, 0xFD, 0x0, Apos, s_, Space, s_, i_, d_, e_, Exclam, Termin};
                                 0xFD, 0x0, Space, d_, i_, s_,  a_, p_, p_, e_, a_, r_, e_, d_, Exclam, Termin};
 /*0x22A*/u8 berry_redux_text[] = {0xFD, 0x10, Apos, s_, Space, 0xFD, 0x16, JumpLine, r_, e_, d_, u_, c_, e_, d_, Space, 0xFD, 0x14, Apos, s_, Space, p_, o_, w_, e_, r_, Exclam, Termin};
 /*0x22B*/u8 pokeballblock_text[] = {0xFD, 53, Space, b_, l_, o_, c_, k_, e_, d_, Space, t_, h_, e_, Space, B_, a_, l_, l_, Exclam, 0xFF};
+/*0x22C*/u8 player_wonlost_text[] = {0xFD, 35, Space, 0xFD, 55, JumpLine, 0xFD, 28, Space, 0xFD, 29, Exclam, 0xFF};
+/*0x22D*/u8 trainerwon_text[] = {0xFD, 37, 0xFF};
 
 void* new_strings_table[] = {sample_text, snowwarning_text, extreme_sun_activation_text, heavyrain_activation_text, mysticalaircurrent_activation_text, forewarn_text, slowstart_text, anticipation_text, dryskin_damage_text, solarpower_text, harvest_text, healer_text, pickup_text, moldbreaker_text, turboblaze_text, terravolt_text, downloadatk_text,
 downloadspatk_text, absorbabilityboost_text , absorbabilityimmune_text, userteam_text, foeteam_text,
@@ -239,7 +245,7 @@ quash_text, allyswitch_text, topsyturvy_text, bestow_text, statushealpoison_text
 statushealslp_text, statushealfrz_text, primal_reversion_text, congrats_player_text, happyhour_text, skydrop1_text, skydrop2_text,
 skydroptooheavy_text, fairylock_text, illusion_off_text, protean_text, gem_text, telepathy_text, flame_burst_text, zen_mode_text,
 zen_end_text, form_change_text, partner_wait_text, combined_move_text, userteam_lc_text, foeteam_lc_text, fire_sea_text, fire_sea_hurt_text,
-swamp_text, rainbow_text, swamp_end_text, fire_sea_end_text, rainbow_end_text, berry_redux_text, pokeballblock_text};
+swamp_text, rainbow_text, swamp_end_text, fire_sea_end_text, rainbow_end_text, berry_redux_text, pokeballblock_text, player_wonlost_text, trainerwon_text};
 
 
 void battle_string_loader(u16 string_id)
@@ -2725,12 +2731,12 @@ void healthbox_target_update()
 void return_hitmarker_animation()
 {
     hitmarker |= new_battlestruct->various.var1;
-    battle_graphics.graphics_data->species_info[bank_target]->transformed_species = 0;
+    (*battle_graphics.graphics_data->species_info)[bank_target].transformed_species = 0;
 }
 
 void transformed_species_to_0()
 {
-    battle_graphics.graphics_data->species_info[battle_scripting.active_bank]->transformed_species = 0;
+    (*battle_graphics.graphics_data->species_info)[battle_scripting.active_bank].transformed_species = 0;
 }
 
 void attacker_bank_exchange()

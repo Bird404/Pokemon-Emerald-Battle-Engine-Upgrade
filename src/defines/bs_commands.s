@@ -498,7 +498,7 @@ jumpifbyte 0x4 0x202427C 0x29 \jumpiftypenotaffected_address
 .byte \cmd52_bank
 .endm
 
-.macro cmd53 cmd53_bank
+.macro trainer_slide cmd53_bank
 .byte 0x53
 .byte \cmd53_bank
 .endm
@@ -1273,7 +1273,7 @@ jumpifbyte 0x4 0x202427C 0x29 \jumpiftypenotaffected_address
 .byte 0xF7
 .endm
 
-.macro cmdf8 cmdf8_bank
+.macro trainer_back_slide cmdf8_bank
 .byte 0xF8
 .byte \cmdf8_bank
 .endm

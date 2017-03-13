@@ -4,6 +4,20 @@
 #include "types.h"
 #include "config.h"
 
+//defines for protect-like moves argument, arg1
+#define PR_counter_incr 0x1
+#define PR_fail_chance 0x2
+#define PR_affects_allies 0x4
+//defines for protect-like moves argument, arg2
+#define PR_protect 0x1
+#define PR_endure 0x2
+#define PR_quick_guard 0x3
+#define PR_wide_guard 0x4
+#define PR_kings_shield 0x5
+#define PR_spiky_shield 0x6
+#define PR_mat_block 0x7
+#define PR_crafty_shield 0x8
+
 enum poke_sprite{
     SPRITE_BACK = 0,
     SPRITE_FRONT = 1
@@ -109,6 +123,11 @@ enum map_type{
 #define BACKGROUND_CAVE 0x7
 #define BACKGROUND_INDOORS 0x8
 #define BACKGROUND_INDOORS_2 0x9
+
+#define OUTCOME_WIN 0x1
+#define OUTCOME_LOSS 0x2
+#define OUTCOME_DRAW 0x3
+#define OUTCOME_RAN 0x4
 
 #define POKE_BURMY(species) (species == POKE_BURMY_PLANT || species == POKE_BURMY_SAND || species == POKE_BURMY_TRASH)
 

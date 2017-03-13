@@ -52,6 +52,7 @@ struct bank_affecting{
     u8 illusion_nick[10];
     u8 transform_pal_changed : 1;
     u8 skips_turn : 1;
+    u8 caught : 1;
 };
 
 struct side_affecting{
@@ -161,12 +162,5 @@ struct new_battle_struct{
 };
 
 extern struct new_battle_struct* new_battlestruct;
-
-//functions used by multiple files
-u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special_cases_argument, u16 move);
-u8 get_item_effect(u8 bank, u8 check_negating_effects);
-u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro);
-s8 get_move_position(u8 bank, u16 move);
-u8 weather_abilities_effect();
 
 #endif /* NEW_STRUCT */

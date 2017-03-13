@@ -35,6 +35,12 @@ u32 accuracy_percent(u16 move, u8 bankatk, u8 bankdef);
 void handle_bug_bite();
 u8 is_poke_valid(struct pokemon* poke);
 struct pokemon* get_party_ptr(u8 bank);
+u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special_cases_argument, u16 move);
+u8 get_item_effect(u8 bank, u8 check_negating_effects);
+u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro);
+s8 get_move_position(u8 bank, u16 move);
+u8 weather_abilities_effect();
+
 
 void set_unburden(u8 bank)
 {
@@ -2035,84 +2041,85 @@ void atk70_record_ability_of_bank()
 
 void atk77_set_protect_stuff()
 {
-    //Detect, Endure, King's Shield, Protect, Quick Guard, Spiky Shield, or Wide Guard.
-    u8 fail = 0;
-    u8 protects_team = 0;
-    u8 attacker_side = is_bank_from_opponent_side(bank_attacker);
-    u8* activity = &disable_structs[bank_attacker].protect_uses;
+    //Detect, Protect, Endure, King's Shield, Quick Guard, Spiky Shield, Wide Guard, Mat Block, Crafty Shield
+
+    u8* counter = &disable_structs[bank_attacker].protect_uses;
+    //check if previous move resets counter if it wasn't a 'protect' move or if it is a protect move resets counter
     u16 previous_move = last_used_moves[bank_attacker];
-    if (move_table[previous_move].script_id != 34 || previous_move == MOVE_MAT_BLOCK)
-        *activity = 0;
+    u8 pr_flags = move_table[current_move].arg1;
+    if (move_table[previous_move].script_id != 34 || !(pr_flags & PR_counter_incr))
+        *counter = 0;
+
+    bool fail = 0;
+    u8 pr_case = move_table[current_move].arg2;
+    //check if all pokemon have already moved
     if (current_move_turn == no_of_all_banks - 1)
         fail = 1;
-    else if (current_move != MOVE_MAT_BLOCK) //mat block doesn't check it
+    else
     {
-        if (protect_chance_table[*activity] < rng())
+        //check if it passes consecutive chance of happening
+        if (pr_flags & PR_fail_chance && (*counter > 3 || protect_chance_table[*counter] < rng()))
             fail = 1;
-        else //at this point move should work
+        else
         {
-            switch (current_move)
+            u8 atk_side = is_bank_from_opponent_side(bank_attacker);
+            switch (pr_case)
             {
-            case MOVE_PROTECT:
-            case MOVE_DETECT:
+            case PR_protect:
                 protect_structs[bank_attacker].flag0_protect = 1;
                 break;
-            case MOVE_KINGS_SHIELD:
-                new_battlestruct->bank_affecting[bank_attacker].kings_shield = 1;
-                break;
-            case MOVE_SPIKY_SHIELD:
-                new_battlestruct->bank_affecting[bank_attacker].spiky_shield = 1;
-                break;
-            case MOVE_ENDURE:
+            case PR_endure:
                 protect_structs[bank_attacker].flag0_endure = 1;
                 break;
-            case MOVE_WIDE_GUARD:
-                protects_team = 1;
-                if (new_battlestruct->side_affecting[attacker_side].wide_guard)
+            case PR_wide_guard:
+                if (new_battlestruct->side_affecting[atk_side].wide_guard)
                     fail = 1;
                 else
-                    new_battlestruct->side_affecting[attacker_side].wide_guard = 1;
+                    new_battlestruct->side_affecting[atk_side].wide_guard = 1;
                 break;
-            case MOVE_QUICK_GUARD:
-                protects_team = 1;
-                if (new_battlestruct->side_affecting[attacker_side].quick_guard)
+            case PR_quick_guard:
+                if (new_battlestruct->side_affecting[atk_side].quick_guard)
                     fail = 1;
                 else
-                    new_battlestruct->side_affecting[attacker_side].quick_guard = 1;
+                    new_battlestruct->side_affecting[atk_side].quick_guard = 1;
                 break;
+            case PR_kings_shield:
+                new_battlestruct->bank_affecting[bank_attacker].kings_shield = 1;
+                break;
+            case PR_spiky_shield:
+                new_battlestruct->bank_affecting[bank_attacker].spiky_shield = 1;
+                break;
+            case PR_mat_block:
+                if (new_battlestruct->side_affecting[atk_side].mat_block)
+                    fail = 1;
+                else
+                    new_battlestruct->side_affecting[atk_side].mat_block = 1;
+                break;
+            case PR_crafty_shield:
+                if (new_battlestruct->side_affecting[atk_side].crafty_shield)
+                    fail = 1;
+                else
+                    new_battlestruct->side_affecting[atk_side].crafty_shield = 1;
+                break;
+            default:
+                fail = 1;
             }
         }
     }
-    else
-    {
-        protects_team = 1;
-        switch (current_move)
-        {
-        case MOVE_MAT_BLOCK:
-            if (new_battlestruct->side_affecting[attacker_side].mat_block)
-                fail = 1;
-            else
-                new_battlestruct->side_affecting[attacker_side].mat_block = 1;
-            break;
-        case MOVE_CRAFTY_SHIELD:
-            if (new_battlestruct->side_affecting[attacker_side].crafty_shield)
-                fail = 1;
-            else
-                new_battlestruct->side_affecting[attacker_side].crafty_shield = 1;
-            break;
-        }
-    }
+    //sadly move failed
     if (fail)
     {
         move_outcome.failed = 1;
         battlescripts_curr_instruction = (void*) 0x082D9F1C;
-        *activity = 0;
+        *counter = 0;
     }
     else
     {
         battlescripts_curr_instruction++;
-        *activity += 1;
-        if (protects_team)
+        if (pr_flags & PR_counter_incr)
+            *counter += 1;
+        //choose text to display
+        if (pr_flags & PR_affects_allies)
         {
             battle_communication_struct.multistring_chooser = 2;
             battle_text_buff1[0] = 0xFD;
@@ -2121,13 +2128,11 @@ void atk77_set_protect_stuff()
             battle_text_buff1[3] = current_move >> 8;
             battle_text_buff1[4] = 0xFF;
         }
-        else if (current_move == MOVE_ENDURE)
+        else if (pr_case == PR_endure)
             battle_communication_struct.multistring_chooser = 0;
         else
             battle_communication_struct.multistring_chooser = 1;
     }
-    return;
-    //table looks like this: endure, protects bank, protects team
 }
 
 void atk0C_datahpupdate()

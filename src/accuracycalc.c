@@ -7,6 +7,10 @@ u32 percent_lose(u32 number, u16 percent);
 s8 get_priority(u16 move, u8 bank);
 u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8 effects_handling_and_recording);
 u8 get_attacking_move_type();
+u8 get_item_effect(u8 bank, u8 check_negating_effects);
+u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special_cases_argument, u16 move);
+u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro);
+u8 weather_abilities_effect();
 
 u8 protect_affects(u16 move, u8 set)
 {
@@ -36,7 +40,7 @@ u8 protect_affects(u16 move, u8 set)
         effect = 1;
     else if (new_battlestruct->side_affecting[targets_side].mat_block && protect_flag && split != 2)
         effect = 1;
-    else if (new_battlestruct->side_affecting[targets_side].wide_guard && protect_flag && (target == 8 || target == 0x20))
+    else if (new_battlestruct->side_affecting[targets_side].wide_guard && protect_flag && (target == move_target_both || target == move_target_foes_and_ally))
         effect = 1;
     return effect;
 }
@@ -179,7 +183,7 @@ u32 accuracy_percent(u16 move, u8 bankatk, u8 bankdef)
 void accuracy_calc()
 {
     u32 jump_loc = read_word(battlescripts_curr_instruction + 1);
-    s16 arg = (s16) read_hword(battlescripts_curr_instruction + 5);
+    u16 arg = read_hword(battlescripts_curr_instruction + 5);
     u16 checked_move=current_move;
     if (arg == 0)
     {
@@ -228,7 +232,7 @@ void accuracy_calc()
             }
             else
             {
-                if (!protect_affecting_moves(0))
+                if (!protect_affecting_moves(checked_move))
                 {
                     battlescripts_curr_instruction += 7;
                 }

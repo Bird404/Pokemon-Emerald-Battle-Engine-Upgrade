@@ -51,7 +51,7 @@ void pokeball_chosen(u8 taskID)
 {
     void* fail_msg = NULL;
     if (WILD_DOUBLE_BATTLE &&
-        ((is_bank_present(1) && is_bank_present(3)) || (bank_in_menu == 2))) //wild double battle and (two pokes are alive or using pokeball via second pokemon)
+        ((is_bank_present(1) && is_bank_present(3)) || (bank_in_menu == 2 && is_bank_present(0)))) //wild double battle and (two pokes are alive or using pokeball via second pokemon when two are alive)
             fail_msg = text_impossible_to_aim;
     else if (is_team_and_pc_full()) //full box
         fail_msg = text_BOX_IS_FULL;
@@ -268,6 +268,7 @@ void atkEF_ballthrow(void)
         u8* string_chooser = &battle_communication_struct.multistring_chooser;
         if (ball_no == BALL_MASTER || ball_shakes == 4) //catching successful
         {
+            new_battlestruct->bank_affecting[bank_target].caught = 1;
             ball_shakes = 4;
             throw_bs = &capture_exp_bs; //script poke caught
             struct pokemon* poke = get_bank_poke_ptr(catch_bank);

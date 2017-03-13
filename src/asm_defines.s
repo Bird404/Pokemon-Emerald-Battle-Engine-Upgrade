@@ -3,6 +3,7 @@
 
 @battle flags
 .equ BATTLE_TRAINER, 0x8
+.equ BATTLE_MULTI, 0x8000
 
 @types
 .equ TYPE_NORMAL, 0x0

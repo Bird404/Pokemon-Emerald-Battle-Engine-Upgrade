@@ -196,6 +196,13 @@ void poke_restore_pp(struct pokemon*);
 bool not_in_battle(void);
 void stop_battle_music(void);
 void play_song_check_flag(u16 songID);
+void c2_exit_to_overworld_1_continue_scripts_restart_music(void);
+void c2_whiteout(void);
+bool frontier_sth(void);
+void rematch_trainer_flag_set(void);
+void set_battled_trainers_flags(void);
+void set_rematched_trainer_as_defeated(void);
+void end_battle(void);
 
 u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);

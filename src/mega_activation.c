@@ -1,5 +1,7 @@
 #include "defines.h"
 
+u8 get_item_effect(u8 bank, u8 check_negating_effects);
+
 void reset_indicators_height_except_bank(u8  bank)
 {
     struct mega_related* mega = &new_battlestruct->mega_related;

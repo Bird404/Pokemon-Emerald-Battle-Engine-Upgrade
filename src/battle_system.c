@@ -16,6 +16,8 @@ struct pokemon* get_party_ptr(u8 bank);
 u8 is_poke_valid(struct pokemon* poke);
 u8 is_bank_present(u8 bank);
 u8 handle_leppa(u8 bank, u8 quality, enum call_mode calling_mode);
+u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro);
+u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special_cases_argument, u16 move);
 
 enum COMMON_ITEM_EFFECT
 {

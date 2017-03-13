@@ -857,7 +857,7 @@ struct b_species_info{
 };
 
 struct b_graphics_data{
-    struct b_species_info (*species_info)[1]; //ptr to an array of b_species_info
+    struct b_species_info (*species_info)[4]; //ptr to an array of b_species_info
 };
 
 struct battle_graphics_struct{

@@ -4,6 +4,8 @@
 u8 get_all_item_quality(u8 bank);
 u8 find_move_in_table(u16 move, u16 table_ptr[]);
 void setup_berry_consume_buffers(u8 bank);
+u8 get_item_effect(u8 bank, u8 check_negating_effects);
+u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro);
 
 u8 affected_by_substitute(u8 substitute_bank)
 {

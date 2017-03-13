@@ -1,9 +1,4 @@
-#include "types.h"
 #include "defines.h"
-#include "battle_locations.h"
-#include "battle_structs.h"
-#include "vanilla_functions.h"
-#include "new_battle_struct.h"
 #include "static_references.h"
 
 enum drive_types
@@ -22,6 +17,8 @@ void setup_berry_consume_buffers(u8 bank);
 u8 get_attacking_move_type();
 u8 check_ability(u8 bank, u8 ability);
 u16 get_speed(u8 bank);
+u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro);
+u8 get_item_effect(u8 bank, u8 check_negating_effects);
 
 bool is_bank_present(u8 bank)
 {

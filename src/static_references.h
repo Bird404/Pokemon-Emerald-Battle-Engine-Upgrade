@@ -190,4 +190,5 @@ extern void* capture_exp_bs;
 
 //extern scripts from battlescripts.s file
 extern void* BS_BALL_BLOCK;
+extern void* BS_CUSTOM_LOSS;
 #endif /* static_references */

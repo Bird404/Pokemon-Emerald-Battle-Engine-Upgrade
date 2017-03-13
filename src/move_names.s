@@ -433,7 +433,7 @@ move_names_table:
 .byte S_, h_, a_, d_, o_, w_, Space, S_, n_, e_, a_, k_, Termin
 .byte M_, u_, d_, Space, B_, o_, m_, b_, Termin, Space, Space, Space, Space
 .byte P_, s_, y_, c_, h_, o_, Space, C_, u_, t_, Termin, Space, Space
-.byte Z_, e_, n_, Space, H_, e_, a_, b_, u_, t_, t_, Termin, Space
+.byte Z_, e_, n_, Space, H_, e_, a_, d_, b_, u_, t_, t_, Termin
 .byte M_, i_, r_, r_, o_, r_, Space, S_, h_, o_, t_, Termin, Space
 .byte F_, l_, a_, s_, h_, Space, C_, a_, n_, n_, o_, n_, Termin
 .byte R_, o_, c_, k_, Space, C_, l_, i_, m_, b_, Termin, Space, Space

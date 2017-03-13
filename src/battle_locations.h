@@ -111,6 +111,9 @@ u8 bank_in_menu;
 u8 old_curr_full_box_id;
 s16 battle_BG3_X;
 u8 leveled_up_in_battle;
+u16 (*buffer_moves)[2];
+void* battle_executed_routine;
+void* opponentwon_text;
 
 u32 poison_status_flag;
 u32 sleep_status_flag;

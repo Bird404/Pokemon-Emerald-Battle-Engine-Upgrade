@@ -50,3 +50,6 @@ can_run_from_double 0803ED80 0
 throw_at_correct_poke 0805BC36 0
 oac_wild_poke_enters 080397DC 1
 oac_wild_poke_enters_fade_to_normal 08039838 1
+handle_outcome_trainerbattle 080B1918 0
+handle_outcome_rematchbattle 080B1994 0
+battle_lost_set_script 0803DAC0 0

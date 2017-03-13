@@ -20,3 +20,27 @@ BS_TRAINER_BLOCK:
 	printstring 0x104
 	waitmessage 0x40
 	goto_cmd BALLBLOCK_CONTINUE
+
+.global BS_CUSTOM_LOSS
+BS_CUSTOM_LOSS:
+	printstring 0x22C
+	waitmessage 0x40
+	cmd76 1 19 @return to ball
+	waitstate
+	cmd76 1 20 @return to ball second poke
+	waitstate
+	trainer_slide 1
+	waitstate
+	printstring 0x22D
+	waitmessage 0x30
+	jumpifword Has_One_Bit_Common battle_flags BATTLE_MULTI BS_CUSTOM_SLIDE_TRAINER2
+	end_cmd
+BS_CUSTOM_SLIDE_TRAINER2:
+	trainer_back_slide 1
+	waitstate
+	trainer_slide 3
+	waitstate
+	trainer_back_slide 3
+	waitstate
+	end_cmd
+	
