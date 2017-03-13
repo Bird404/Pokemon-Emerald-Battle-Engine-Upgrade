@@ -19,7 +19,7 @@ Stone Edge (Reserved MRDS)
 Captivate (Complete)
 Stealth Rock (Reserved MRDS)
 Chatter
-Judgment
+Judgment (Complete - Artemis64)
 Wood Hammer (Reserved MRDS) (Complete)
 Attack Order (Reserved MRDS) (Complete)
 Defend Order (Reserved MRDS) (Complete)
@@ -44,7 +44,7 @@ Venoshock (Complete)
 Autotomize
 Rage Powder (Reserved MRDS)
 Telekinesis
-Smack Down
+Smack Down (Complete - Artemis64)
 Storm Throw
 Flame Burst
 Sludge Wave (Reserved MRDS)
