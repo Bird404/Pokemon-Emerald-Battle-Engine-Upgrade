@@ -6,7 +6,12 @@
 #define ALL_POKES       412     //number of all pokemon
 #define ALL_ITEMS       377     //number of all items
 #define NUM_OF_EVOS     5       //number of evolutions per pokemon
-#define KEYSTONE        0x4     //mega item that the player has to posses in order to mega evolve
+#define KEYSTONE        0x0     //mega item that the player has to posses in order to mega evolve
+
+#define BUILD_LEARNSETS true        //set to false if you modified the learnsets and dont want them to get changed
+#define GEN4_LEARNSETS  false         //set to true if you want to have learnsets for pokemon up to genIV
+#define GEN5_LEARNSETS  false         //set to true if you want to have learnsets for pokemon up to genV
+#define GEN6_LEARNSETS  false          //set to true if you want to have learnsets for pokemon up to genVI
 
 #define EXP_CAPTURE         true    //set to false if you don't want to receive exp from catching pokes
 #define STAT_RECALC         false   //set to true if you want all pokemon having their stats recalculated at the end of the battle
@@ -14,7 +19,7 @@
 #define ITEM_SWAP           false   //if true player's item will be that that was switched, if false the switched item that a pokemon originally had returns to it
 #define MAX_LEVEL           100     //highest possible level
 #define MAX_EVS             510     //maximum amount of EV points per pokemon
-#define EXP_DIVIDE          true    //if true exp will be divided among pokemon(if two pokemon participite they'll get 50 % each), set to false if you want gen6-style exp
+#define EXP_DIVIDE          true    //if true exp will be divided among pokemon(if two pokemon participate they'll get 50 % each), set to false if you want gen6-style exp
 #define GENVI_EXPSHARE      false    //set to true if you want EXPSHARE to act like in gen6
 #define EXPSHARE_FLAG       0x900   //flag that must be set for GENVI expshare to work
 #define DISABLED_EXP_FLAG   0x0   //if that flag is set, receiving exp is disabled, if flag is 0 it has no effect

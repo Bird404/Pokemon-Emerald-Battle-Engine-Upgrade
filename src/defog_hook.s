@@ -10,13 +10,6 @@ DEFOG_animation_hook:
 	ldrh r0, [r0]
 	mov r2, #0xD8
 	lsl r2, r2, #0x1
-	cmp r0, r2
-	bne THUNDER_WAVE_animation_loader
-
-DEFOG_animation_loader:
-	ldr r0, =(DEFOG_animation_part_2)
-	b return_DEFOG_anim_hook
-
 THUNDER_WAVE_animation_loader:
 	ldr r0, =(0x08595840)
 

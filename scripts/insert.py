@@ -141,10 +141,6 @@ with open(ROM_NAME, 'rb+') as rom:
 		for entry in table:
 				table[entry] += OFFSET_TO_PUT
 
-		with open('learnsetcatch', 'w') as lcatch:
-				x=table['learnset_table']
-				lcatch.write(format(x, '06x'))
-		
 		# Read hooks from a file
 		with open('hooks', 'r') as hooklist:
 				for line in hooklist:

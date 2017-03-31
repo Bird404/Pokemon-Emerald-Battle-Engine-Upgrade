@@ -450,6 +450,21 @@ u8 anticipation_shudder(u8 bank)
     return shudder;
 }
 
+void record_usage_of_move(u8 bank, u16 move)
+{
+    u16 *slot = &battle_resources->battle_history->used_moves[bank].moves[0];
+    for (u8 i = 0; i < 4; i++)
+    {
+        u16* slot_move = &slot[i];
+        if (*slot_move == move) {break;} //move is already recorded
+        if (*slot_move == 0)
+        {
+            *slot_move = move;
+            break;
+        }
+    }
+}
+
 u8 prepare_castform_switch(u8 effect, u8 bank)
 {
     if (effect)
@@ -683,6 +698,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 if (best_move)
                 {
                     effect = true;
+                    record_usage_of_move(bank, best_move);
                     battle_scripting.active_bank = bank;
                     execute_battle_script(&forewarn_bs);
                     battle_text_buff1[0] = 0xFD;
@@ -1150,6 +1166,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             if (has_ability_effect(bank, 0, 1) && !(move_outcome.not_affected || move_outcome.failed || move_outcome.missed)
                 && battle_participants[bank_attacker].current_hp && (special_statuses[bank_target].moveturn_losthp))
             {
+                u16 curr_hp = battle_participants[bank].current_hp;
                 switch (last_used_ability)
                 {
                 case ABILITY_STATIC:
@@ -1179,7 +1196,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     }
                     break;
                 case ABILITY_AFTERMATH:
-                    if (battle_participants[bank].current_hp == 0 && contact && !(ability_battle_effects(0x13, 0, ABILITY_DAMP, 0, 0)) && !(has_ability_effect(bank_attacker, 0, 1) && battle_participants[bank_attacker].ability_id == ABILITY_MAGIC_GUARD))
+                    if (curr_hp == 0 && contact && !(ability_battle_effects(0x13, 0, ABILITY_DAMP, 0, 0)) && !(has_ability_effect(bank_attacker, 0, 1) && battle_participants[bank_attacker].ability_id == ABILITY_MAGIC_GUARD))
                     {
                         damage_loc = get_1_4_of_max_hp(bank_attacker);
                         effect = true;
@@ -1250,7 +1267,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     }
                     break;
                 case ABILITY_STEADFAST:
-                    if (battle_participants[bank].spd_buff != 0xC && battle_participants[bank].status2.flinched)
+                    if (curr_hp && battle_participants[bank].spd_buff != 0xC && battle_participants[bank].status2.flinched)
                     {
                         effect = true;
                         battlescript_push();
@@ -1259,7 +1276,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     }
                     break;
                 case ABILITY_ANGER_POINT:
-                    if (crit_loc==2 && battle_participants[bank].atk_buff != 0xC)
+                    if (curr_hp && crit_loc==2 && special_statuses[bank].moveturn_losthp && battle_participants[bank].atk_buff != 0xC)
                     {
                         effect = true;
                         battlescript_push();
@@ -1268,7 +1285,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     }
                     break;
                 case ABILITY_WEAK_ARMOR:
-                    if (battle_participants[bank].def_buff > 0 || battle_participants[bank].spd_buff != 0xC)
+                    if (curr_hp && special_statuses[bank].moveturn_losthp_physical && (battle_participants[bank].def_buff > 0 || battle_participants[bank].spd_buff != 0xC))
                     {
                         effect = true;
                         battlescript_push();
@@ -2703,6 +2720,8 @@ void move_effect_setter(u8 primary, u8 certain)
 
     switch (*move_effect)
     {
+        case 0:
+            return;
         case 1: //put to sleep
             if (current_hp && !shield_dust && !substitute)
                 status_change = cant_fall_asleep(bank_to_apply, 0);
@@ -2813,7 +2832,7 @@ void move_effect_setter(u8 primary, u8 certain)
             {
                 new_battlestruct->various.move_primary_effect |= 0x40;
             }
-            if (*move_effect != 10) //wake up slap/smelling salts
+            if (*move_effect != 10 && *move_effect != 0x37) //wake up slap/smelling salts && set two-turn move
             {
                 statustoeffect();
                 if (*move_effect && current_hp && !shield_dust && !substitute && calculate_effect_chance(bank_attacker, current_move))
@@ -3920,7 +3939,7 @@ u8 message_cant_choose_move()
 
 s8 can_switch(u8 bank) //1 - can; 0 - can't; -1 can't due to abilities
 {
-    if (battle_flags.battle_arena)
+    if (battle_flags.battle_arena || new_battlestruct->bank_affecting[bank].sky_drop_target)
         return 0;
     if (get_item_effect(bank, 1) == ITEM_EFFECT_SHEDSHELL)
         return 1;

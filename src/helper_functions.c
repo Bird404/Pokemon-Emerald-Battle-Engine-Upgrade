@@ -222,6 +222,7 @@ o_, n_, Space, 0xFD, 0x0, Apos, s_, Space, s_, i_, d_, e_, Exclam, Termin};
 /*0x22B*/u8 pokeballblock_text[] = {0xFD, 53, Space, b_, l_, o_, c_, k_, e_, d_, Space, t_, h_, e_, Space, B_, a_, l_, l_, Exclam, 0xFF};
 /*0x22C*/u8 player_wonlost_text[] = {0xFD, 35, Space, 0xFD, 55, JumpLine, 0xFD, 28, Space, 0xFD, 29, Exclam, 0xFF};
 /*0x22D*/u8 trainerwon_text[] = {0xFD, 37, 0xFF};
+/*0x22E*/u8 skydrop_cantchooseaction_text[] = {S_, k_, y_, Space, D_, r_, o_, p_, Space, w_, o_, n_, Apos, t_, Space, l_, e_, t_, JumpLine, 0xFD, 11, g_, o_, Exclam, 0xFF};
 
 void* new_strings_table[] = {sample_text, snowwarning_text, extreme_sun_activation_text, heavyrain_activation_text, mysticalaircurrent_activation_text, forewarn_text, slowstart_text, anticipation_text, dryskin_damage_text, solarpower_text, harvest_text, healer_text, pickup_text, moldbreaker_text, turboblaze_text, terravolt_text, downloadatk_text,
 downloadspatk_text, absorbabilityboost_text , absorbabilityimmune_text, userteam_text, foeteam_text,
@@ -245,7 +246,8 @@ quash_text, allyswitch_text, topsyturvy_text, bestow_text, statushealpoison_text
 statushealslp_text, statushealfrz_text, primal_reversion_text, congrats_player_text, happyhour_text, skydrop1_text, skydrop2_text,
 skydroptooheavy_text, fairylock_text, illusion_off_text, protean_text, gem_text, telepathy_text, flame_burst_text, zen_mode_text,
 zen_end_text, form_change_text, partner_wait_text, combined_move_text, userteam_lc_text, foeteam_lc_text, fire_sea_text, fire_sea_hurt_text,
-swamp_text, rainbow_text, swamp_end_text, fire_sea_end_text, rainbow_end_text, berry_redux_text, pokeballblock_text, player_wonlost_text, trainerwon_text};
+swamp_text, rainbow_text, swamp_end_text, fire_sea_end_text, rainbow_end_text, berry_redux_text, pokeballblock_text, player_wonlost_text, trainerwon_text,
+skydrop_cantchooseaction_text};
 
 
 void battle_string_loader(u16 string_id)
@@ -514,24 +516,20 @@ void attacker_stat_change()
 
 void moxie_stat_raise()
 {
-    if ((current_move == MOVE_BLOCK || check_ability(bank_attacker, ABILITY_MOXIE)) && bank_attacker != bank_target && DAMAGING_MOVE(current_move))
+    if (bank_attacker != bank_target && DAMAGING_MOVE(current_move))
     {
-        //check if that's the last opponent pokemon, if yes, then we'll skip the animation
-        if (is_bank_from_opponent_side(bank_target))
+        u8 raiser = 0;
+        if (current_move == MOVE_FELL_STINGER)
+            raiser = move_table[current_move].arg1;
+        else if (check_ability(bank_attacker, ABILITY_MOXIE))
+            raiser = 0x11;
+        if (raiser)
         {
-            for (u8 i = 0; i < 6; i++)
-            {
-                if (!(get_attributes(&party_opponent[i], ATTR_CURRENT_HP, 0) == 0 || get_attributes(&party_opponent[i], ATTR_IS_EGG, 0) || get_attributes(&party_opponent[i], ATTR_SPECIES, 0) == 0))
-                    break;
-                if (i == 5)
-                    return;
-            }
+            battlescript_push();
+            battlescripts_curr_instruction = &changeattackerstat_bs;
+            battle_scripting.stat_changer = raiser;
         }
-        battlescript_push();
-        battlescripts_curr_instruction = &changeattackerstat_bs;
-        battle_scripting.stat_changer = 0x21;
     }
-    return;
 }
 
 void grassyterrainn_heal()

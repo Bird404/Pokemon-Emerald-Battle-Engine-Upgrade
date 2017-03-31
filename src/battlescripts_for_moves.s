@@ -98,7 +98,7 @@ battlescripts_table:
 .word BURN_TARGET		@16 Will-o-wisp
 .word FREEZE_TARGET		@17 currently no move can do that
 .word ATTACK_STATUS_CHANCE	@18 arg1 is status(poison, burn, etc.) flag
-.word RECOIL_ATTACK		@19 arg1 is status(poison, burn, etc.) flag that can be applied; default recoil is 1/3
+.word RECOIL_ATTACK		@19 arg1 is status(poison, burn, etc.) flag that can be applied; arg2 is recoil value to dividie, 1 would be 100% recoil, 2 would be 50 %, 3 would be 33 %, etc
 .word CRASH_ATTACK		@20 Jump Kick and such
 .word FAINT_HEAL		@21 user faints, replacement is healed
 .word FAINTSTATCHANGE	@22 user faints, but lowers target's stats; arg1 is bitfield for stats, arg2 is value for raising/lowering
@@ -1259,12 +1259,10 @@ BRICKBREAK:
 	attackstring
 	ppreduce
 	removereflectlightscreen
-	attackanimation
-	waitanimation
 	critcalc
 	damagecalc
 	damageadjustment
-	goto_cmd 0x082DA31B
+	goto_cmd ATTACK_ANIM
 
 SETTAILWIND:
 	attackcanceler

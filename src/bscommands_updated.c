@@ -493,25 +493,22 @@ u8 does_move_target_multiple()
     return retval;
 }
 
-u8 recoil_damage(u8 bank_to_apply)
+bool calc_recoil_dmg(u8 bank, u16 move)
 {
-    u8 can = 1;
-    u16 recoil;
-    if (current_move == MOVE_HEAD_SMASH || current_move == MOVE_LIGHT_OF_RUIN) //1/2 of damage dealt
-        recoil = hp_dealt >> 1;
-    else if (current_move == MOVE_STRUGGLE || current_move == MOVE_TAKE_DOWN || current_move == MOVE_WILD_CHARGE || current_move == MOVE_HEAD_CHARGE) //1/4 of damage dealt
-        recoil = hp_dealt >> 2;
-    else //1/3 of damage dealt hp
-        recoil = __udivsi3(hp_dealt, 3);
-    if (recoil == 0)
-        recoil = 1;
-    damage_loc = recoil;
-    if ((check_ability(bank_to_apply, ABILITY_ROCK_HEAD) || check_ability(bank_to_apply, ABILITY_MAGIC_GUARD)) && current_move != MOVE_STRUGGLE)
+    if ((check_ability(bank, ABILITY_ROCK_HEAD) || check_ability(bank, ABILITY_MAGIC_GUARD)) && move != MOVE_STRUGGLE)
     {
-        record_usage_of_ability(bank_to_apply, battle_participants[bank_to_apply].ability_id);
-        can = 0;
+        record_usage_of_ability(bank, battle_participants[bank].ability_id);
+        return 0;
     }
-    return can;
+    u16 recoil_dmg;
+    //formula is dmg = HP dealt / arg2 or MaxHP / arg2 if value is negative
+    s8 arg = move_table[move].arg2;
+    if (arg < 0)
+        recoil_dmg = battle_participants[bank].max_hp / (arg * -1);
+    else
+        recoil_dmg = hp_dealt / arg;
+    damage_loc = ATLEAST_ONE(recoil_dmg);
+    return 1;
 }
 
 u8 can_lose_item(u8 bank, u8 stickyhold_check, u8 sticky_message);
@@ -664,7 +661,7 @@ u8 primary_effect_setter()
             }
             break;
         case 0x30: //recoil
-            if (battle_participants[bank_attacker].current_hp && recoil_damage(bank_attacker))
+            if (battle_participants[bank_attacker].current_hp && calc_recoil_dmg(bank_attacker, current_move))
             {
                 battlescript_push();
                 battlescripts_curr_instruction = (void*) 0x082DB3F4; //recoil battlescript
@@ -919,12 +916,21 @@ void atk49_move_end_turn()
             INC_END_EVENTS
             break;
         }
-        case 12: //hide user sprite in a semi invulnerable state
-            if(SEMI_INVULNERABLE(bank_attacker) && (hitmarker & 80))
+        case 12: //hide attacker/target sprite in a semi invulnerable state
+            if(!(hitmarker & HITMARKER_NO_ANIMATIONS))
             {
-                active_bank=bank_attacker;
-                prepare_pokemon_battle_sprite_manipulation_buffer(0,1);
-                mark_buffer_bank_for_execution(active_bank);
+                if (SEMI_INVULNERABLE(bank_attacker))
+                {
+                    active_bank=bank_attacker;
+                    prepare_pokemon_battle_sprite_manipulation_buffer(0,1);
+                    mark_buffer_bank_for_execution(active_bank);
+                }
+                if (SEMI_INVULNERABLE(bank_target))
+                {
+                    active_bank=bank_target;
+                    prepare_pokemon_battle_sprite_manipulation_buffer(0,1);
+                    mark_buffer_bank_for_execution(active_bank);
+                }
             }
             INC_END_EVENTS
             break;

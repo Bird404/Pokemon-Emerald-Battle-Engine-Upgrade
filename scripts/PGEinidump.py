@@ -36,6 +36,7 @@ table['AttackDescriptionTable']=0x1C3EFC
 table['AttackData']=0x1CC
 table['AttackAnimationTable']=0xA3A44
 table['ContestMoveData']=0xD85F0
+table['learnset_table']=0x06930C
 
 table2={}
 table2['NumberOfAttacks']=1024

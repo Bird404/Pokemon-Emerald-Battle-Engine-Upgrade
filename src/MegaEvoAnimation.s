@@ -17,13 +17,6 @@ NewPlayAnimationTable:
 .word IllusionAnimation
 
 IllusionAnimation:
-	animA 0x1
-	playsound2 0xCB 0xC0
-	anim1D 0xCC 0xC0 0x30
-	launchtask 0x0815B7D0 + 1 2 0x1
-	.hword 0
-	waitanimation
-	animB 0x1
 	endanimation
 
 MegaEvoAnimation:
