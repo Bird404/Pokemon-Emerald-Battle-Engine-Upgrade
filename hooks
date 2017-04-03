@@ -6,9 +6,7 @@ free_new_struct_hook 08057044 2
 cleanstructhook	0803A700	0
 hazards_hook	0804DAFC	0
 get_first_to_strike	0803CF10	3
-battle_turn_move_effects	08040924	0
 move_effect_setter	08048760	3
-update_turn_counters	080401D0	0
 fill_with_default_moves	08069270	1
 teach_move_player	08069318	2
 check_move_limitations 0803FECC 3
@@ -53,3 +51,7 @@ oac_wild_poke_enters_fade_to_normal 08039838 1
 handle_outcome_trainerbattle 080B1918 0
 handle_outcome_rematchbattle 080B1994 0
 battle_lost_set_script 0803DAC0 0
+b_load_fitting_bg 08035770 0
+b_load_fitting_entry_bg 08036154 0
+b_load_chosen_bg_element 080363C4 1
+battle_turn_passed 0803B9BC 0

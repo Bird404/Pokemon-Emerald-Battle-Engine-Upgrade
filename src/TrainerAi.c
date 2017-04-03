@@ -48,7 +48,7 @@ u8 was_impossible_used(u8 bank)
 
 u16 ai_get_species(u8 bank)
 {
-    if (new_battlestruct->bank_affecting[bank].illusion_on && !is_bank_ai(bank) && !was_impossible_used(bank))
+    if (new_battlestruct->bank_affecting[bank].illusion_on && !is_bank_ai(bank) && was_impossible_used(bank))
         return get_transform_species(bank);
     else
         return battle_participants[bank].poke_species;
@@ -132,32 +132,24 @@ u8 does_bank_know_move(u8 bank, u16 move)
 
 void save_bank_stuff(u8 bank)
 {
-    if (!is_bank_ai(bank))
-    {
-        u16* item = &battle_participants[bank].held_item;
-        new_battlestruct->trainer_AI.saved_item = *item;
-        if (!get_item_effect(bank, 0)) //ai doesn't know an item the target has
-            *item = 0;
-        u8* ability = &battle_participants[bank].ability_id;
-        new_battlestruct->trainer_AI.saved_ability = *ability;
-        if (!ai_get_ability(bank, 0)) //ai doesn't know an ability the target has
-            *ability = 0;
-        u16* species = &battle_participants[bank].poke_species;
-        new_battlestruct->trainer_AI.saved_species = *species;
-        *species = ai_get_species(bank); //make illusion trick AI
-    }
-    return;
+    u16* item = &battle_participants[bank].held_item;
+    new_battlestruct->trainer_AI.saved_item[bank] = *item;
+    if (!get_item_effect(bank, 0)) //ai doesn't know an item the target has
+        *item = 0;
+    u8* ability = &battle_participants[bank].ability_id;
+    new_battlestruct->trainer_AI.saved_ability[bank] = *ability;
+    if (!ai_get_ability(bank, 0)) //ai doesn't know an ability the target has
+        *ability = 0;
+    u16* species = &battle_participants[bank].poke_species;
+    new_battlestruct->trainer_AI.saved_species[bank] = *species;
+    *species = ai_get_species(bank); //make illusion trick AI
 }
 
 void restore_bank_stuff(u8 bank)
 {
-    if (!is_bank_ai(bank))
-    {
-        battle_participants[bank].held_item = new_battlestruct->trainer_AI.saved_item;
-        battle_participants[bank].ability_id = new_battlestruct->trainer_AI.saved_ability;
-        battle_participants[bank].poke_species = new_battlestruct->trainer_AI.saved_species;
-    }
-    return;
+    battle_participants[bank].held_item = new_battlestruct->trainer_AI.saved_item[bank];
+    battle_participants[bank].ability_id = new_battlestruct->trainer_AI.saved_ability[bank];
+    battle_participants[bank].poke_species = new_battlestruct->trainer_AI.saved_species[bank];
 }
 
 u8 tai_get_move_effectiveness()
@@ -930,7 +922,7 @@ void tai71_getmovesplit()
 
 void tai72_cantargetfaintuser() // u8 amount of hits
 {
-    u8 can = 0;
+    bool can = 0;
     u8 amount_of_hits = read_byte(tai_current_instruction + 1);
     if (amount_of_hits == 0)
         amount_of_hits = 1;

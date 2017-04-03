@@ -123,7 +123,7 @@ DISCOURAGE_STUPIDMOVEEFFECTS:
 	jumpifmovescriptEQ 48 POINTS_MINUS10 @After You
 	jumpifmovescriptEQ 50 POINTS_MINUS10 @Aromatic Mist ;target is not bank at this point
 	jumpifmovescriptEQ 53 DISCOURAGE_ENTRYHAZARDS
-	jumpifmovescriptEQ 54 DISCOURAGE_IFNOTDOUBLE @Follow Me/Rage Powder
+	jumpifmovescriptEQ 54 DISCOURAGE_IFNOALLY @Follow Me/Rage Powder
 	jumpifmovescriptEQ 55 DISCOURAGE_SYNCHRONOISE
 	jumpifmovescriptEQ 56 DISCOURAGE_ONESTATUSER @Autonomize
 	jumpifmovescriptEQ 60 DISCOURAGE_FOCUSENERGY

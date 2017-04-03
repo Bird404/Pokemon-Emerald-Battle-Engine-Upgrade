@@ -266,3 +266,5 @@ TAI_SCRIPT_7 082DBF14
 TAI_SCRIPT_1D 082DBF6C
 ### learnsets for PGEscript.py
 learnset_table 0806930C
+### exp give
+BS_POKE_FAINTS_EXP_SLIDEIN 08041754

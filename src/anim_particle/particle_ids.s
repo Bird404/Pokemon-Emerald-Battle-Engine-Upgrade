@@ -1,16 +1,21 @@
 .text
-.thumb
-.align 2
 
-.equ MEGA_EVOLUTION_RAINBOW_particle_ID, 0x31
-.equ MEGA_EVOLUTION_STONE_particle_ID, 0x32
-.equ MEGA_EVOLUTION_SYMBOL_particle_ID, 0x33
-.equ ALPHA_REVERSION_CHARGE_particle_ID, 0x34
-.equ ALPHA_REVERSION_STONE_particle_ID, 0x35
-.equ ALPHA_REVERSION_SYMBOL_particle_ID, 0x36
-.equ OMEGA_REVERSION_CHARGE_particle_ID, 0x37
-.equ OMEGA_REVERSION_STONE_particle_ID, 0x38
-.equ OMEGA_REVERSION_SYMBOL_particle_ID, 0x39
+@mega evolution
+.equ MEGAEVORAINBOW_particle, 0x2831
+.equ MEGAEVOSTONE_particle, 0x2832
+.equ MEGAEVOSYMBOL_particle, 0x2833
+
+@primal alpha
+.equ ALPHAEVO_CHARGE_particle, 0x2834
+.equ ALPHAEVO_STONE_particle, 0x2835
+.equ ALPHAEVO_SYMBOL_particle, 0x2836
+
+@primal omega
+.equ OMEGAEVO_CHARGE_particle, 0x2837
+.equ OMEGAEVO_STONE_particle, 0x2838
+.equ OMEGAEVO_SYMBOL_particle, 0x2839
+
+@for moves
 .equ HAMMER_ARM_particle_ID, 0x3A
 .equ BRINE_particle_ID, 0x3B
 .equ ACUPRESSURE_particle_ID, 0x3C

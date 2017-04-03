@@ -41,9 +41,9 @@ void try_burmy_change(u8 id, struct pokemon* poke)
         if (POKE_BURMY(species))
         {
             u16 to_change;
-            if (battle_background >= 8)
+            if (battle_env_bg >= 8)
                 to_change = POKE_BURMY_TRASH;
-            else if (battle_background == BACKGROUND_SAND || battle_background >= BACKGROUND_ROCK)
+            else if (battle_env_bg == BACKGROUND_SAND || battle_env_bg >= BACKGROUND_ROCK)
                 to_change = POKE_BURMY_SAND;
             else
                 to_change = POKE_BURMY_PLANT;
@@ -87,4 +87,5 @@ void free_new_struct()
     free(new_battlestruct);
     //SET_u32(&battle_flags, 0); //throws a compiler warning, so I used a different solution
     memset(&battle_flags, 0, sizeof(struct battle_flags)); //it gets optimalized to str r0, #0 anyway
+    battle_chosen_bg = 0;
 }

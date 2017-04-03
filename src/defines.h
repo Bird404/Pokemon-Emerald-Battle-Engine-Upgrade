@@ -123,6 +123,67 @@ enum map_type{
 #define BACKGROUND_CAVE 0x7
 #define BACKGROUND_INDOORS 0x8
 #define BACKGROUND_INDOORS_2 0x9
+//new ones
+#define BACKGROUND_FRONTIER 10
+#define BACKGROUND_GROUDON 11
+#define BACKGROUND_KYORGE 12
+#define BACKGROUND_RAYQUAZA 13
+#define BACKGROUND_LEADER 14
+#define BACKGROUND_CHAMPION 15
+#define BACKGROUND_GYM 16
+#define BACKGROUND_TEAM_MAGMA 17
+#define BACKGROUND_TEAM_AQUA 18
+#define BACKGROUND_ELITEFOUR1 19
+#define BACKGROUND_ELITEFOUR2 20
+#define BACKGROUND_ELITEFOUR3 21
+#define BACKGROUND_ELITEFOUR4 22
+
+enum trainer_class{
+    CLASS_PKMN_TRAINER0, //0
+    CLASS_PKMN_TRAINER1, //1
+    CLASS_HIKER, //2
+    CLASS_TEAM_AQUA, //3
+    CLASS_PKMN_BREEDER, //4
+    CLASS_COOLTRAINER, //5
+    CLASS_BIRDKEEPER, //6
+    CLASS_COLLECTOR, //7
+    CLASS_SWIMMER_MALE, //8
+    CLASS_TEAM_MAGMA, //9
+    CLASS_EXPERT, //xA
+    CLASS_AQUA_ADMIN, //xB
+    CLASS_BLACK_BELT, //xC
+    CLASS_AQUA_LEADER, //xD
+    CLASS_HEX_MANIAC, //xE
+    CLASS_AROMA_LADY, //xF
+    CLASS_RUIN_MANIAC, //x10
+    CLASS_INTERVIEWER, //x11
+    CLASS_TUBER_FEMALE, //x12
+    CLASS_TUBER_MALE, //x13
+    CLASS_LADY, //x14
+    CLASS_BEAUTY, //x15
+    CLASS_RICH_BOY, //x16
+    CLASS_POKEMANIAC, //x17
+    CLASS_GUITARIST, //x18
+    CLASS_KINDLER, //x19
+    CLASS_CAMPER, //x1A
+    CLASS_PICKNICKER, //x1B
+    CLASS_BUG_MANIAC, //x1C
+    CLASS_PSYCHIC, //x1D
+    CLASS_GENTLEMAN, //x1E
+    CLASS_ELITE_FOUR, //x1F
+    CLASS_LEADER, //x20
+    CLASS_CHAMPION = 0x26,
+    CLASS_MAGMA_ADMIN = 0x31,
+    CLASS_PKMN_TRAINER_RIVAL = 0x32,
+    CLASS_MAGMA_LEADER = 0x35,
+    CLASS_DOME_ACE = 0x3B,
+    CLASS_PALACE_MAVEN, //0x3C
+    CLASS_ARENA_TYCOON, //0x3D
+    CLASS_FACTORY_HEAD, //0x3E
+    CLASS_PIKE_QUEEN, //0x3F
+    CLASS_PYRAMID_KING, //0x40
+    CLASS_PKMN_TRAINER2, //0x41
+};
 
 #define OUTCOME_WIN 0x1
 #define OUTCOME_LOSS 0x2
@@ -156,6 +217,8 @@ enum map_type{
 #define get_1_16_of_max_hp(bank)(ATLEAST_ONE(battle_participants[bank].max_hp >> 4))
 #define get_1_8_of_max_hp(bank)(ATLEAST_ONE(battle_participants[bank].max_hp >> 3))
 #define get_1_4_of_max_hp(bank)(ATLEAST_ONE(battle_participants[bank].max_hp >> 2))
+#define BIC(value, bit)(value & (~(bit)))
+#define NEG_AND(value, to_neg)(value & (to_neg * (-1)))
 
 #define REQUEST_SPECIES_BATTLE 0x1
 #define REQUEST_HELDITEM_BATTLE 0x2

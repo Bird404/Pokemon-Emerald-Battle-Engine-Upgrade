@@ -852,7 +852,10 @@ struct b_species_info{
     u16 flag_x40 : 1; //0x40
     u16 flag_x80 : 1; //0x80
     u16 flag_x100 : 1; //0x100
-    u16 pal_change : 1; //0x200
+    u16 flag_x200 : 1; //0x200
+    u16 flag_x400 : 1; //0x400
+    u16 flag_x800 : 1; //0x800
+    u16 pal_change : 1; //0x1000
     u16 transformed_species;
 };
 
@@ -1003,7 +1006,7 @@ struct trainer_data{
     struct poke_trainer_data* poke_data;
 };
 
-extern struct trainer_data trainer_table[864];
+extern struct trainer_data (*trainer_table)[864];
 
 struct fadescreen_exec{
     u16 BLDCNT;
@@ -1035,5 +1038,19 @@ struct mapheader{
 };
 
 extern struct mapheader curr_mapheader;
+
+struct b_background_info{
+    void* tileset;
+    void* tilemap;
+    void* entry_tileset;
+    void* entry_tilemap;
+    void* pal;
+};
+
+struct move_background_info{
+    void* tileset;
+    void* tilemap;
+    void* pal;
+};
 
 #endif /* B_STRUCTS */

@@ -1,6 +1,5 @@
 .text
 .thumb
-.align 2
 
 .include "anim_particle/particle_image.s"
 .include "anim_particle/particle_pallet.s"
@@ -10,6 +9,13 @@
 @Format for each entry is:
 @Pointer to image, Particle size (hword), Particle ID (hword)
 
+.macro particle_entry particle_entry_ptr particle_entry1 particle_entry2
+.word \particle_entry_ptr
+.hword \particle_entry1
+.hword \particle_entry2
+.endm
+
+.align 2
 battle_particle_table:
 .byte 0x38, 0x25, 0xC0, 0x08, 0x00, 0x02, 0x10, 0x27
 .byte 0xE0, 0xC6, 0xC1, 0x08, 0x00, 0x03, 0x11, 0x27
@@ -301,24 +307,43 @@ shiny_particle_image:
 .byte 0xB4, 0xE0, 0xC1, 0x08, 0x00, 0x08, 0x2E, 0x28
 .byte 0xEC, 0xA3, 0xC0, 0x08, 0x00, 0x10, 0x2F, 0x28
 .byte 0xE4, 0xBE, 0xC1, 0x08, 0x00, 0x01, 0x30, 0x28
+
 .word MEGA_EVOLUTION_RAINBOW_particle
-.byte 0x80, 0x01, MEGA_EVOLUTION_RAINBOW_particle_ID, 0x28
+.byte 0x80, 0x01
+.hword MEGAEVORAINBOW_particle
+
 .word MEGA_EVOLUTION_STONE_particle
-.byte 0x00, 0x08, MEGA_EVOLUTION_STONE_particle_ID, 0x28
+.byte 0x00, 0x08
+.hword MEGAEVOSTONE_particle
+
 .word MEGA_EVOLUTION_SYMBOL_particle
-.byte 0x00, 0x02, MEGA_EVOLUTION_SYMBOL_particle_ID, 0x28
+.byte 0x00, 0x02
+.hword MEGAEVOSYMBOL_particle
+
 .word PRIMAL_REVERSION_CHARGE_particle
-.byte 0x80, 0x01, ALPHA_REVERSION_CHARGE_particle_ID, 0x28
+.byte 0x80, 0x01
+.hword ALPHAEVO_CHARGE_particle
+
 .word PRIMAL_REVERSION_STONE_particle
-.byte 0x00, 0x08, ALPHA_REVERSION_STONE_particle_ID, 0x28
+.byte 0x00, 0x08
+.hword ALPHAEVO_STONE_particle
+
 .word ALPHA_REVERSION_SYMBOL_particle
-.byte 0x00, 0x02, ALPHA_REVERSION_SYMBOL_particle_ID, 0x28
+.byte 0x00, 0x02
+.hword ALPHAEVO_SYMBOL_particle
+
 .word PRIMAL_REVERSION_CHARGE_particle
-.byte 0x80, 0x01, OMEGA_REVERSION_CHARGE_particle_ID, 0x28
+.byte 0x80, 0x01
+.hword OMEGAEVO_CHARGE_particle
+
 .word PRIMAL_REVERSION_STONE_particle
-.byte 0x00, 0x08, OMEGA_REVERSION_STONE_particle_ID, 0x28
+.byte 0x00, 0x08
+.hword OMEGAEVO_STONE_particle
+
 .word OMEGA_REVERSION_SYMBOL_particle
-.byte 0x00, 0x02, OMEGA_REVERSION_SYMBOL_particle_ID, 0x28
+.byte 0x00, 0x02
+.hword OMEGAEVO_SYMBOL_particle
+
 .word HAMMER_ARM_particle
 .byte 0x00, 0x02, HAMMER_ARM_particle_ID, 0x28
 .word BRINE_particle
@@ -649,24 +674,19 @@ shiny_particle_pallet:
 .byte 0x98, 0x66, 0xD9, 0x08, 0x2E, 0x28, 0x00, 0x00
 .byte 0x4C, 0x10, 0xD9, 0x08, 0x2F, 0x28, 0x00, 0x00
 .byte 0x5C, 0xBF, 0xC1, 0x08, 0x30, 0x28, 0x00, 0x00
-.word MEGA_EVOLUTION_RAINBOW_palette
-.byte MEGA_EVOLUTION_RAINBOW_particle_ID, 0x28, 0x00, 0x00
-.word MEGA_EVOLUTION_STONE_palette
-.byte MEGA_EVOLUTION_STONE_particle_ID, 0x28, 0x00, 0x00
-.word MEGA_EVOLUTION_SYMBOL_palette
-.byte MEGA_EVOLUTION_SYMBOL_particle_ID, 0x28, 0x00, 0x00
-.word ALPHA_REVERSION_CHARGE_palette
-.byte ALPHA_REVERSION_CHARGE_particle_ID, 0x28, 0x00, 0x00
-.word ALPHA_REVERSION_STONE_palette
-.byte ALPHA_REVERSION_STONE_particle_ID, 0x28, 0x00, 0x00
-.word ALPHA_REVERSION_SYMBOL_palette
-.byte ALPHA_REVERSION_SYMBOL_particle_ID, 0x28, 0x00, 0x00
-.word OMEGA_REVERSION_CHARGE_palette
-.byte OMEGA_REVERSION_CHARGE_particle_ID, 0x28, 0x00, 0x00
-.word OMEGA_REVERSION_STONE_palette
-.byte OMEGA_REVERSION_STONE_particle_ID, 0x28, 0x00, 0x00
-.word OMEGA_REVERSION_SYMBOL_palette
-.byte OMEGA_REVERSION_SYMBOL_particle_ID, 0x28, 0x00, 0x00
+
+particle_entry MEGA_EVOLUTION_RAINBOW_palette MEGAEVORAINBOW_particle 0x0
+particle_entry MEGA_EVOLUTION_STONE_palette MEGAEVOSTONE_particle 0x0
+particle_entry MEGA_EVOLUTION_SYMBOL_palette MEGAEVOSYMBOL_particle 0x0
+
+particle_entry ALPHA_REVERSION_CHARGE_palette ALPHAEVO_CHARGE_particle 0x0
+particle_entry ALPHA_REVERSION_STONE_palette ALPHAEVO_STONE_particle 0x0
+particle_entry ALPHA_REVERSION_SYMBOL_palette ALPHAEVO_SYMBOL_particle 0x0
+
+particle_entry OMEGA_REVERSION_CHARGE_palette OMEGAEVO_CHARGE_particle 0x0
+particle_entry OMEGA_REVERSION_STONE_palette OMEGAEVO_STONE_particle 0x0
+particle_entry OMEGA_REVERSION_SYMBOL_palette OMEGAEVO_SYMBOL_particle 0x0
+
 .byte 0xDC, 0xCD, 0xC2, 0x08, HAMMER_ARM_particle_ID, 0x28, 0x00, 0x00
 .byte 0x28, 0xB7, 0xC1, 0x08, BRINE_particle_ID, 0x28, 0x00, 0x00
 .byte 0xF4, 0x31, 0xC2, 0x08, ACUPRESSURE_particle_ID, 0x28, 0x00, 0x00

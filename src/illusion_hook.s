@@ -1,6 +1,6 @@
 .text
 .thumb
-.align 2
+.align 1
 
 illusion_throw_different_ball: @r0 contains bank
 	bl b_get_ball_to_throw

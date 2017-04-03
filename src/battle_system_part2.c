@@ -95,7 +95,7 @@ struct pokemon* get_poke_to_illusion_into(struct pokemon* poke, u8 bank)
     return 0;
 }
 
-u8 try_illusion_change(struct pokemon* poke, u8 bank)
+bool try_illusion_change(struct pokemon* poke, u8 bank)
 {
     struct pokemon* masquerade_as = get_poke_to_illusion_into(poke, bank);
     if (masquerade_as)
@@ -431,7 +431,7 @@ u16 battle_string_decoder(u8* src, u8* dst)
                     else if (battle_flags.flagx800)
                         classID = get_x800_trainerclass();
                     else
-                        classID = trainer_table[trainerA].class;
+                        classID = (*trainer_table)[trainerA].class;
                     string = get_trainerclass_ptr(classID);
                 }
                 break;
@@ -456,7 +456,7 @@ u16 battle_string_decoder(u8* src, u8* dst)
                     string = text;
                 }
                 else
-                    string = trainer_table[var_8015_trainer_opponent_A].name;
+                    string = (*trainer_table)[var_8015_trainer_opponent_A].name;
                 break;
             case 30: //link player 1 name
                 string = get_link_trainername(link_id, 0);
@@ -538,7 +538,7 @@ u16 battle_string_decoder(u8* src, u8* dst)
                     else if (battle_flags.flag_x4000000)
                         class_id = get_x4000000_trainerclass(trainer_opponent_B);
                     else
-                        class_id = trainer_table[trainer_opponent_B].class;
+                        class_id = (*trainer_table)[trainer_opponent_B].class;
                     string = get_trainerclass_ptr(class_id);
                 }
                 break;
@@ -554,7 +554,7 @@ u16 battle_string_decoder(u8* src, u8* dst)
                     string = text;
                 }
                 else
-                    string = trainer_table[trainer_opponent_B].name;
+                    string = (*trainer_table)[trainer_opponent_B].name;
                 break;
             case 48: //trainer B lose text
                 if (BATTLE_FRONTIER_BATTLE)
@@ -604,6 +604,9 @@ u16 battle_string_decoder(u8* src, u8* dst)
                     strcpy_xFF_terminated_0(text, drew);
                 }
                 string = text;
+                break;
+            case 56: //trainer sliding msg
+                string = new_battlestruct->various.trainer_slide_msg;
                 break;
             }
             if (string) //copy decoded string

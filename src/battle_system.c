@@ -18,6 +18,8 @@ u8 is_bank_present(u8 bank);
 u8 handle_leppa(u8 bank, u8 quality, enum call_mode calling_mode);
 u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro);
 u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special_cases_argument, u16 move);
+u8 count_party_pokemon(u8 bank);
+u8* get_slide_msg(u16 trainerID, u8 caseID);
 
 enum COMMON_ITEM_EFFECT
 {
@@ -2888,7 +2890,7 @@ void move_effect_setter(u8 primary, u8 certain)
     return;
 }
 
-u8 battle_turn_move_effects()
+bool battle_turn_move_effects()
 {
     u8 effect = 0;
     hitmarker |= 0x1000020;
@@ -3286,7 +3288,7 @@ void move_to_buffer(u16 move)
     return;
 }
 
-u8 update_turn_counters()
+bool update_turn_counters()
 {
     #define TURN_LAST_CASE 26
     bool effect = 0;
@@ -3827,6 +3829,100 @@ u8 update_turn_counters()
         }
     }
     return effect;
+}
+
+bool consider_sliding_msg(void)
+{
+    bool effect = 0;
+    if (battle_flags.trainer && !battle_flags.multibattle)
+    {
+        //check if only one poke alive
+        u8 bank = get_bank_by_player_ai(1);
+        if (count_party_pokemon(bank) == 1 && battle_participants[bank].current_hp)
+        {
+            //check switch-in last poke
+            if ((new_battlestruct->various.trainer_slide_msg = get_slide_msg(var_8015_trainer_opponent_A, 0))
+                 && !new_battlestruct->various.trainer_msg_on_switch_in_done)
+            {
+                new_battlestruct->various.trainer_msg_on_switch_in_done = 1;
+                call_bc_move_exec(&BS_TRAINER_SLIDE_MSG_END2);
+                effect = 1;
+            }
+            //check last poke low health
+            else if (((battle_participants[bank].current_hp * 100 / battle_participants[bank].max_hp) < 27)
+                 && ((new_battlestruct->various.trainer_slide_msg = get_slide_msg(var_8015_trainer_opponent_A, 1)))
+                 && !new_battlestruct->various.trainer_msg_on_low_health_done)
+            {
+                new_battlestruct->various.trainer_msg_on_low_health_done = 1;
+                call_bc_move_exec(&BS_TRAINER_SLIDE_MSG_END2);
+                effect = 1;
+            }
+        }
+    }
+    return effect;
+}
+
+void battle_turn_passed(void)
+{
+    turn_values_cleanup(1);
+    if (battle_outcome == 0)
+    {
+        if (update_turn_counters()) {return;}
+        if (battle_turn_move_effects()) {return;}
+    }
+    if (sub_8041728()) {return;}
+    battle_stuff_ptr->field_4D = 0;
+    if (sub_8041364()) {return;} //perish song/future sight is done there
+    if (consider_sliding_msg()) {return;}
+
+    turn_values_cleanup(0);
+    hitmarker = BIC(hitmarker, 0x100000 | 0x400000 | 0x80000 | 0x200);
+    battle_scripting.cmd49_state_tracker = 0;
+    battle_scripting.field19 = 0;
+    battle_scripting.field18 = 0;
+    damage_loc = 0;
+    *(u8*)(&move_outcome) = 0;
+
+    battle_communication_struct.field0 = 0;
+    battle_communication_struct.field1 = 0;
+    battle_communication_struct.field2 = 0;
+    battle_communication_struct.field4 = 0;
+    battle_communication_struct.move_effect = 0;
+
+    if (battle_outcome)
+    {
+        battle_state_mode = 0xC;
+        battle_executed_routine = bc_bs_executer;
+    }
+    else
+    {
+        u8* turn_counter = &battle_trace.battle_turn_counter;
+        if (*turn_counter < 254)
+        {
+            (*turn_counter)++;
+            battle_stuff_ptr->field_DA++;
+        }
+        for (u8 i = 0; i < no_of_all_banks; i++)
+        {
+            chosen_move_by_banks[i] = 0;
+            menu_choice_pbs[i] = 0xFF;
+        }
+        battle_stuff_ptr->field_5C[0] = 6;
+        battle_stuff_ptr->field_5C[1] = 6;
+        battle_stuff_ptr->field_5C[2] = 6;
+        battle_stuff_ptr->field_5C[3] = 6;
+
+        battle_stuff_ptr->absent_bank_flags_prev_turn = absent_bank_flags;
+
+        battle_display_rbox((void*) 0x085CC23E, 0);
+        battle_executed_routine = fighting_mode_off;
+        battle_turn_random_no = rng();
+
+        if (battle_flags.battle_palace)
+            call_bc_move_exec((void*)(0x82DB881));
+        else if (battle_flags.battle_arena && !battle_stuff_ptr->field_DA)
+            call_bc_move_exec((void*)(0x82DB8BE));
+    }
 }
 
 struct move_limitation{

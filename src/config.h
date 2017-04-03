@@ -6,7 +6,7 @@
 #define ALL_POKES       412     //number of all pokemon
 #define ALL_ITEMS       377     //number of all items
 #define NUM_OF_EVOS     5       //number of evolutions per pokemon
-#define KEYSTONE        0x0     //mega item that the player has to posses in order to mega evolve
+#define KEYSTONE        4     //mega item that the player has to posses in order to mega evolve
 
 #define BUILD_LEARNSETS true        //set to false if you modified the learnsets and dont want them to get changed
 #define GEN4_LEARNSETS  false         //set to true if you want to have learnsets for pokemon up to genIV
@@ -31,6 +31,7 @@
 #define FISHING_FLAG        0x0   //if that flag is set, it's a battle against a hooked up pokemon
 #define CANT_CATCH_FLAG     0x0   //if that flag is set, you can't catch any pokemon, if flag is 0 you always can catch any pokemon
 #define ALLOW_LOSE_FLAG     0x0   //if that flag is set, you can lose a battle and the script will continue
+#define NO_OF_SLIDING_MSG_TRAINERS 10 //number of trainers that say things in the middle of a battle
 
 //form indexes
 #define POKE_CHERRIM                1000

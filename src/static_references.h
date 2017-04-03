@@ -191,4 +191,6 @@ extern void* capture_exp_bs;
 //extern scripts from battlescripts.s file
 extern void* BS_BALL_BLOCK;
 extern void* BS_CUSTOM_LOSS;
+extern void* BS_TRAINER_SLIDE_MSG_RETURN;
+extern void* BS_TRAINER_SLIDE_MSG_END2;
 #endif /* static_references */

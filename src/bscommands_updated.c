@@ -40,7 +40,8 @@ u8 get_item_effect(u8 bank, u8 check_negating_effects);
 u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro);
 s8 get_move_position(u8 bank, u16 move);
 u8 weather_abilities_effect();
-
+u8 count_party_pokemon(u8 bank);
+u8* get_slide_msg(u16 trainerID, u8 caseID);
 
 void set_unburden(u8 bank)
 {
@@ -468,26 +469,29 @@ void switchin_newstruct_update()
     return;
 }
 
-u8 not_magicguard(u8 bank)
+bool not_magicguard(u8 bank)
 {
     if (battle_participants[bank].ability_id == ABILITY_MAGIC_GUARD && has_ability_effect(bank, 0, 1))
         return 0;
     return 1;
 }
 
-u8 does_move_target_multiple()
+bool does_move_target_multiple()
 {
     u8 retval=0;
     if(battle_flags.double_battle)
     {
+        u8 alive_targets = 0;
+        if (is_bank_present(bank_target)) {alive_targets++;}
+        if (is_bank_present(bank_target ^ 2)) {alive_targets++;}
+        u8 alive_atk_ally = is_bank_present(bank_attacker ^ 2);
         if(move_table[current_move].target==move_target_both)
         {
-            retval=(count_alive_pokes_on_side(2)>=2);
+            retval = (alive_targets == 2);
         }
         else if(move_table[current_move].target==move_target_foes_and_ally)
         {
-            active_bank=bank_attacker;
-            retval=(count_alive_pokes_on_side(0)>=2);
+            retval = (alive_targets == 2 || (alive_targets == 1 && alive_atk_ally));
         }
     }
     return retval;
@@ -1974,7 +1978,7 @@ void atkEB_set_type_to_terrain()
     else if (new_battlestruct->field_affecting.electic_terrain)
         terrain_type = TYPE_ELECTRIC;
     else
-        terrain_type = terrain_to_type_table[battle_background];
+        terrain_type = terrain_to_type_table[battle_env_bg];
     if (is_of_type(bank_attacker, terrain_type))
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction + 1);
     else
@@ -2537,7 +2541,7 @@ void atkCC_nature_power()
     else if (new_battlestruct->field_affecting.electic_terrain)
         current_move = MOVE_THUNDERBOLT;
     else
-        current_move = naturepower_table[battle_background];
+        current_move = naturepower_table[battle_env_bg];
     bank_target = get_target_of_move(current_move, 0, 0);
     set_attacking_move_type();
     battlescript_custom_push(get_move_battlescript_ptr(current_move));
@@ -2722,7 +2726,7 @@ void atkE4_secretpowereffect()
         *effect = 0x1B;
     else
     {
-        switch (battle_background)
+        switch (battle_env_bg)
         {
         case 0: //normal grass; sleep
             *effect = 1;
@@ -3112,7 +3116,7 @@ void evs_update(struct pokemon *poke, u16 defeated_species)
 bool is_poke_usable(struct pokemon* poke)
 {
     u16 species = get_attributes(poke, ATTR_SPECIES, 0);
-    if (species != 0 && species != POKE_CHIMECHO + 1 && get_attributes(poke, ATTR_CURRENT_HP, 0))
+    if (species != 0 && species != POKE_EGG && get_attributes(poke, ATTR_CURRENT_HP, 0))
         return 1;
     return 0;
 }

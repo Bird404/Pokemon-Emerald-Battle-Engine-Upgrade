@@ -220,7 +220,7 @@ jumpifbyte 0x4 0x202427C 0x29 \jumpiftypenotaffected_address
 .word \jumpiftype_address
 .endm
 
-.macro cmd23 cmd23_side_or_bank
+.macro giveexp cmd23_side_or_bank
 .byte 0x23
 .byte \cmd23_side_or_bank
 .endm

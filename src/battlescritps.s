@@ -44,3 +44,26 @@ BS_CUSTOM_SLIDE_TRAINER2:
 	waitstate
 	end_cmd
 	
+.global BS_TRAINER_SLIDE_MSG_RETURN
+BS_TRAINER_SLIDE_MSG_RETURN:
+	callasm_cmd 133
+	trainer_slide 1
+	waitstate
+	printstring 0x22F
+	waitmessage 0x30
+	trainer_back_slide 1
+	waitstate
+	callasm_cmd 134
+	return_cmd
+	
+.global BS_TRAINER_SLIDE_MSG_END2	
+BS_TRAINER_SLIDE_MSG_END2:
+	call BS_TRAINER_SLIDE_MSG_RETURN
+	end2
+
+BS_POKE_FAINTS_EXP_SLIDEIN:
+	callasm_cmd 135
+	setbyte 0x02024490 0x0 @exp command state tracker
+	giveexp 0
+	end2
+	

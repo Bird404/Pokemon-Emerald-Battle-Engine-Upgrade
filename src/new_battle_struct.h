@@ -49,8 +49,7 @@ struct bank_affecting{
     u8 illusion_on : 1;
     u8 illusion_hit : 1;
     u8 illusion_ball : 6;
-    u8 illusion_nick[10];
-    u8 transform_pal_changed : 1;
+    u8 illusion_nick[11];
     u8 skips_turn : 1;
     u8 caught : 1;
 };
@@ -127,6 +126,10 @@ struct various{
     u16 original_held_item[6];
     u8 returns_swap : 6;
     #endif // ITEMS_SWAP
+    u8* trainer_slide_msg;
+    u8 trainer_msg_on_switch_in_done : 1;
+    u8 trainer_msg_on_low_health_done : 1;
+    u8 trainer_msg_after_first_poke_done : 1;
 };
 
 #define PBOND_PARENT 2
@@ -146,9 +149,9 @@ struct mega_related
 };
 
 struct tai_related{
-    u16 saved_species;
-    u16 saved_item;
-    u8 saved_ability;
+    u16 saved_species[4];
+    u16 saved_item[4];
+    u8 saved_ability[4];
     u16 var2;
 };
 

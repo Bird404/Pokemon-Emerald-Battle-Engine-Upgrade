@@ -1,5 +1,7 @@
 #include "defines.h"
 #include "static_references.h"
+#include <string.h>
+#include <stdlib.h>
 
 u8 check_ability(u8 bank, u8 ability);
 u8 get_airborne_state(u8 bank, u8 mode, u8 check_levitate);
@@ -27,11 +29,12 @@ u8 check_mega_evo(u8 bank);
 u8 is_bank_present(u8 bank);
 u8 can_lose_item(u8 bank, u8 stickyhold_check, u8 sticky_message);
 u8 canlose_megastone(u8 bank, u16 item);
-void b_load_sprite_opponent(struct pokemon* poke, u8 bank_target);
-void b_load_sprite_player(struct pokemon* poke, u8 bank_target);
+void b_load_sprite_opponent(struct pokemon* poke, u8 bank);
+void b_load_sprite_player(struct pokemon* poke, u8 bank);
 s8 get_move_position(u8 bank, u16 move);
 u8 get_item_effect(u8 bank, u8 check_negating_effects);
 u8 weather_abilities_effect();
+u8* get_slide_msg(u16 trainerID, u8 caseID);
 
 extern u8 type_effectiveness_table[TYPE_FAIRY-0x4][TYPE_FAIRY-0x4];
 
@@ -223,6 +226,7 @@ o_, n_, Space, 0xFD, 0x0, Apos, s_, Space, s_, i_, d_, e_, Exclam, Termin};
 /*0x22C*/u8 player_wonlost_text[] = {0xFD, 35, Space, 0xFD, 55, JumpLine, 0xFD, 28, Space, 0xFD, 29, Exclam, 0xFF};
 /*0x22D*/u8 trainerwon_text[] = {0xFD, 37, 0xFF};
 /*0x22E*/u8 skydrop_cantchooseaction_text[] = {S_, k_, y_, Space, D_, r_, o_, p_, Space, w_, o_, n_, Apos, t_, Space, l_, e_, t_, JumpLine, 0xFD, 11, g_, o_, Exclam, 0xFF};
+/*0x22F*/u8 trainer_sliding_text[] = {0xFD, 56, 0xFF};
 
 void* new_strings_table[] = {sample_text, snowwarning_text, extreme_sun_activation_text, heavyrain_activation_text, mysticalaircurrent_activation_text, forewarn_text, slowstart_text, anticipation_text, dryskin_damage_text, solarpower_text, harvest_text, healer_text, pickup_text, moldbreaker_text, turboblaze_text, terravolt_text, downloadatk_text,
 downloadspatk_text, absorbabilityboost_text , absorbabilityimmune_text, userteam_text, foeteam_text,
@@ -247,7 +251,7 @@ statushealslp_text, statushealfrz_text, primal_reversion_text, congrats_player_t
 skydroptooheavy_text, fairylock_text, illusion_off_text, protean_text, gem_text, telepathy_text, flame_burst_text, zen_mode_text,
 zen_end_text, form_change_text, partner_wait_text, combined_move_text, userteam_lc_text, foeteam_lc_text, fire_sea_text, fire_sea_hurt_text,
 swamp_text, rainbow_text, swamp_end_text, fire_sea_end_text, rainbow_end_text, berry_redux_text, pokeballblock_text, player_wonlost_text, trainerwon_text,
-skydrop_cantchooseaction_text};
+skydrop_cantchooseaction_text, trainer_sliding_text};
 
 
 void battle_string_loader(u16 string_id)
@@ -2760,7 +2764,7 @@ void setup_zen_buffers()
 
 void in_battle_form_change(u8 bank, bool change_hp, bool change_type)
 {
-    battle_graphics.graphics_data->species_info[bank]->transformed_species = 0;
+    (*battle_graphics.graphics_data->species_info)[bank].transformed_species = 0;
     struct pokemon* poke = get_bank_poke_ptr(bank);
     calculate_stats_pokekmon(poke);
     struct battle_participant* aegi = &battle_participants[bank];
@@ -2797,7 +2801,7 @@ void type_stat_form_change()
 
 void set_transfrom_palchange()
 {
-    battle_graphics.graphics_data->species_info[bank_attacker]->pal_change = 1;
+   (*battle_graphics.graphics_data->species_info)[bank_attacker].pal_change = 1;
     new_battlestruct->bank_affecting[bank_attacker].transform_tid = get_attributes(get_bank_poke_ptr(bank_target), ATTR_TID, 0);
 }
 
@@ -2958,6 +2962,37 @@ void set_rainbow()
     battle_communication_struct.is_message_displayed = 1;
 }
 
+void save_trainerslide_pokeobj(void)
+{
+    u8 objID = objID_pbs_moveanimations[get_bank_by_player_ai(1)];
+    new_battlestruct->various.var1 = objID;
+}
+
+void restore_trainerslide_pokeobj(void)
+{
+    u8 objID = new_battlestruct->various.var1;
+    u8 bank = get_bank_by_player_ai(1);
+    objID_pbs_moveanimations[bank] = objID;
+    if (battle_participants[bank].current_hp)
+        b_load_sprite_opponent(get_bank_poke_ptr(bank), bank);
+}
+
+void conider_trainermsg_firstfaint(void)
+{
+    u8 bank = get_bank_by_player_ai(1);
+    if (!battle_participants[bank].current_hp && count_party_pokemon(bank))
+    {
+        //check switch-in last poke
+        if ((new_battlestruct->various.trainer_slide_msg = get_slide_msg(var_8015_trainer_opponent_A, 2))
+             && !new_battlestruct->various.trainer_msg_after_first_poke_done)
+        {
+            new_battlestruct->various.trainer_msg_after_first_poke_done = 1;
+            battlescript_push();
+            battlescripts_curr_instruction = &BS_TRAINER_SLIDE_MSG_RETURN;
+        }
+    }
+}
+
 void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*/, &change_attacker_item /*2*/, &try_to_lower_def /*3*/, &try_to_raise_spd /*4*/,
 &changestatvar1 /*5*/, &changestatvar2 /*6*/, &frisk_target_item /*7*/, &set_stat_msg_buffer /*8*/, &set_type_msg_buffer /*9*/, &set_team_msg_buffer /*10*/, &bad_dreams_damage_calc /*11*/,
 &weaknesspolicy /*12*/, &mentalherb /*13*/, &placeholder0x14 /*14*/, &hazards_bank_switcher /*15*/, &hazards_bank_return /*16*/, &leechseed_update /*17*/,
@@ -2982,7 +3017,8 @@ void* callasm_table[] = {&call_ability_effects /*0*/, &apply_burn_animation /*1*
 &return_hitmarker_animation /*113*/, &transformed_species_to_0 /*114*/, &aegi_change /*115*/, &set_transfrom_palchange /*116*/, &bug_bite_end_tasks /*117*/,
 &type_stat_form_change/*118*/, &setup_zen_buffers/*119*/, &belch_canceler/*120*/, &attacker_bank_exchange/*121*/, &print_from_nbsvar2/*122*/,
 &attackerhp_to_zero /*123*/, &reset_bg2x /*124*/, &check_and_set_pledge/*125*/, &print_combined_attack_message/*126*/, &print_attack_message/*127*/,
-&set_message_bank_buffer_to_ally /*128*/, &set_fire_sea /*129*/, &set_swamp /*130*/, &set_rainbow/*131*/, &set_team_msg_buffer_lc/*132*/};
+&set_message_bank_buffer_to_ally /*128*/, &set_fire_sea /*129*/, &set_swamp /*130*/, &set_rainbow/*131*/, &set_team_msg_buffer_lc/*132*/,
+&save_trainerslide_pokeobj /*133*/, &restore_trainerslide_pokeobj /*134*/, &conider_trainermsg_firstfaint /*135*/};
 
 void callasm_cmd()
 {
