@@ -58,6 +58,7 @@ enum attribute_requests
      ATTR_SPEED, //0x3D
      ATTR_SPECIAL_ATTACK, //0x3E
      ATTR_SPECIAL_DEFENCE, //0x3F
+     ATTR_POKERUS_REMAINING, //0x40
      ATTR_SPECIES_2, //0x41
 };
 
