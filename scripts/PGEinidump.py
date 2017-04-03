@@ -56,10 +56,6 @@ with open(args.romfile, 'rb+') as rom:
                                 for key in table2.keys():
                                         if line.strip().startswith(str(key)):
                                                 line=str(key)+'='+str(table2[key])+'\n'
-                                if line.strip().startswith('PokemonAttackTable='):
-                                        with open('learnsetcatch', 'r') as catcher:
-                                                for catched in catcher:
-                                                        line='PokemonAttackTable='+catched+'\n'
                         if line.strip().startswith('[BPEE]'):
                                 wflag=1
                         if line.strip().startswith('[AXVF]'):
