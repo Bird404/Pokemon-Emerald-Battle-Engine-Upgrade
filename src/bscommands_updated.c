@@ -3115,7 +3115,7 @@ void evs_update(struct pokemon *poke, u16 defeated_species)
 
 bool is_poke_usable(struct pokemon* poke)
 {
-    u16 species = get_attributes(poke, ATTR_SPECIES, 0);
+    u16 species = get_attributes(poke, ATTR_SPECIES_2, 0);
     if (species != 0 && species != POKE_EGG && get_attributes(poke, ATTR_CURRENT_HP, 0))
         return 1;
     return 0;
