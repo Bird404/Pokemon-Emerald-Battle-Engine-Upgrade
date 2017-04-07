@@ -1322,8 +1322,8 @@ void tai7E_isrecoilmove_necessary()
             is_neccessary = 0;
         else if (BestNotRecoilMoveDmg && RecoilMoveDMG < target_HP) //recoil move doesn't faint
         {
-            u8 RecoilMoveHitsToFaint = 0;
-            u8 NotRecoilMoveHitsToFaint = 0;
+            u32 RecoilMoveHitsToFaint = 0;
+            u32 NotRecoilMoveHitsToFaint = 0;
             while (RecoilMoveDMG * RecoilMoveHitsToFaint < target_HP)
                 RecoilMoveHitsToFaint++;
             while (BestNotRecoilMoveDmg * NotRecoilMoveHitsToFaint < target_HP)
