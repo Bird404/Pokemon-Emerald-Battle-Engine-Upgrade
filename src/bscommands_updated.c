@@ -1848,7 +1848,7 @@ u8 symbiosis_effect(u8 bank)
     {
         new_battlestruct->various.trigger_symbiosis = 0;
         u8 ally_bank = bank ^ 2;
-        if (ability_battle_effects(20, bank, ABILITY_STATIC, 0, 0) && battle_participants[bank].held_item == 0 && battle_participants[ally_bank].held_item)
+        if (ability_battle_effects(20, bank, ABILITY_SYMBIOSIS, 0, 0) && battle_participants[bank].held_item == 0 && battle_participants[ally_bank].held_item)
         {
             symbiosis = 1;
             battle_participants[bank].held_item = battle_participants[ally_bank].held_item;
@@ -3343,5 +3343,35 @@ void atk23_exp_evs_lvlup(void)
     default:
         battlescripts_curr_instruction += 2;
         break;
+    }
+}
+
+void atk84_jumpifcannotsleep(void)
+{
+    void* jump_loc = (void*) read_word(battlescripts_curr_instruction + 1);
+    if (uproar_wakeup_check(bank_target))
+        battlescripts_curr_instruction = jump_loc;
+    else
+    {
+        u8 ability = battle_participants[bank_target].ability_id;
+        u8 ability_effect = has_ability_effect(bank_target, 1, 1);
+        u8 partnersweetveil;
+        if (ability_effect && (ability == ABILITY_INSOMNIA || ability == ABILITY_VITAL_SPIRIT))
+        {
+            record_usage_of_ability(bank_target, ability);
+            battle_communication_struct.multistring_chooser = 2;
+            battlescripts_curr_instruction = jump_loc;
+        }
+        else if (ability == ABILITY_SWEET_VEIL || (partnersweetveil = ability_battle_effects(20, bank_target, ABILITY_SWEET_VEIL, 1, 0)))
+        {
+            if (partnersweetveil)
+                record_usage_of_ability(bank_target ^ 2, ABILITY_SWEET_VEIL);
+            else
+                record_usage_of_ability(bank_target, ABILITY_SWEET_VEIL);
+            battle_communication_struct.multistring_chooser = 3;
+            battlescripts_curr_instruction = jump_loc;
+        }
+        else
+            battlescripts_curr_instruction += 5;
     }
 }

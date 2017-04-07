@@ -793,3 +793,10 @@ jumpifbytevarEQ 0x1 \jumpifabilityPtr
 .byte \jumpifstatusmovesnotworthusingbank
 .word \jumpifstatusmovesnotworthusingptr
 .endm
+
+.macro jumpifsamestatboosts jumpifsamestatboostsbank1 jumpifsamestatboostsbank2 jumpifsamestatboostsptr
+.byte 0x89
+.byte \jumpifsamestatboostsbank1
+.byte \jumpifsamestatboostsbank2
+.word \jumpifsamestatboostsptr
+.endm

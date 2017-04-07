@@ -26,10 +26,10 @@ void can_magneticflux_work();
 
 u8 is_bank_ai(u8 bank)
 {
-    if (battle_flags.player_partner && battle_flags.player_ingame_partner)
-        return !(bank & 1); //bank 2 controls player's partner but belongs to AI, while bank 0 is player's, AI can freely view it
+    if ((tai_bank & 1) == (bank & 1))
+        return 1;
     else
-        return bank & 1; //banks 1 and 3 are controlled by AI in normal battles
+        return 0;
 }
 
 u8 tai_getmovetype(u8 atk_bank, u16 move)
@@ -1508,4 +1508,21 @@ void tai88_jumpifstatusmovesnotworthusing() //u8 bank, void* ptr
         }
     }
     tai_current_instruction = (void*) (read_word(tai_current_instruction + 2));
+}
+
+void tai89_jumpifsamestatboosts(void) //u8 bank1, u8 bank2, void* ptr
+{
+    u8 bank1 = get_ai_bank(read_byte(tai_current_instruction + 1));
+    u8 bank2 = get_ai_bank(read_byte(tai_current_instruction + 2));
+    u8* boosts1 = &battle_participants[bank1].atk_buff;
+    u8* boosts2 = &battle_participants[bank2].atk_buff;
+    for (u8 i = 0; i < 7; i++)
+    {
+        if (boosts1[i] != boosts2[i])
+        {
+            tai_current_instruction += 7;
+            return;
+        }
+    }
+    tai_current_instruction = (void*) (read_word(tai_current_instruction + 3));
 }

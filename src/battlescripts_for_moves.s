@@ -172,7 +172,7 @@ battlescripts_table:
 .word NIGHTMARE			@90 Nightmare
 .word TRANSFROM_MOVE_BS		@91 Transform
 .word USELESS_MOVES		@92 Splash, Hold Hands, Celebrate
-.word 0x082D8F9C		@93 Rest
+.word REST_BS		@93 Rest
 .word CONVERSIONS		@94 Conversion and Conversion2, based on move IDs
 .word TRIATTACK 		@95 Tri Attack
 .word 0x082D9409		@96 Substitute
@@ -361,6 +361,20 @@ USELESS_MOVES:
 	printstring
 	waitmessage 0x40
 	goto_cmd ENDTURN
+	
+REST_BS:
+	attackcanceler
+	attackstring
+	ppreduce
+	jumpifstatus 0x0 0x7 0x82D8AB0 @already asleep
+	jumpifcannotsleep CANT_BECOME_ASLEEP_BS @uproar, abiliy
+	setrest 0x82D9EFB
+	pause_cmd 0x20
+	printfromtable 0x85CC882
+	waitmessage 0x40
+	statusiconeupdate bank_attacker
+	waitstate
+	goto_cmd 0x82D9EE1
 	
 HOLDHANDS:
 	attackcanceler
@@ -2057,7 +2071,7 @@ PUT_TARGET_TO_SLEEP:
 	attackstring
 	ppreduce
 	jumpifstatus 0x0 0x7 0x82D8AB0 @already asleep
-	jumpifcannotsleep 0x82D8ACF @uproar, abiliy
+	jumpifcannotsleep CANT_BECOME_ASLEEP_BS @uproar, abiliy
 	jumpifstatus 0x0 0xFF MOVE_FAILED
 	accuracycheck MOVE_MISSED 0x0
 	jumpifhalverset 0x0 0x20 0x82DAD01
@@ -2066,6 +2080,16 @@ PUT_TARGET_TO_SLEEP:
 	setbyte EffectChooser 0x1
 	seteffectprimary
 	goto_cmd ENDTURN
+	
+CANT_BECOME_ASLEEP_BS:
+	pause_cmd 32
+	printfromtable PUT_TARGET_TO_SLEEP_MSGS
+	waitmessage 0x40
+	goto_cmd ENDTURN
+	
+.align 1
+PUT_TARGET_TO_SLEEP_MSGS:
+.hword 0x75, 0x76, 0x77, 0x230
 
 ATTACK_CONFUSION_CHANCE:
 	setbyte EffectChooser 7

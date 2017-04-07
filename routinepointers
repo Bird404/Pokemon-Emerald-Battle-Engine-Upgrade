@@ -28,6 +28,7 @@ atk78_explodeifnotdamp 0831BEF0
 atk7D_set_rain 0831BF04
 atk7E_set_reflect 0831BF08
 atk7F_set_leech_seed 0831BF0C
+atk84_jumpifcannotsleep 0831BF20
 atk88_drain_damage 0831BF30
 atk8D_multihit_move_loop_counter 0831BF44
 atk92_set_lightscreen 0831BF58

@@ -227,6 +227,7 @@ o_, n_, Space, 0xFD, 0x0, Apos, s_, Space, s_, i_, d_, e_, Exclam, Termin};
 /*0x22D*/u8 trainerwon_text[] = {0xFD, 37, 0xFF};
 /*0x22E*/u8 skydrop_cantchooseaction_text[] = {S_, k_, y_, Space, D_, r_, o_, p_, Space, w_, o_, n_, Apos, t_, Space, l_, e_, t_, JumpLine, 0xFD, 11, g_, o_, Exclam, 0xFF};
 /*0x22F*/u8 trainer_sliding_text[] = {0xFD, 56, 0xFF};
+/*0x230*/u8 sweetveilactivation_text[] = {0xFD, 16, Space, s_, u_, r_, r_, o_, u_, n_, d_, e_, d_, Space, i_, t_, s_, e_, l_, f_, JumpLine, w_, i_, t_, h_, Space, a_, Space, v_, e_, i_, l_, Space, o_, f_, Space, s_, w_, e_, e_, t_, n_, e_, s_, s_, Exclam, 0xFF};
 
 void* new_strings_table[] = {sample_text, snowwarning_text, extreme_sun_activation_text, heavyrain_activation_text, mysticalaircurrent_activation_text, forewarn_text, slowstart_text, anticipation_text, dryskin_damage_text, solarpower_text, harvest_text, healer_text, pickup_text, moldbreaker_text, turboblaze_text, terravolt_text, downloadatk_text,
 downloadspatk_text, absorbabilityboost_text , absorbabilityimmune_text, userteam_text, foeteam_text,
@@ -251,7 +252,7 @@ statushealslp_text, statushealfrz_text, primal_reversion_text, congrats_player_t
 skydroptooheavy_text, fairylock_text, illusion_off_text, protean_text, gem_text, telepathy_text, flame_burst_text, zen_mode_text,
 zen_end_text, form_change_text, partner_wait_text, combined_move_text, userteam_lc_text, foeteam_lc_text, fire_sea_text, fire_sea_hurt_text,
 swamp_text, rainbow_text, swamp_end_text, fire_sea_end_text, rainbow_end_text, berry_redux_text, pokeballblock_text, player_wonlost_text, trainerwon_text,
-skydrop_cantchooseaction_text, trainer_sliding_text};
+skydrop_cantchooseaction_text, trainer_sliding_text, sweetveilactivation_text};
 
 
 void battle_string_loader(u16 string_id)

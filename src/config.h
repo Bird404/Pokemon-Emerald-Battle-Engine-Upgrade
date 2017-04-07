@@ -21,7 +21,7 @@
 #define MAX_EVS             510     //maximum amount of EV points per pokemon
 #define EXP_DIVIDE          true    //if true exp will be divided among pokemon(if two pokemon participate they'll get 50 % each), set to false if you want gen6-style exp
 #define GENVI_EXPSHARE      false    //set to true if you want EXPSHARE to act like in gen6
-#define EXPSHARE_FLAG       0x900   //flag that must be set for GENVI expshare to work
+#define EXPSHARE_FLAG       0x0   //flag that must be set for GENVI expshare to work
 #define DISABLED_EXP_FLAG   0x0   //if that flag is set, receiving exp is disabled, if flag is 0 it has no effect
 #define DISABLED_EVS_FLAG   0x0     //if that flag is set, receiving EVS points is disabled, if flag is 0 it has no effect; this and above flag can be the same
 #define DOUBLE_WILD_BATTLES true    //set to false if you don't want have them in your hack at all

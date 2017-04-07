@@ -2535,7 +2535,7 @@ u8 berry_eaten(u8 bank, bool from_remove_item)
     if (new_battlestruct->bank_affecting[bank].eaten_berry)
     {
         new_battlestruct->bank_affecting[bank].eaten_berry = 0;
-        if (check_ability(bank, ABILITY_RUN_AWAY) && battle_participants[bank].current_hp != battle_participants[bank].max_hp)
+        if (check_ability(bank, ABILITY_CHEEK_POUCH) && battle_participants[bank].current_hp != battle_participants[bank].max_hp)
         {
             cheek_pouch = 1;
             damage_loc = ATLEAST_ONE(battle_participants[bank].max_hp / 3) * -1;

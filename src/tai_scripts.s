@@ -335,6 +335,7 @@ DISCOURAGE_FUTURESIGHT:
 	jumpifsideaffecting bank_target SIDE_FUTUREATTACK POINTS_MINUS10
 	return_cmd
 DISCOURAGE_PSYCHUP:
+	jumpifsamestatboosts bank_ai bank_target POINTS_MINUS10
 	jumpifstatbuffGE bank_target 0x1 0x6 END_LOCATION
 	jumpifstatbuffGE bank_target 0x2 0x6 END_LOCATION
 	jumpifstatbuffGE bank_target 0x3 0x6 END_LOCATION
@@ -1200,3 +1201,4 @@ tai_command_table:
 .word tai86_jumpifhasattackingmovewithtype + 1 		@0x86
 .word tai87_jumpifhasnostatusmoves + 1		@0x87
 .word tai88_jumpifstatusmovesnotworthusing + 1 		@0x88
+.word tai89_jumpifsamestatboosts + 1							@0x89
