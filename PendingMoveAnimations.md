@@ -1,5 +1,5 @@
 GEN 4:
-Healing Wish
+Healing Wish (Complete - Tetra)
 Tailwind (Complete)
 Metal Burst (Complete)
 Embargo (Complete)
@@ -46,7 +46,7 @@ Rage Powder (Reserved MRDS)
 Telekinesis
 Smack Down (Complete - Artemis64)
 Storm Throw
-Flame Burst
+Flame Burst (Complete - Tetra)
 Sludge Wave (Reserved MRDS)
 Heavy Slam
 Synchronoise
@@ -69,7 +69,7 @@ Hex
 Sky Drop
 Shift Gear (Reserved MRDS)
 Circle Throw
-Incinerate
+Incinerate (Complete - Tetra)
 Quash
 Reflect Type
 Retaliate
