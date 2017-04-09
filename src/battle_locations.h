@@ -97,6 +97,7 @@ extern u16 no_of_recorded_bytes[4];
 extern u16 var_800D_lastresult;
 extern u16 var_800E_last_used_item;
 extern u16 randomly_chosen_move;
+extern s16 BG1Y_battle;
 extern s16 bg2X_battle;
 extern s16 bg2Y_battle;
 extern u8 battle_some_link_id;
@@ -116,7 +117,11 @@ extern u16 (*buffer_moves)[2];
 extern void* battle_executed_routine;
 extern void* opponentwon_text;
 extern u16 anim_arguments[8];
-
+extern u16 var_8004;
+extern u16 var_8005;
+extern u16 var_8006;
+extern u16 var_8007;
+extern u8 which_spotted_trainer;
 
 extern void* battletextbox_tileset;
 extern void* battletextbox_tilemap;

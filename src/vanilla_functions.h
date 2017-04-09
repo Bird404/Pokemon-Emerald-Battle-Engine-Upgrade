@@ -224,6 +224,13 @@ void turn_values_cleanup(u8 arg0);
 bool sub_8041728(void);
 bool sub_8041364(void);
 void fighting_mode_off(void);
+void create_trainer_pokemon(struct pokemon*, u16 trainerID, bool purge);
+void set_music_for_battle(u16 songID);
+void prepare_ov_to_battle_transition(u8 changeID);
+void sub_8163A8C(u8 taskID);
+void gpu_bg_config_set_field(u8 bgID, u8 arg1, u8 arg2);
+void lcd_io_set(u8 lcdID, u16 value);
+void gpu_decompress_tile_obj_alloc_tag_and_upload(void* tileObj);
 
 u32 __udivsi3(u32 numerator, u32 denumerator);
 u32 __umodsi3(u32 numerator, u32 denumerator);

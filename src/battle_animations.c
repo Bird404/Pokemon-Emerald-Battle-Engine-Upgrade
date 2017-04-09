@@ -63,3 +63,11 @@ void AnimTask_animate_pokemon(u8 taskID) //argument is bank
         }
     }
 }
+
+void AnimTask_swapbanks(u8 taskID)
+{
+    u8 temp = animation_bank_attacker;
+    animation_bank_attacker = animation_bank_target;
+    animation_bank_target = temp;
+    move_anim_task_del(taskID);
+}

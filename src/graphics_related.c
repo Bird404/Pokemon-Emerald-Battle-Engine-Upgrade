@@ -86,9 +86,31 @@ void b_load_fitting_bg(void)
 
 void b_load_fitting_entry_bg(void)
 {
-    const struct b_background_info* BG_info = get_BG_struct();
-    LZ77UnCompVram(BG_info->entry_tileset, (void*)(0x06004000));
-    LZ77UnCompVram(BG_info->entry_tilemap, (void*)(0x0600E000));
+    if (battle_flags.link)
+    {
+        LZ77UnCompVram((void*)(0x8D778F0), (void*)(0x06004000));
+        LZ77UnCompVram((void*)(0x8D77B0C), (void*)(0x06010000));
+        gpu_pal_decompress_apply((void*)(0x8D77AE4), 0x60, 0x20);
+        gpu_bg_config_set_field(1, 3, 1);
+
+        lcd_io_set(0xA, 0x5C04);
+        tilemap_decompress_wram_BGconfig(1, (void*)(0x8D779D8), 0, 0);
+        tilemap_decompress_wram_BGconfig(2, (void*)(0x8D779D8), 0, 0);
+        bgid_send_tilemap(1);
+        bgid_send_tilemap(2);
+
+        lcd_io_set(0x48, 0x36);
+        lcd_io_set(0x4A, 0x36);
+        BG1Y_battle = 0xFF5C;
+        bg2Y_battle = 0xFF5C;
+        gpu_decompress_tile_obj_alloc_tag_and_upload((void*)(0x831AA00));
+    }
+    else
+    {
+        const struct b_background_info* BG_info = get_BG_struct();
+        LZ77UnCompVram(BG_info->entry_tileset, (void*)(0x06004000));
+        LZ77UnCompVram(BG_info->entry_tilemap, (void*)(0x0600E000));
+    }
 }
 
 bool b_load_chosen_bg_element(u8 caseID)

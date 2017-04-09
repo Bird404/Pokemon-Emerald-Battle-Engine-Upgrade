@@ -170,6 +170,11 @@ get_backgroundID_for_battle = 0x080B0BD0|1;
 sav1_get_map_battleground = 0x08085C80|1;
 sub_8041728 = 0x08041728|1;
 sub_8041364 = 0x08041364|1;
+create_trainer_pokemon = 0x080385E8|1;
+set_music_for_battle = 0x0806E668|1;
+prepare_ov_to_battle_transition = 0x08145EF4|1;
+sub_8163A8C = 0x08163A8C|1;
+gpu_decompress_tile_obj_alloc_tag_and_upload = 0x08034988|1;
 
 script_text_buffer1 = 0x02021CC4;
 script_text_buffer2 = 0x02021DC4;
@@ -180,6 +185,11 @@ old_curr_full_box_id = 0x0203AB6F;
 battle_BG3_X = 0x02022E20;
 buffer_moves = 0x0203ABA8;
 opponentwon_text = 0x02038BE4;
+which_spotted_trainer = 0x02038BFC;
+var_8004 = 0x020375E0;
+var_8005 = 0x020375E2;
+var_8006 = 0x020375E4;
+var_8007 = 0x020375E6;
 
 /*move animation tasks*/
 AnimTask_arg7_is_target_opponent = 0x8117780 |1;
@@ -242,6 +252,7 @@ decompression_buffer = 0x0201C000;
 battle_graphics = 0x020244D0;
 PiD_pbs = 0x020244BC;
 
+BG1Y_battle = 0x02022E1A;
 bg2X_battle = 0x02022E1C;
 bg2Y_battle = 0x02022E1E;
 bank_in_menu = 0x020244B8;
@@ -307,6 +318,8 @@ get_bank_identity = 0x080A6A44|1;
 prepare_exp_receiving = 0x08033F34|1;
 happiness_algorithm = 0x0806D934|1;
 not_in_battle = 0x080A4DF0|1;
+gpu_bg_config_set_field = 0x08001B58|1;
+lcd_io_set = 0x080010B4|1;
 
 battle_turn_random_no = 0x02024330;
 last_used_ability = 0x0202420A;

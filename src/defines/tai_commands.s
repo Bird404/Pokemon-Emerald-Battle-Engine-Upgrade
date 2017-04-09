@@ -800,3 +800,7 @@ jumpifbytevarEQ 0x1 \jumpifabilityPtr
 .byte \jumpifsamestatboostsbank2
 .word \jumpifsamestatboostsptr
 .endm
+
+.macro canusemultitargetmove
+.byte 0x8A
+.endm

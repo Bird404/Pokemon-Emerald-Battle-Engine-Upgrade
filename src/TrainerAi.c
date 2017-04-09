@@ -1526,3 +1526,53 @@ void tai89_jumpifsamestatboosts(void) //u8 bank1, u8 bank2, void* ptr
     }
     tai_current_instruction = (void*) (read_word(tai_current_instruction + 3));
 }
+
+bool can_drain_attack(u8 attacker, u8 target, u16 move)
+{
+    bool drains = 0;
+    u8 move_type = tai_getmovetype(attacker, move);
+    u8 ability_target = ai_get_ability(target, 1);
+    if (ability_target == ABILITY_SOUNDPROOF && find_move_in_table(move, sound_moves))
+        drains = 1;
+    else
+    {
+        switch (move_type)
+        {
+        case TYPE_FIRE:
+            if (ability_target == ABILITY_FLASH_FIRE)
+                drains = 1;
+            break;
+        case TYPE_WATER:
+            if (ability_target == ABILITY_WATER_ABSORB || ability_target == ABILITY_STORM_DRAIN || ability_target == ABILITY_DRY_SKIN)
+                drains = 1;
+            break;
+        case TYPE_ELECTRIC:
+            if (ability_target == ABILITY_VOLT_ABSORB || ability_target == ABILITY_LIGHTNING_ROD)
+                drains = 1;
+            break;
+        case TYPE_GRASS:
+            if (ability_target == ABILITY_SAP_SIPPER)
+                drains = 1;
+            break;
+        }
+    }
+    return drains;
+}
+
+void tai8A_can_use_multitarget_move(void)
+{
+    bool can = 1;
+    u8 partner = tai_bank ^ 2;
+    u16 curr_move = AI_STATE->curr_move;
+    if (is_bank_present(partner) && move_table[curr_move].target == move_target_foes_and_ally && !can_drain_attack(tai_bank, partner, curr_move))
+    {
+        u32 partner_dmg = ai_calculate_damage(tai_bank, partner, curr_move);
+        u16 partner_hp = battle_participants[partner].current_hp;
+        if (partner_dmg >= partner_hp || (partner_dmg * 100 / battle_participants[partner].max_hp) > 15) //deals more than 15% of partner's HP
+        {
+             can = 0;
+        }
+    }
+    AI_STATE->var = can;
+    tai_current_instruction++;
+}

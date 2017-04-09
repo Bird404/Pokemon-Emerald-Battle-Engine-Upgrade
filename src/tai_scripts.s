@@ -1035,6 +1035,8 @@ TAI_SCRIPT_3: @ENCOURAGE status moves if it's a first turn; bitfield 0x8
 	
 TAI_SCRIPT_7: @Act Smart During Double Battles
 	jumpiftargetisally CONSIDER_MOVE_ON_ALLY
+	canusemultitargetmove
+	jumpifbytevarEQ 0x0 POINTS_MINUS10
 	getpartnerchosenmove
 	jumpifwordvarEQ MOVE_HELPING_HAND PARTNER_CHOSE_HELPING_HAND
 	return_cmd
@@ -1202,3 +1204,4 @@ tai_command_table:
 .word tai87_jumpifhasnostatusmoves + 1		@0x87
 .word tai88_jumpifstatusmovesnotworthusing + 1 		@0x88
 .word tai89_jumpifsamestatboosts + 1							@0x89
+.word tai8A_can_use_multitarget_move + 1					@0x8A
