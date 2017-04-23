@@ -1,7 +1,7 @@
 .text
 .thumb
 .thumb_func
-.align 2
+.align 1
 
 wild_grass_hook: @at 0x080B5424, via r1
 	bl wild_grass_battle

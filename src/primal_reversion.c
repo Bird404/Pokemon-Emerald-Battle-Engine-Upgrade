@@ -1,18 +1,16 @@
 #include "defines.h"
+#include "static_references.h"
 
 #define ALPHA_REVERSION 1
 #define OMEGA_REVERSION 2
 
 u16 get_mega_species(u8 bank, u8 chosen_method);
 
-u8 alpha_primal_reversion_bs[] = {0x39, 0x20, 0x0, 0x45, 1, 0x1F, 0, 0, 0, 0, 0x3A, 0x83, 106, 0, 0x83, 89, 0, 0x10, 0x10, 0x02, 0x12, 0x40, 0x0, 0x3F};
-u8 omega_primal_reversion_bs[] = {0x39, 0x20, 0x0, 0x45, 1, 0x20, 0, 0, 0, 0, 0x3A, 0x83, 106, 0, 0x83, 89, 0, 0x10, 0x10, 0x02, 0x12, 0x40, 0x0, 0x3F};
-
 u8 get_reversion_type(u8 bank, u16 target_species)
 {
     u16 species = battle_participants[bank].poke_species;
     u8 reversion_type = 0;
-    struct evolution_sub* evos = GET_EVO_TABLE(species);
+    const struct evolution_sub* evos = GET_EVO_TABLE(species);
     for(u8 i=0; i<NUM_OF_EVOS; i++)
     {
         if (evos[i].method==0xFD && evos[i].poke==target_species)
@@ -41,12 +39,12 @@ bool handle_primal_reversion(u8 bank)
             if(reversion_mode==ALPHA_REVERSION)
             {
                 objects[objid].final_oam.attr2+=2;
-                execute_battle_script(&alpha_primal_reversion_bs);
+                execute_battle_script(BS_ALPHA_PRIMAL);
             }
             else if(reversion_mode==OMEGA_REVERSION)
             {
                 objects[objid].final_oam.attr2+=1;
-                execute_battle_script(&omega_primal_reversion_bs);
+                execute_battle_script(BS_OMEGA_PRIMAL);
             }
             struct pokemon* poke_address;
             if (banks_side == 1)
@@ -68,7 +66,7 @@ bool handle_primal_reversion(u8 bank)
             bank_struct->sp_atk = get_attributes(poke_address, ATTR_SPECIAL_ATTACK, 0);
             bank_struct->sp_def = get_attributes(poke_address, ATTR_SPECIAL_DEFENCE, 0);
             bank_struct->poke_species = primal_species;
-            struct poke_basestats* PokeStats = &((*basestat_table)[primal_species]);
+            const struct poke_basestats* PokeStats = &((*basestat_table)[primal_species]);
             bank_struct->type1 = PokeStats->type1;
             bank_struct->type2 = PokeStats->type2;
             // The ability 1 and ability 2 of the primal species in the base stat table should both be set and

@@ -81,16 +81,18 @@ struct side_affecting{
 
 struct field_affecting{
     u32 trick_room : 3;
-    u32 wonder_room : 3;
-    u32 magic_room : 3;
-    u32 grassy_terrain : 3;
-    u32 electic_terrain : 3;
-    u32 misty_terrain : 3;
-    u32 ion_deluge : 3;
-    u32 gravity : 3;
-    u32 echo_voice_counter : 3;
-    u32 round_chosen : 1;
-    u32 fairy_lock : 2;
+    u32 wonder_room : 3; //6
+    u32 magic_room : 3; //9
+    u32 grassy_terrain : 3; //12
+    u32 electic_terrain : 3; //15
+    u32 misty_terrain : 3; //18
+    u32 ion_deluge : 3; //21
+    u32 gravity : 3; //24
+    u32 echo_voice_counter : 3; //27
+    u32 mudsport : 3; //30
+    u32 fairy_lock : 2; //32
+    u8 round_chosen : 1; //1
+    u8 watersport : 3; //4
 };
 
 struct various{

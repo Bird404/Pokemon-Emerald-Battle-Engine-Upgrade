@@ -1,7 +1,7 @@
 .text
 .thumb
 .thumb_func
-.align 2
+.align 1
 	
 display_custom_text:
 	mov r0, r6

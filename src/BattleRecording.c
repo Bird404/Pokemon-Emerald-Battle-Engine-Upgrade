@@ -25,7 +25,6 @@ void update_battle_record(u8 bank, u8 action)
         battle_record[bank].action[*curr_byte] = action;
         *curr_byte += 1;
     }
-    return;
 }
 
 u8 read_recorded_battle_byte(u8 bank)

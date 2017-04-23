@@ -231,7 +231,7 @@ void* get_ability_name_ptr(enum poke_abilities ability)
     return ability_names_table[ability];
 }
 
-void* get_trainerclass_ptr(u8 classID)
+u8* get_trainerclass_ptr(u8 classID)
 {
     return trainerclass_names[classID];
 }
@@ -242,7 +242,30 @@ void* get_link_trainername(u8 linkID, u8 to_xor)
     return battle_link_pbs[get_linkpbs_id(bank)].trainer_name;
 }
 
-u16 battle_string_decoder(u8* src, u8* dst)
+u8* get_partner_name(void)
+{
+    u8* string_ptr = NULL;
+    if (battle_flags.player_ingame_partner)
+    {
+        if (partner_trainer & PARTNER_CUSTOM)
+            string_ptr = (*trainer_table)[BIC(partner_trainer, PARTNER_ANIMATES | PARTNER_CUSTOM)].name;
+        else
+        {
+            get_frontier_trainer_name(script_text_buffer1, partner_trainer);
+            string_ptr = script_text_buffer1;
+        }
+    }
+    else
+    {
+        u8 linkID = link_get_multiplayer_id();
+        linkID = battle_link_pbs[linkID].bank_id;
+        linkID = get_linkpbs_id(linkID ^ 2);
+        string_ptr = battle_link_pbs[linkID].trainer_name;
+    }
+    return string_ptr;
+}
+
+u16 battle_string_decoder(const u8* src, u8* dst)
 {
     u8 link_id = link_get_multiplayer_id();
     if (battle_flags.flag_x2000000)
@@ -578,11 +601,13 @@ u16 battle_string_decoder(u8* src, u8* dst)
                 }
                 break;
             case 50: //partner trainer class
-                string = get_trainerclass_ptr(get_frontier_opponent_class(partner_trainer));
+                if (partner_trainer & PARTNER_CUSTOM)
+                    string = get_trainerclass_ptr((*trainer_table)[BIC(partner_trainer, PARTNER_ANIMATES | PARTNER_CUSTOM)].class);
+                else
+                    string = get_trainerclass_ptr(get_frontier_opponent_class(partner_trainer));
                 break;
             case 51: //partner trainer name
-                get_frontier_trainer_name(text, partner_trainer);
-                string = text;
+                string = get_partner_name();
                 break;
             case 54: //current move
                 string = move_names_table[current_move];

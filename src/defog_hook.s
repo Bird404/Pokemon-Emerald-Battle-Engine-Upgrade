@@ -2,9 +2,7 @@
 .thumb
 .thumb_func
 
-.include "moveanimations.s"
-
-.align 2
+.align 1
 DEFOG_animation_hook:
 	ldr r0, =(0x020241EA)
 	ldrh r0, [r0]

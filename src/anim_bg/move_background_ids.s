@@ -1,6 +1,5 @@
 .text
 .thumb
-.align 2
 
 .equ AURA_SPHERE_background_user, 0x1B
 .equ AURA_SPHERE_background_foe, 0x1C

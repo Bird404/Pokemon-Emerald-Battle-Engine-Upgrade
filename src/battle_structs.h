@@ -325,7 +325,7 @@ struct status_3{
     u32 yawn : 2; //x800 || x1000
     u32 imprision : 1; //x2000
     u32 grudge : 1; //x4000
-    u32 unkown_no_crit : 1; //x8000
+    u32 atk_cant_crt : 1; //x8000
     u32 mud_sport : 1; //x10 000
     u32 watersport : 1; //x20 000
     u32 underwater : 1; //x40 000
@@ -773,7 +773,7 @@ struct poke_basestats{
     u8 padding2;
 };
 
-extern struct poke_basestats (*basestat_table)[ALL_POKES];
+extern const struct poke_basestats (*basestat_table)[ALL_POKES];
 
 struct battle_info_struct
 {
@@ -834,7 +834,7 @@ struct evolution_sub{
     u8 pad2;
 };
 
-extern struct evolution_sub (*evo_table)[ALL_POKES][NUM_OF_EVOS];
+extern const struct evolution_sub (*evo_table)[ALL_POKES][NUM_OF_EVOS];
 
 struct b_graphics_loc{
     void* beg_decompressed_sprites; //ptr to the decompressed sprite of the first pokemon
@@ -1051,6 +1051,17 @@ struct move_background_info{
     void* tileset;
     void* tilemap;
     void* pal;
+};
+
+struct img_size{
+    void* img;
+    u32 size;
+};
+
+struct trainerhrow_position{
+    u8 pos1;
+    u8 pos2;
+    u16 padd;
 };
 
 #endif /* B_STRUCTS */

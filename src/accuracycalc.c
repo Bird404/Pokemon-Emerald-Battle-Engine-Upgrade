@@ -180,7 +180,7 @@ u32 accuracy_percent(u16 move, u8 bankatk, u8 bankdef)
     return accuracy;
 }
 
-void accuracy_calc()
+void accuracy_calc(void)
 {
     u32 jump_loc = read_word(battlescripts_curr_instruction + 1);
     u16 arg = read_hword(battlescripts_curr_instruction + 5);
@@ -239,5 +239,4 @@ void accuracy_calc()
             }
         }
     }
-    return;
 }

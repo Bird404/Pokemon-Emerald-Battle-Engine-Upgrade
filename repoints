@@ -268,3 +268,25 @@ TAI_SCRIPT_1D 082DBF6C
 learnset_table 0806930C
 ### exp give
 BS_POKE_FAINTS_EXP_SLIDEIN 08041754
+### trainer throw images
+trainerthrow_imgs 0805DFD4
+trainerthrow_imgs 0818D098
+### trainer throw pals
+trainerthrow_pals 0805CBDC
+trainerthrow_pals 0805DFDC
+trainerthrow_pals 0814DCA0
+trainerthrow_pals 0816AA60
+trainerthrow_pals 0818CBF8
+trainerthrow_pals 081BE1F8
+### trainer throw positions
+trainerhrow_positions 0805B634
+trainerhrow_positions 0805B768
+trainerhrow_positions 0805B9DC
+trainerhrow_positions 080A98CC
+trainerhrow_positions 080A9958
+trainerhrow_positions 0814D0C8
+trainerhrow_positions 081598C4
+trainerhrow_positions 08169F78
+trainerhrow_positions 0816A044
+trainerhrow_positions 0818BEB8
+trainerhrow_positions 081BD3A4

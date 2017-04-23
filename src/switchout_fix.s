@@ -1,7 +1,7 @@
 .text
 .thumb
 .thumb_func
-.align 2
+.align 1
 
 explosion_like_switch_fix:
 	push {r1-r3}

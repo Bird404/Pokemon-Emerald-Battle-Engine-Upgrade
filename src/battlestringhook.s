@@ -1,7 +1,7 @@
 .text
 .thumb
 .thumb_func
-.align 2
+.align 1
 
 battlestringhook:
 	mov r0, #0xBE

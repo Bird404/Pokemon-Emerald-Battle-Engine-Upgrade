@@ -1,7 +1,7 @@
 .text
 .thumb
 .thumb_func
-.align 2
+.align 1
 
 FLASH_CANNON_animation_hook:
 	ldr r0, =(0x020241EA)

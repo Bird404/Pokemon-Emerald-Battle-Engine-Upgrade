@@ -13,7 +13,7 @@ void critcalc_cmd4();
 void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u16 chained_effectiveness);
 void damagecalc2();
 u8 affected_by_substitute(u8 substitute_bank);
-u8 find_move_in_table(u16 move, u16 table_ptr[]);
+u8 find_move_in_table(u16 move, const u16* table_ptr);
 u8 get_first_to_strike(u8 bank1, u8 bank2, u8 ignore_priority);
 u8 get_item_effect(u8 bank, u8 check_negating_effects);
 u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro);
@@ -21,6 +21,8 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
 void canuselastresort();
 void belch_canceler();
 void can_magneticflux_work();
+bool is_poke_usable(struct pokemon* poke);
+struct pokemon* get_bank_poke_ptr(u8 bank);
 
 #define AI_STATE battle_resources->tai_state
 
@@ -228,6 +230,46 @@ u8 ai_is_fatal(u8 atk_bank, u8 def_bank, u16 move)
         return 1;
     else
         return 0;
+}
+
+//switch functions
+u8 tai_find_best_to_switch(void)
+{
+    u8 bank = active_bank;
+    if (battle_stuff_ptr->field_5C[bank] == 6) {return 6;}
+    if (battle_flags.battle_arena) {return battle_team_id_by_side[bank] + 1;}
+    u8 from = 0, to = 5, partner = bank;
+    if (battle_flags.double_battle && is_bank_present(bank ^ 2))
+        partner = bank ^ 2;
+    if (battle_flags.multibattle && is_bank_from_opponent_side(bank))
+    {
+        if (bank == 1)
+            to = 2;
+        else if (bank == 3)
+            from = 3;
+    }
+    else if ((battle_flags.player_ingame_partner || battle_flags.player_partner) && !is_bank_from_opponent_side(bank))
+    {
+        if (bank == 0)
+            to = 2;
+        else if (bank == 2)
+            from = 3;
+    }
+    u32 candidates = 0;
+    struct pokemon* poke = get_bank_poke_ptr(bank);
+    for (u8 i = from; i < to; i++)
+    {
+        struct pokemon* curr_poke = &poke[i];
+        if (battle_team_id_by_side[bank] != i && battle_team_id_by_side[partner] != i && is_poke_usable(curr_poke))
+            candidates |= bits_table[i];
+    }
+    if (candidates == 0) {return 0;}
+    u8 to_ret;
+    do
+    {
+        to_ret = __umodsi3(rng(), 6);
+    } while(!(candidates & bits_table[to_ret]));
+    return to_ret;
 }
 
 void tai24_ismostpowerful() //no args, returns 1 if it's the most powerful move, otherwise 0
@@ -879,17 +921,17 @@ void tai6E_islockon_on() //u8 bankattacker, u8 banktarget
 
 void tai6F_discouragesports()
 {
-    u8 sport_arg = 0;
+    u8 discourage = 0;
     switch (AI_STATE->curr_move)
     {
     case MOVE_WATER_SPORT:
-        sport_arg = 0xFE;
+        discourage = new_battlestruct->field_affecting.watersport;
         break;
     case MOVE_MUD_SPORT:
-        sport_arg = 0xFD;
+        discourage = new_battlestruct->field_affecting.mudsport;
         break;
     }
-    if (ability_battle_effects(14, bank_target, 0xFF, sport_arg, 0))
+    if (discourage)
         AI_STATE->score[AI_STATE->moveset_index] -= 10;
     tai_current_instruction++;
 }
@@ -975,7 +1017,7 @@ u8 has_any_move_with_split(u8 bank, u8 split)
 u8 get_base_stat(u8 bank, u8 stat)
 {
     u16 species = ai_get_species(bank);
-    u8* stat_value = stat + &((*basestat_table)[species].base_hp);
+    const u8* stat_value = stat + &((*basestat_table)[species].base_hp);
     return *stat_value;
 }
 

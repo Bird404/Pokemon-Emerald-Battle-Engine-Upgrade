@@ -6,7 +6,7 @@ bool handle_primal_reversion(u8 bank);
 u8 check_ability(u8 bank, u8 ability);
 u8 change_stats(s8 arg1, s8 arg2, s8 arg3, void* battlescript_if_fails);
 void statustoeffect();
-u8 find_move_in_table(u16 move, u16 table_ptr[]);
+u8 find_move_in_table(u16 move, const u16* table_ptr);
 u8 healblock_forbidden_moves(u16 move, u8 with_leechseed);
 u8 gravity_forbidden_move(u16 move);
 u8 embargo_forbidden_move(u16 move);
@@ -502,8 +502,6 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
     else
         curr_move = current_move;
     u8 move_type = get_attacking_move_type();
-    if (!move_type)
-        move_type = move_table[curr_move].type;
 
     if (special_cases_argument)
         last_used_ability = special_cases_argument;
@@ -691,7 +689,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             {
                 effect = true;
                 battle_stuff_ptr->intimidate_user=bank;
-                execute_battle_script(frisk_bs);
+                execute_battle_script(FRISK_BS);
             }
             break;
         case ABILITY_FOREWARN:
@@ -951,7 +949,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             case ABILITY_BAD_DREAMS:
                 effect = true;
                 battle_stuff_ptr->intimidate_user=bank;
-                execute_battle_script(bad_dreams_bs);
+                execute_battle_script(BAD_DREAMS_BS);
                 break;
             case ABILITY_SPEED_BOOST:
                 if (battle_participants[bank].spd_buff != 0xC && disable_structs[bank].is_first_turn != 2)
@@ -1033,36 +1031,26 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
     case 2: //abilities that affect certain moves
         if (!has_ability_effect(bank, 1, 1))
             break;
-        u16* table_ptr;
+        const u16* table_ptr = NULL;
         switch (last_used_ability)
         {
         case ABILITY_SOUNDPROOF:
-            table_ptr = &sound_moves[0];
-            common_effect=1;
+            table_ptr = sound_moves;
             break;
         case ABILITY_BULLETPROOF:
-            table_ptr = &ball_bomb_moves[0];
-            common_effect=1;
+            table_ptr = ball_bomb_moves;
             break;
         case ABILITY_OVERCOAT:
-            table_ptr = &powder_moves[0];
-            common_effect=1;
+            table_ptr = powder_moves;
             break;
         }
-        if(common_effect)
+        if (table_ptr != NULL && find_move_in_table(current_move, table_ptr))
         {
-            for (u8 i = 0; table_ptr[i]!= 0xFFFF; i++)
+            effect = true;
+            battlescripts_curr_instruction = (void*) 0x082DB61F;
+            if (battle_participants[bank_attacker].status2.multiple_turn_move)
             {
-                if (current_move == table_ptr[i])
-                {
-                    effect = true;
-                    battlescripts_curr_instruction = (void*) 0x082DB61F;
-                    if (battle_participants[bank_attacker].status2.multiple_turn_move)
-                    {
-                        hitmarker |= 0x800;
-                    }
-                    break;
-                }
+                hitmarker |= 0x800;
             }
         }
         break;
@@ -1104,7 +1092,6 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 case ABILITY_LIGHTNING_ROD:
                     if (move_type == TYPE_ELECTRIC && (!is_of_type(bank,TYPE_GROUND) || get_item_effect(bank,1)==ITEM_EFFECT_RINGTARGET))
                     {
-
                         common_effect=2;
                         stat=4;
                     }
@@ -1480,7 +1467,6 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         }
         break;
     case 12: //check opposing field for ability
-    {
         for (u8 i = 0; i < no_of_all_banks; i++)
         {
             if (is_bank_from_opponent_side(i) != bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument, 1))
@@ -1491,9 +1477,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             }
         }
         break;
-    }
     case 13: //check bank field for ability
-    {
         for (u8 i = 0; i < no_of_all_banks; i++)
         {
             if (is_bank_from_opponent_side(i) == bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument, 1))
@@ -1504,87 +1488,69 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             }
         }
         break;
-    }
-    case 14: //check field affecting; mud, water sport and whole field for ability
+    case 14: //check field affecting; whole field for ability
+        for (u8 i = 0; i < no_of_all_banks; i++)
         {
-            for (u8 i = 0; i < no_of_all_banks; i++)
+            if (battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument, 1))
             {
-                if ((status3[i].mud_sport && special_cases_argument == 0xFD) || (status3[i].watersport && special_cases_argument == 0xFE))
-                {
-                    effect = i + 1;
-                    break;
-                }
-                else if (battle_participants[i].ability_id == ability_to_check  && has_ability_effect(i, special_cases_argument, 1))
-                {
-                    effect = i + 1;
-                    last_used_ability = ability_to_check;
-                    break;
-                }
+                effect = i + 1;
+                last_used_ability = ability_to_check;
+                break;
             }
-            break;
         }
+        break;
     case 15: //check field except the bank
+        for (u8 i = 0; i < no_of_all_banks; i++)
         {
-            for (u8 i = 0; i < no_of_all_banks; i++)
+            if (battle_participants[i].ability_id == ability_to_check && i != bank && has_ability_effect(i, special_cases_argument, 1))
             {
-                if (battle_participants[i].ability_id == ability_to_check && i != bank && has_ability_effect(i, special_cases_argument, 1))
-                {
-                    effect = i + 1;
-                    last_used_ability = ability_to_check;
-                    break;
-                }
+                effect = i + 1;
+                last_used_ability = ability_to_check;
+                break;
             }
-            break;
         }
+        break;
     case 16: //count instances of ability in the opponent field
+        for (u8 i = 0; i < no_of_all_banks; i++)
         {
-            for (u8 i = 0; i < no_of_all_banks; i++)
+            if (is_bank_from_opponent_side(i) != bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument, 1))
             {
-                if (is_bank_from_opponent_side(i) != bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument, 1))
-                {
-                    effect++;
-                    last_used_ability = ability_to_check;
-                }
+                effect++;
+                last_used_ability = ability_to_check;
             }
-            break;
         }
+        break;
     case 17: //count instances of ability in the banks field
+        for (u8 i = 0; i < no_of_all_banks; i++)
         {
-            for (u8 i = 0; i < no_of_all_banks; i++)
+            if (is_bank_from_opponent_side(i) == bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument, 1))
             {
-                if (is_bank_from_opponent_side(i) == bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument, 1))
-                {
-                    effect++;
-                    last_used_ability = ability_to_check;
-                }
+                effect++;
+                last_used_ability = ability_to_check;
             }
-            break;
         }
+        break;
     case 18: //count instances of ability except bank
+        for (u8 i = 0; i < no_of_all_banks; i++)
         {
-            for (u8 i = 0; i < no_of_all_banks; i++)
+            if ( i != bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument, 1))
             {
-                if ( i != bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument, 1))
-                {
-                    effect++;
-                    last_used_ability = ability_to_check;
-                }
+                effect++;
+                last_used_ability = ability_to_check;
             }
-            break;
         }
+        break;
     case 19: //check whole field for ability with a hp check
+        for (u8 i = 0; i < no_of_all_banks; i ++)
         {
-            for (u8 i = 0; i < no_of_all_banks; i ++)
+            if (battle_participants[i].ability_id == ability_to_check && battle_participants[i].current_hp && has_ability_effect(i, special_cases_argument, 1))
             {
-                if (battle_participants[i].ability_id == ability_to_check && battle_participants[i].current_hp && has_ability_effect(i, special_cases_argument, 1))
-                {
-                    effect = i + 1;
-                    last_used_ability = ability_to_check;
-                    break;
-                }
+                effect = i + 1;
+                last_used_ability = ability_to_check;
+                break;
             }
-            break;
         }
+        break;
     case 20: //check ally
         {
             u8 ally = bank ^ 2;
@@ -1647,12 +1613,6 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
     if (effect && last_used_ability != 0xFF && switch_id < 0xB)
         record_usage_of_ability(bank, last_used_ability);
     return effect;
-}
-
-void call_ability_effects()
-{
-    ability_battle_effects(0, new_battlestruct->various.active_bank, 0, 0, 0);
-    return;
 }
 
 u8 white_herb_effect(u8 bank, enum call_mode calling_mode)
@@ -2530,7 +2490,6 @@ u8 not_magicguard(u8 bank);
 
 u8 berry_eaten(u8 bank, bool from_remove_item)
 {
-
     u8 cheek_pouch = 0;
     if (new_battlestruct->bank_affecting[bank].eaten_berry)
     {
@@ -3163,7 +3122,7 @@ bool battle_turn_move_effects()
                         if (ptr_to_struct->telekinesis == 0)
                         {
                             effect = 1;
-                            call_bc_move_exec(&telekinesis_end_bs);
+                            call_bc_move_exec(BS_TELEKINESIS_ENDS_2);
                         }
                     }
                     break;
@@ -3290,7 +3249,7 @@ void move_to_buffer(u16 move)
 
 bool update_turn_counters()
 {
-    #define TURN_LAST_CASE 26
+    #define TURN_LAST_CASE 28
     bool effect = 0;
     for (bank_attacker = 0; bank_attacker < no_of_all_banks; bank_attacker++)
     {
@@ -3404,14 +3363,39 @@ bool update_turn_counters()
             }
             *statetracker +=1;
             break;
-        case 7: //ion deluge and fairy lock
+        case 7: //mud sport
+            if (new_battlestruct->field_affecting.mudsport)
+            {
+                new_battlestruct->field_affecting.mudsport--;
+                if (new_battlestruct->field_affecting.mudsport == 0)
+                {
+                    effect = 1;
+                    call_bc_move_exec(BS_PRINT_SPORT_FADED);
+                    move_to_buffer(MOVE_MUD_SPORT);
+                }
+            }
+            *statetracker +=1;
+            break;
+        case 8: //water sport
+            if (new_battlestruct->field_affecting.watersport)
+            {
+                new_battlestruct->field_affecting.watersport--;
+                if (new_battlestruct->field_affecting.watersport == 0)
+                {
+                    effect = 1;
+                    call_bc_move_exec(BS_PRINT_SPORT_FADED);
+                    move_to_buffer(MOVE_WATER_SPORT);
+                }
+            }
+            *statetracker +=1;
+            break;
+        case 9: //ion deluge and fairy lock
             if (new_battlestruct->field_affecting.ion_deluge)
                 new_battlestruct->field_affecting.ion_deluge--;
             if (new_battlestruct->field_affecting.fairy_lock)
                 new_battlestruct->field_affecting.fairy_lock--;
             *statetracker +=1;
-            break;
-        case 8: //something with turn order
+        case 10: //something with turn order
             for (u8 i = 0; i < no_of_all_banks; i++)
             {
                 turn_order[i] = i;
@@ -3431,7 +3415,7 @@ bool update_turn_counters()
             }
             *statetracker +=1;
             *sidebank = 0;
-        case 9: //reflect
+        case 11: //reflect
             while (*sidebank <= 1 && effect == 0)
             {
                 if (side_affecting_halfword[*sidebank].reflect_on)
@@ -3454,7 +3438,7 @@ bool update_turn_counters()
                 *statetracker +=1;
             }
             break;
-        case 10: //light screen
+        case 12: //light screen
             while (*sidebank <= 1 && effect == 0)
             {
                 if (side_affecting_halfword[*sidebank].light_screen_on)
@@ -3478,7 +3462,7 @@ bool update_turn_counters()
                 *statetracker +=1;
             }
             break;
-        case 11: //mist
+        case 13: //mist
             while (*sidebank <= 1 && effect == 0)
             {
                 if (side_affecting_halfword[*sidebank].mist_on)
@@ -3502,7 +3486,7 @@ bool update_turn_counters()
                 *statetracker +=1;
             }
             break;
-        case 12: //safeguard
+        case 14: //safeguard
             while (*sidebank <= 1 && effect == 0)
             {
                 if (side_affecting_halfword[*sidebank].safeguard_on)
@@ -3526,7 +3510,7 @@ bool update_turn_counters()
                 *statetracker +=1;
             }
             break;
-        case 13: //lucky chant
+        case 15: //lucky chant
             while (*sidebank <= 1 && effect == 0)
             {
                 if (new_battlestruct->side_affecting[*sidebank].lucky_chant)
@@ -3549,7 +3533,7 @@ bool update_turn_counters()
                 *statetracker +=1;
             }
             break;
-        case 14: //tailwind
+        case 16: //tailwind
             while (*sidebank <= 1 && effect == 0)
             {
                 if (new_battlestruct->side_affecting[*sidebank].tailwind)
@@ -3572,7 +3556,7 @@ bool update_turn_counters()
                 *statetracker +=1;
             }
             break;
-        case 15: //swamp
+        case 17: //swamp
             while (*sidebank <= 1 && effect == 0)
             {
                 if (new_battlestruct->side_affecting[*sidebank].swamp_spd_reduce)
@@ -3594,7 +3578,7 @@ bool update_turn_counters()
                 *statetracker +=1;
             }
             break;
-        case 16: //sea of fire
+        case 18: //sea of fire
             while (*sidebank <= 5 && effect == 0)
             {
                 u8 side = (*sidebank)&1;
@@ -3652,7 +3636,7 @@ bool update_turn_counters()
                 *statetracker +=1;
             }
             break;
-        case 17: //rainbow
+        case 19: //rainbow
             while (*sidebank <= 1 && effect == 0)
             {
                 if (new_battlestruct->side_affecting[*sidebank].rainbow)
@@ -3674,7 +3658,7 @@ bool update_turn_counters()
                 *statetracker +=1;
             }
             break;
-        case 18: //wish
+        case 20: //wish
             while (*sidebank < no_of_all_banks && effect == 0)
             {
                 if (battle_effects_duration.wish_duration[*sidebank])
@@ -3695,7 +3679,7 @@ bool update_turn_counters()
                 *statetracker +=1;
             }
             break;
-        case 19: //new struct
+        case 21: //new struct
             while (*sidebank <= 1)
             {
                 if (new_battlestruct->side_affecting[*sidebank].ally_fainted_last_turn)
@@ -3712,7 +3696,7 @@ bool update_turn_counters()
             }
             *sidebank = 0;
             *statetracker += 1;
-        case 20: //echo voice
+        case 22: //echo voice
             {
                 bool echo_used = 0;
                 for (u8 i = 0; i < no_of_all_banks; i++)
@@ -3732,7 +3716,7 @@ bool update_turn_counters()
                 }
                 *statetracker += 1;
             }
-        case 21: //rain
+        case 23: //rain
             if (battle_weather.flags.rain || battle_weather.flags.downpour || battle_weather.flags.heavy_rain || battle_weather.flags.permament_rain)
             {
                 effect = 1;
@@ -3757,7 +3741,7 @@ bool update_turn_counters()
             *sidebank = 0;
             *statetracker += 1;
             break;
-        case 22: //sun
+        case 24: //sun
             if (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)
             {
                 effect = 1;
@@ -3772,7 +3756,7 @@ bool update_turn_counters()
             }
             *statetracker += 1;
             break;
-        case 23: //darude
+        case 25: //darude
             if (battle_weather.flags.sandstorm || battle_weather.flags.permament_sandstorm)
             {
                 effect = 1;
@@ -3789,7 +3773,7 @@ bool update_turn_counters()
             }
             *statetracker += 1;
             break;
-        case 24: //hail
+        case 26: //hail
             if (battle_weather.flags.hail || battle_weather.flags.permament_hail)
             {
                 effect = 1;
@@ -3806,7 +3790,7 @@ bool update_turn_counters()
             }
             *statetracker += 1;
             break;
-        case 25: //fog
+        case 27: //fog
             if (battle_weather.flags.fog || battle_weather.flags.permament_fog)
             {
                 effect = 1;

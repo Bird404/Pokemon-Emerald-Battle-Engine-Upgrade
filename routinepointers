@@ -55,14 +55,13 @@ atkDE_assistmovechoose 0831C088
 atkE1_intimidate_loop 0831C094
 atkE2_switchout_abilities 0831C098
 atkE4_secretpowereffect 0831C0A0
+atkE8_settypebasedhalvers 0831C0B0
 atkEB_set_type_to_terrain 0831C0BC
 atkEF_ballthrow 0831C0CC
 atkF0_copy_caught_poke 0831C0D0
 atkF1_setpoke_as_caught 0831C0D4
 atkF2_display_dex_info 0831C0D8
 atkF3_nickname_caught_poke 0831C0DC
-###new animation commands
-anim6_swap_banks 08525EB0
 ###start attack
 bs_start_attack 0831BC0C
 ###pre attacks

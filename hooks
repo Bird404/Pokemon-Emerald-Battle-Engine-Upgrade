@@ -55,3 +55,16 @@ b_load_fitting_bg 08035770 0
 b_load_fitting_entry_bg 08036154 0
 b_load_chosen_bg_element 080363C4 1
 battle_turn_passed 0803B9BC 0
+no_item_if_embargo 081B14C6 0
+special_EF_hook 08163ACC 3
+bbp07_correct_sprite 0805B5B4 0
+bbp07_correct_sprite2 0805B664 0
+bbpp07_correct_sprite 081BD384 0
+window_control_multibattle 0803682C 1
+prepare_intro_slide 081181E8 0
+bbpp2F_trainer_throw 081BE1B0 1
+get_partner_name 0806EBF8 2
+get_partner_frontier_spriteID 08162AA0 1
+is_in_tag_battle 081B1250 0
+tag_wild_prepare_buffer_hook 0803AEC0 0
+bbp2F_trainer_throw 0805CB28 0

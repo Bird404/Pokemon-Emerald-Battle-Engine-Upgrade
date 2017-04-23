@@ -26,6 +26,46 @@ const struct b_background_info battle_bgs[] = {
     {&bg_boss_tileset, &bg_boss_tilemap, &entry_bg_indoors_tileset, &entry_bg_indoors_tilemap, &bg_elitefour4_pal}, //22 elitefour4
 };
 
+const struct img_size trainerthrow_imgs[] = {
+    {(void*) 0x8D66480, 0x2000}, // 0 brendan
+    {(void*) 0x8D68480, 0x12000}, // 1 may
+    {(void*) 0x8D6A480, 0x22800}, // 2 FR male protag
+    {(void*) 0x8D6CC80, 0x32800}, // 3 FR female protag
+    {(void*) 0x8D6F480, 0x42000}, // 4 RS brendan
+    {(void*) 0x8D71480, 0x52000}, // 5 RS may
+    {(void*) 0x8D73480, 0x62000}, // 6 wally
+    {(void*) 0x8D75480, 0x72000}, // 7 steven
+};
+
+const struct img_size trainerthrow_pals[] = {
+    {(void*) 0x8D61A30, 0}, // 0 brendan
+    {(void*) 0x8D61D58, 1}, // 1 may
+    {(void*) 0x8D77480, 2}, // 2 FR male protag
+    {(void*) 0x8D774A8, 3}, // 3 FR female protag
+    {(void*) 0x8D66130, 4}, // 4 RS brendan
+    {(void*) 0x8D66458, 5}, // 5 RS may
+    {(void*) 0x8D616E4, 6}, // 6 wally
+    {(void*) 0x8D63E88, 7}, // 7 steven
+};
+
+const struct trainerhrow_position trainerhrow_positions[] = {
+    {8, 4, 0}, // 0 brendan
+    {8, 4, 0}, // 1 may
+    {8, 5, 0}, // 2 FR male protag
+    {8, 5, 0}, // 3 FR female protag
+    {8, 4, 0}, // 4 RS brendan
+    {8, 4, 0}, // 5 RS may
+    {8, 4, 0}, // 6 wally
+    {8, 4, 0}, // 7 steven
+};
+
+bool does_partner_animate()
+{
+    if (partner_trainer == TRAINER_STEVEN  || (partner_trainer & PARTNER_ANIMATES))
+        return 1;
+    return 0;
+}
+
 u8 get_fitting_BG_ID(void)
 {
     if (BATTLE_FRONTIER_BATTLE || battle_flags.link)
@@ -104,6 +144,17 @@ void b_load_fitting_entry_bg(void)
         BG1Y_battle = 0xFF5C;
         bg2Y_battle = 0xFF5C;
         gpu_decompress_tile_obj_alloc_tag_and_upload((void*)(0x831AA00));
+    }
+    else if (battle_flags.player_ingame_partner && !does_partner_animate())
+    {
+        gpu_bg_config_set_field(1, 1, 2);
+        gpu_bg_config_set_field(2, 1, 2);
+
+        tilemap_decompress_wram_BGconfig(1, (void*)(0x8D857A8), 0, 0);
+        tilemap_decompress_wram_BGconfig(2, (void*)(0x8D85A1C), 0, 0);
+
+        bgid_send_tilemap(1);
+        bgid_send_tilemap(2);
     }
     else
     {

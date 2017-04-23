@@ -5,18 +5,18 @@
 #include "battle_structs.h"
 
 extern const struct move_info move_table[1024];
-extern u16 forewarn_moves[];
-extern u16 sound_moves[];
-extern u16 powder_moves[];
-extern u16 ball_bomb_moves[];
-extern u16 reckless_moves_table[];
-extern u16 ironfist_moves_table[];
-extern u16 sheerforce_moves_table[];
-extern u16 biting_moves_table[];
-extern u16 megalauncher_moves_table[];
-extern u16 moveshitting_onair[];
-extern u16 moveshitting_underground[];
-extern u16 moveshitting_underwater[];
+extern const u16 forewarn_moves[];
+extern const u16 sound_moves[];
+extern const u16 powder_moves[];
+extern const u16 ball_bomb_moves[];
+extern const u16 reckless_moves_table[];
+extern const u16 ironfist_moves_table[];
+extern const u16 sheerforce_moves_table[];
+extern const u16 biting_moves_table[];
+extern const u16 megalauncher_moves_table[];
+extern const u16 moveshitting_onair[];
+extern const u16 moveshitting_underground[];
+extern const u16 moveshitting_underwater[];
 
 extern void* transform_bs;
 extern void* snow_warning_bs;
@@ -96,7 +96,6 @@ extern void* no_effect_bs;
 extern void* lunardance_bs;
 extern void* leechseed_updated_bs;
 extern void* poisonheal_bs;
-extern void* telekinesis_end_bs;
 extern void* embargo_end_bs;
 extern void* magnetrise_end_bs;
 extern void* wrapped_bs;
@@ -133,7 +132,6 @@ extern void* bad_dreams_bs();
 extern void* CANCELER_FAIL();
 extern void* incinerateberry_bs;
 extern void* magnetrise_end_return_bs;
-extern void* telekinesis_end_return_bs;
 extern void* gravitybringsdown_bs;
 extern void* clearstats_bs;
 extern void* smackdown_bs;
@@ -189,8 +187,17 @@ extern void* berry_redux_bs;
 extern void* capture_exp_bs;
 
 //extern scripts from battlescripts.s file
-extern void* BS_BALL_BLOCK;
-extern void* BS_CUSTOM_LOSS;
-extern void* BS_TRAINER_SLIDE_MSG_RETURN;
-extern void* BS_TRAINER_SLIDE_MSG_END2;
+extern u8 BS_TELEKINESIS_ENDS_RET[];
+extern u8 BS_TELEKINESIS_ENDS_2[];
+extern u8 BS_BALL_BLOCK[];
+extern u8 BS_CUSTOM_LOSS[];
+extern u8 BS_TRAINER_SLIDE_MSG_RETURN[];
+extern u8 BS_TRAINER_SLIDE_MSG_END2[];
+extern u8 BS_PRINT_SPORT_FADED[];
+extern u8 FRISK_BS[];
+extern u8 BAD_DREAMS_BS[];
+extern u8 BS_MEGA_EVO[];
+extern u8 BS_FERVENT_EVO[];
+extern u8 BS_ALPHA_PRIMAL[];
+extern u8 BS_OMEGA_PRIMAL[];
 #endif /* static_references */

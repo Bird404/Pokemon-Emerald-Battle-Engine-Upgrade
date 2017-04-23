@@ -78,6 +78,7 @@ jumpifhalfword 0x1 0x020241EA \jumpifnotmove_move \jumpifnotmove_address
 .word \jumpifuserhasnoHP_address
 .endm
 
+.align 2
 battlescripts_table:
 .word ATTACKING_MOVE	@ 0	Just attacks target(Tackle)
 .word FIXED_DAMAGE		@1 Sonicboom, Dragon Rage, etc.
@@ -406,7 +407,18 @@ FLING_MISS:
 SECRETPOWER:
 	secretpowereffect
 	goto_cmd ATTACKING_MOVE
-
+	
+WATERMUD_SPORT:
+	attackcanceler
+	settypebasedhalvers MOVE_FAILED
+	attackstring
+	ppreduce
+	attackanimation
+	waitanimation
+	printfromtable 0x85CC900
+	waitmessage 0x40
+	goto_cmd ENDTURN
+	
 ACUPRESSURE:
 	attackcanceler
 	attackstring
@@ -1015,8 +1027,8 @@ TWOTURN_MAYBEONETURNIFWEATHER:
 	call TWOTURN_LOADINGTURN
 	callasm_cmd 85 @power herb check
 	.word TWOTURNFLINCHCHANCE_ACTUALMOVE
-	jumpifabilitypresent 0xD NOWEATHERJUMP
-	jumpifabilitypresent 0x4D NOWEATHERJUMP
+	jumpifabilitypresent ABILITY_CLOUD_NINE NOWEATHERJUMP
+	jumpifabilitypresent ABILITY_AIR_LOCK NOWEATHERJUMP
 	jumpifhalfword 0x4 0x20243CC 0x860 TWOTURN_MAYBEONETURNIFWEATHER_ACTUALMOVE
 NOWEATHERJUMP:
 	call SETTWOTURN

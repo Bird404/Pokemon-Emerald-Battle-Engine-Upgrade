@@ -77,7 +77,7 @@ extern u8 healthbox_obj_id_pbs[4];
 extern u8 move_selection_chosen_target_pbs[4];
 extern u8 moves_to_choose_pbs[4];
 extern u8 move_selection_cursor_pbs[4];
-extern u32 bits_table[32];
+extern const u32 bits_table[32];
 extern u32 PiD_pbs[4];
 extern u8 decompression_buffer[0xF80];
 extern u8 nick_male_sign[5];
@@ -122,6 +122,8 @@ extern u16 var_8005;
 extern u16 var_8006;
 extern u16 var_8007;
 extern u8 which_spotted_trainer;
+extern u8 partner_sprite;
+extern u8 player_backsprite;
 
 extern void* battletextbox_tileset;
 extern void* battletextbox_tilemap;

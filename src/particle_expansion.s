@@ -1,8 +1,6 @@
 .text
 .thumb
 
-.include "anim_particle/particle_image.s"
-.include "anim_particle/particle_pallet.s"
 .include "anim_particle/particle_ids.s"
 
 @Battle Animations Particles Table

@@ -14,13 +14,15 @@ u8 get_item_effect(u8 bank, u8 check_negating_effects);
 u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro);
 s8 get_move_position(u8 bank, u16 move);
 u8 weather_abilities_effect();
+u8 is_of_type(u8 bank, u8 type);
+bool check_ability(u8 bank, u8 ability);
 
 struct natural_gift{
     u8 move_power;
     u8 move_type;
 };
 
-struct natural_gift natural_gift_table[] = { {0xFF, 0} ,{80, TYPE_FIRE}, {80, TYPE_WATER}, {80, TYPE_ELECTRIC}, {80, TYPE_GRASS}, {80, TYPE_ICE}, {80, TYPE_FIGHTING}, {80, TYPE_POISON}, {80, TYPE_GROUND}, {80, TYPE_FLYING}, {80, TYPE_PSYCHIC}, {80, TYPE_BUG}, {80, TYPE_ROCK}, {80, TYPE_GHOST}, {80, TYPE_DRAGON}, {80, TYPE_DARK}, {80, TYPE_STEEL}, {90, TYPE_FIRE}, {90, TYPE_WATER}, {90, TYPE_ELECTRIC}, {90, TYPE_GRASS}, {90, TYPE_ICE}, {90, TYPE_FIGHTING}, {90, TYPE_POISON}, {90, TYPE_GROUND}, {90, TYPE_FLYING}, {90, TYPE_PSYCHIC}, {90, TYPE_BUG}, {90, TYPE_ROCK}, {90, TYPE_GHOST}, {90, TYPE_DRAGON}, {90, TYPE_DARK}, {90, TYPE_STEEL}, {100, TYPE_FIRE}, {100, TYPE_WATER}, {100, TYPE_ELECTRIC}, {100, TYPE_FIGHTING}, {100, TYPE_POISON}, {100, TYPE_GROUND}, {100, TYPE_FLYING}, {100, TYPE_PSYCHIC}, {100, TYPE_BUG} };;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+const struct natural_gift natural_gift_table[] = { {0xFF, 0} ,{80, TYPE_FIRE}, {80, TYPE_WATER}, {80, TYPE_ELECTRIC}, {80, TYPE_GRASS}, {80, TYPE_ICE}, {80, TYPE_FIGHTING}, {80, TYPE_POISON}, {80, TYPE_GROUND}, {80, TYPE_FLYING}, {80, TYPE_PSYCHIC}, {80, TYPE_BUG}, {80, TYPE_ROCK}, {80, TYPE_GHOST}, {80, TYPE_DRAGON}, {80, TYPE_DARK}, {80, TYPE_STEEL}, {90, TYPE_FIRE}, {90, TYPE_WATER}, {90, TYPE_ELECTRIC}, {90, TYPE_GRASS}, {90, TYPE_ICE}, {90, TYPE_FIGHTING}, {90, TYPE_POISON}, {90, TYPE_GROUND}, {90, TYPE_FLYING}, {90, TYPE_PSYCHIC}, {90, TYPE_BUG}, {90, TYPE_ROCK}, {90, TYPE_GHOST}, {90, TYPE_DRAGON}, {90, TYPE_DARK}, {90, TYPE_STEEL}, {100, TYPE_FIRE}, {100, TYPE_WATER}, {100, TYPE_ELECTRIC}, {100, TYPE_FIGHTING}, {100, TYPE_POISON}, {100, TYPE_GROUND}, {100, TYPE_FLYING}, {100, TYPE_PSYCHIC}, {100, TYPE_BUG} };
 
 struct fling{
     u16 item_id;
@@ -28,20 +30,18 @@ struct fling{
     u8 move_effect;
 };
 
-struct fling fling_table[] = { {ITEM_CHOICEBAND, 10, 0}, {ITEM_BRIGHTPOWDER, 10, 0}, {ITEM_FOCUSBAND, 10, 0}, {ITEM_LEFTOVERS, 10, 0}, {ITEM_MENTALHERB, 10, 0}, {ITEM_METALPOWDER, 10, 0}, {ITEM_SILKSCARF, 10, 0}, {ITEM_SILVERPOWDER, 10, 0}, {ITEM_SOFTSAND, 10, 0}, {ITEM_SOOTHEBELL, 10, 0}, {ITEM_WHITEHERB, 10, 0}, {ITEM_ANTIDOTE, 30, 0}, {ITEM_PARLYZHEAL, 30, 0}, {ITEM_AWAKENING, 30, 0}, {ITEM_BURNHEAL, 30, 0}, {ITEM_ICEHEAL, 30, 0}, {ITEM_FULLHEAL, 30, 0}, {ITEM_FULLRESTORE, 30, 0}, {ITEM_LAVACOOKIE, 30, 0}, {ITEM_POTION, 30, 0}, {ITEM_SUPERPOTION, 30, 0}, {ITEM_HYPERPOTION, 30, 0}, {ITEM_MAXPOTION, 30, 0}, {ITEM_HEALPOWDER, 30, 0}, {ITEM_ENERGYPOWDER, 30, 0}, {ITEM_ENERGYROOT, 30, 0}, {ITEM_REVIVALHERB, 30, 0}, {ITEM_REVIVE, 30, 0}, {ITEM_MAXREVIVE, 30, 0}, {ITEM_SODAPOP, 30, 0}, {ITEM_LEMONADE, 30, 0}, {ITEM_SODAPOP, 30, 0}, {ITEM_MOOMOOMILK, 30, 0}, {ITEM_BERRYJUICE, 30, 0}, {ITEM_ETHER, 30, 0}, {ITEM_MAXETHER, 30, 0}, {ITEM_ELIXIR, 30, 0}, {ITEM_MAXELIXIR, 30, 0}, {ITEM_REPEL, 30, 0}, {ITEM_SUPERREPEL, 30, 0}, {ITEM_MAXREPEL, 30, 0}, {ITEM_PROTEIN, 30, 0}, {ITEM_ZINC, 30, 0}, {ITEM_CALCIUM, 30, 0}, {ITEM_CARBOS, 30, 0}, {ITEM_HPUP, 30, 0}, {ITEM_PPUP, 30, 0}, {ITEM_PPMAX, 30, 0}, {ITEM_REDSHARD, 30, 0}, {ITEM_BLUESHARD, 30, 0}, {ITEM_YELLOWSHARD, 30, 0}, {ITEM_GREENSHARD, 30, 0}, {ITEM_XACCURACY, 30, 0}, {ITEM_XDEFEND, 30, 0}, {ITEM_XSPEED, 30, 0}, {ITEM_XATTACK, 30, 0}, {ITEM_XSPECIAL, 30, 0}, {ITEM_YELLOWFLUTE, 30, 0}, {ITEM_BLACKFLUTE, 30, 0}, {ITEM_WHITEFLUTE, 30, 0}, {ITEM_REDFLUTE, 30, 0}, {ITEM_BLUEFLUTE, 30, 0}, {ITEM_AMULETCOIN, 30, 0}, {ITEM_BIGMUSHROOM, 30, 0}, {ITEM_BIGPEARL, 30, 0}, {ITEM_BLACKBELT, 30, 0}, {ITEM_CHARCOAL, 30, 0}, {ITEM_CLEANSETAG, 30, 0}, {ITEM_DEEPSEASCALE, 30, 0}, {ITEM_DRAGONSCALE, 30, 0}, {ITEM_ESCAPEROPE, 30, 0}, {ITEM_EVERSTONE, 30, 0}, {ITEM_EXPSHARE, 30, 0}, {ITEM_FIRESTONE, 30, 0}, {ITEM_FLUFFYTAIL, 30, 0}, {ITEM_HEARTSCALE, 30, 0}, {ITEM_KINGSROCK, 30, 0}, {ITEM_LEAFSTONE, 30, 0}, {ITEM_LIGHTBALL, 30, 0}, {ITEM_LUCKYEGG, 30, 0}, {ITEM_MAGNET, 30, 0}, {ITEM_METALCOAT, 30, 0}, {ITEM_MIRACLESEED, 30, 0}, {ITEM_MOONSTONE, 30, 0}, {ITEM_MYSTICWATER, 30, 0}, {ITEM_NEVERMELTICE, 30, 0}, {ITEM_NUGGET, 30, 0}, {ITEM_PEARL, 30, 0}, {ITEM_POKEDOLL, 30, 0}, {ITEM_SACREDASH, 30, 0}, {ITEM_SCOPELENS, 30, 0}, {ITEM_SHELLBELL, 30, 0}, {ITEM_SHOALSALT, 30, 0}, {ITEM_SHOALSHELL, 30, 0}, {ITEM_SMOKEBALL, 30, 0}, {ITEM_SOULDEW, 30, 0}, {ITEM_SPELLTAG, 30, 0}, {ITEM_STARDUST, 30, 0}, {ITEM_STARPIECE, 30, 0}, {ITEM_SUNSTONE, 30, 0}, {ITEM_THUNDERSTONE, 30, 0}, {ITEM_TINYMUSHROOM, 30, 0}, {ITEM_TWISTEDSPOON, 30, 0}, {ITEM_UPGRADE, 30, 0}, {ITEM_WATERSTONE, 30, 0}, {ITEM_LUCKYPUNCH, 40, 0}, {ITEM_SHARPBEAK, 50, 0}, {ITEM_MACHOBRACE, 60, 0}, {ITEM_STICK, 60, 0}, {ITEM_DRAGONFANG, 70, 0}, {ITEM_POISONBARB, 70, 0}, {ITEM_QUICKCLAW, 80, 0}, {ITEM_DEEPSEATOOTH, 90, 0}, {ITEM_THICKCLUB, 90, 0}, {ITEM_DOMEFOSSIL, 100, 0}, {ITEM_HELIXFOSSIL, 100, 0}, {ITEM_OLDAMBER, 100, 0}, {ITEM_ROOTFOSSIL, 100, 0}, {ITEM_CLAWFOSSIL, 100, 0}, {0xFFFF, 0, 0} };;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+const struct fling fling_table[] = { {ITEM_CHOICEBAND, 10, 0}, {ITEM_BRIGHTPOWDER, 10, 0}, {ITEM_FOCUSBAND, 10, 0}, {ITEM_LEFTOVERS, 10, 0}, {ITEM_MENTALHERB, 10, 0}, {ITEM_METALPOWDER, 10, 0}, {ITEM_SILKSCARF, 10, 0}, {ITEM_SILVERPOWDER, 10, 0}, {ITEM_SOFTSAND, 10, 0}, {ITEM_SOOTHEBELL, 10, 0}, {ITEM_WHITEHERB, 10, 0}, {ITEM_ANTIDOTE, 30, 0}, {ITEM_PARLYZHEAL, 30, 0}, {ITEM_AWAKENING, 30, 0}, {ITEM_BURNHEAL, 30, 0}, {ITEM_ICEHEAL, 30, 0}, {ITEM_FULLHEAL, 30, 0}, {ITEM_FULLRESTORE, 30, 0}, {ITEM_LAVACOOKIE, 30, 0}, {ITEM_POTION, 30, 0}, {ITEM_SUPERPOTION, 30, 0}, {ITEM_HYPERPOTION, 30, 0}, {ITEM_MAXPOTION, 30, 0}, {ITEM_HEALPOWDER, 30, 0}, {ITEM_ENERGYPOWDER, 30, 0}, {ITEM_ENERGYROOT, 30, 0}, {ITEM_REVIVALHERB, 30, 0}, {ITEM_REVIVE, 30, 0}, {ITEM_MAXREVIVE, 30, 0}, {ITEM_SODAPOP, 30, 0}, {ITEM_LEMONADE, 30, 0}, {ITEM_SODAPOP, 30, 0}, {ITEM_MOOMOOMILK, 30, 0}, {ITEM_BERRYJUICE, 30, 0}, {ITEM_ETHER, 30, 0}, {ITEM_MAXETHER, 30, 0}, {ITEM_ELIXIR, 30, 0}, {ITEM_MAXELIXIR, 30, 0}, {ITEM_REPEL, 30, 0}, {ITEM_SUPERREPEL, 30, 0}, {ITEM_MAXREPEL, 30, 0}, {ITEM_PROTEIN, 30, 0}, {ITEM_ZINC, 30, 0}, {ITEM_CALCIUM, 30, 0}, {ITEM_CARBOS, 30, 0}, {ITEM_HPUP, 30, 0}, {ITEM_PPUP, 30, 0}, {ITEM_PPMAX, 30, 0}, {ITEM_REDSHARD, 30, 0}, {ITEM_BLUESHARD, 30, 0}, {ITEM_YELLOWSHARD, 30, 0}, {ITEM_GREENSHARD, 30, 0}, {ITEM_XACCURACY, 30, 0}, {ITEM_XDEFEND, 30, 0}, {ITEM_XSPEED, 30, 0}, {ITEM_XATTACK, 30, 0}, {ITEM_XSPECIAL, 30, 0}, {ITEM_YELLOWFLUTE, 30, 0}, {ITEM_BLACKFLUTE, 30, 0}, {ITEM_WHITEFLUTE, 30, 0}, {ITEM_REDFLUTE, 30, 0}, {ITEM_BLUEFLUTE, 30, 0}, {ITEM_AMULETCOIN, 30, 0}, {ITEM_BIGMUSHROOM, 30, 0}, {ITEM_BIGPEARL, 30, 0}, {ITEM_BLACKBELT, 30, 0}, {ITEM_CHARCOAL, 30, 0}, {ITEM_CLEANSETAG, 30, 0}, {ITEM_DEEPSEASCALE, 30, 0}, {ITEM_DRAGONSCALE, 30, 0}, {ITEM_ESCAPEROPE, 30, 0}, {ITEM_EVERSTONE, 30, 0}, {ITEM_EXPSHARE, 30, 0}, {ITEM_FIRESTONE, 30, 0}, {ITEM_FLUFFYTAIL, 30, 0}, {ITEM_HEARTSCALE, 30, 0}, {ITEM_KINGSROCK, 30, 0}, {ITEM_LEAFSTONE, 30, 0}, {ITEM_LIGHTBALL, 30, 0}, {ITEM_LUCKYEGG, 30, 0}, {ITEM_MAGNET, 30, 0}, {ITEM_METALCOAT, 30, 0}, {ITEM_MIRACLESEED, 30, 0}, {ITEM_MOONSTONE, 30, 0}, {ITEM_MYSTICWATER, 30, 0}, {ITEM_NEVERMELTICE, 30, 0}, {ITEM_NUGGET, 30, 0}, {ITEM_PEARL, 30, 0}, {ITEM_POKEDOLL, 30, 0}, {ITEM_SACREDASH, 30, 0}, {ITEM_SCOPELENS, 30, 0}, {ITEM_SHELLBELL, 30, 0}, {ITEM_SHOALSALT, 30, 0}, {ITEM_SHOALSHELL, 30, 0}, {ITEM_SMOKEBALL, 30, 0}, {ITEM_SOULDEW, 30, 0}, {ITEM_SPELLTAG, 30, 0}, {ITEM_STARDUST, 30, 0}, {ITEM_STARPIECE, 30, 0}, {ITEM_SUNSTONE, 30, 0}, {ITEM_THUNDERSTONE, 30, 0}, {ITEM_TINYMUSHROOM, 30, 0}, {ITEM_TWISTEDSPOON, 30, 0}, {ITEM_UPGRADE, 30, 0}, {ITEM_WATERSTONE, 30, 0}, {ITEM_LUCKYPUNCH, 40, 0}, {ITEM_SHARPBEAK, 50, 0}, {ITEM_MACHOBRACE, 60, 0}, {ITEM_STICK, 60, 0}, {ITEM_DRAGONFANG, 70, 0}, {ITEM_POISONBARB, 70, 0}, {ITEM_QUICKCLAW, 80, 0}, {ITEM_DEEPSEATOOTH, 90, 0}, {ITEM_THICKCLUB, 90, 0}, {ITEM_DOMEFOSSIL, 100, 0}, {ITEM_HELIXFOSSIL, 100, 0}, {ITEM_OLDAMBER, 100, 0}, {ITEM_ROOTFOSSIL, 100, 0}, {ITEM_CLAWFOSSIL, 100, 0}, {0xFFFF, 0, 0} };
 
-struct stat_fractions stat_buffs[] = { {2, 8}, {2, 7}, {2, 6}, {2, 5}, {2, 4}, {2, 3}, {2, 2}, {3, 2}, {4, 2}, {5, 2}, {6, 2}, {7, 2}, {8, 2} };;;;;;;;;;;;;;
+const struct stat_fractions stat_buffs[] = { {2, 8}, {2, 7}, {2, 6}, {2, 5}, {2, 4}, {2, 3}, {2, 2}, {3, 2}, {4, 2}, {5, 2}, {6, 2}, {7, 2}, {8, 2} };
 
-u8 can_evolve(u16 species)
+bool can_evolve(u16 species)
 {
-    struct evolution_sub* evo = GET_EVO_TABLE(species);
+    const struct evolution_sub* evo = GET_EVO_TABLE(species);
     for (u8 i = 0; i < NUM_OF_EVOS; i++)
     {
         u8 method = evo[i].method;
         if (method != 0 && method < 0xFA)
-        {
             return true;
-        }
     }
     return false;
 }
@@ -88,9 +88,9 @@ u16 percent_to_modifier(u8 percent) //20 gives exactly 0x1333, 30 is short on 1
     return 0x1000 + (percent * 819 / 20);
 }
 
-s16 get_poke_weight(u8 bank)
+u16 get_poke_weight(u8 bank)
 {
-    s16 poke_weight = get_height_or_weight(species_to_national_dex(battle_participants[bank].poke_species), 1);
+    u16 poke_weight = get_height_or_weight(species_to_national_dex(battle_participants[bank].poke_species), 1);
     if (has_ability_effect(bank, 1, 1))
     {
         switch (battle_participants[bank].ability_id)
@@ -114,8 +114,6 @@ s16 get_poke_weight(u8 bank)
 
     return poke_weight;
 }
-
-extern u8 is_of_type(u8 bank, u8 type);
 
 u8 count_stat_increases(u8 bank, u8 eva_acc)
 {
@@ -499,14 +497,11 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
     return base_power;
 }
 
-u8 find_move_in_table(u16 move, u16 table_ptr[])
+bool find_move_in_table(u16 move, const u16* table_ptr)
 {
-    for (u8 i = 0; table_ptr[i] != 0xFFFF; i++)
+    for (u32 i = 0; table_ptr[i] != 0xFFFF; i++)
     {
-        if (table_ptr[i] == move)
-        {
-            return true;
-        }
+        if (table_ptr[i] == move) {return true;}
     }
     return false;
 }
@@ -539,7 +534,7 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
             }
             break;
         case ABILITY_RECKLESS:
-            if (find_move_in_table(move, &reckless_moves_table[0]))
+            if (find_move_in_table(move, reckless_moves_table))
             {
                 modifier = chain_modifier(modifier, 0x1333);
             }
@@ -615,6 +610,7 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
             {
                 modifier = chain_modifier(modifier, 0x1800);
             }
+            break;
         }
     }
 
@@ -860,7 +856,7 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
     {
         modifier = chain_modifier(modifier, 0x2000);
     }
-    if ((move_type == TYPE_ELECTRIC && ability_battle_effects(0xE, 0, 0, 0xFD, 0)) || (move_type == TYPE_FIRE && ability_battle_effects(0xE, 0, 0, 0xFE, 0))) //mud and water sports
+    if ((move_type == TYPE_ELECTRIC && new_battlestruct->field_affecting.mudsport) || (move_type == TYPE_FIRE && new_battlestruct->field_affecting.watersport)) //mud and water sports
     {
         modifier = chain_modifier(modifier, 0x548);
     }
@@ -1221,7 +1217,7 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u16 chained_e
     damage=(damage*chained_effectiveness)>>6;
 
     //burn
-    if (battle_participants[atk_bank].status.flags.burn && move_table[move].split == MOVE_PHYSICAL && move != MOVE_FACADE && !(has_ability_effect(atk_bank, 0, 1) && battle_participants[atk_bank].ability_id == ABILITY_GUTS))
+    if (battle_participants[atk_bank].status.flags.burn && move_table[move].split == MOVE_PHYSICAL && move != MOVE_FACADE && !(check_ability(atk_bank, ABILITY_GUTS)))
     {
         damage /= 2;
     }

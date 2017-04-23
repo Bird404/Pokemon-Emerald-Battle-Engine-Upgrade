@@ -1,6 +1,6 @@
 .text
 .thumb
-.align 2
+.align 1
 
 mega_trigger_hook:
 	mov r6, #2		@B Button
@@ -34,7 +34,6 @@ bx_move_menu_return:
 check_left:
 	ldr r0, =(0x8057E30|1)
 	bx r0
-.align 2
 
 reset_mega_trigger_hook:
 	push {r4-r7, lr}
@@ -45,4 +44,3 @@ reset_mega_trigger_hook:
 	ldrb r0, [r4] 
 	ldr r1, =(0x08057590|1)
 	bx r1
-.align 2

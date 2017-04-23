@@ -14,7 +14,7 @@ u8 get_attacking_move_type();
 u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn);
 u8 percent_chance(u8 percent);
 void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u16 chained_effectiveness);
-u8 find_move_in_table(u16 move, u16 table_ptr[]);
+u8 find_move_in_table(u16 move, const u16* table_ptr);
 u8 protect_affects(u16 move, u8 set);
 u8 berry_eaten(u8 how_tocall, u8 bank);
 u8 set_type(u8 bank, u8 type);
@@ -120,7 +120,6 @@ void atkBB_set_sunny()
         else
             battle_effects_duration.weather_dur = 5;
     }
-    return;
 }
 
 void atkC8_set_hail()
@@ -144,7 +143,6 @@ void atkC8_set_hail()
         else
             battle_effects_duration.weather_dur = 5;
     }
-    return;
 }
 
 void atk7E_set_reflect()
@@ -169,7 +167,6 @@ void atk7E_set_reflect()
         else
             battle_communication_struct.multistring_chooser = 1;
     }
-    return;
 }
 
 void atk92_set_lightscreen()
@@ -194,10 +191,9 @@ void atk92_set_lightscreen()
         else
             battle_communication_struct.multistring_chooser = 3;
     }
-    return;
 }
 
-void atk96_weather_damage()
+void atk96_weather_damage(void)
 {
     battlescripts_curr_instruction++;
     s32 damage = 0;
@@ -207,13 +203,11 @@ void atk96_weather_damage()
     {
         if (battle_weather.flags.sandstorm || battle_weather.flags.permament_sandstorm)
         {
-            if (!(is_of_type(bank_attacker, TYPE_GROUND) || is_of_type(bank_attacker, TYPE_STEEL) || is_of_type(bank_attacker, TYPE_ROCK)) && !(ability_effect && (ability == ABILITY_SAND_FORCE || ability == ABILITY_SAND_RUSH)))
+            if (!(is_of_type(bank_attacker, TYPE_GROUND) || is_of_type(bank_attacker, TYPE_STEEL) || is_of_type(bank_attacker, TYPE_ROCK)) && !(ability_effect && (ability == ABILITY_SAND_FORCE || ability == ABILITY_SAND_RUSH || ability == ABILITY_SAND_VEIL)))
             {
                 if (!(status3[bank_attacker].underground || status3[bank_attacker].underwater))
                 {
-                    damage = battle_participants[bank_attacker].max_hp >> 4;
-                    if (damage == 0)
-                        damage = 1;
+                    damage = ATLEAST_ONE(battle_participants[bank_attacker].max_hp >> 4);
                 }
             }
         }
@@ -223,9 +217,7 @@ void atk96_weather_damage()
             {
                 if (!(status3[bank_attacker].underground || status3[bank_attacker].underwater))
                 {
-                    damage = battle_participants[bank_attacker].max_hp >> 4;
-                    if (damage == 0)
-                        damage = 1;
+                    damage = ATLEAST_ONE(battle_participants[bank_attacker].max_hp >> 4);
 
                     if (ability_effect && ability == ABILITY_ICE_BODY)
                         damage *= -1;
@@ -234,7 +226,6 @@ void atk96_weather_damage()
         }
     }
     damage_loc = damage;
-    return;
 }
 
 void atkE2_switchout_abilities()
@@ -291,19 +282,17 @@ void atk8D_multihit_move_loop_counter()
         }
     }
     battlescripts_curr_instruction += 2;
-    return;
 }
 
-void atk42_jump_if_type()
+void atk42_jump_if_type(void)
 {
     if (is_of_type(get_battle_bank(read_byte(battlescripts_curr_instruction + 1)), read_byte(battlescripts_curr_instruction + 2)))
         battlescripts_curr_instruction = (void*)read_word(battlescripts_curr_instruction + 3);
     else
         battlescripts_curr_instruction += 7;
-    return;
 }
 
-void atk7F_set_leech_seed()
+void atk7F_set_leech_seed(void)
 {
     if (move_outcome.missed || move_outcome.not_affected || move_outcome.failed || status3[bank_target].leech_seed)
     {
@@ -322,7 +311,6 @@ void atk7F_set_leech_seed()
         battle_communication_struct.multistring_chooser = 0;
     }
     battlescripts_curr_instruction++;
-    return;
 }
 
 u8 entry_hazards_hook()
@@ -2763,7 +2751,7 @@ void atkE4_secretpowereffect()
 }
 
 
-void atk15_setmoveeffectchance()
+void atk15_setmoveeffectchance(void)
 {
     if(MOVE_WORKED && TARGET_TURN_DAMAGED /*&& !affected_by_substitute(bank_target)*/)
     {
@@ -3055,7 +3043,7 @@ void evs_update(struct pokemon *poke, u16 defeated_species)
     {
         power_item = (u8) get_item_extra_param(item);
     }
-    struct poke_basestats* stats = &((*basestat_table)[defeated_species]);
+    const struct poke_basestats* stats = &((*basestat_table)[defeated_species]);
     for (u8 curr_stat = 0; curr_stat < 6; curr_stat++)
     {
         u8 to_add = 0;
@@ -3374,4 +3362,23 @@ void atk84_jumpifcannotsleep(void)
         else
             battlescripts_curr_instruction += 5;
     }
+}
+
+void atkE8_settypebasedhalvers(void)
+{
+    void* fail_loc = (void*)(read_word(battlescripts_curr_instruction + 1));
+    if (current_move == MOVE_MUD_SPORT && !new_battlestruct->field_affecting.mudsport)
+    {
+        battle_communication_struct.multistring_chooser = 0;
+        new_battlestruct->field_affecting.mudsport = 5;
+        battlescripts_curr_instruction += 5;
+    }
+    else if (current_move == MOVE_WATER_SPORT && !new_battlestruct->field_affecting.watersport)
+    {
+        battle_communication_struct.multistring_chooser = 1;
+        new_battlestruct->field_affecting.watersport = 5;
+        battlescripts_curr_instruction += 5;
+    }
+    else
+        battlescripts_curr_instruction = fail_loc;
 }

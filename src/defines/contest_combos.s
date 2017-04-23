@@ -1,6 +1,5 @@
 .text
 .thumb
-.align 2
 
 .equ RAIN_DANCE_combo, 0x01
 .equ RAGE_combo, 0x02

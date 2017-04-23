@@ -6,6 +6,7 @@ illusion_throw_different_ball: @r0 contains bank
 	bl b_get_ball_to_throw
 	mov r4, r0
 	ldr r2, =(0x080754DA | 1)
+.global r2_caller
 r2_caller:
 	bx r2
 	

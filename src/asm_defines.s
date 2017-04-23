@@ -3,7 +3,9 @@
 
 @battle flags
 .equ BATTLE_TRAINER, 0x8
+.equ BATTLE_PARTER, 0x40
 .equ BATTLE_MULTI, 0x8000
+.equ BATTLE_INGAME_PARTNER, 0x400000
 
 @move battlescript IDs
 .equ MOVEBS_PUT_TO_SLEEP, 12

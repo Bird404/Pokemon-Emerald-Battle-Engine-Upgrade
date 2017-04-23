@@ -11,6 +11,7 @@ trainer_table = 0x080619C8;
 fadescreen_info = 0x02037FD4;
 leveled_up_in_battle = 0x03005D54;
 curr_mapheader = 0x02037318;
+item_effectiveness = 0x0203CEE8;
 
 /*backgrounds and graphics*/
 battletextbox_tileset = 0x08C00000;
@@ -87,6 +88,7 @@ bg_cave_pal = 0x8D7C10C;
 bg_indoors1_pal = 0x8D7DEB4;
 bg_indoors2_pal = 0x8D7C404;
 
+bgid_mark_for_sync = 0x081999BC|1;
 tilemap_decompress_wram_BGconfig = 0x080022F0|1;
 bgid_send_tilemap = 0x0800236C|1;
 frame_battletextbox = 0x0803570C|1;
@@ -175,6 +177,14 @@ set_music_for_battle = 0x0806E668|1;
 prepare_ov_to_battle_transition = 0x08145EF4|1;
 sub_8163A8C = 0x08163A8C|1;
 gpu_decompress_tile_obj_alloc_tag_and_upload = 0x08034988|1;
+pokemenu_get_selected_poke = 0x081B1354|1;
+is_viewed_poke_partners = 0x081C3304|1;
+task_add_01_battle_start = 0x080B065C|1;
+is_ov_to_battle_transition_done = 0x08145F20|1;
+battlestructs_setup = 0x08036760|1;
+sp28_party_to_save = 0x08076D8C|1;
+sp29_party_from_save = 0x08076DD4|1;
+poke_add_to_pc = 0x0806B490|1;
 
 script_text_buffer1 = 0x02021CC4;
 script_text_buffer2 = 0x02021DC4;
@@ -190,6 +200,8 @@ var_8004 = 0x020375E0;
 var_8005 = 0x020375E2;
 var_8006 = 0x020375E4;
 var_8007 = 0x020375E6;
+partner_sprite = 0x02022FF2; 
+player_backsprite = 0x02022FF3;
 
 /*move animation tasks*/
 AnimTask_arg7_is_target_opponent = 0x8117780 |1;
@@ -538,6 +550,7 @@ ai_switch_sth1 = 0x08062E54|1;
 ai_switch_sth2 = 0x080631BC|1;
 ai_switch_sth3 = 0x08063364|1;
 ai_is_statbuffed = 0x0806331C|1;
+pokemon_purge_opponent = 0x08067B2C|1;
 
 /*mega*/
 gpu_pal_obj_alloc_tag_and_apply = 0x8008744|1; 

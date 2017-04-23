@@ -4,6 +4,7 @@
 u8 is_bank_present(u8 bank);
 u8 percent_chance(u8 percent);
 struct pokemon* get_bank_poke_ptr(u8 bank);
+u8 is_poke_valid(struct pokemon* poke);
 
 #pragma pack(push,1)
 struct double_grass_tile{
@@ -317,10 +318,26 @@ void atkF1_setpoke_as_caught(void)
     }
 }
 
+u8 partnerbattle_count_player_pokes(void)
+{
+    u8 count = 0;
+    for (u8 i = 0; i < 3; i++)
+    {
+        if (is_poke_valid(&party_player[i]))
+            count++;
+    }
+    return count;
+}
+
 void atkF0_copy_caught_poke(void)
 {
     struct pokemon* poke = get_bank_poke_ptr(bank_target);
-    if (generate_pokemon_data_for_player(poke)) //went to PC instead of party
+    u8 ret;
+    if ((battle_flags.player_ingame_partner || battle_flags.player_partner) && partnerbattle_count_player_pokes() >= 3) //its a partner battle, so add to pc
+        ret = poke_add_to_pc(poke);
+    else
+        ret = generate_pokemon_data_for_player(poke);
+    if (ret) //went to PC instead of party
     {
         strcpy_xFF_terminated_0(script_text_buffer1, get_box_name_ptr(get_variable_value(0x4036)));
         get_attributes(poke, ATTR_NAME, script_text_buffer2);

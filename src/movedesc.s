@@ -1,12 +1,10 @@
 .text
 .thumb
-.align 2
-
 
 .include "asm_defines.s"
 .include "macrotext.s"
 
-
+.align 2
 move_desc_table:
 .byte 0xC1, 0x81, 0x61, 0x08
 .byte 0xE7, 0x81, 0x61, 0x08
@@ -1076,1132 +1074,1132 @@ move_desc_table:
 .word NOTHING_description
 
 
-.align 2
+
 GRAVITY_description:
 .byte G_, r_, a_, v_, i_, t_, y_, Space, i_, s_, Space, i_, n_, t_, e_, n_, s_, i_, f_, i_, e_, d_, Comma, JumpLine
 .byte n_, e_, g_, a_, t_, i_, n_, g_, Space, l_, e_, v_, i_, t_, a_, t_, i_, o_, n_, Dot, Termin
 
-.align 2
+
 WAKE_UP_SLAP_description:
 .byte P_, o_, w_, e_, r_, f_, u_, l_, Space, a_, g_, a_, i_, n_, s_, t_, Space, s_, l_, e_, e_, p_, i_, n_, g_, JumpLine
 .byte f_, o_, e_, s_, Comma, Space, b_, u_, t_, Space, a_, l_, s_, o_, Space, h_, e_, a_, l_, s_, Space, t_, h_, e_, m_, Dot, Termin
 
-.align 2
+
 HAMMER_ARM_description:
 .byte A_, Space, s_, w_, i_, n_, g_, i_, n_, g_, Space, f_, i_, s_, t_, Space, a_, t_, t_, a_, c_, k_, JumpLine
 .byte t_, h_, a_, t_, Space, a_, l_, s_, o_, Space, l_, o_, w_, e_, r_, s_, Space, S_, p_, e_, e_, d_, Dot, Termin
 
-.align 2
+
 GYRO_BALL_description:
 .byte A_, Space, h_, i_, g_, h_, Dash, s_, p_, e_, e_, d_, Space, s_, p_, i_, n_, Space, t_, h_, a_, t_, Space, d_, o_, e_, s_, JumpLine
 .byte m_, o_, r_, e_, Space, d_, a_, m_, a_, g_, e_, Space, t_, o_, Space, f_, a_, s_, t_, e_, r_, Space, f_, o_, e_, s_, Dot, Termin
 
-.align 2
+
 HEALING_WISH_description:
 .byte T_, h_, e_, Space, u_, s_, e_, r_, Space, f_, a_, i_, n_, t_, s_, Space, t_, o_, Space, h_, e_, a_, l_, Space, u_, p_, JumpLine
 .byte t_, h_, e_, Space, r_, e_, c_, i_, p_, i_, e_, n_, t_, Dot, Termin
 
-.align 2
+
 BRINE_description:
 .byte D_, o_, e_, s_, Space, d_, o_, u_, b_, l_, e_, Space, d_, a_, m_, a_, g_, e_, Space, t_, o_, Space, f_, o_, e_, s_, JumpLine
 .byte w_, i_, t_, h_, Space, h_, a_, l_, f_, Space, H_, P_, Dot, Termin
 
-.align 2
+
 NATURAL_GIFT_description:
 .byte T_, h_, e_, Space, e_, f_, f_, e_, c_, t_, i_, v_, e_, n_, e_, s_, s_, Space, v_, a_, r_, i_, e_, s_, JumpLine
 .byte w_, i_, t_, h_, Space, t_, h_, e_, Space, h_, e_, l_, d_, Space, B_, e_, r_, r_, y_, Dot, Termin
 
-.align 2
+
 FEINT_description:
 .byte A_, n_, Space, a_, t_, t_, a_, c_, k_, Space, t_, h_, a_, t_, Space, h_, i_, t_, s_, Space, f_, o_, e_, s_, JumpLine
 .byte u_, s_, i_, n_, g_, Space, m_, o_, v_, e_, s_, Space, l_, i_, k_, e_, Space, P_, r_, o_, t_, e_, c_, t_, Dot, Termin
 
-.align 2
+
 PLUCK_description:
 .byte E_, a_, t_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Apos, s_, Space, h_, e_, l_, d_, Space, B_, e_, r_, r_, y_, Comma, JumpLine
 .byte g_, a_, i_, n_, i_, n_, g_, Space, i_, t_, s_, Space, e_, f_, f_, e_, c_, t_, Dot, Termin
 
-.align 2
+
 TAILWIND_description:
 .byte W_, h_, i_, p_, s_, Space, u_, p_, Space, a_, Space, t_, u_, r_, b_, u_, l_, e_, n_, t_, Space, b_, r_, e_, e_, z_, e_, JumpLine
 .byte t_, h_, a_, t_, Space, r_, a_, i_, s_, e_, s_, Space, S_, p_, e_, e_, d_, Dot, Termin
 
-.align 2
+
 ACUPRESSURE_description:
 .byte T_, h_, e_, Space, u_, s_, e_, r_, Space, s_, h_, a_, r_, p_, l_, y_, Space, r_, a_, i_, s_, e_, s_, JumpLine
 .byte o_, n_, e_, Space, o_, f_, Space, i_, t_, s_, Space, s_, t_, a_, t_, s_, Dot, Termin
 
-.align 2
+
 METAL_BURST_description:
 .byte R_, e_, t_, a_, l_, i_, a_, t_, e_, s_, Space, a_, n_, y_, Space, h_, i_, t_, Space, w_, i_, t_, h_, JumpLine
 .byte g_, r_, e_, a_, t_, e_, r_, Space, p_, o_, w_, e_, r_, Dot, Termin
 
-.align 2
+
 U_TURN_description:
 .byte D_, o_, e_, s_, Space, d_, a_, m_, a_, g_, e_, Space, t_, h_, e_, n_, Space, s_, w_, i_, t_, c_, h_, e_, s_, JumpLine
 .byte o_, u_, t_, Space, t_, h_, e_, Space, u_, s_, e_, r_, Dot, Termin
 
-.align 2
+
 CLOSE_COMBAT_description:
 .byte A_, Space, s_, t_, r_, o_, n_, g_, Space, a_, t_, t_, a_, c_, k_, Space, b_, u_, t_, Space, l_, o_, w_, e_, r_, s_, JumpLine
 .byte t_, h_, e_, Space, d_, e_, f_, e_, n_, s_, i_, v_, e_, Space, s_, t_, a_, t_, s_, Dot, Termin
 
-.align 2
+
 PAYBACK_description:
 .byte A_, n_, Space, a_, t_, t_, a_, c_, k_, Space, t_, h_, a_, t_, Space, g_, a_, i_, n_, s_, Space, p_, o_, w_, e_, r_, JumpLine
 .byte i_, f_, Space, t_, h_, e_, Space, u_, s_, e_, r_, Space, m_, o_, v_, e_, s_, Space, l_, a_, s_, t_, Dot, Termin
 
-.align 2
+
 ASSURANCE_description:
 .byte A_, n_, Space, a_, t_, t_, a_, c_, k_, Space, t_, h_, a_, t_, Space, g_, a_, i_, n_, s_, Space, p_, o_, w_, e_, r_, JumpLine
 .byte i_, f_, Space, t_, h_, e_, Space, f_, o_, e_, Space, h_, a_, s_, Space, b_, e_, e_, n_, Space, h_, u_, r_, t_, Dot, Termin
 
-.align 2
+
 EMBARGO_description:
 .byte P_, r_, e_, v_, e_, n_, t_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Space, f_, r_, o_, m_, JumpLine
 .byte u_, s_, i_, n_, g_, Space, a_, n_, y_, Space, i_, t_, e_, m_, s_, Dot, Termin
 
-.align 2
+
 FLING_description:
 .byte T_, h_, e_, Space, e_, f_, f_, e_, c_, t_, i_, v_, e_, n_, e_, s_, s_, Space, v_, a_, r_, i_, e_, s_, JumpLine
 .byte w_, i_, t_, h_, Space, t_, h_, e_, Space, h_, e_, l_, d_, Space, i_, t_, e_, m_, Dot, Termin
 
-.align 2
+
 PSYCHO_SHIFT_description:
 .byte T_, r_, a_, n_, s_, f_, e_, r_, s_, Space, s_, t_, a_, t_, u_, s_, Space, p_, r_, o_, b_, l_, e_, m_, s_, JumpLine
 .byte t_, o_, Space, t_, h_, e_, Space, f_, o_, e_, Dot, Termin
 
-.align 2
+
 TRUMP_CARD_description:
 .byte T_, h_, e_, Space, l_, e_, s_, s_, Space, P_, P_, Space, t_, h_, e_, Space, m_, o_, v_, e_, Space, h_, a_, s_, Comma, JumpLine
 .byte t_, h_, e_, Space, m_, o_, r_, e_, Space, d_, a_, m_, a_, g_, e_, Space, i_, t_, Space, d_, o_, e_, s_, Dot, Termin
 
-.align 2
+
 HEAL_BLOCK_description:
 .byte P_, r_, e_, v_, e_, n_, t_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Space, f_, r_, o_, m_, JumpLine
 .byte r_, e_, c_, o_, v_, e_, r_, i_, n_, g_, Space, a_, n_, y_, Space, H_, P_, Dot, Termin
 
-.align 2
+
 WRING_OUT_description:
 .byte T_, h_, e_, Space, h_, i_, g_, h_, e_, r_, Space, t_, h_, e_, Space, f_, o_, e_, Apos, s_, Space, H_, P_, Comma, JumpLine
 .byte t_, h_, e_, Space, m_, o_, r_, e_, Space, d_, a_, m_, a_, g_, e_, Space, c_, a_, u_, s_, e_, d_, Dot, Termin
 
-.align 2
+
 POWER_TRICK_description:
 .byte T_, h_, e_, Space, u_, s_, e_, r_, Space, s_, w_, a_, p_, s_, Space, i_, t_, s_, Space, A_, t_, t_, a_, c_, k_, JumpLine
 .byte a_, n_, d_, Space, D_, e_, f_, e_, n_, s_, e_, Space, s_, t_, a_, t_, s_, Dot, Termin
 
-.align 2
+
 GASTRO_ACID_description:
 .byte S_, t_, o_, m_, a_, c_, h_, Space, a_, c_, i_, d_, Space, s_, u_, p_, p_, r_, e_, s_, s_, e_, s_, JumpLine
 .byte t_, h_, e_, Space, f_, o_, e_, Apos, s_, Space, a_, b_, i_, l_, i_, t_, y_, Dot, Termin
 
-.align 2
+
 LUCKY_CHANT_description:
 .byte P_, r_, e_, v_, e_, n_, t_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Space, f_, r_, o_, m_, JumpLine
 .byte l_, a_, n_, d_, i_, n_, g_, Space, c_, r_, i_, t_, i_, c_, a_, l_, Space, h_, i_, t_, s_, Dot, Termin
 
-.align 2
+
 ME_FIRST_description:
 .byte E_, x_, e_, c_, u_, t_, e_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Apos, s_, Space, a_, t_, t_, a_, c_, k_, JumpLine
 .byte w_, i_, t_, h_, Space, g_, r_, e_, a_, t_, e_, r_, Space, p_, o_, w_, e_, r_, Dot, Termin
 
-.align 2
+
 POWER_SWAP_description:
 .byte S_, w_, a_, p_, s_, Space, c_, h_, a_, n_, g_, e_, s_, Space, t_, o_, Space, A_, t_, t_, a_, c_, k_, JumpLine
 .byte a_, n_, d_, Space, S_, p_, Dot, Space, A_, t_, k_, Space, w_, i_, t_, h_, Space, t_, h_, e_, Space, f_, o_, e_, Dot, Termin
 
-.align 2
+
 GUARD_SWAP_description:
 .byte S_, w_, a_, p_, s_, Space, c_, h_, a_, n_, g_, e_, s_, Space, t_, o_, Space, D_, e_, f_, e_, n_, s_, e_, JumpLine
 .byte a_, n_, d_, Space, S_, p_, Dot, Space, D_, e_, f_, Space, w_, i_, t_, h_, Space, t_, h_, e_, Space, f_, o_, e_, Dot, Termin
 
-.align 2
+
 PUNISHMENT_description:
 .byte D_, o_, e_, s_, Space, m_, o_, r_, e_, Space, d_, a_, m_, a_, g_, e_, Space, i_, f_, Space, t_, h_, e_, JumpLine
 .byte f_, o_, e_, Space, h_, a_, s_, Space, p_, o_, w_, e_, r_, e_, d_, Space, u_, p_, Dot, Termin
 
-.align 2
+
 LAST_RESORT_description:
 .byte C_, a_, n_, Space, o_, n_, l_, y_, Space, b_, e_, Space, u_, s_, e_, d_, Space, i_, f_, Space, e_, v_, e_, r_, y_, JumpLine
 .byte o_, t_, h_, e_, r_, Space, m_, o_, v_, e_, Space, h_, a_, s_, Space, b_, e_, e_, n_, Space, u_, s_, e_, d_, Dot, Termin
 
-.align 2
+
 WORRY_SEED_description:
 .byte P_, l_, a_, n_, t_, s_, Space, a_, Space, s_, e_, e_, d_, Space, o_, n_, Space, t_, h_, e_, Space, f_, o_, e_, Comma, JumpLine
 .byte g_, i_, v_, i_, n_, g_, Space, i_, t_, Space, I_, n_, s_, o_, m_, n_, i_, a_, Dot, Termin
 
-.align 2
+
 SUCKER_PUNCH_description:
 .byte S_, t_, r_, i_, k_, e_, s_, Space, f_, i_, r_, s_, t_, Space, i_, f_, Space, t_, h_, e_, Space, f_, o_, e_, JumpLine
 .byte i_, s_, Space, p_, r_, e_, p_, a_, r_, i_, n_, g_, Space, a_, n_, Space, a_, t_, t_, a_, c_, k_, Dot, Termin
 
-.align 2
+
 TOXIC_SPIKES_description:
 .byte S_, e_, t_, s_, Space, s_, p_, i_, k_, e_, s_, Space, t_, h_, a_, t_, Space, p_, o_, i_, s_, o_, n_, Space, a_, JumpLine
 .byte f_, o_, e_, Space, s_, w_, i_, t_, c_, h_, i_, n_, g_, Space, i_, n_, Dot, Termin
 
-.align 2
+
 HEART_SWAP_description:
 .byte S_, w_, a_, p_, s_, Space, a_, n_, y_, Space, s_, t_, a_, t_, Space, c_, h_, a_, n_, g_, e_, s_, JumpLine
 .byte w_, i_, t_, h_, Space, t_, h_, e_, Space, f_, o_, e_, Dot, Termin
 
-.align 2
+
 AQUA_RING_description:
 .byte F_, o_, r_, m_, s_, Space, a_, Space, v_, e_, i_, l_, Space, o_, f_, Space, w_, a_, t_, e_, r_, JumpLine
 .byte t_, h_, a_, t_, Space, r_, e_, s_, t_, o_, r_, e_, s_, Space, H_, P_, Dot, Termin
 
-.align 2
+
 MAGNET_RISE_description:
 .byte T_, h_, e_, Space, u_, s_, e_, r_, Space, l_, e_, v_, i_, t_, a_, t_, e_, s_, Space, w_, i_, t_, h_, JumpLine
 .byte e_, l_, e_, c_, t_, r_, o_, m_, a_, g_, n_, e_, t_, i_, s_, m_, Dot, Termin
 
-.align 2
+
 FLARE_BLITZ_description:
 .byte A_, Space, c_, h_, a_, r_, g_, e_, Space, t_, h_, a_, t_, Space, m_, a_, y_, Space, b_, u_, r_, n_, Space, t_, h_, e_, JumpLine
 .byte f_, o_, e_, Dot, Space, A_, l_, s_, o_, Space, h_, u_, r_, t_, s_, Space, t_, h_, e_, Space, u_, s_, e_, r_, Dot, Termin
 
-.align 2
+
 FORCE_PALM_description:
 .byte A_, Space, s_, h_, o_, c_, k_, Space, w_, a_, v_, e_, Space, a_, t_, t_, a_, c_, k_, Space, t_, h_, a_, t_, JumpLine
 .byte m_, a_, y_, Space, p_, a_, r_, a_, l_, y_, z_, e_, Space, t_, h_, e_, Space, f_, o_, e_, Dot, Termin
 
-.align 2
+
 AURA_SPHERE_description:
 .byte A_, t_, t_, a_, c_, k_, s_, Space, w_, i_, t_, h_, Space, a_, n_, Space, a_, u_, r_, a_, Space, b_, l_, a_, s_, t_, JumpLine
 .byte t_, h_, a_, t_, Space, c_, a_, n_, n_, o_, t_, Space, b_, e_, Space, e_, v_, a_, d_, e_, d_, Dot, Termin
 
-.align 2
+
 ROCK_POLISH_description:
 .byte P_, o_, l_, i_, s_, h_, e_, s_, Space, t_, h_, e_, Space, b_, o_, d_, y_, Space, t_, o_, JumpLine
 .byte s_, h_, a_, r_, p_, l_, y_, Space, r_, a_, i_, s_, e_, Space, S_, p_, e_, e_, d_, Dot, Termin
 
-.align 2
+
 POISON_JAB_description:
 .byte A_, Space, s_, t_, a_, b_, b_, i_, n_, g_, Space, a_, t_, t_, a_, c_, k_, Space, t_, h_, a_, t_, JumpLine
 .byte m_, a_, y_, Space, p_, o_, i_, s_, o_, n_, Space, t_, h_, e_, Space, f_, o_, e_, Dot, Termin
 
-.align 2
+
 DARK_PULSE_description:
 .byte A_, t_, t_, a_, c_, k_, s_, Space, w_, i_, t_, h_, Space, a_, Space, h_, o_, r_, r_, i_, b_, l_, e_, JumpLine
 .byte a_, u_, r_, a_, Dot, Space, M_, a_, y_, Space, c_, a_, u_, s_, e_, Space, f_, l_, i_, n_, c_, h_, i_, n_, g_, Dot, Termin
 
-.align 2
+
 AQUA_TAIL_description:
 .byte T_, h_, e_, Space, u_, s_, e_, r_, Space, s_, w_, i_, n_, g_, s_, Space, i_, t_, s_, Space, t_, a_, i_, l_, JumpLine
 .byte l_, i_, k_, e_, Space, a_, Space, w_, a_, v_, e_, Space, t_, o_, Space, a_, t_, t_, a_, c_, k_, Dot, Termin
 
-.align 2
+
 SEED_BOMB_description:
 .byte A_, Space, b_, a_, r_, r_, a_, g_, e_, Space, o_, f_, Space, h_, a_, r_, d_, Space, s_, e_, e_, d_, s_, JumpLine
 .byte i_, s_, Space, f_, i_, r_, e_, d_, Space, a_, t_, Space, t_, h_, e_, Space, f_, o_, e_, Dot, Termin
 
-.align 2
+
 AIR_SLASH_description:
 .byte A_, t_, t_, a_, c_, k_, s_, Space, w_, i_, t_, h_, Space, a_, Space, b_, l_, a_, d_, e_, Space, o_, f_, JumpLine
 .byte a_, i_, r_, Dot, Space, M_, a_, y_, Space, c_, a_, u_, s_, e_, Space, f_, l_, i_, n_, c_, h_, i_, n_, g_, Dot, Termin
 
-.align 2
+
 X_SCISSOR_description:
 .byte S_, l_, a_, s_, h_, e_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Space, w_, i_, t_, h_, Space, c_, r_, o_, s_, s_, e_, d_, JumpLine
 .byte s_, c_, y_, t_, h_, e_, s_, Comma, Space, c_, l_, a_, w_, s_, Comma, Space, e_, t_, c_, Dot, Termin
 
-.align 2
+
 BUG_BUZZ_description:
 .byte A_, Space, d_, a_, m_, a_, g_, i_, n_, g_, Space, s_, o_, u_, n_, d_, Space, w_, a_, v_, e_, Space, t_, h_, a_, t_, JumpLine
 .byte m_, a_, y_, Space, l_, o_, w_, e_, r_, Space, S_, p_, Dot, Space, D_, e_, f_, Dot, Termin
 
-.align 2
+
 DRAGON_PULSE_description:
 .byte G_, e_, n_, e_, r_, a_, t_, e_, s_, Space, a_, Space, s_, h_, o_, c_, k_, Space, w_, a_, v_, e_, Space, t_, o_, JumpLine
 .byte d_, a_, m_, a_, g_, e_, Space, t_, h_, e_, Space, f_, o_, e_, Dot, Termin
 
-.align 2
+
 DRAGON_RUSH_description:
 .byte T_, a_, c_, k_, l_, e_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Space, w_, i_, t_, h_, Space, m_, e_, n_, a_, c_, e_, Dot, JumpLine
 .byte M_, a_, y_, Space, c_, a_, u_, s_, e_, Space, f_, l_, i_, n_, c_, h_, i_, n_, g_, Dot, Termin
 
-.align 2
+
 POWER_GEM_description:
 .byte A_, t_, t_, a_, c_, k_, s_, Space, w_, i_, t_, h_, Space, r_, a_, y_, s_, Space, o_, f_, Space, l_, i_, g_, h_, t_, JumpLine
 .byte t_, h_, a_, t_, Space, s_, p_, a_, r_, k_, l_, e_, Space, l_, i_, k_, e_, Space, d_, i_, a_, m_, o_, n_, d_, s_, Dot, Termin
 
-.align 2
+
 VACUUM_WAVE_description:
 .byte W_, h_, i_, r_, l_, s_, Space, i_, t_, s_, Space, f_, i_, s_, t_, s_, Space, t_, o_, Space, s_, e_, n_, d_, JumpLine
 .byte a_, Space, w_, a_, v_, e_, Space, t_, h_, a_, t_, Space, s_, t_, r_, i_, k_, e_, s_, Space, f_, i_, r_, s_, t_, Dot, Termin
 
-.align 2
+
 FOCUS_BLAST_description:
 .byte A_, t_, t_, a_, c_, k_, s_, Space, a_, t_, Space, f_, u_, l_, l_, Space, p_, o_, w_, e_, r_, Dot, JumpLine
 .byte M_, a_, y_, Space, l_, o_, w_, e_, r_, Space, S_, p_, Dot, Space, D_, e_, f_, Dot, Termin
 
-.align 2
+
 ENERGY_BALL_description:
 .byte D_, r_, a_, w_, s_, Space, p_, o_, w_, e_, r_, Space, f_, r_, o_, m_, Space, n_, a_, t_, u_, r_, e_, Space, t_, o_, JumpLine
 .byte a_, t_, t_, a_, c_, k_, Dot, Space, M_, a_, y_, Space, l_, o_, w_, e_, r_, Space, S_, p_, Dot, Space, D_, e_, f_, Dot, Termin
 
-.align 2
+
 BRAVE_BIRD_description:
 .byte A_, Space, l_, o_, w_, Space, a_, l_, t_, i_, t_, u_, d_, e_, Space, c_, h_, a_, r_, g_, e_, Space, t_, h_, a_, t_, JumpLine
 .byte a_, l_, s_, o_, Space, h_, u_, r_, t_, s_, Space, t_, h_, e_, Space, u_, s_, e_, r_, Dot, Termin
 
-.align 2
+
 EARTH_POWER_description:
 .byte M_, a_, k_, e_, s_, Space, t_, h_, e_, Space, g_, r_, o_, u_, n_, d_, Space, e_, r_, u_, p_, t_, Space, w_, i_, t_, h_, JumpLine
 .byte p_, o_, w_, e_, r_, Dot, Space, M_, a_, y_, Space, l_, o_, w_, e_, r_, Space, S_, p_, Dot, Space, D_, e_, f_, Dot, Termin
 
-.align 2
+
 SWITCHEROO_description:
 .byte S_, w_, a_, p_, s_, Space, i_, t_, e_, m_, s_, Space, w_, i_, t_, h_, Space, t_, h_, e_, Space, f_, o_, e_, JumpLine
 .byte f_, a_, s_, t_, e_, r_, Space, t_, h_, a_, n_, Space, t_, h_, e_, Space, e_, y_, e_, Space, c_, a_, n_, Space, s_, e_, e_, Dot, Termin
 
-.align 2
+
 NASTY_PLOT_description:
 .byte T_, h_, i_, n_, k_, s_, Space, b_, a_, d_, Space, t_, h_, o_, u_, g_, h_, t_, s_, Space, t_, o_, JumpLine
 .byte s_, h_, a_, r_, p_, l_, y_, Space, b_, o_, o_, s_, t_, Space, S_, p_, Dot, Space, A_, t_, k_, Dot, Termin
 
-.align 2
+
 ICE_SHARD_description:
 .byte H_, u_, r_, l_, s_, Space, a_, Space, c_, h_, u_, n_, k_, Space, o_, f_, Space, i_, c_, e_, Space, t_, h_, a_, t_, JumpLine
 .byte a_, l_, w_, a_, y_, s_, Space, s_, t_, r_, i_, k_, e_, Space, f_, i_, r_, s_, t_, Dot, Termin
 
-.align 2
+
 THUNDER_FANG_description:
 .byte M_, a_, y_, Space, c_, a_, u_, s_, e_, Space, f_, l_, i_, n_, c_, h_, i_, n_, g_, Space, o_, r_, JumpLine
 .byte l_, e_, a_, v_, e_, Space, t_, h_, e_, Space, f_, o_, e_, Space, p_, a_, r_, a_, l_, y_, z_, e_, d_, Dot, Termin
 
-.align 2
+
 ICE_FANG_description:
 .byte M_, a_, y_, Space, c_, a_, u_, s_, e_, Space, f_, l_, i_, n_, c_, h_, i_, n_, g_, Space, o_, r_, JumpLine
 .byte l_, e_, a_, v_, e_, Space, t_, h_, e_, Space, f_, o_, e_, Space, f_, r_, o_, z_, e_, n_, Dot, Termin
 
-.align 2
+
 FIRE_FANG_description:
 .byte M_, a_, y_, Space, c_, a_, u_, s_, e_, Space, f_, l_, i_, n_, c_, h_, i_, n_, g_, Space, o_, r_, JumpLine
 .byte l_, e_, a_, v_, e_, Space, t_, h_, e_, Space, f_, o_, e_, Space, w_, i_, t_, h_, Space, a_, Space, b_, u_, r_, n_, Dot, Termin
 
-.align 2
+
 SHADOW_SNEAK_description:
 .byte E_, x_, t_, e_, n_, d_, s_, Space, t_, h_, e_, Space, u_, s_, e_, r_, Apos, s_, Space, s_, h_, a_, d_, o_, w_, JumpLine
 .byte t_, o_, Space, s_, t_, r_, i_, k_, e_, Space, f_, i_, r_, s_, t_, Dot, Termin
 
-.align 2
+
 MUD_BOMB_description:
 .byte T_, h_, r_, o_, w_, s_, Space, a_, Space, b_, l_, o_, b_, Space, o_, f_, Space, m_, u_, d_, Space, t_, o_, JumpLine
 .byte d_, a_, m_, a_, g_, e_, Space, a_, n_, d_, Space, c_, u_, t_, Space, a_, c_, c_, u_, r_, a_, c_, y_, Dot, Termin
 
-.align 2
+
 PSYCHO_CUT_description:
 .byte T_, e_, a_, r_, s_, Space, w_, i_, t_, h_, Space, p_, s_, y_, c_, h_, i_, c_, Space, b_, l_, a_, d_, e_, s_, Dot, JumpLine
 .byte H_, i_, g_, h_, Space, c_, r_, i_, t_, i_, c_, a_, l_, Dash, h_, i_, t_, Space, r_, a_, t_, i_, o_, Dot, Termin
 
-.align 2
+
 MIRROR_SHOT_description:
 .byte E_, m_, i_, t_, s_, Space, a_, Space, f_, l_, a_, s_, h_, Space, o_, f_, Space, e_, n_, e_, r_, g_, y_, Space, t_, o_, JumpLine
 .byte d_, a_, m_, a_, g_, e_, Space, a_, n_, d_, Space, c_, u_, t_, Space, a_, c_, c_, u_, r_, a_, c_, y_, Dot, Termin
 
-.align 2
+
 FLASH_CANNON_description:
 .byte R_, e_, l_, e_, a_, s_, e_, s_, Space, a_, Space, b_, l_, a_, s_, t_, Space, o_, f_, Space, l_, i_, g_, h_, t_, JumpLine
 .byte t_, h_, a_, t_, Space, m_, a_, y_, Space, l_, o_, w_, e_, r_, Space, S_, p_, Dot, Space, D_, e_, f_, Dot, Termin
 
-.align 2
+
 ROCK_CLIMB_description:
 .byte A_, Space, c_, h_, a_, r_, g_, i_, n_, g_, Space, a_, t_, t_, a_, c_, k_, Space, t_, h_, a_, t_, Space, m_, a_, y_, JumpLine
 .byte c_, o_, n_, f_, u_, s_, e_, Space, t_, h_, e_, Space, f_, o_, e_, Dot, Termin
 
-.align 2
+
 DEFOG_description:
 .byte R_, e_, m_, o_, v_, e_, s_, Space, o_, b_, s_, t_, a_, c_, l_, e_, s_, Space, a_, n_, d_, JumpLine
 .byte l_, o_, w_, e_, r_, s_, Space, e_, v_, a_, s_, i_, o_, n_, Dot, Termin
 
-.align 2
+
 TRICK_ROOM_description:
 .byte S_, l_, o_, w_, e_, r_, Space, P_, o_, k_, Poke_e, m_, o_, n_, Space, g_, e_, t_, Space, t_, o_, Space, m_, o_, v_, e_, JumpLine
 .byte f_, i_, r_, s_, t_, Space, f_, o_, r_, Space, 0xA6, Space, t_, u_, r_, n_, s_, Dot, Termin
 
-.align 2
+
 POWER_WHIP_description:
 .byte V_, i_, o_, l_, e_, n_, t_, l_, y_, Space, l_, a_, s_, h_, e_, s_, Space, t_, h_, e_, Space, f_, o_, e_, JumpLine
 .byte w_, i_, t_, h_, Space, v_, i_, n_, e_, s_, Space, o_, r_, Space, t_, e_, n_, t_, a_, c_, l_, e_, s_, Dot, Termin
 
-.align 2
+
 GUNK_SHOT_description:
 .byte S_, h_, o_, o_, t_, s_, Space, f_, i_, l_, t_, h_, y_, Space, g_, a_, r_, b_, a_, g_, e_, Space, a_, t_, JumpLine
 .byte t_, h_, e_, Space, f_, o_, e_, Dot, Space, M_, a_, y_, Space, a_, l_, s_, o_, Space, p_, o_, i_, s_, o_, n_, Dot, Termin
 
-.align 2
+
 IRON_HEAD_description:
 .byte S_, l_, a_, m_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Space, w_, i_, t_, h_, Space, a_, Space, h_, a_, r_, d_, JumpLine
 .byte h_, e_, a_, d_, Dot, Space, M_, a_, y_, Space, c_, a_, u_, s_, e_, Space, f_, l_, i_, n_, c_, h_, i_, n_, g_, Dot, Termin
 
-.align 2
+
 MAGNET_BOMB_description:
 .byte L_, a_, u_, n_, c_, h_, e_, s_, Space, a_, Space, m_, a_, g_, n_, e_, t_, Space, t_, h_, a_, t_, JumpLine
 .byte s_, t_, r_, i_, k_, e_, s_, Space, w_, i_, t_, h_, o_, u_, t_, Space, f_, a_, i_, l_, Dot, Termin
 
-.align 2
+
 STONE_EDGE_description:
 .byte S_, t_, a_, b_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Space, w_, i_, t_, h_, Space, s_, t_, o_, n_, e_, s_, Dot, JumpLine
 .byte H_, i_, g_, h_, Space, c_, r_, i_, t_, i_, c_, a_, l_, Dash, h_, i_, t_, Space, r_, a_, t_, i_, o_, Dot, Termin
 
-.align 2
+
 CAPTIVATE_description:
 .byte M_, a_, k_, e_, s_, Space, t_, h_, e_, Space, o_, p_, p_, o_, s_, i_, t_, e_, Space, g_, e_, n_, d_, e_, r_, JumpLine
 .byte s_, h_, a_, r_, p_, l_, y_, Space, r_, e_, d_, u_, c_, e_, Space, i_, t_, s_, Space, S_, p_, Dot, Space, A_, t_, k_, Dot, Termin
 
-.align 2
+
 STEALTH_ROCK_description:
 .byte S_, e_, t_, s_, Space, f_, l_, o_, a_, t_, i_, n_, g_, Space, s_, t_, o_, n_, e_, s_, Space, t_, h_, a_, t_, JumpLine
 .byte h_, u_, r_, t_, Space, a_, Space, f_, o_, e_, Space, s_, w_, i_, t_, c_, h_, i_, n_, g_, Space, i_, n_, Dot, Termin
 
-.align 2
+
 GRASS_KNOT_description:
 .byte A_, Space, s_, n_, a_, r_, e_, Space, a_, t_, t_, a_, c_, k_, Space, t_, h_, a_, t_, Space, d_, o_, e_, s_, JumpLine
 .byte m_, o_, r_, e_, Space, d_, a_, m_, a_, g_, e_, Space, t_, o_, Space, h_, e_, a_, v_, i_, e_, r_, Space, f_, o_, e_, s_, Dot, Termin
 
-.align 2
+
 CHATTER_description:
 .byte A_, t_, t_, a_, c_, k_, s_, Space, w_, i_, t_, h_, Space, a_, Space, s_, o_, u_, n_, d_, Space, w_, a_, v_, e_, JumpLine
 .byte t_, h_, a_, t_, Space, c_, a_, u_, s_, e_, s_, Space, c_, o_, n_, f_, u_, s_, i_, o_, n_, Dot, Termin
 
-.align 2
+
 JUDGMENT_description:
 .byte T_, h_, e_, Space, t_, y_, p_, e_, Space, v_, a_, r_, i_, e_, s_, Space, w_, i_, t_, h_, Space, t_, h_, e_, JumpLine
 .byte k_, i_, n_, d_, Space, o_, f_, Space, P_, l_, a_, t_, e_, Space, h_, e_, l_, d_, Dot, Termin
 
-.align 2
+
 CHARGE_BEAM_description:
 .byte F_, i_, r_, e_, s_, Space, a_, Space, b_, e_, a_, m_, Space, o_, f_, Space, e_, l_, e_, c_, t_, r_, i_, c_, i_, t_, y_, Dot, JumpLine
 .byte M_, a_, y_, Space, r_, a_, i_, s_, e_, Space, S_, p_, Dot, Space, A_, t_, k_, Dot, Termin
 
-.align 2
+
 ATTACK_ORDER_description:
 .byte U_, n_, d_, e_, r_, l_, i_, n_, g_, s_, Space, p_, u_, m_, m_, e_, l_, Space, t_, h_, e_, Space, f_, o_, e_, Dot, JumpLine
 .byte H_, i_, g_, h_, Space, c_, r_, i_, t_, i_, c_, a_, l_, Dash, h_, i_, t_, Space, r_, a_, t_, i_, o_, Dot, Termin
 
-.align 2
+
 DEFEND_ORDER_description:
 .byte R_, a_, i_, s_, e_, s_, Space, D_, e_, f_, e_, n_, s_, e_, Space, a_, n_, d_, Space, S_, p_, Dot, Space, D_, e_, f_, JumpLine
 .byte w_, i_, t_, h_, Space, a_, Space, l_, i_, v_, i_, n_, g_, Space, s_, h_, i_, e_, l_, d_, Dot, Termin
 
-.align 2
+
 HEAD_SMASH_description:
 .byte A_, Space, l_, i_, f_, e_, Dash, r_, i_, s_, k_, i_, n_, g_, Space, h_, e_, a_, d_, b_, u_, t_, t_, Space, t_, h_, a_, t_, JumpLine
 .byte s_, e_, r_, i_, o_, u_, s_, l_, y_, Space, h_, u_, r_, t_, s_, Space, t_, h_, e_, Space, u_, s_, e_, r_, Dot, Termin
 
-.align 2
+
 DOUBLE_HIT_description:
 .byte S_, l_, a_, m_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Space, w_, i_, t_, h_, Space, a_, Space, t_, a_, i_, l_, Comma, JumpLine
 .byte e_, t_, c_, Dot, Space, S_, t_, r_, i_, k_, e_, s_, Space, t_, w_, i_, c_, e_, Dot, Termin
 
-.align 2
+
 SPACIAL_REND_description:
 .byte T_, e_, a_, r_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Comma, Space, a_, n_, d_, Space, s_, p_, a_, c_, e_, Dot, JumpLine
 .byte H_, i_, g_, h_, Space, c_, r_, i_, t_, i_, c_, a_, l_, Dash, h_, i_, t_, Space, r_, a_, t_, i_, o_, Dot, Termin
 
-.align 2
+
 DARK_VOID_description:
 .byte D_, r_, a_, g_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Space, i_, n_, t_, o_, Space, t_, o_, t_, a_, l_, JumpLine
 .byte d_, a_, r_, k_, n_, e_, s_, s_, Comma, Space, i_, n_, d_, u_, c_, i_, n_, g_, Space, S_, l_, e_, e_, p_, Dot, Termin
 
-.align 2
+
 SEED_FLARE_description:
 .byte G_, e_, n_, e_, r_, a_, t_, e_, s_, Space, a_, Space, s_, h_, o_, c_, k_, Space, w_, a_, v_, e_, Space, t_, h_, a_, t_, JumpLine
 .byte s_, h_, a_, r_, p_, l_, y_, Space, r_, e_, d_, u_, c_, e_, s_, Space, S_, p_, Dot, Space, D_, e_, f_, Dot, Termin
 
-.align 2
+
 OMINOUS_WIND_description:
 .byte A_, Space, r_, e_, p_, u_, l_, s_, i_, v_, e_, Space, a_, t_, t_, a_, c_, k_, Space, t_, h_, a_, t_, Space, m_, a_, y_, JumpLine
 .byte r_, a_, i_, s_, e_, Space, a_, l_, l_, Space, s_, t_, a_, t_, s_, Dot, Termin
 
-.align 2
+
 SHADOW_FORCE_description:
 .byte V_, a_, n_, i_, s_, h_, e_, s_, Space, o_, n_, Space, t_, h_, e_, Space, f_, i_, r_, s_, t_, Space, t_, u_, r_, n_, Comma, JumpLine
 .byte t_, h_, e_, n_, Space, s_, t_, r_, i_, k_, e_, s_, Space, t_, h_, e_, Space, n_, e_, x_, t_, Space, t_, u_, r_, n_, Dot, Termin
 
-.align 2
+
 HONE_CLAWS_description:
 .byte S_, h_, a_, r_, p_, e_, n_, s_, Space, i_, t_, s_, Space, c_, l_, a_, w_, s_, Space, t_, o_, Space, r_, a_, i_, s_, e_, JumpLine
 .byte A_, t_, t_, a_, c_, k_, Space, a_, n_, d_, Space, A_, c_, c_, u_, r_, a_, c_, y_, Dot, Termin
 
-.align 2
+
 WIDE_GUARD_description:
 .byte E_, v_, a_, d_, e_, s_, Space, w_, i_, d_, e_, Dash, r_, a_, n_, g_, i_, n_, g_, Space, a_, t_, t_, a_, c_, k_, s_, JumpLine
 .byte f_, o_, r_, Space, o_, n_, e_, Space, t_, u_, r_, n_, Dot, Termin
 
-.align 2
+
 GUARD_SPLIT_description:
 .byte A_, v_, e_, r_, a_, g_, e_, s_, Space, c_, h_, a_, n_, g_, e_, s_, Space, t_, o_, Space, D_, e_, f_, e_, n_, s_, e_, JumpLine
 .byte a_, n_, d_, Space, S_, p_, Dot, Space, D_, e_, f_, Space, w_, i_, t_, h_, Space, t_, h_, e_, Space, f_, o_, e_, Dot, Termin
 
-.align 2
+
 POWER_SPLIT_description:
 .byte A_, v_, e_, r_, a_, g_, e_, s_, Space, c_, h_, a_, n_, g_, e_, s_, Space, t_, o_, Space, A_, t_, t_, a_, c_, k_, JumpLine
 .byte a_, n_, d_, Space, S_, p_, Dot, Space, A_, t_, k_, Space, w_, i_, t_, h_, Space, t_, h_, e_, Space, f_, o_, e_, Dot, Termin
 
-.align 2
+
 WONDER_ROOM_description:
 .byte D_, e_, f_, e_, n_, s_, e_, Space, a_, n_, d_, Space, S_, p_, Dot, Space, D_, e_, f_, Space, s_, t_, a_, t_, s_, JumpLine
 .byte a_, r_, e_, Space, s_, w_, a_, p_, p_, e_, d_, Space, f_, o_, r_, Space, 0xA6, Space, t_, u_, r_, n_, s_, Dot, Termin
 
-.align 2
+
 PSYSHOCK_description:
 .byte A_, t_, t_, a_, c_, k_, s_, Space, w_, i_, t_, h_, Space, a_, Space, p_, s_, y_, c_, h_, i_, c_, Space, w_, a_, v_, e_, JumpLine
 .byte t_, h_, a_, t_, Space, d_, o_, e_, s_, Space, p_, h_, y_, s_, i_, c_, a_, l_, Space, d_, a_, m_, a_, g_, e_, Dot, Termin
 
-.align 2
+
 VENOSHOCK_description:
 .byte D_, o_, e_, s_, Space, d_, o_, u_, b_, l_, e_, Space, d_, a_, m_, a_, g_, e_, Space, i_, f_, Space, t_, h_, e_, JumpLine
 .byte f_, o_, e_, Space, i_, s_, Space, p_, o_, i_, s_, o_, n_, e_, d_, Dot, Termin
 
-.align 2
+
 AUTOTOMIZE_description:
 .byte S_, h_, e_, d_, s_, Space, a_, d_, d_, i_, t_, i_, o_, n_, a_, l_, Space, w_, e_, i_, g_, h_, t_, Space, t_, o_, JumpLine
 .byte s_, h_, a_, r_, p_, l_, y_, Space, b_, o_, o_, s_, t_, Space, S_, p_, e_, e_, d_, Dot, Termin
 
-.align 2
+
 RAGE_POWDER_description:
 .byte S_, c_, a_, t_, t_, e_, r_, s_, Space, p_, o_, w_, d_, e_, r_, Space, t_, o_, Space, m_, a_, k_, e_, JumpLine
 .byte f_, o_, e_, s_, Space, a_, t_, t_, a_, c_, k_, Space, o_, n_, l_, y_, Space, t_, h_, e_, Space, u_, s_, e_, r_, Dot, Termin
 
-.align 2
+
 TELEKINESIS_description:
 .byte M_, a_, k_, e_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Space, f_, l_, o_, a_, t_, Dot, Space, I_, t_, Space, i_, s_, JumpLine
 .byte e_, a_, s_, i_, e_, r_, Space, t_, o_, Space, h_, i_, t_, Space, f_, o_, r_, Space, 0xA4, Space, t_, u_, r_, n_, s_, Dot, Termin
 
-.align 2
+
 MAGIC_ROOM_description:
 .byte H_, o_, l_, d_, Space, i_, t_, e_, m_, s_, Space, l_, o_, s_, e_, Space, t_, h_, e_, i_, r_, JumpLine
 .byte e_, f_, f_, e_, c_, t_, s_, Space, f_, o_, r_, Space, 0xA6, Space, t_, u_, r_, n_, s_, Dot, Termin
 
-.align 2
+
 SMACK_DOWN_description:
 .byte T_, h_, r_, o_, w_, s_, Space, a_, Space, r_, o_, c_, k_, Space, t_, o_, Space, k_, n_, o_, c_, k_, Space, t_, h_, e_, JumpLine
 .byte f_, o_, e_, Space, d_, o_, w_, n_, Space, t_, o_, Space, t_, h_, e_, Space, g_, r_, o_, u_, n_, d_, Dot, Termin
 
-.align 2
+
 STORM_THROW_description:
 .byte T_, h_, i_, s_, Space, a_, t_, t_, a_, c_, k_, Space, a_, l_, w_, a_, y_, s_, Space, r_, e_, s_, u_, l_, t_, s_, JumpLine
 .byte i_, n_, Space, a_, Space, c_, r_, i_, t_, i_, c_, a_, l_, Space, h_, i_, t_, Dot, Termin
 
-.align 2
+
 FLAME_BURST_description:
 .byte A_, Space, b_, u_, r_, s_, t_, i_, n_, g_, Space, f_, l_, a_, m_, e_, Space, t_, h_, a_, t_, Space, d_, o_, e_, s_, JumpLine
 .byte d_, a_, m_, a_, g_, e_, Space, t_, o_, Space, a_, l_, l_, Space, f_, o_, e_, s_, Dot, Termin
 
-.align 2
+
 SLUDGE_WAVE_description:
 .byte S_, w_, a_, m_, p_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Space, w_, i_, t_, h_, Space, a_, Space, w_, a_, v_, e_, JumpLine
 .byte o_, f_, Space, s_, l_, u_, d_, g_, e_, Dot, Space, M_, a_, y_, Space, a_, l_, s_, o_, Space, p_, o_, i_, s_, o_, n_, Dot, Termin
 
-.align 2
+
 QUIVER_DANCE_description:
 .byte D_, a_, n_, c_, e_, s_, Space, t_, o_, Space, r_, a_, i_, s_, e_, Space, S_, p_, Dot, Space, A_, t_, k_, Comma, JumpLine
 .byte S_, p_, Dot, Space, D_, e_, f_, Space, a_, n_, d_, Space, S_, p_, e_, e_, d_, Dot, Termin
 
-.align 2
+
 HEAVY_SLAM_description:
 .byte D_, o_, e_, s_, Space, m_, o_, r_, e_, Space, d_, a_, m_, a_, g_, e_, Space, i_, f_, Space, t_, h_, e_, JumpLine
 .byte u_, s_, e_, r_, Space, o_, u_, t_, w_, e_, i_, g_, h_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Dot, Termin
 
-.align 2
+
 SYNCHRONOISE_description:
 .byte A_, n_, Space, o_, d_, d_, Space, s_, h_, o_, c_, k_, Space, w_, a_, v_, e_, Space, t_, h_, a_, t_, Space, o_, n_, l_, y_, JumpLine
 .byte d_, a_, m_, a_, g_, e_, s_, Space, s_, a_, m_, e_, Dash, t_, y_, p_, e_, Space, f_, o_, e_, s_, Dot, Termin
 
-.align 2
+
 ELECTRO_BALL_description:
 .byte H_, u_, r_, l_, s_, Space, a_, n_, Space, o_, r_, b_, Space, t_, h_, a_, t_, Space, d_, o_, e_, s_, Space, m_, o_, r_, e_, JumpLine
 .byte d_, a_, m_, a_, g_, e_, Space, t_, o_, Space, s_, l_, o_, w_, e_, r_, Space, f_, o_, e_, s_, Dot, Termin
 
-.align 2
+
 SOAK_description:
 .byte S_, p_, r_, a_, y_, s_, Space, w_, a_, t_, e_, r_, Space, a_, t_, Space, t_, h_, e_, Space, f_, o_, e_, Comma, JumpLine
 .byte m_, a_, k_, i_, n_, g_, Space, i_, t_, Space, W_, a_, t_, e_, r_, Dash, t_, y_, p_, e_, Dot, Termin
 
-.align 2
+
 FLAME_CHARGE_description:
 .byte A_, t_, t_, a_, c_, k_, s_, Space, i_, n_, Space, a_, Space, c_, l_, o_, a_, k_, Space, o_, f_, JumpLine
 .byte f_, l_, a_, m_, e_, s_, Dot, Space, R_, a_, i_, s_, e_, s_, Space, S_, p_, e_, e_, d_, Dot, Termin
 
-.align 2
+
 COIL_description:
 .byte C_, o_, i_, l_, s_, Space, u_, p_, Space, t_, o_, Space, r_, a_, i_, s_, e_, Space, A_, t_, t_, a_, c_, k_, Comma, JumpLine
 .byte D_, e_, f_, e_, n_, s_, e_, Space, a_, n_, d_, Space, A_, c_, c_, u_, r_, a_, c_, y_, Dot, Termin
 
-.align 2
+
 LOW_SWEEP_description:
 .byte A_, t_, t_, a_, c_, k_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Apos, s_, Space, l_, e_, g_, s_, Comma, JumpLine
 .byte l_, o_, w_, e_, r_, i_, n_, g_, Space, i_, t_, s_, Space, S_, p_, e_, e_, d_, Dot, Termin
 
-.align 2
+
 ACID_SPRAY_description:
 .byte S_, p_, r_, a_, y_, s_, Space, a_, Space, h_, i_, d_, e_, Dash, m_, e_, l_, t_, i_, n_, g_, Space, a_, c_, i_, d_, Dot, JumpLine
 .byte S_, h_, a_, r_, p_, l_, y_, Space, r_, e_, d_, u_, c_, e_, s_, Space, S_, p_, Dot, Space, D_, e_, f_, Dot, Termin
 
-.align 2
+
 FOUL_PLAY_description:
 .byte T_, h_, e_, Space, h_, i_, g_, h_, e_, r_, Space, t_, h_, e_, Space, f_, o_, e_, Apos, s_, Space, A_, t_, t_, a_, c_, k_, Comma, JumpLine
 .byte t_, h_, e_, Space, m_, o_, r_, e_, Space, d_, a_, m_, a_, g_, e_, Space, c_, a_, u_, s_, e_, d_, Dot, Termin
 
-.align 2
+
 SIMPLE_BEAM_description:
 .byte A_, Space, b_, e_, a_, m_, Space, t_, h_, a_, t_, Space, c_, h_, a_, n_, g_, e_, s_, Space, t_, h_, e_, JumpLine
 .byte f_, o_, e_, Apos, s_, Space, a_, b_, i_, l_, i_, t_, y_, Space, t_, o_, Space, S_, i_, m_, p_, l_, e_, Dot, Termin
 
-.align 2
+
 ENTRAINMENT_description:
 .byte M_, a_, k_, e_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Space, m_, i_, m_, i_, c_, Space, t_, h_, e_, JumpLine
 .byte u_, s_, e_, r_, Comma, Space, g_, a_, i_, n_, i_, n_, g_, Space, i_, t_, s_, Space, a_, b_, i_, l_, i_, t_, y_, Dot, Termin
 
-.align 2
+
 AFTER_YOU_description:
 .byte H_, e_, l_, p_, s_, Space, o_, u_, t_, Space, t_, h_, e_, Space, f_, o_, e_, Comma, Space, l_, e_, t_, t_, i_, n_, g_, JumpLine
 .byte i_, t_, Space, m_, o_, v_, e_, Space, n_, e_, x_, t_, Dot, Termin
 
-.align 2
+
 ROUND_description:
 .byte A_, Space, s_, o_, n_, g_, Space, t_, h_, a_, t_, Space, i_, n_, f_, l_, i_, c_, t_, s_, Space, d_, a_, m_, a_, g_, e_, Dot, JumpLine
 .byte O_, t_, h_, e_, r_, s_, Space, c_, a_, n_, Space, j_, o_, i_, n_, Space, i_, n_, Space, t_, o_, o_, Dot, Termin
 
-.align 2
+
 ECHOED_VOICE_description:
 .byte D_, o_, e_, s_, Space, m_, o_, r_, e_, Space, d_, a_, m_, a_, g_, e_, Space, e_, v_, e_, r_, y_, Space, t_, u_, r_, n_, JumpLine
 .byte i_, t_, Space, i_, s_, Space, u_, s_, e_, d_, Dot, Termin
 
-.align 2
+
 CHIP_AWAY_description:
 .byte S_, t_, r_, i_, k_, e_, s_, Space, t_, h_, r_, o_, u_, g_, h_, Space, t_, h_, e_, Space, f_, o_, e_, Apos, s_, JumpLine
 .byte s_, t_, a_, t_, Space, c_, h_, a_, n_, g_, e_, s_, Dot, Termin
 
-.align 2
+
 CLEAR_SMOG_description:
 .byte A_, t_, t_, a_, c_, k_, s_, Space, w_, i_, t_, h_, Space, w_, h_, i_, t_, e_, Space, h_, a_, z_, e_, Space, t_, h_, a_, t_, JumpLine
 .byte e_, l_, i_, m_, i_, n_, a_, t_, e_, s_, Space, a_, l_, l_, Space, s_, t_, a_, t_, Space, c_, h_, a_, n_, g_, e_, s_, Dot, Termin
 
-.align 2
+
 STORED_POWER_description:
 .byte T_, h_, e_, Space, h_, i_, g_, h_, e_, r_, Space, t_, h_, e_, Space, u_, s_, e_, r_, Apos, s_, Space, s_, t_, a_, t_, s_, Comma, JumpLine
 .byte t_, h_, e_, Space, m_, o_, r_, e_, Space, d_, a_, m_, a_, g_, e_, Space, c_, a_, u_, s_, e_, d_, Dot, Termin
 
-.align 2
+
 QUICK_GUARD_description:
 .byte E_, v_, a_, d_, e_, s_, Space, p_, r_, i_, o_, r_, i_, t_, y_, Space, a_, t_, t_, a_, c_, k_, s_, JumpLine
 .byte f_, o_, r_, Space, o_, n_, e_, Space, t_, u_, r_, n_, Dot, Termin
 
-.align 2
+
 ALLY_SWITCH_description:
 .byte T_, h_, e_, Space, u_, s_, e_, r_, Space, s_, w_, i_, t_, c_, h_, e_, s_, Space, p_, l_, a_, c_, e_, s_, JumpLine
 .byte w_, i_, t_, h_, Space, i_, t_, s_, Space, p_, a_, r_, t_, n_, e_, r_, Dot, Termin
 
-.align 2
+
 SCALD_description:
 .byte S_, h_, o_, o_, t_, s_, Space, b_, o_, i_, l_, i_, n_, g_, Space, w_, a_, t_, e_, r_, Space, a_, t_, Space, t_, h_, e_, JumpLine
 .byte f_, o_, e_, Dot, Space, M_, a_, y_, Space, i_, n_, f_, l_, i_, c_, t_, Space, a_, Space, b_, u_, r_, n_, Dot, Termin
 
-.align 2
+
 SHELL_SMASH_description:
 .byte R_, a_, i_, s_, e_, s_, Space, o_, f_, f_, e_, n_, s_, i_, v_, e_, Space, s_, t_, a_, t_, s_, Comma, Space, b_, u_, t_, JumpLine
 .byte l_, o_, w_, e_, r_, s_, Space, d_, e_, f_, e_, n_, s_, i_, v_, e_, Space, s_, t_, a_, t_, s_, Dot, Termin
 
-.align 2
+
 HEAL_PULSE_description:
 .byte R_, e_, c_, o_, v_, e_, r_, s_, Space, u_, p_, Space, t_, o_, Space, h_, a_, l_, f_, Space, t_, h_, e_, JumpLine
 .byte t_, a_, r_, g_, e_, t_, Apos, s_, Space, m_, a_, x_, i_, m_, u_, m_, Space, H_, P_, Dot, Termin
 
-.align 2
+
 HEX_description:
 .byte D_, o_, e_, s_, Space, d_, o_, u_, b_, l_, e_, Space, d_, a_, m_, a_, g_, e_, Space, i_, f_, Space, t_, h_, e_, JumpLine
 .byte f_, o_, e_, Space, h_, a_, s_, Space, a_, Space, s_, t_, a_, t_, u_, s_, Space, p_, r_, o_, b_, l_, e_, m_, Dot, Termin
 
-.align 2
+
 SKY_DROP_description:
 .byte T_, a_, k_, e_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Space, i_, n_, t_, o_, Space, t_, h_, e_, Space, s_, k_, y_, Comma, JumpLine
 .byte t_, h_, e_, n_, Space, d_, r_, o_, p_, s_, Space, i_, t_, Space, t_, h_, e_, Space, n_, e_, x_, t_, Space, t_, u_, r_, n_, Dot, Termin
 
-.align 2
+
 SHIFT_GEAR_description:
 .byte R_, o_, t_, a_, t_, e_, s_, Space, i_, t_, s_, Space, g_, e_, a_, r_, s_, Space, t_, o_, Space, r_, a_, i_, s_, e_, JumpLine
 .byte A_, t_, t_, a_, c_, k_, Space, a_, n_, d_, Space, S_, p_, e_, e_, d_, Dot, Termin
 
-.align 2
+
 CIRCLE_THROW_description:
 .byte K_, n_, o_, c_, k_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Space, a_, w_, a_, y_, Space, t_, o_, Space, e_, n_, d_, JumpLine
 .byte t_, h_, e_, Space, b_, a_, t_, t_, l_, e_, Dot, Termin
 
-.align 2
+
 INCINERATE_description:
 .byte B_, u_, r_, n_, s_, Space, u_, p_, Space, B_, e_, r_, r_, i_, e_, s_, Space, a_, n_, d_, Space, G_, e_, m_, s_, Comma, JumpLine
 .byte p_, r_, e_, v_, e_, n_, t_, i_, n_, g_, Space, t_, h_, e_, i_, r_, Space, u_, s_, e_, Dot, Termin
 
-.align 2
+
 QUASH_description:
 .byte S_, u_, p_, p_, r_, e_, s_, s_, e_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Comma, Space, m_, a_, k_, i_, n_, g_, JumpLine
 .byte i_, t_, Space, m_, o_, v_, e_, Space, l_, a_, s_, t_, Dot, Termin
 
-.align 2
+
 ACROBATICS_description:
 .byte D_, o_, e_, s_, Space, d_, o_, u_, b_, l_, e_, Space, d_, a_, m_, a_, g_, e_, Space, i_, f_, Space, t_, h_, e_, JumpLine
 .byte u_, s_, e_, r_, Space, h_, a_, s_, Space, n_, o_, Space, i_, t_, e_, m_, Dot, Termin
 
-.align 2
+
 REFLECT_TYPE_description:
 .byte T_, h_, e_, Space, u_, s_, e_, r_, Space, r_, e_, f_, l_, e_, c_, t_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Apos, s_, JumpLine
 .byte t_, y_, p_, e_, Comma, Space, c_, o_, p_, y_, i_, n_, g_, Space, i_, t_, Dot, Termin
 
-.align 2
+
 RETALIATE_description:
 .byte A_, n_, Space, a_, t_, t_, a_, c_, k_, Space, t_, h_, a_, t_, Space, d_, o_, e_, s_, Space, m_, o_, r_, e_, JumpLine
 .byte d_, a_, m_, a_, g_, e_, Space, i_, f_, Space, a_, n_, Space, a_, l_, l_, y_, Space, f_, a_, i_, n_, t_, e_, d_, Dot, Termin
 
-.align 2
+
 FINAL_GAMBIT_description:
 .byte T_, h_, e_, Space, u_, s_, e_, r_, Space, f_, a_, i_, n_, t_, s_, Space, t_, o_, Space, d_, a_, m_, a_, g_, e_, JumpLine
 .byte t_, h_, e_, Space, f_, o_, e_, Space, e_, q_, u_, a_, l_, Space, t_, o_, Space, i_, t_, s_, Space, H_, P_, Dot, Termin
 
-.align 2
+
 BESTOW_description:
 .byte T_, h_, e_, Space, u_, s_, e_, r_, Space, g_, i_, v_, e_, s_, Space, i_, t_, s_, Space, h_, e_, l_, d_, JumpLine
 .byte i_, t_, e_, m_, Space, t_, o_, Space, t_, h_, e_, Space, f_, o_, e_, Dot, Termin
 
-.align 2
+
 INFERNO_description:
 .byte P_, o_, w_, e_, r_, f_, u_, l_, Space, a_, n_, d_, Space, s_, u_, r_, e_, Space, t_, o_, Space, i_, n_, f_, l_, i_, c_, t_, JumpLine
 .byte a_, Space, b_, u_, r_, n_, Comma, Space, b_, u_, t_, Space, i_, n_, a_, c_, c_, u_, r_, a_, t_, e_, Dot, Termin
 
-.align 2
+
 WATER_PLEDGE_description:
 .byte A_, t_, t_, a_, c_, k_, s_, Space, w_, i_, t_, h_, Space, a_, Space, c_, o_, l_, u_, m_, n_, Space, o_, f_, JumpLine
 .byte w_, a_, t_, e_, r_, Dot, Space, M_, a_, y_, Space, m_, a_, k_, e_, Space, a_, Space, r_, a_, i_, n_, b_, o_, w_, Dot, Termin
 
-.align 2
+
 FIRE_PLEDGE_description:
 .byte A_, t_, t_, a_, c_, k_, s_, Space, w_, i_, t_, h_, Space, a_, Space, c_, o_, l_, u_, m_, n_, Space, o_, f_, JumpLine
 .byte f_, i_, r_, e_, Dot, Space, M_, a_, y_, Space, b_, u_, r_, n_, Space, t_, h_, e_, Space, g_, r_, a_, s_, s_, Dot, Termin
 
-.align 2
+
 GRASS_PLEDGE_description:
 .byte A_, t_, t_, a_, c_, k_, s_, Space, w_, i_, t_, h_, Space, a_, Space, c_, o_, l_, u_, m_, n_, Space, o_, f_, JumpLine
 .byte g_, r_, a_, s_, s_, Dot, Space, M_, a_, y_, Space, c_, r_, e_, a_, t_, e_, Space, a_, Space, s_, w_, a_, m_, p_, Dot, Termin
 
-.align 2
+
 STRUGGLE_BUG_description:
 .byte R_, e_, s_, i_, s_, t_, i_, n_, g_, Comma, Space, t_, h_, e_, Space, u_, s_, e_, r_, Space, a_, t_, t_, a_, c_, k_, s_, JumpLine
 .byte t_, h_, e_, Space, f_, o_, e_, Dot, Space, L_, o_, w_, e_, r_, s_, Space, S_, p_, Dot, Space, A_, t_, k_, Dot, Termin
 
-.align 2
+
 BULLDOZE_description:
 .byte S_, t_, o_, m_, p_, s_, Space, d_, o_, w_, n_, Space, o_, n_, Space, t_, h_, e_, Space, g_, r_, o_, u_, n_, d_, Dot, JumpLine
 .byte L_, o_, w_, e_, r_, s_, Space, S_, p_, e_, e_, d_, Dot, Termin
 
-.align 2
+
 WORK_UP_description:
 .byte T_, h_, e_, Space, u_, s_, e_, r_, Space, i_, s_, Space, r_, o_, u_, s_, e_, d_, Dot, JumpLine
 .byte U_, p_, s_, Space, A_, t_, t_, a_, c_, k_, Space, a_, n_, d_, Space, S_, p_, Dot, Space, A_, t_, k_, Dot, Termin
 
-.align 2
+
 ELECTROWEB_description:
 .byte S_, n_, a_, r_, e_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Space, w_, i_, t_, h_, Space, a_, n_, JumpLine
 .byte e_, l_, e_, c_, t_, r_, i_, c_, Space, n_, e_, t_, Dot, Space, L_, o_, w_, e_, r_, s_, Space, S_, p_, e_, e_, d_, Dot, Termin
 
-.align 2
+
 DRILL_RUN_description:
 .byte S_, p_, i_, n_, s_, Space, i_, t_, s_, Space, b_, o_, d_, y_, Space, l_, i_, k_, e_, Space, a_, Space, d_, r_, i_, l_, l_, Dot, JumpLine
 .byte H_, i_, g_, h_, Space, c_, r_, i_, t_, i_, c_, a_, l_, Dash, h_, i_, t_, Space, r_, a_, t_, i_, o_, Dot, Termin
 
-.align 2
+
 DUAL_CHOP_description:
 .byte A_, t_, t_, a_, c_, k_, s_, Space, w_, i_, t_, h_, Space, b_, r_, u_, t_, a_, l_, Space, h_, i_, t_, s_, JumpLine
 .byte t_, h_, a_, t_, Space, s_, t_, r_, i_, k_, e_, Space, t_, w_, i_, c_, e_, Dot, Termin
 
-.align 2
+
 HEART_STAMP_description:
 .byte A_, Space, s_, u_, d_, d_, e_, n_, Space, b_, l_, o_, w_, Space, a_, f_, t_, e_, r_, Space, a_, Space, c_, u_, t_, e_, JumpLine
 .byte a_, c_, t_, Dot, Space, M_, a_, y_, Space, c_, a_, u_, s_, e_, Space, f_, l_, i_, n_, c_, h_, i_, n_, g_, Dot, Termin
 
-.align 2
+
 RAZOR_SHELL_description:
 .byte T_, e_, a_, r_, s_, Space, a_, t_, Space, t_, h_, e_, Space, f_, o_, e_, Space, w_, i_, t_, h_, Space, s_, h_, a_, r_, p_, JumpLine
 .byte s_, h_, e_, l_, l_, s_, Dot, Space, M_, a_, y_, Space, l_, o_, w_, e_, r_, Space, D_, e_, f_, e_, n_, s_, e_, Dot, Termin
 
-.align 2
+
 LEAF_TORNADO_description:
 .byte C_, i_, r_, c_, l_, e_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Space, w_, i_, t_, h_, Space, l_, e_, a_, v_, e_, s_, JumpLine
 .byte t_, o_, Space, d_, a_, m_, a_, g_, e_, Space, a_, n_, d_, Space, c_, u_, t_, Space, a_, c_, c_, u_, r_, a_, c_, y_, Dot, Termin
 
-.align 2
+
 STEAMROLLER_description:
 .byte C_, r_, u_, s_, h_, e_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Space, w_, i_, t_, h_, Space, i_, t_, s_, JumpLine
 .byte b_, o_, d_, y_, Dot, Space, M_, a_, y_, Space, c_, a_, u_, s_, e_, Space, f_, l_, i_, n_, c_, h_, i_, n_, g_, Dot, Termin
 
-.align 2
+
 COTTON_GUARD_description:
 .byte W_, r_, a_, p_, s_, Space, i_, t_, s_, Space, b_, o_, d_, y_, Space, i_, n_, Space, c_, o_, t_, t_, o_, n_, Dot, JumpLine
 .byte D_, r_, a_, s_, t_, i_, c_, a_, l_, l_, y_, Space, r_, a_, i_, s_, e_, s_, Space, D_, e_, f_, e_, n_, s_, e_, Dot, Termin
 
-.align 2
+
 NIGHT_DAZE_description:
 .byte L_, o_, o_, s_, e_, s_, Space, a_, Space, p_, i_, t_, c_, h_, Dash, b_, l_, a_, c_, k_, Space, s_, h_, o_, c_, k_, JumpLine
 .byte w_, a_, v_, e_, Dot, Space, M_, a_, y_, Space, l_, o_, w_, e_, r_, Space, a_, c_, c_, u_, r_, a_, c_, y_, Dot, Termin
 
-.align 2
+
 HURRICANE_description:
 .byte T_, r_, a_, p_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Space, i_, n_, Space, a_, Space, f_, i_, e_, r_, c_, e_, JumpLine
 .byte w_, i_, n_, d_, Dot, Space, M_, a_, y_, Space, c_, a_, u_, s_, e_, Space, c_, o_, n_, f_, u_, s_, i_, o_, n_, Dot, Termin
 
-.align 2
+
 HEAD_CHARGE_description:
 .byte A_, Space, c_, h_, a_, r_, g_, e_, Space, u_, s_, i_, n_, g_, Space, g_, u_, a_, r_, d_, Space, h_, a_, i_, r_, Dot, JumpLine
 .byte I_, t_, Space, h_, u_, r_, t_, s_, Space, t_, h_, e_, Space, u_, s_, e_, r_, Space, a_, Space, l_, i_, t_, t_, l_, e_, Dot, Termin
 
-.align 2
+
 GEAR_GRIND_description:
 .byte T_, h_, r_, o_, w_, s_, Space, t_, w_, o_, Space, s_, t_, e_, e_, l_, Space, g_, e_, a_, r_, s_, JumpLine
 .byte t_, h_, a_, t_, Space, s_, t_, r_, i_, k_, e_, Space, t_, w_, i_, c_, e_, Dot, Termin
 
-.align 2
+
 TECHNO_BLAST_description:
 .byte T_, h_, e_, Space, t_, y_, p_, e_, Space, v_, a_, r_, i_, e_, s_, Space, w_, i_, t_, h_, Space, t_, h_, e_, JumpLine
 .byte k_, i_, n_, d_, Space, o_, f_, Space, D_, r_, i_, v_, e_, Space, h_, e_, l_, d_, Dot, Termin
 
-.align 2
+
 RELIC_SONG_description:
 .byte A_, t_, t_, a_, c_, k_, s_, Space, w_, i_, t_, h_, Space, a_, n_, Space, a_, n_, c_, i_, e_, n_, t_, JumpLine
 .byte s_, o_, n_, g_, Dot, Space, M_, a_, y_, Space, i_, n_, d_, u_, c_, e_, Space, s_, l_, e_, e_, p_, Dot, Termin
 
-.align 2
+
 SECRET_SWORD_description:
 .byte C_, u_, t_, s_, Space, w_, i_, t_, h_, Space, a_, Space, l_, o_, n_, g_, Space, h_, o_, r_, n_, Space, t_, h_, a_, t_, JumpLine
 .byte d_, o_, e_, s_, Space, p_, h_, y_, s_, i_, c_, a_, l_, Space, d_, a_, m_, a_, g_, e_, Dot, Termin
 
-.align 2
+
 BOLT_STRIKE_description:
 .byte S_, t_, r_, i_, k_, e_, s_, Space, w_, i_, t_, h_, Space, a_, Space, g_, r_, e_, a_, t_, Space, a_, m_, o_, u_, n_, t_, JumpLine
 .byte o_, f_, Space, l_, i_, g_, h_, t_, n_, i_, n_, g_, Dot, Space, M_, a_, y_, Space, p_, a_, r_, a_, l_, y_, z_, e_, Dot, Termin
 
-.align 2
+
 BLUE_FLARE_description:
 .byte E_, n_, g_, u_, l_, f_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Space, i_, n_, Space, a_, Space, b_, l_, u_, e_, JumpLine
 .byte f_, l_, a_, m_, e_, Dot, Space, M_, a_, y_, Space, i_, n_, f_, l_, i_, c_, t_, Space, a_, Space, b_, u_, r_, n_, Dot, Termin
 
-.align 2
+
 FIERY_DANCE_description:
 .byte D_, a_, n_, c_, e_, s_, Space, c_, l_, o_, a_, k_, e_, d_, Space, i_, n_, Space, f_, l_, a_, m_, e_, s_, Dot, JumpLine
 .byte M_, a_, y_, Space, r_, a_, i_, s_, e_, Space, S_, p_, Dot, Space, A_, t_, k_, Dot, Termin
 
-.align 2
+
 FREEZE_SHOCK_description:
 .byte A_, Space, p_, o_, w_, e_, r_, f_, u_, l_, Space, 0xA3, Dash, t_, u_, r_, n_, Space, m_, o_, v_, e_, Space, t_, h_, a_, t_, JumpLine
 .byte m_, a_, y_, Space, p_, a_, r_, a_, l_, y_, z_, e_, Space, t_, h_, e_, Space, f_, o_, e_, Dot, Termin
 
-.align 2
+
 ICE_BURN_description:
 .byte A_, Space, p_, o_, w_, e_, r_, f_, u_, l_, Space, 0xA3, Dash, t_, u_, r_, n_, Space, m_, o_, v_, e_, Space, t_, h_, a_, t_, JumpLine
 .byte m_, a_, y_, Space, i_, n_, f_, l_, i_, c_, t_, Space, a_, Space, b_, u_, r_, n_, Dot, Termin
 
-.align 2
+
 SNARL_description:
 .byte Y_, e_, l_, l_, s_, Space, a_, n_, d_, Space, r_, a_, n_, t_, s_, Space, a_, t_, Space, t_, h_, e_, Space, f_, o_, e_, Comma, JumpLine
 .byte l_, o_, w_, e_, r_, i_, n_, g_, Space, i_, t_, s_, Space, S_, p_, Dot, Space, A_, t_, k_, Dot, Termin
 
-.align 2
+
 ICICLE_CRASH_description:
 .byte D_, r_, o_, p_, s_, Space, l_, a_, r_, g_, e_, Space, i_, c_, i_, c_, l_, e_, s_, Space, o_, n_, Space, t_, h_, e_, JumpLine
 .byte f_, o_, e_, Dot, Space, M_, a_, y_, Space, c_, a_, u_, s_, e_, Space, f_, l_, i_, n_, c_, h_, i_, n_, g_, Dot, Termin
 
-.align 2
+
 V_CREATE_description:
 .byte V_, e_, r_, y_, Space, p_, o_, w_, e_, r_, f_, u_, l_, Comma, Space, b_, u_, t_, Space, l_, o_, w_, e_, r_, s_, JumpLine
 .byte D_, e_, f_, e_, n_, s_, e_, Comma, Space, S_, p_, Dot, Space, D_, e_, f_, Space, a_, n_, d_, Space, S_, p_, e_, e_, d_, Dot, Termin
 
-.align 2
+
 FUSION_FLARE_description:
 .byte S_, u_, m_, m_, o_, n_, s_, Space, a_, Space, f_, i_, r_, e_, b_, a_, l_, l_, Dot, Space, W_, o_, r_, k_, s_, JumpLine
 .byte w_, e_, l_, l_, Space, w_, i_, t_, h_, Space, a_, Space, t_, h_, u_, n_, d_, e_, r_, b_, o_, l_, t_, Dot, Termin
 
-.align 2
+
 FUSION_BOLT_description:
 .byte S_, u_, m_, m_, o_, n_, s_, Space, a_, Space, t_, h_, u_, n_, d_, e_, r_, b_, o_, l_, t_, Dot, JumpLine
 .byte W_, o_, r_, k_, s_, Space, w_, e_, l_, l_, Space, w_, i_, t_, h_, Space, a_, Space, f_, i_, r_, e_, b_, a_, l_, l_, Dot, Termin
 
-.align 2
+
 FLYING_PRESS_description:
 .byte T_, h_, i_, s_, Space, a_, t_, t_, a_, c_, k_, Space, d_, o_, e_, s_, Space, F_, i_, g_, h_, t_, i_, n_, g_, Dash, JumpLine
 .byte a_, n_, d_, Space, F_, l_, y_, i_, n_, g_, Dash, t_, y_, p_, e_, Space, d_, a_, m_, a_, g_, e_, Dot, Termin
 
-.align 2
+
 MAT_BLOCK_description:
 .byte E_, v_, a_, d_, e_, s_, Space, d_, a_, m_, a_, g_, i_, n_, g_, Space, m_, o_, v_, e_, s_, JumpLine
 .byte f_, o_, r_, Space, o_, n_, e_, Space, t_, u_, r_, n_, Dot, Termin
 
-.align 2
+
 BELCH_description:
 .byte L_, e_, t_, s_, Space, o_, u_, t_, Space, a_, Space, l_, o_, u_, d_, Space, b_, e_, l_, c_, h_, Dot, JumpLine
 .byte M_, u_, s_, t_, Space, e_, a_, t_, Space, a_, Space, B_, e_, r_, r_, y_, Space, t_, o_, Space, u_, s_, e_, Space, i_, t_, Dot, Termin
 
-.align 2
+
 ROTOTILLER_description:
 .byte U_, p_, s_, Space, t_, h_, e_, Space, A_, t_, t_, a_, c_, k_, Space, a_, n_, d_, Space, S_, p_, Dot, Space, A_, t_, k_, JumpLine
 .byte o_, f_, Space, G_, r_, a_, s_, s_, Dash, t_, y_, p_, e_, Space, P_, o_, k_, Poke_e, m_, o_, n_, Dot, Termin
 
-.align 2
+
 STICKY_WEB_description:
 .byte W_, e_, a_, v_, e_, s_, Space, a_, Space, s_, t_, i_, c_, k_, y_, Space, n_, e_, t_, Space, t_, h_, a_, t_, JumpLine
 .byte s_, l_, o_, w_, s_, Space, f_, o_, e_, s_, Space, s_, w_, i_, t_, c_, h_, i_, n_, g_, Space, i_, n_, Dot, Termin
 
-.align 2
+
 FELL_STINGER_description:
 .byte I_, f_, Space, i_, t_, Space, k_, n_, o_, c_, k_, s_, Space, o_, u_, t_, Space, a_, Space, f_, o_, e_, Comma, JumpLine
 .byte t_, h_, e_, Space, A_, t_, t_, a_, c_, k_, Space, s_, t_, a_, t_, Space, i_, s_, Space, r_, a_, i_, s_, e_, d_, Dot, Termin
 
-.align 2
+
 TRICK_OR_TREAT_description:
 .byte G_, o_, e_, s_, Space, t_, r_, i_, c_, k_, Dash, o_, r_, Dash, t_, r_, e_, a_, t_, i_, n_, g_, Comma, JumpLine
 .byte m_, a_, k_, i_, n_, g_, Space, t_, h_, e_, Space, f_, o_, e_, Space, G_, h_, o_, s_, t_, Dash, t_, y_, p_, e_, Dot, Termin
 
-.align 2
+
 NOBLE_ROAR_description:
 .byte I_, n_, t_, i_, m_, i_, d_, a_, t_, e_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Comma, Space, t_, o_, Space, c_, u_, t_, JumpLine
 .byte A_, t_, t_, a_, c_, k_, Space, a_, n_, d_, Space, S_, p_, Dot, Space, A_, t_, k_, Dot, Termin
 
-.align 2
+
 ION_DELUGE_description:
 .byte E_, l_, e_, c_, t_, r_, i_, f_, i_, e_, s_, Space, N_, o_, r_, m_, a_, l_, Dash, t_, y_, p_, e_, JumpLine
 .byte m_, o_, v_, e_, s_, Space, w_, i_, t_, h_, Space, c_, h_, a_, r_, g_, e_, d_, Space, a_, t_, o_, m_, s_, Dot, Termin
 
-.align 2
+
 FORESTS_CURSE_description:
 .byte P_, u_, t_, s_, Space, a_, Space, c_, u_, r_, s_, e_, Space, o_, n_, Space, t_, h_, e_, Space, f_, o_, e_, Comma, JumpLine
 .byte m_, a_, k_, i_, n_, g_, Space, t_, h_, e_, Space, f_, o_, e_, Space, G_, r_, a_, s_, s_, Dash, t_, y_, p_, e_, Dot, Termin
 
-.align 2
+
 PETAL_BLIZZARD_description:
 .byte S_, t_, i_, r_, s_, Space, u_, p_, Space, a_, Space, v_, i_, o_, l_, e_, n_, t_, Space, s_, t_, o_, r_, m_, JumpLine
 .byte o_, f_, Space, p_, e_, t_, a_, l_, s_, Space, t_, o_, Space, a_, t_, t_, a_, c_, k_, Dot, Termin
 
-.align 2
+
 FREEZE_DRY_description:
 .byte S_, u_, p_, e_, r_, Space, e_, f_, f_, e_, c_, t_, i_, v_, e_, Space, o_, n_, Space, W_, a_, t_, e_, r_, Dash, JumpLine
 .byte t_, y_, p_, e_, s_, Dot, Space, M_, a_, y_, Space, c_, a_, u_, s_, e_, Space, f_, r_, e_, e_, z_, i_, n_, g_, Dot, Termin
 
-.align 2
+
 DISARMING_VOICE_description:
 .byte L_, e_, t_, s_, Space, o_, u_, t_, Space, a_, Space, c_, h_, a_, r_, m_, i_, n_, g_, Space, c_, r_, y_, JumpLine
 .byte t_, h_, a_, t_, Space, c_, a_, n_, n_, o_, t_, Space, b_, e_, Space, e_, v_, a_, d_, e_, d_, Dot, Termin
 
-.align 2
+
 PARTING_SHOT_description:
 .byte L_, o_, w_, e_, r_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Apos, s_, Space, A_, t_, t_, a_, c_, k_, Space, a_, n_, d_, JumpLine
 .byte S_, p_, Dot, Space, A_, t_, k_, Comma, Space, t_, h_, e_, n_, Space, s_, w_, i_, t_, c_, h_, e_, s_, Space, o_, u_, t_, Dot, Termin
 
-.align 2
+
 TOPSY_TURVY_description:
 .byte S_, w_, a_, p_, s_, Space, a_, l_, l_, Space, s_, t_, a_, t_, Space, c_, h_, a_, n_, g_, e_, s_, Space, t_, h_, a_, t_, JumpLine
 .byte a_, f_, f_, e_, c_, t_, Space, t_, h_, e_, Space, t_, a_, r_, g_, e_, t_, Dot, Termin
 
-.align 2
+
 DRAINING_KISS_description:
 .byte A_, n_, Space, a_, t_, t_, a_, c_, k_, Space, t_, h_, a_, t_, Space, a_, b_, s_, o_, r_, b_, s_, Space, o_, v_, e_, r_, JumpLine
 .byte h_, a_, l_, f_, Space, t_, h_, e_, Space, d_, a_, m_, a_, g_, e_, Space, i_, n_, f_, l_, i_, c_, t_, e_, d_, Dot, Termin
 
-.align 2
+
 CRAFTY_SHIELD_description:
 .byte E_, v_, a_, d_, e_, s_, Space, s_, t_, a_, t_, u_, s_, Space, m_, o_, v_, e_, s_, Space, f_, o_, r_, JumpLine
 .byte o_, n_, e_, Space, t_, u_, r_, n_, Dot, Termin
 
-.align 2
+
 FLOWER_SHIELD_description:
 .byte R_, a_, i_, s_, e_, s_, Space, t_, h_, e_, Space, D_, e_, f_, e_, n_, s_, e_, Space, o_, f_, JumpLine
 .byte G_, r_, a_, s_, s_, Dash, t_, y_, p_, e_, Space, P_, o_, k_, Poke_e, m_, o_, n_, Dot, Termin
 
-.align 2
+
 GRASSY_TERRAIN_description:
 .byte T_, h_, e_, Space, g_, r_, o_, u_, n_, d_, Space, t_, u_, r_, n_, s_, Space, t_, o_, Space, g_, r_, a_, s_, s_, JumpLine
 .byte f_, o_, r_, Space, 0xA6, Space, t_, u_, r_, n_, s_, Dot, Space, R_, e_, s_, t_, o_, r_, e_, s_, Space, H_, P_, Dot, Termin
 
-.align 2
+
 MISTY_TERRAIN_description:
 .byte C_, o_, v_, e_, r_, s_, Space, t_, h_, e_, Space, g_, r_, o_, u_, n_, d_, Space, w_, i_, t_, h_, Space, m_, i_, s_, t_, JumpLine
 .byte f_, o_, r_, Space, 0xA6, Space, t_, u_, r_, n_, s_, Dot, Space, B_, l_, o_, c_, k_, s_, Space, s_, t_, a_, t_, u_, s_, Dot, Termin
 
-.align 2
+
 ELECTRIFY_description:
 .byte E_, l_, e_, c_, t_, r_, i_, f_, i_, e_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Comma, Space, m_, a_, k_, i_, n_, g_, JumpLine
 .byte i_, t_, s_, Space, n_, e_, x_, t_, Space, m_, o_, v_, e_, Space, E_, l_, e_, c_, t_, r_, i_, c_, Dash, t_, y_, p_, e_, Dot, Termin
 
-.align 2
+
 PLAY_ROUGH_description:
 .byte P_, l_, a_, y_, s_, Space, r_, o_, u_, g_, h_, Space, w_, i_, t_, h_, Space, t_, h_, e_, Space, f_, o_, e_, Dot, JumpLine
 .byte M_, a_, y_, Space, l_, o_, w_, e_, r_, Space, A_, t_, t_, a_, c_, k_, Dot, Termin
 
-.align 2
+
 FAIRY_WIND_description:
 .byte S_, t_, i_, r_, s_, Space, u_, p_, Space, a_, Space, f_, a_, i_, r_, y_, Space, w_, i_, n_, d_, Space, t_, o_, JumpLine
 .byte s_, t_, r_, i_, k_, e_, Space, t_, h_, e_, Space, f_, o_, e_, Dot, Termin
 
-.align 2
+
 MOONBLAST_description:
 .byte A_, t_, t_, a_, c_, k_, s_, Space, w_, i_, t_, h_, Space, t_, h_, e_, Space, p_, o_, w_, e_, r_, Space, o_, f_, JumpLine
 .byte t_, h_, e_, Space, m_, o_, o_, n_, Dot, Space, M_, a_, y_, Space, l_, o_, w_, e_, r_, Space, S_, p_, Dot, Space, A_, t_, k_, Dot, Termin
 
-.align 2
+
 BOOMBURST_description:
 .byte A_, t_, t_, a_, c_, k_, s_, Space, e_, v_, e_, r_, y_, t_, h_, i_, n_, g_, Space, w_, i_, t_, h_, Space, a_, JumpLine
 .byte d_, e_, s_, t_, r_, u_, c_, t_, i_, v_, e_, Space, s_, o_, u_, n_, d_, Space, w_, a_, v_, e_, Dot, Termin
 
-.align 2
+
 FAIRY_LOCK_description:
 .byte L_, o_, c_, k_, s_, Space, d_, o_, w_, n_, Space, t_, h_, e_, Space, b_, a_, t_, t_, l_, e_, f_, i_, e_, l_, d_, Comma, JumpLine
 .byte p_, r_, e_, v_, e_, n_, t_, i_, n_, g_, Space, e_, s_, c_, a_, p_, e_, Space, n_, e_, x_, t_, Space, t_, u_, r_, n_, Dot, Termin
 
-.align 2
+
 KINGS_SHIELD_description:
 .byte E_, v_, a_, d_, e_, s_, Space, d_, a_, m_, a_, g_, e_, Comma, Space, a_, n_, d_, Space, s_, h_, a_, r_, p_, l_, y_, JumpLine
 .byte r_, e_, d_, u_, c_, e_, s_, Space, A_, t_, t_, a_, c_, k_, Space, i_, f_, Space, s_, t_, r_, u_, c_, k_, Dot, Termin
 
-.align 2
+
 PLAY_NICE_description:
 .byte B_, e_, f_, r_, i_, e_, n_, d_, Space, t_, h_, e_, Space, f_, o_, e_, Comma, Space, l_, o_, w_, e_, r_, i_, n_, g_, JumpLine
 .byte i_, t_, s_, Space, A_, t_, t_, a_, c_, k_, Space, w_, i_, t_, h_, o_, u_, t_, Space, f_, a_, i_, l_, Dot, Termin
 
-.align 2
+
 CONFIDE_description:
 .byte S_, h_, a_, r_, e_, s_, Space, a_, Space, s_, e_, c_, r_, e_, t_, Space, w_, i_, t_, h_, Space, t_, h_, e_, JumpLine
 .byte f_, o_, e_, Comma, Space, l_, o_, w_, e_, r_, i_, n_, g_, Space, S_, p_, Dot, Space, A_, t_, k_, Dot, Termin
 
-.align 2
+
 DIAMOND_STORM_description:
 .byte W_, h_, i_, p_, s_, Space, u_, p_, Space, a_, Space, s_, t_, o_, r_, m_, Space, o_, f_, JumpLine
 .byte d_, i_, a_, m_, o_, n_, d_, s_, Dot, Space, M_, a_, y_, Space, u_, p_, Space, D_, e_, f_, e_, n_, s_, e_, Dot, Termin
 
-.align 2
+
 STEAM_ERUPTION_description:
 .byte I_, m_, m_, e_, r_, s_, e_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Space, i_, n_, Space, h_, e_, a_, t_, e_, d_, JumpLine
 .byte s_, t_, e_, a_, m_, Dot, Space, M_, a_, y_, Space, i_, n_, f_, l_, i_, c_, t_, Space, a_, Space, b_, u_, r_, n_, Dot, Termin
 
-.align 2
+
 HYPERSPACE_HOLE_description:
 .byte U_, s_, e_, s_, Space, a_, Space, w_, a_, r_, p_, Space, h_, o_, l_, e_, Space, t_, o_, Space, a_, t_, t_, a_, c_, k_, Dot, JumpLine
 .byte C_, a_, n_, Apos, t_, Space, b_, e_, Space, e_, v_, a_, d_, e_, d_, Dot, Termin
 
-.align 2
+
 WATER_SHURIKEN_description:
 .byte T_, h_, r_, o_, w_, s_, Space, 0xA3, Space, t_, o_, Space, 0xA6, Space, s_, t_, a_, r_, s_, Space, t_, h_, a_, t_, JumpLine
 .byte a_, r_, e_, Space, s_, u_, r_, e_, Space, t_, o_, Space, s_, t_, r_, i_, k_, e_, Space, f_, i_, r_, s_, t_, Dot, Termin
 
-.align 2
+
 MYSTICAL_FIRE_description:
 .byte B_, r_, e_, a_, t_, h_, e_, s_, Space, a_, Space, s_, p_, e_, c_, i_, a_, l_, Comma, Space, h_, o_, t_, JumpLine
 .byte f_, i_, r_, e_, Dot, Space, M_, a_, y_, Space, l_, o_, w_, e_, r_, Space, S_, p_, Dot, Space, A_, t_, k_, Dot, Termin
 
-.align 2
+
 SPIKY_SHIELD_description:
 .byte E_, v_, a_, d_, e_, s_, Space, a_, t_, t_, a_, c_, k_, Comma, Space, a_, n_, d_, Space, d_, a_, m_, a_, g_, e_, s_, JumpLine
 .byte t_, h_, e_, Space, f_, o_, e_, Space, i_, f_, Space, s_, t_, r_, u_, c_, k_, Dot, Termin
 
-.align 2
+
 AROMATIC_MIST_description:
 .byte R_, a_, i_, s_, e_, s_, Space, t_, h_, e_, Space, S_, p_, Dot, Space, D_, e_, f_, Space, o_, f_, Space, a_, JumpLine
 .byte p_, a_, r_, t_, n_, e_, r_, Space, P_, o_, k_, Poke_e, m_, o_, n_, Dot, Termin
 
-.align 2
+
 EERIE_IMPULSE_description:
 .byte E_, x_, p_, o_, s_, e_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Space, t_, o_, Space, a_, Space, p_, u_, l_, s_, e_, JumpLine
 .byte t_, h_, a_, t_, Space, s_, h_, a_, r_, p_, l_, y_, Space, c_, u_, t_, s_, Space, S_, p_, Dot, Space, A_, t_, k_, Dot, Termin
 
-.align 2
+
 VENOM_DRENCH_description:
 .byte L_, o_, w_, e_, r_, s_, Space, t_, h_, e_, Space, A_, t_, t_, a_, c_, k_, Comma, Space, S_, p_, Dot, Space, A_, t_, k_, JumpLine
 .byte a_, n_, d_, Space, S_, p_, e_, e_, d_, Space, o_, f_, Space, a_, Space, p_, o_, i_, s_, o_, n_, e_, d_, Space, f_, o_, e_, Dot, Termin
 
-.align 2
+
 POWDER_description:
 .byte D_, a_, m_, a_, g_, e_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Space, i_, f_, Space, i_, t_, Space, u_, s_, e_, s_, JumpLine
 .byte a_, Space, F_, i_, r_, e_, Dash, t_, y_, p_, e_, Space, m_, o_, v_, e_, Dot, Termin
 
-.align 2
+
 GEOMANCY_description:
 .byte R_, a_, i_, s_, e_, s_, Space, S_, p_, Dot, Space, A_, t_, k_, Comma, Space, S_, p_, Dot, Space, D_, e_, f_, Space, a_, n_, d_, JumpLine
 .byte S_, p_, e_, e_, d_, Space, o_, n_, Space, t_, h_, e_, Space, 0xA3, n_, d_, Space, t_, u_, r_, n_, Dot, Termin
 
-.align 2
+
 MAGNETIC_FLUX_description:
 .byte B_, o_, o_, s_, t_, s_, Space, t_, h_, e_, Space, d_, e_, f_, e_, n_, s_, e_, s_, Space, o_, f_, JumpLine
 .byte t_, h_, o_, s_, e_, Space, w_, i_, t_, h_, Space, P_, l_, u_, s_, Space, o_, r_, Space, M_, i_, n_, u_, s_, Dot, Termin
 
-.align 2
+
 HAPPY_HOUR_description:
 .byte D_, o_, u_, b_, l_, e_, s_, Space, t_, h_, e_, Space, a_, m_, o_, u_, n_, t_, Space, o_, f_, JumpLine
 .byte P_, r_, i_, z_, e_, Space, M_, o_, n_, e_, y_, Space, r_, e_, c_, e_, i_, v_, e_, d_, Dot, Termin
 
-.align 2
+
 ELECTRIC_TERRAIN_description:
 .byte E_, l_, e_, c_, t_, r_, i_, f_, i_, e_, s_, Space, t_, h_, e_, Space, g_, r_, o_, u_, n_, d_, Space, f_, o_, r_, JumpLine
 .byte 0xA6, Space, t_, u_, r_, n_, s_, Dot, Space, P_, r_, e_, v_, e_, n_, t_, s_, Space, s_, l_, e_, e_, p_, Dot, Termin
 
-.align 2
+
 DAZZLING_GLEAM_description:
 .byte D_, a_, m_, a_, g_, e_, s_, Space, f_, o_, e_, s_, Space, b_, y_, Space, e_, m_, i_, t_, t_, i_, n_, g_, JumpLine
 .byte a_, Space, b_, r_, i_, g_, h_, t_, Space, f_, l_, a_, s_, h_, Dot, Termin
 
-.align 2
+
 CELEBRATE_description:
 .byte C_, o_, n_, g_, r_, a_, t_, u_, l_, a_, t_, e_, s_, Space, y_, o_, u_, Space, o_, n_, Space, y_, o_, u_, r_, JumpLine
 .byte s_, p_, e_, c_, i_, a_, l_, Space, d_, a_, y_, Exclam, Termin
 
-.align 2
+
 HOLD_HANDS_description:
 .byte T_, h_, e_, Space, u_, s_, e_, r_, Space, a_, n_, d_, Space, a_, l_, l_, y_, Space, h_, o_, l_, d_, Space, h_, a_, n_, d_, s_, Comma, JumpLine
 .byte m_, a_, k_, i_, n_, g_, Space, t_, h_, e_, m_, Space, h_, a_, p_, p_, y_, Dot, Termin
 
-.align 2
+
 BABYDOLL_EYES_description:
 .byte L_, o_, w_, e_, r_, s_, Space, t_, h_, e_, Space, f_, o_, e_, Apos, s_, Space, A_, t_, t_, a_, c_, k_, JumpLine
 .byte b_, e_, f_, o_, r_, e_, Space, i_, t_, Space, c_, a_, n_, Space, m_, o_, v_, e_, Dot, Termin
 
-.align 2
+
 NUZZLE_description:
 .byte R_, u_, b_, s_, Space, i_, t_, s_, Space, c_, h_, e_, e_, c_, k_, s_, Space, a_, g_, a_, i_, n_, s_, t_, JumpLine
 .byte t_, h_, e_, Space, f_, o_, e_, Comma, Space, p_, a_, r_, a_, l_, y_, z_, i_, n_, g_, Space, i_, t_, Dot, Termin
 
-.align 2
+
 INFESTATION_description:
 .byte T_, h_, e_, Space, f_, o_, e_, Space, i_, s_, Space, i_, n_, f_, e_, s_, t_, e_, d_, Space, a_, n_, d_, JumpLine
 .byte a_, t_, t_, a_, c_, k_, e_, d_, Space, f_, o_, r_, Space, 0xA3, Space, t_, o_, Space, 0xA6, Space, t_, u_, r_, n_, s_, Dot, Termin
 
-.align 2
+
 POWER_UP_PUNCH_description:
 .byte A_, Space, h_, a_, r_, d_, Space, p_, u_, n_, c_, h_, Space, t_, h_, a_, t_, Space, r_, a_, i_, s_, e_, s_, JumpLine
 .byte t_, h_, e_, Space, u_, s_, e_, r_, Apos, s_, Space, A_, t_, t_, a_, c_, k_, Dot, Termin
 
-.align 2
+
 THOUSAND_ARROWS_description:
 .byte C_, a_, n_, Space, h_, i_, t_, Space, F_, l_, y_, i_, n_, g_, Space, f_, o_, e_, s_, Comma, Space, t_, h_, e_, n_, JumpLine
 .byte k_, n_, o_, c_, k_, s_, Space, t_, h_, e_, m_, Space, t_, o_, Space, t_, h_, e_, Space, g_, r_, o_, u_, n_, d_, Dot, Termin
 
-.align 2
+
 THOUSAND_WAVES_description:
 .byte T_, h_, o_, s_, e_, Space, h_, i_, t_, Space, b_, y_, Space, t_, h_, e_, Space, w_, a_, v_, e_, Space, c_, a_, n_, JumpLine
 .byte n_, o_, Space, l_, o_, n_, g_, e_, r_, Space, e_, s_, c_, a_, p_, e_, Dot, Termin
 
-.align 2
+
 LIGHT_OF_RUIN_description:
 .byte F_, i_, r_, e_, s_, Space, a_, Space, g_, r_, e_, a_, t_, Space, b_, e_, a_, m_, Space, o_, f_, Space, l_, i_, g_, h_, t_, JumpLine
 .byte t_, h_, a_, t_, Space, a_, l_, s_, o_, Space, h_, u_, r_, t_, s_, Space, t_, h_, e_, Space, u_, s_, e_, r_, Dot, Termin
 
-.align 2
+
 ORIGIN_PULSE_description:
 .byte B_, e_, a_, m_, s_, Space, o_, f_, Space, g_, l_, o_, w_, i_, n_, g_, Space, b_, l_, u_, e_, Space, l_, i_, g_, h_, t_, JumpLine
 .byte b_, l_, a_, s_, t_, Space, b_, o_, t_, h_, Space, f_, o_, e_, s_, Dot, Termin
 
-.align 2
+
 PRECIPICE_BLADES_description:
 .byte F_, e_, a_, r_, s_, o_, m_, e_, Space, b_, l_, a_, d_, e_, s_, Space, o_, f_, Space, s_, t_, o_, n_, e_, JumpLine
 .byte a_, t_, t_, a_, c_, k_, Space, b_, o_, t_, h_, Space, f_, o_, e_, s_, Dot, Termin
 
-.align 2
+
 LAVA_PLUME_description:
 .byte S_, c_, a_, r_, l_, e_, t_, 0, f_, l_, a_, m_, e_, s_, 0, t_, o_, r_, c_, h_, e_, s_, 0xFE
 .byte e_, v_, e_, r_, y_, t_, h_, i_, n_, g_, 0, a_, r_, o_, u_, n_, d_, 0, t_, h_, e_, 0, u_, s_, e_, r_, Dot, 0xFF

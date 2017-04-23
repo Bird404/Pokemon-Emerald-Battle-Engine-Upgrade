@@ -12,7 +12,7 @@ enum drive_types
 u32 get_item_extra_param(u16 item);
 u16 get_mega_species(u8 bank, u8 chosen_method);
 u8 weather_abilities_effect();
-u8 find_move_in_table(u16 move, u16 table_ptr[]);
+bool find_move_in_table(u16 move, const u16* table_ptr);
 void setup_berry_consume_buffers(u8 bank);
 u8 get_attacking_move_type();
 u8 check_ability(u8 bank, u8 ability);
@@ -289,9 +289,6 @@ void* get_move_battlescript_ptr(u16 move)
     return (void*) *ptr_to_movescript;
 }
 
-u8 mega_evolution_script[] = {0x83, 88, 0, 0x10, 0x05, 0x02, 0x45, 1, 0x1E, 0, 0, 0, 0, 0x3A, 0x83, 106, 0, 0x83, 89, 0, 0x10, 0x04, 0x02, 0x83, 0x0, 0x0, 0x3F};
-u8 fervent_evolution_script[] = {0x83, 88, 0, 0x10, 0x06, 0x02, 0x45, 1, 0x1E, 0, 0, 0, 0, 0x3A, 0x83, 106, 0, 0x83, 89, 0, 0x10, 0x04, 0x02, 0x83, 0x0, 0x0, 0x3F};
-
 u8 is_multi_battle();
 
 void reset_indicators_height()
@@ -381,7 +378,7 @@ u8 check_mega_evo(u8 bank)
         attacker_struct->sp_atk = get_attributes(poke_address, ATTR_SPECIAL_ATTACK, 0);
         attacker_struct->sp_def = get_attributes(poke_address, ATTR_SPECIAL_DEFENCE, 0);
         attacker_struct->poke_species = mega_species;
-        struct poke_basestats* PokeStats = &((*basestat_table)[mega_species]);
+        const struct poke_basestats* PokeStats = &((*basestat_table)[mega_species]);
         attacker_struct->type1 = PokeStats->type1;
         attacker_struct->type2 = PokeStats->type2;
         // The ability 1 and ability 2 of the mega species in the base stat table should both be set and
@@ -402,7 +399,7 @@ u8 check_mega_evo(u8 bank)
 
         if(bank_mega_mode==2)
         {
-            execute_battle_script(&fervent_evolution_script);
+            execute_battle_script(BS_FERVENT_EVO);
         }
         else
         {
@@ -414,7 +411,7 @@ u8 check_mega_evo(u8 bank)
             battle_text_buff2[2] = MEGA_RING;
             battle_text_buff2[3] = MEGA_RING >> 8;
             battle_text_buff2[4] = 0xFF;
-            execute_battle_script(&mega_evolution_script);
+            execute_battle_script(BS_MEGA_EVO);
         }
 
         new_battlestruct->various.active_bank = bank;

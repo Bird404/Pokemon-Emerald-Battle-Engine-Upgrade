@@ -1,6 +1,6 @@
-
-.align 2
+.text
 .thumb
+.align 1
 
 load_graphics_hook:
 	push {r0}
@@ -11,7 +11,6 @@ load_graphics_hook:
 	pop {r1}
 	bx r1
 
-.align 2
 position_trigger_hook:
 	bl position_trigger
 	mov r1, #0x0
@@ -23,7 +22,6 @@ position_trigger_hook:
 	bx r1
 
 @At 0x57d6c via r1
-.align 2
 slide_out_on_pressing_A_hook1:
 	ldrb r0, [r0]
 	lsl r0, r0, #0x8
@@ -35,7 +33,6 @@ slide_out_on_pressing_A_hook1:
 	bx r1
 
 @At 0x578D8 via r1
-.align 2
 slide_out_on_pressing_A_hook2:
 	push {r0,r2}
 	bl hide_trigger_on_pressing_A
@@ -47,4 +44,3 @@ slide_out_on_pressing_A_hook2:
 	ldr r3, =(0x80578E0|1)
 	bx r3
 
-.align 2

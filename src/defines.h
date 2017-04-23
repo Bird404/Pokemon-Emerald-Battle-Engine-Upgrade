@@ -207,7 +207,7 @@ enum trainer_class{
 #define read_byte(ptr) (*((u8*)(ptr)))
 #define read_hword(ptr) (read_byte(ptr) | ((read_byte(ptr + 1)) << 8))
 #define BATTLE_FRONTIER_BATTLE (battle_flags.frontier_general || battle_flags.battle_dome || battle_flags.battle_palace || battle_flags.battle_arena || battle_flags.battle_factory || battle_flags.flag_x100000 || battle_flags.battle_pyramid)
-#define ATLEAST_ONE(value)(value ? value : 1)
+#define ATLEAST_ONE(value)(value != 0 ? value : 1)
 #define PERCENT_100(value, percent)((value * percent) / 100)
 #define GETS_VIA_EXPSHARE(held_item)((GENVI_EXPSHARE == false && held_item == ITEM_EFFECT_EXPSHARE) || (GENVI_EXPSHARE == true && checkitem(ITEM_EXPSHARE, 1) && getflag(EXPSHARE_FLAG)))
 #define SET_u32(ptr, val)((*(u32*)(ptr) = 0))
@@ -219,6 +219,10 @@ enum trainer_class{
 #define get_1_4_of_max_hp(bank)(ATLEAST_ONE(battle_participants[bank].max_hp >> 2))
 #define BIC(value, bit)(value & (~(bit)))
 #define NEG_AND(value, to_neg)(value & (to_neg * (-1)))
+
+#define TRAINER_STEVEN 0xC03
+#define PARTNER_ANIMATES 0x8000
+#define PARTNER_CUSTOM 0x4000
 
 #define REQUEST_SPECIES_BATTLE 0x1
 #define REQUEST_HELDITEM_BATTLE 0x2

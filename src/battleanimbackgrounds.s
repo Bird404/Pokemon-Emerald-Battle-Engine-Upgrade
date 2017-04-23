@@ -1,10 +1,6 @@
 .text
 .thumb
-.align 2
 
-.include "anim_bg/bg_image.s"
-.include "anim_bg/bg_image_pallet.s"
-.include "anim_bg/bg_image_tilemap.s"
 .include "anim_bg/move_background_ids.s"
 
 @Battle Animations Background Table
