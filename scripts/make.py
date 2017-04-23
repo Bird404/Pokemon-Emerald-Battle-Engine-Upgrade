@@ -8,6 +8,7 @@ import os
 #Options go here.
 ############
 
+ROM_NAME = "BPEE0.gba"  #the name of your rom
 OFFSET_TO_PUT = 0xF00000
 SEARCH_FREE_SPACE = False #Set to True if you want the script to search for free space;Set to False if you don't want to search for free space as you for example update the engine
 CLEAR_ALL_OLDTABLES = False #Set to True if you want to clear all old tables
@@ -81,7 +82,7 @@ def clear_from_to(rom, from_, to_):
 #Functions end here.
 ##############
 
-with open("BPEE0.gba", 'rb+') as rom:
+with open(ROM_NAME, 'rb+') as rom:
 	offset = OFFSET_TO_PUT
 	if SEARCH_FREE_SPACE == True:
 		offset = find_offset_to_put(rom, 0x50000, align_x100(offset))
