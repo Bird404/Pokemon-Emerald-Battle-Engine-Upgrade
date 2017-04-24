@@ -3,29 +3,25 @@
 import sys
 import argparse
 
-if sys.version_info < (3, 4):
-        print('Python 3.4 or later is required.')
-        sys.exit(1)
-
 # Parse arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('--romfile', metavar='file', 
-                    help='ROM to read', default='test.gba')
+			help='ROM to read', default='test.gba')
 parser.add_argument('--oldini', metavar='file', 
-                    help='Old INI to change', default='roms.ini')
+			help='Old INI to change', default='roms.ini')
 parser.add_argument('--newini', metavar='file', 
-                    help='New INI to use', default='test.ini')
+			help='New INI to use', default='test.ini')
 args = parser.parse_args()
 
 def getpointer(rom,offset):
-        rom.seek(offset)
-        byte=rom.read(3);
-        rom.seek(offset+3);
-        page=rom.read(1);
-        p=page[0]-8;
-        byte+=bytes(p.to_bytes(1,'little'));
-        ps=''.join(format(x, '02x') for x in reversed(byte))
-        return (ps.upper()+'\n')
+	rom.seek(offset)
+	byte=rom.read(3);
+	rom.seek(offset+3);
+	page=rom.read(1);
+	p=page[0]-8;
+	byte+=bytes(p.to_bytes(1,'little'));
+	ps=''.join(format(x, '02x') for x in reversed(byte))
+	return (ps.upper()+'\n')
 
 #The variables named table below are actually a dictionary structure
 table={}
@@ -44,23 +40,23 @@ table2['NumberOfAbilities']=256
 
 
 with open(args.romfile, 'rb+') as rom:
-        #Get ability name pointer
-        wflag=0
-        with open(args.oldini, 'r') as oldlines:
-                fout=open(args.newini, 'w')
-                for line in oldlines:
-                        if wflag is 1:
-                                for key in table.keys():
-                                        if line.strip().startswith(str(key)):
-                                                line=str(key)+'='+getpointer(rom,table[key])
-                                for key in table2.keys():
-                                        if line.strip().startswith(str(key)):
-                                                line=str(key)+'='+str(table2[key])+'\n'
-                        if line.strip().startswith('[BPEE]'):
-                                wflag=1
-                        if line.strip().startswith('[AXVF]'):
-                                wflag=0
-                        fout.write(line)
-                        if line.strip().startswith('PokedexTypeTable'):
-                                if wflag is 1:
-                                        fout.write('MoveTableHack=True\n')
+	#Get ability name pointer
+	wflag=0
+	with open(args.oldini, 'r') as oldlines:
+		fout=open(args.newini, 'w')
+		for line in oldlines:
+			if wflag is 1:
+				for key in table.keys():
+					if line.strip().startswith(str(key)):
+						line=str(key)+'='+getpointer(rom,table[key])
+				for key in table2.keys():
+					if line.strip().startswith(str(key)):
+						line=str(key)+'='+str(table2[key])+'\n'
+			if line.strip().startswith('[BPEE]'):
+				wflag=1
+			if line.strip().startswith('[AXVF]'):
+				wflag=0
+			fout.write(line)
+			if line.strip().startswith('PokedexTypeTable'):
+				if wflag is 1:
+					fout.write('MoveTableHack=True\n')
