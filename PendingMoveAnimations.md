@@ -1,52 +1,38 @@
-GEN 4:
-Healing Wish (Complete - Tetra)
-Tailwind (Complete)
-Metal Burst (Complete)
-Embargo (Complete)
-Fling
+Gen 4:
+
 Psycho Shift
 Trump Card
 Heal Block
 Me First
-Copycat - Probabably doesn't need one use Mirror Move
+Copycat - (Probably doesn't need one, use Mirror Move)
 Last Resort
 Heart Swap
-Aqua Ring (Complete)
 Magnet Rise (Reserved MRDS)
-Rock Wrecker (Reserved MRDS) (Complete)
 Magnet Bomb
 Stone Edge (Reserved MRDS)
-Captivate (Complete)
 Stealth Rock (Reserved MRDS)
 Chatter
-Judgment (Complete - Artemis64)
-Wood Hammer (Reserved MRDS) (Complete)
-Attack Order (Reserved MRDS) (Complete)
-Defend Order (Reserved MRDS) (Complete)
-Heal Order (Reserved MRDS) (Complete)
 Double Hit
 Roar of Time
 Spacial Rend (Reserved MRDS)
-Lunar Dance (Complete)
 Crush Grip
 Magma Storm (Reserved MRDS)
 Dark Void
 Seed Flare
 Shadow Force
 
+_________________________________________________________
 
-GEN 5:
+Gen 5:
+
 Wide Guard
 Guard Split
 Power Split
 Psyshock
-Venoshock (Complete)
 Autotomize
 Rage Powder (Reserved MRDS)
 Telekinesis
-Smack Down (Complete - Artemis64)
 Storm Throw
-Flame Burst (Complete - Tetra)
 Sludge Wave (Reserved MRDS)
 Heavy Slam
 Synchronoise
@@ -69,7 +55,6 @@ Hex
 Sky Drop
 Shift Gear (Reserved MRDS)
 Circle Throw
-Incinerate (Complete - Tetra)
 Quash
 Reflect Type
 Retaliate
@@ -80,7 +65,6 @@ Fire Pledge
 Grass Pledge
 Frost Breath
 Dragon Tail
-Work Up (Complete)
 Electroweb (Reserved MRDS)
 Dual Chop
 Heart Stamp (Reserved MRDS)
@@ -108,8 +92,10 @@ V-Create
 Fusion Flare
 Fusion Bolt
 
+_________________________________________________________
+  
+Gen 6:
 
-GEN 6:
 Flying Press
 Mat Block
 Belch
@@ -119,7 +105,6 @@ Phantom Force
 Trick or Treat
 Noble Roar
 Ion Deluge
-Parabolic Charge (Complete)
 Forest's Curse
 Freeze Dry
 Disarming Voice (Reserved MRDS)
@@ -137,7 +122,6 @@ Diamond Storm (Reserved MRDS)
 Steam Eruption
 Hyperspace Hole
 Water Shuriken (Reserved MRDS)
-Mystical Fire (Completed)
 Spiky Shield
 Aromatic Mist
 Eerie Impulse
@@ -151,7 +135,6 @@ Celebrate
 Hold Hands
 Hold Back
 Infestation
-Power Up Punch (Completed)
 Oblivion Wing
 Thousand Arrows
 Thousand Waves
