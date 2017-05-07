@@ -1515,6 +1515,9 @@ FLING_ANIM:
 	pokespritefromBG bank_target 
 	resetblends 
 	endanimation
+.align 2
+FLING_TEMPL:
+objtemplate 0x2716 0x2716 0x852490c 0x82ec69c 0x0 0x82ec6a8 0x80a78ad
 PSYCHO_SHIFT_ANIM:
 	endanimation 
 TRUMP_CARD_ANIM:
