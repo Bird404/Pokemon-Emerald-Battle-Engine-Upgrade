@@ -172,8 +172,8 @@ struct b_scripting{
     u8 field_D;
     u8 damage_multiplier;
     u8 fieldF;
-    u8 field10;
-    u8 field11;
+    u8 AnimInfo1;
+    u8 AnimInfo2;
     u8 field12;
     u8 field13;
     u8 cmd49_state_tracker;
@@ -559,7 +559,7 @@ struct fraction_buff2{
     u16 padding;
 };
 
-extern struct fraction_buff2 fraction_stat_buffs2[0xC];
+extern const struct fraction_buff2 fraction_stat_buffs2[0xC];
 
 struct side_timer{
     u8 reflect_timer;
@@ -729,9 +729,14 @@ struct object{
     u8 y_height_related;
 };
 
-struct image_resource{
-    void *image;
+struct SpriteTiles{
+    const void *image;
     u16 size;
+    u16 tag;
+};
+
+struct SpritePalette {
+    const void* data;
     u16 tag;
 };
 
@@ -818,11 +823,7 @@ struct item_struct
     u32 extra_param;
 };
 
-struct item_data{
-    struct item_struct items[ALL_ITEMS];
-};
-
-extern struct item_data* item_table;
+extern const struct item_struct (*item_table)[ALL_ITEMS];
 
 //Evolution table
 
@@ -859,8 +860,14 @@ struct b_species_info{
     u16 transformed_species;
 };
 
+struct anim_info{
+    u16 arg;
+};
+
 struct b_graphics_data{
     struct b_species_info (*species_info)[4]; //ptr to an array of b_species_info
+    void* field4;
+    struct anim_info* anims_info;
 };
 
 struct battle_graphics_struct{
@@ -876,22 +883,10 @@ struct sprite_poke{
     u16 species;
 };
 
-struct sprite_table{
-    struct sprite_poke p_sprite[ALL_POKES];
-};
+extern const struct sprite_poke (*front_sprites)[ALL_POKES];
+extern const struct sprite_poke (*back_sprites)[ALL_POKES];
 
-extern struct sprite_table* front_sprites;
-extern struct sprite_table* back_sprites;
-
-struct pokenames{
-    u8 letter[11];
-};
-
-struct pokenames_all{
-    struct pokenames pokename[ALL_POKES];
-};
-
-extern struct pokenames_all* poke_name_table;
+extern const u8 (*poke_name_table)[ALL_POKES][11];
 
 struct button{
     u16 A : 1;
@@ -1006,7 +1001,7 @@ struct trainer_data{
     struct poke_trainer_data* poke_data;
 };
 
-extern struct trainer_data (*trainer_table)[864];
+extern const struct trainer_data (*trainer_table)[864];
 
 struct fadescreen_exec{
     u16 BLDCNT;
@@ -1040,17 +1035,17 @@ struct mapheader{
 extern struct mapheader curr_mapheader;
 
 struct b_background_info{
-    void* tileset;
-    void* tilemap;
-    void* entry_tileset;
-    void* entry_tilemap;
-    void* pal;
+    const void* tileset;
+    const void* tilemap;
+    const void* entry_tileset;
+    const void* entry_tilemap;
+    const void* pal;
 };
 
 struct move_background_info{
-    void* tileset;
-    void* tilemap;
-    void* pal;
+    const void* tileset;
+    const void* tilemap;
+    const void* pal;
 };
 
 struct img_size{

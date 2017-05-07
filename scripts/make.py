@@ -68,10 +68,10 @@ def edit_insert(offset):
 	file_change_line("./scripts/insert.py", 11, "OFFSET_TO_PUT = " + hex(offset) + '\n')
 		
 def build_code():
-	os.system("python scripts//build.py")
+	os.system("python scripts/build.py")
 	
 def insert_code():
-	os.system("python scripts//insert.py")
+	os.system("python scripts/insert.py")
 	
 def clear_from_to(rom, from_, to_):
 	rom.seek(from_)

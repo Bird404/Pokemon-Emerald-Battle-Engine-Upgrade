@@ -1,5 +1,4 @@
 #include "defines.h"
-#include <string.h>
 
 void revert_form_change(u8 mega_revert, u8 teamID, u8 side, struct pokemon* poke);
 u16 try_illusion_change(u8 bank, struct pokemon* poke);
@@ -20,6 +19,7 @@ void alloc_new_struct()
         struct pokemon* poke = &party_player[i];
         new_battlestruct->various.original_held_item[i] = get_attributes(poke, ATTR_HELD_ITEM, 0);
     }
+    #endif // ITEM_SWAP
     if (INVERSE_FLAG && getflag(INVERSE_FLAG))
     {
         new_battlestruct->various.inverse_battle = 1;
@@ -30,7 +30,6 @@ void alloc_new_struct()
         new_battlestruct->various.fishing_battle = 1;
         clearflag(FISHING_FLAG);
     }
-    #endif // ITEM_SWAP
 }
 
 void try_burmy_change(u8 id, struct pokemon* poke)

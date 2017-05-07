@@ -71,3 +71,35 @@ void AnimTask_swapbanks(u8 taskID)
     animation_bank_target = temp;
     move_anim_task_del(taskID);
 }
+
+void ANIMTASK_prepare_statargs(u8 taskID)
+{
+    if (new_battlestruct->various.dont_play_stat_anim)
+    {   move_anim_task_del(taskID);    }
+    else
+    {
+        u16 info = battle_graphics.graphics_data->anims_info->arg;
+        anim_arguments[0] = (info & STAT_NEGATIVE); //bool goes down
+        anim_arguments[1] = (info & STAT_STATID); //colour ID
+        if (anim_arguments[1] == 7)
+            new_battlestruct->various.dont_play_stat_anim = 1; //if the colour is gray, dont play anim later
+        anim_arguments[2] = 0;
+        anim_arguments[3] = 0;
+        anim_arguments[4] = (info & STAT_STAGES); //stages
+        task_statchange_preparestruct(taskID);
+    }
+}
+
+void AnimTask_target_attacks(u8 taskID)
+{
+    animation_bank_attacker = bank_target;
+    animation_bank_target = bank_attacker;
+    move_anim_task_del(taskID);
+}
+
+void AnimTask_banks_to_partnerbanks(u8 taskID)
+{
+    animation_bank_attacker = bank_partner_atk;
+    animation_bank_target = bank_partner_def;
+    move_anim_task_del(taskID);
+}

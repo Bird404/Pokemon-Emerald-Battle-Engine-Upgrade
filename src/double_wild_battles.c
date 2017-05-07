@@ -17,7 +17,7 @@ struct double_grass_tile double_grass_tiles[DOUBLE_WILD_TILES] = {
     {0xD, 70}
 };
 
-bool doubles_tile_check()
+bool doubles_tile_check(void)
 {
     u16 tile = cur_map_get_blockid_at(sav1->x_coords + 7, sav1->y_coords + 7);
     for (u32 i = 0; i < DOUBLE_WILD_TILES; i++)
@@ -45,15 +45,17 @@ bool wild_grass_battle(void* wild_data)
     return battle;
 }
 
-u8 text_impossible_to_aim[] = {I_, t_, Apos, s_, Space, i_, m_, p_, o_, s_, s_, i_, b_, l_, e_, Space, t_, o_, Space, a_, i_, m_, JumpLine, w_, i_, t_, h_, o_, u_, t_, Space, b_, e_, i_, n_, g_, Space, f_, o_, c_, u_, s_, e_, d_, Exclam, wait_for_pressed_key, 0xFF};
-//It's impossible to aim without being focused!
-
 void pokeball_chosen(u8 taskID)
 {
-    void* fail_msg = NULL;
+    const u8* fail_msg = NULL; //wild double battle and (two pokes are alive or using pokeball via second pokemon when two are alive)
     if (WILD_DOUBLE_BATTLE &&
-        ((is_bank_present(1) && is_bank_present(3)) || (bank_in_menu == 2 && is_bank_present(0)))) //wild double battle and (two pokes are alive or using pokeball via second pokemon when two are alive)
+        ((is_bank_present(1) && is_bank_present(3)) || (bank_in_menu == 2 && is_bank_present(0))))
+        {
+            static const u8 text_impossible_to_aim[] = {I_, t_, Apos, s_, Space, i_, m_, p_, o_, s_, s_, i_, b_, l_, e_, Space, t_, o_, Space, a_, i_, m_, JumpLine, w_, i_, t_, h_, o_, u_, t_, Space, b_, e_, i_, n_, g_, Space, f_, o_, c_, u_, s_, e_, d_, Exclam, wait_for_pressed_key, 0xFF};
+            //It's impossible to aim without being focused!
+
             fail_msg = text_impossible_to_aim;
+        }
     else if (is_team_and_pc_full()) //full box
         fail_msg = text_BOX_IS_FULL;
     bool pyramid = is_in_battle_pyramid();
@@ -95,7 +97,7 @@ bool is_poke_caught(u16 species)
     return get_or_set_pokedex_flags(species_to_national_dex(species), 1);
 }
 
-bool is_poke_ultrabeast(u16 species)
+bool is_poke_ultrabeast(/*u16 species*/)
 {
     return 0;
 }
@@ -203,7 +205,7 @@ u32 calc_ball_formula(enum ball_index ball_no, struct battle_participant* catchi
         break;
     case BALL_MOON:
         {
-            struct evolution_sub* evo = GET_EVO_TABLE(catching->poke_species);
+            const struct evolution_sub* evo = GET_EVO_TABLE(catching->poke_species);
             for (u8 i = 0; i < NUM_OF_EVOS; i++)
             {
                 if (evo[i].method == 7 && evo[i].paramter == ITEM_MOONSTONE)

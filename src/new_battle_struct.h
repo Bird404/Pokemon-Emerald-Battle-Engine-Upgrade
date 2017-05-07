@@ -21,6 +21,7 @@ struct bank_affecting{
     u8 gastro_acided : 1;
     u8 spiky_shield : 1;
     u8 kings_shield : 1;
+    u8 baneful_bunker : 1;
     u8 sky_drop_attacker : 1;
     u8 sky_drop_target : 1;
     u8 me_first : 1;
@@ -29,6 +30,7 @@ struct bank_affecting{
     u8 powertrick : 1;
     u8 kingsshield_damage : 1;
     u8 spikyshield_damage : 1;
+    u8 banefulbunker_damage : 1;
     u8 grassyterrain_heal : 1;
     u8 slowstart_duration : 3;
     u8 aegislash_form : 2; //0 = not aegi, 1 = defensive, 2 = attacking
@@ -52,6 +54,8 @@ struct bank_affecting{
     u8 illusion_nick[11];
     u8 skips_turn : 1;
     u8 caught : 1;
+    u8 always_crit : 2;
+    u8 itemheal : 1;
 };
 
 struct side_affecting{
@@ -77,22 +81,24 @@ struct side_affecting{
     u8 lunardance_done : 1;
     u8 ally_fainted_last_turn : 2;
     u8 pledge_effect : 2; //1 for grass, 2 for fire , 3 for water
+    u8 aurora_veil : 4;
 };
 
 struct field_affecting{
-    u32 trick_room : 3;
-    u32 wonder_room : 3; //6
-    u32 magic_room : 3; //9
-    u32 grassy_terrain : 3; //12
-    u32 electic_terrain : 3; //15
-    u32 misty_terrain : 3; //18
-    u32 ion_deluge : 3; //21
-    u32 gravity : 3; //24
-    u32 echo_voice_counter : 3; //27
-    u32 mudsport : 3; //30
-    u32 fairy_lock : 2; //32
-    u8 round_chosen : 1; //1
-    u8 watersport : 3; //4
+    u32 trick_room : 3; //0-2
+    u32 wonder_room : 3; //3-5
+    u32 magic_room : 3; //6-8
+    u32 grassy_terrain : 4; //9-12
+    u32 electic_terrain : 4; //13-16
+    u32 misty_terrain : 4; //17-20
+    u32 psychic_terrain : 4; //21-24
+    u32 ion_deluge : 3; //25-27
+    u32 gravity : 3; //28-30
+    u32 round_chosen : 1; //31
+    u8 watersport : 3; //0-2
+    u8 mudsport : 3; //3-5
+    u8 fairy_lock : 2; //6-7
+    u8 echo_voice_counter : 3; //0-3
 };
 
 struct various{
@@ -132,6 +138,8 @@ struct various{
     u8 trainer_msg_on_switch_in_done : 1;
     u8 trainer_msg_on_low_health_done : 1;
     u8 trainer_msg_after_first_poke_done : 1;
+    u8 dont_play_move_anim : 1;
+    u8 dont_play_stat_anim : 1;
 };
 
 #define PBOND_PARENT 2
@@ -157,10 +165,30 @@ struct tai_related{
     u16 var2;
 };
 
+#define MOVEEFFECT_SLP      0x7
+#define MOVEEFFECT_PSN      0x8
+#define MOVEEFFECT_BRN      0x10
+#define MOVEEFFECT_FRZ      0x20
+#define MOVEEFFECT_PRLZ     0x40
+#define MOVEEFFECT_TOXIC    0x80
+#define MOVEEFFECT_CONFUSE  0x100
+#define MOVEEFFECT_FLINCH   0x200
+#define MOVEEFFECT_STATCHANGE   0x400
+#define MOVEEFFECT_MULTIPLESTATS   0x800
+#define MOVEEFFECT_ALL (MOVEEFFECT_SLP | MOVEEFFECT_PSN | MOVEEFFECT_BRN | MOVEEFFECT_FRZ | MOVEEFFECT_PRLZ | MOVEEFFECT_TOXIC | MOVEEFFECT_CONFUSE | MOVEEFFECT_FLINCH | MOVEEFFECT_STATCHANGE | MOVEEFFECT_MULTIPLESTATS)
+
+#define MOVEEFFECT_AFFECTSUSER 0x4000
+#define MOVEEFFECT_ONECALC  0x8000
+
+struct move_effects{
+    u16 effect1;
+};
+
 struct new_battle_struct{
     struct bank_affecting bank_affecting[4];
     struct side_affecting side_affecting[2];
     struct field_affecting field_affecting;
+    struct move_effects move_effect;
     struct various various;
     struct mega_related mega_related;
     struct tai_related trainer_AI;

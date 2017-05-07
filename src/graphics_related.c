@@ -59,7 +59,7 @@ const struct trainerhrow_position trainerhrow_positions[] = {
     {8, 4, 0}, // 7 steven
 };
 
-bool does_partner_animate()
+bool does_partner_animate(void)
 {
     if (partner_trainer == TRAINER_STEVEN  || (partner_trainer & PARTNER_ANIMATES))
         return 1;

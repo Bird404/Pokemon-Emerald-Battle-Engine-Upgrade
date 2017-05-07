@@ -76,3 +76,5 @@
 08550088 07
 ## ai switching on partner player
 08063B8E 00 80 C0 00
+## magic coat text change
+085CAD78 AB FF

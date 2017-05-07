@@ -12,8 +12,8 @@ enum poke_flavours
 
 enum poke_flavour_status
 {
-    FLAVOUR_NEUTRAL,
-    FLAVOUR_LIKED,
-    FLAVOUR_DISLIKED=0xFF
+    FLAVOUR_NEUTRAL = 0,
+    FLAVOUR_LIKED = 1,
+    FLAVOUR_DISLIKED = -1
 };
 #endif /* FLAVOURS_H */

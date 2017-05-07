@@ -12,9 +12,7 @@ void copy_status_condition_text(u8 bank, u8 confusion);
 void setup_berry_consume_buffers(u8 bank);
 u16 get_item_extra_param(u16 item);
 void b_load_sprite_player(struct pokemon* poke, u8 bank);
-
-extern u8 ability_names_table[250][13];
-extern u8 move_names_table[1025][13];
+bool stat_raise_berry(u8 bank, bool checkHP, u8 item_effect, enum call_mode calling_mode);
 
 bool load_weather_from_overworld()
 {
@@ -30,7 +28,7 @@ bool load_weather_from_overworld()
             if(!battle_weather.flags.downpour && !battle_weather.flags.rain && !battle_weather.flags.permament_rain)
             {
                 battle_weather.int_bw = (weather_permament_rain | weather_rain);
-                battle_scripting.field10 = 0xA;
+                battle_scripting.AnimInfo1 = 0xA;
                 is_weather_loaded = true;
             }
             break;
@@ -38,7 +36,7 @@ bool load_weather_from_overworld()
             if(!battle_weather.flags.permament_sandstorm && !battle_weather.flags.sandstorm)
             {
                 battle_weather.int_bw = (weather_permament_sandstorm | weather_sandstorm);
-                battle_scripting.field10 = 0xC;
+                battle_scripting.AnimInfo1 = 0xC;
                 is_weather_loaded = true;
             }
             break;
@@ -46,7 +44,7 @@ bool load_weather_from_overworld()
             if(!battle_weather.flags.permament_sun && !battle_weather.flags.sun)
             {
                 battle_weather.int_bw = (weather_permament_sun | weather_sun);
-                battle_scripting.field10 = 0xB;
+                battle_scripting.AnimInfo1 = 0xB;
                 is_weather_loaded = true;
             }
             break;
@@ -120,11 +118,11 @@ u16 get_transform_species(u8 bank)
     return (*battle_graphics.graphics_data->species_info)[bank].transformed_species;
 }
 
-void* get_poke_nick2(struct pokemon* poke, u8 bank, void* dst)
+u8* get_poke_nick2(struct pokemon* poke, u8 bank, u8* dst)
 {
     struct pokemon* illusion_to_happen_later = get_poke_to_illusion_into(poke, bank);
     if (new_battlestruct->bank_affecting[bank].illusion_on)
-        strcpy_xFF_terminated_0(dst, &new_battlestruct->bank_affecting[bank].illusion_nick);
+        strcpy_xFF_terminated_0(dst, new_battlestruct->bank_affecting[bank].illusion_nick);
     else if (illusion_to_happen_later)
         get_attributes(illusion_to_happen_later, ATTR_NAME, dst);
     else
@@ -132,13 +130,13 @@ void* get_poke_nick2(struct pokemon* poke, u8 bank, void* dst)
     return shorten_str_to_10(dst);
 }
 
-void* get_poke_nick(u8 bank, void* dst)
+u8* get_poke_nick(u8 bank, u8* dst)
 {
     struct pokemon* poke = get_bank_poke_ptr(bank);
     return get_poke_nick2(poke, bank, dst);
 }
 
-void* get_poke_nick_link(u8 linkID, u8 to_xor, void* dst)
+u8* get_poke_nick_link(u8 linkID, u8 to_xor, u8* dst)
 {
     u8 bank = battle_link_pbs[linkID].bank_id ^ to_xor;
     struct pokemon* poke;
@@ -151,7 +149,7 @@ void* get_poke_nick_link(u8 linkID, u8 to_xor, void* dst)
 
 void update_pokenick_in_healthbox(u8 objectID, struct pokemon* poke)
 {
-    void* string_loc = &displayed_string_in_battle;
+    u8* string_loc = displayed_string_in_battle;
     string_loc = strcpy_xFF_terminated_0(string_loc, (void*) 0x085ED228);
     u8 bank = objects[objectID].private[6];
     get_poke_nick2(poke, bank, string_loc);
@@ -169,21 +167,21 @@ void update_pokenick_in_healthbox(u8 objectID, struct pokemon* poke)
         gender = poke_get_gender(poke);
     }
     //append gender sign unless it's already there
-    if ((species == POKE_NIDORANM || species == POKE_NIDORANF) && compare_two_strings(string_loc, &poke_name_table->pokename[species].letter) == 0)
+    if ((species == POKE_NIDORANM || species == POKE_NIDORANF) && compare_two_strings(string_loc, (*poke_name_table)[species]) == 0)
     {
         gender = POKE_GENDERLESS;
     }
-    void* gender_sign = 0;
+    const u8* gender_sign = NULL;
     switch (gender)
     {
     case POKE_MALE:
-        gender_sign = &nick_male_sign;
+        gender_sign = nick_male_sign;
         break;
     case POKE_FEMALE:
-        gender_sign = &nick_female_sign;
+        gender_sign = nick_female_sign;
         break;
     case POKE_GENDERLESS:
-        gender_sign = &nick_genderless_sign;
+        gender_sign = nick_genderless_sign;
         break;
     }
     str_append(string_loc, gender_sign);
@@ -226,25 +224,25 @@ void* get_poke_nick_with_prefix(u8 bank, void* dst)
     return get_poke_nick(bank, get_poke_nick_prefix(bank, dst));
 }
 
-void* get_ability_name_ptr(enum poke_abilities ability)
+const u8* get_ability_name_ptr(enum poke_abilities ability)
 {
     return ability_names_table[ability];
 }
 
-u8* get_trainerclass_ptr(u8 classID)
+const u8* get_trainerclass_ptr(u8 classID)
 {
     return trainerclass_names[classID];
 }
 
-void* get_link_trainername(u8 linkID, u8 to_xor)
+u8* get_link_trainername(u8 linkID, u8 to_xor)
 {
     u8 bank = battle_link_pbs[linkID].bank_id ^ to_xor;
     return battle_link_pbs[get_linkpbs_id(bank)].trainer_name;
 }
 
-u8* get_partner_name(void)
+const u8* get_partner_name(void)
 {
-    u8* string_ptr = NULL;
+    const u8* string_ptr = NULL;
     if (battle_flags.player_ingame_partner)
     {
         if (partner_trainer & PARTNER_CUSTOM)
@@ -265,7 +263,12 @@ u8* get_partner_name(void)
     return string_ptr;
 }
 
-u16 battle_string_decoder(const u8* src, u8* dst)
+extern const u8 userteam_text[];
+extern const u8 userteam_uc_text[];
+extern const u8 foeteam_text[];
+extern const u8 foeteam_uc_text[];
+
+u16 battle_string_decoder(const u8* const src, u8* const dst)
 {
     u8 link_id = link_get_multiplayer_id();
     if (battle_flags.flag_x2000000)
@@ -279,7 +282,7 @@ u16 battle_string_decoder(const u8* src, u8* dst)
         if (curr_char == 0xFD) //decode string
         {
             u8 text[20];
-            u8* string = NULL;
+            const u8* string = NULL;
             curr_char = src[src_id];
             src_id++;
             switch (curr_char) //fd char decoding
@@ -384,6 +387,10 @@ u16 battle_string_decoder(const u8* src, u8* dst)
                 break;
             case 19: //scripting active name with prefix
                 get_poke_nick_with_prefix(battle_scripting.active_bank, text);
+                string = text;
+                break;
+            case 62: //new battlestruct bank with prefix
+                get_poke_nick_with_prefix(new_battlestruct->various.active_bank, text);
                 string = text;
                 break;
             case 20: //move1 in buffer pointer
@@ -615,23 +622,87 @@ u16 battle_string_decoder(const u8* src, u8* dst)
             case 55: //lost/drew/won
                 if (battle_outcome == OUTCOME_LOSS)
                 {
-                    u8 lost[] = {l_, o_, s_, t_, Space, a_, g_, a_, i_, n_, s_, t_, 0xFF};
+                    static const u8 lost[] = {l_, o_, s_, t_, Space, a_, g_, a_, i_, n_, s_, t_, 0xFF};
                     strcpy_xFF_terminated_0(text, lost);
                 }
                 else if (battle_outcome == OUTCOME_WIN)
                 {
-                    u8 won[] = {w_, o_, n_, Space, a_, g_, a_, i_, n_, s_, t_, 0xFF};
+                    static const u8 won[] = {w_, o_, n_, Space, a_, g_, a_, i_, n_, s_, t_, 0xFF};
                     strcpy_xFF_terminated_0(text, won);
                 }
                 else if (battle_outcome == OUTCOME_DRAW)
                 {
-                    u8 drew[] = {d_, r_, e_, w_, Space, w_, i_, t_, h_, 0xFF};
+                    static const u8 drew[] = {d_, r_, e_, w_, Space, w_, i_, t_, h_, 0xFF};
                     strcpy_xFF_terminated_0(text, drew);
                 }
                 string = text;
                 break;
             case 56: //trainer sliding msg
                 string = new_battlestruct->various.trainer_slide_msg;
+                break;
+            case 57: //bank attacker, your team or foe's team - lowercase first letter
+                if (is_bank_from_opponent_side(bank_attacker))
+                    string = foeteam_text;
+                else
+                    string = userteam_text;
+                break;
+            case 63: //bank target, your team or foe's team - lowercase first letter
+                if (is_bank_from_opponent_side(bank_target))
+                    string = foeteam_text;
+                else
+                    string = userteam_text;
+                break;
+            case 64: //bank target, your team or foe's team - uppercase first letter
+                if (is_bank_from_opponent_side(bank_target))
+                    string = foeteam_uc_text;
+                else
+                    string = userteam_uc_text;
+                break;
+            case 58: //sharply/harshly, drastically, severally
+                {
+                    u8 stat_val = battle_scripting.stat_changer & STAT_STAGES;
+                    if (stat_val == 0x20)
+                        string = text_sharply_;
+                    else if (stat_val == 0xA0)
+                        string = text_harshly_;
+                    else if (stat_val >= 0xB0)
+                    {
+                        static const u8 text_severely_[] = {s_, e_, v_, e_, r_, e_, l_, y_, Space, 0xFF};
+                        string = text_severely_;
+                    }
+                    else if (stat_val >= 0x30 && stat_val < 0x70)
+                    {
+                        static const u8 text_drastically_[] = {d_, r_, a_, s_, t_, i_, c_, a_, l_, l_, y_, Space, 0xFF};
+                        string = text_drastically_;
+                    }
+                }
+                break;
+            case 59: //rose/fell
+                if (battle_scripting.stat_changer & STAT_NEGATIVE)
+                    string = text_fell;
+                else
+                    string = text_rose;
+                break;
+            case 60: //lower/higher
+                if (battle_scripting.stat_changer & STAT_NEGATIVE)
+                    string = text_lower;
+                else
+                {
+                    static const u8 text_higher[] = {h_, i_, g_, h_, e_, r_, 0xFF};
+                    string = text_higher;
+                }
+                break;
+            case 61: //raised, lowered
+                if (battle_scripting.stat_changer & STAT_NEGATIVE)
+                {
+                    static const u8 text_lowered[] = {l_, o_, w_, e_, r_, e_, d_, 0xFF};
+                    string = text_lowered;
+                }
+                else
+                {
+                    static const u8 text_raised[] = {r_, a_, i_, s_, e_, d_, 0xFF};
+                    string = text_raised;
+                }
                 break;
             }
             if (string) //copy decoded string
@@ -670,7 +741,7 @@ void update_transform_sprite_pal(u8 bank, u16 pal_arg1)
     }
 }
 
-void b_load_sprite(struct pokemon* poke, u8 bank, struct sprite_table* sprites)
+void b_load_sprite(struct pokemon* poke, u8 bank, const struct sprite_poke (*sprites)[ALL_POKES])
 {
     //load actual sprite
     if (!new_battlestruct->bank_affecting[bank].caught)
@@ -699,7 +770,7 @@ void b_load_sprite(struct pokemon* poke, u8 bank, struct sprite_table* sprites)
         enum poke_sprite sprite = SPRITE_BACK;
         if (sprites == front_sprites)
             sprite = SPRITE_FRONT;
-        sprite_load(&sprites->p_sprite[species].sprite, battle_graphics.graphics_loc->decompressed_sprite[get_bank_identity(bank)], species, PiD, sprite);
+        sprite_load((void*) &(*sprites)[species].sprite, battle_graphics.graphics_loc->decompressed_sprite[get_bank_identity(bank)], species, PiD, sprite);
         void* poke_pal = poke_get_pal(species, TiD, PiD);
         LZ77UnCompWram(poke_pal, decompression_buffer);
         u16 pal_adder = 256 + bank * 16;
@@ -768,361 +839,9 @@ void bbp2F_trainer_ball_throw_new()
     bbp2F_trainer_ball_throw();
 }
 
-u8 return_0_nop()
+u8 return_0_nop(void)
 {
     return 0;
-}
-
-u8 heal_and_confuse_berry_bug_bite(u8 bank, u8 item_effect, u8 quality)
-{
-    u8 effect = 0;
-    //This assumes that the effect ids of these berries are contiguous.
-    if(!new_battlestruct->bank_affecting[bank].heal_block && battle_participants[bank].max_hp > battle_participants[bank].current_hp)
-    {
-        s32 max_hp = battle_participants[bank].max_hp;
-        s32 current_hp = battle_participants[bank].current_hp;
-        u8 flavour = item_effect - ITEM_EFFECT_FIGYBERRY;
-        s32 damage = (max_hp / quality);
-        if (damage == 0)
-            damage = 1;
-        if (damage > (max_hp - current_hp))
-            damage = (max_hp - current_hp);
-        damage_loc = damage * -1;
-        effect = 4;
-        if (get_poke_flavour_relation(battle_participants[bank].pid, flavour) == FLAVOUR_DISLIKED)
-        {
-            battlescript_push();
-            battlescripts_curr_instruction=&healandconfuse_bugbite_bs;
-        }
-        else
-        {
-            battlescript_push();
-            battlescripts_curr_instruction=&healberry_bugbite_bs;
-        }
-        battle_text_buff1[0] = 0xFD;
-        battle_text_buff1[1] = 8;
-        battle_text_buff1[2] = 1;
-        battle_text_buff1[3] = 0xFF;
-    }
-    return effect;
-
-}
-
-u8 stat_raise_berry_bug_bite(u8 bank, u8 item_effect)
-{
-    u8 effect = 0;
-    u8 stat_to_check = 0xC;
-    u8 stat_to_raise = item_effect - ITEM_EFFECT_LIECHIBERRY;
-    if(check_ability(bank,ABILITY_CONTRARY))
-    {
-        stat_to_check = 0;
-    }
-    if(item_effect == ITEM_EFFECT_STARFBERRY)
-    {
-        u8 doable = 0;
-        for (u8 i = 0; i < 5; i++)
-        {
-            if (*(&battle_participants[bank].atk_buff + i) != stat_to_raise)
-                doable |= bits_table[i];
-        }
-        while (doable)
-        {
-            u8 rand = __umodsi3(rng(), 5);
-            if (doable & bits_table[rand])
-            {
-                effect = 5;
-                battle_scripting.stat_changer = 0x21 + rand;
-                battle_scripting.field10 = 0xF + rand;
-                battle_scripting.field11 = 0;
-                break;
-            }
-        }
-    }
-    else
-    {
-        if (*(&battle_participants[bank].atk_buff + stat_to_raise) != stat_to_check)
-        {
-            effect = 5;
-            battle_text_buff1[0] = 0xFD;
-            battle_text_buff1[1] = 0x5;
-            battle_text_buff1[2] = stat_to_raise + 1;
-            battle_text_buff1[3] = 0xFF;
-            bank_partner_def = bank;
-            battle_scripting.stat_changer = 0x11 + stat_to_raise;
-            battle_scripting.field10 = 0xF + stat_to_raise;
-            battle_scripting.field11 = 0;
-        }
-    }
-    if(effect)
-    {
-        battlescript_push();
-        battlescripts_curr_instruction=&statraise_berry_bugbite_bs;
-    }
-    return effect;
-}
-
-bool handle_leppa(u8 bank, u8 quality, enum call_mode calling_mode)
-{
-    u8 i=0;
-    u8 pp_to_set=0;
-    bool effect = false;
-    struct pokemon *poke_data;
-    u8 poke_slot_id = battle_team_id_by_side[bank];
-    u16 chosen_move;
-    poke_data = is_bank_from_opponent_side(bank)?&party_opponent[poke_slot_id]:&party_player[poke_slot_id];
-    for (i = 0; i < 4; i++)
-    {
-        chosen_move = get_attributes(poke_data,ATTR_ATTACK_1+i,0);
-        if (chosen_move && get_attributes(poke_data,ATTR_PP_1+i,0)==0)
-        {
-            effect = true;
-            break;
-        }
-    }
-    if(effect)
-    {
-        u8 total_pp=calc_total_move_pp(chosen_move,get_attributes(poke_data,ATTR_PP_BONUS,0),i);
-        if(total_pp<quality)
-        {
-            pp_to_set=total_pp;
-        }
-        else
-        {
-            pp_to_set=quality;
-        }
-        battle_text_buff1[0]=0xFD;
-        battle_text_buff1[1]=0x2;
-        battle_text_buff1[2]=(u8)chosen_move;
-        battle_text_buff1[3]=chosen_move>>8;
-        battle_text_buff1[4]=0xFF;
-
-        bank_attacker=bank;
-        active_bank=bank;
-        if(calling_mode==BATTLE_TURN)
-        {
-            call_bc_move_exec((void *)0x82DB7E1);
-        }
-        else
-        {
-            battlescript_push();
-            battlescripts_curr_instruction = &leppa_endmove_bs;
-        }
-        prepare_setattributes_in_battle(0,i+10,0,1,&pp_to_set);
-        mark_buffer_bank_for_execution(bank);
-
-        if(!battle_participants[bank].status2.transformed && !((disable_structs[bank].truant_counter>>4)&bits_table[i]))
-        {
-            battle_participants[bank].current_pp[i]=pp_to_set;
-        }
-    }
-    return effect;
-}
-
-bool handle_leppa_bugbite(u8 bank, u8 quality)
-{
-    u8 i=0,j;
-    u8 pp_to_set=0;
-    bool effect = false;
-    struct pokemon *poke_data;
-    u8 poke_slot_id = battle_team_id_by_side[bank];
-    u16 chosen_move=0;
-    u16 min_pp_ratio=0x7FFF;
-    u16 curr_pp=0;
-    u8 total_pp=0;
-    poke_data = is_bank_from_opponent_side(bank)?&party_opponent[poke_slot_id]:&party_player[poke_slot_id];
-    for (j = 0; j < 4; j++)
-    {
-        u16 candidate_move = get_attributes(poke_data,ATTR_ATTACK_1+j,0);
-        if(candidate_move)
-        {
-            u8 cand_curr_pp = get_attributes(poke_data,ATTR_PP_1+j,0);
-            u8 cand_tot_pp = calc_total_move_pp(candidate_move,get_attributes(poke_data,ATTR_PP_BONUS,0),j);
-            u16 pp_ratio = __udivsi3(cand_curr_pp<<7,cand_tot_pp);
-            if (cand_curr_pp!=cand_tot_pp && pp_ratio<min_pp_ratio)
-            {
-                min_pp_ratio = pp_ratio;
-                chosen_move = candidate_move;
-                total_pp = cand_tot_pp;
-                curr_pp = cand_curr_pp;
-                i=j;
-                effect = 2;
-            }
-        }
-
-    }
-    if(effect)
-    {
-        if(total_pp<(quality+curr_pp))
-        {
-            pp_to_set=total_pp;
-        }
-        else
-        {
-            pp_to_set=(quality+curr_pp);
-        }
-        battle_text_buff1[0]=0xFD;
-        battle_text_buff1[1]=0x2;
-        battle_text_buff1[2]=(u8)chosen_move;
-        battle_text_buff1[3]=chosen_move>>8;
-        battle_text_buff1[4]=0xFF;
-
-        bank_attacker=bank;
-        active_bank=bank;
-        battlescript_push();
-        battlescripts_curr_instruction = &leppa_bugbite_bs;
-
-        prepare_setattributes_in_battle(0,i+10,0,1,&pp_to_set);
-        mark_buffer_bank_for_execution(bank);
-
-        if(!battle_participants[bank].status2.transformed && !((disable_structs[bank].truant_counter>>4)&bits_table[i]))
-        {
-            battle_participants[bank].current_pp[i]=pp_to_set;
-        }
-    }
-    return effect;
-}
-
-void handle_bug_bite()
-{
-    u8 bank = bank_attacker;
-    u8 effect= 0;
-    u8 item_effect=get_item_battle_function(last_used_item);
-    u8 quality=get_item_quality(last_used_item);
-    switch(item_effect)
-    {
-        case ITEM_EFFECT_ORANBERRY:
-            if (!new_battlestruct->bank_affecting[bank_target].heal_block && battle_participants[bank].max_hp > battle_participants[bank].current_hp)
-            {
-                effect = 4;
-                if (quality > battle_participants[bank].max_hp - battle_participants[bank].current_hp)
-                    quality = battle_participants[bank].max_hp - battle_participants[bank].current_hp;
-                damage_loc = quality * -1;
-                battlescript_push();
-                battlescripts_curr_instruction=&healberry_bugbite_bs;
-            }
-            break;
-        case ITEM_EFFECT_SITRUSBERRY:
-            if (!new_battlestruct->bank_affecting[bank_target].heal_block && battle_participants[bank].max_hp > battle_participants[bank].current_hp)
-            {
-                effect = 4;
-                s32 damage = battle_participants[bank].max_hp >> 2;
-                if (damage > battle_participants[bank].max_hp - battle_participants[bank].current_hp)
-                    damage = battle_participants[bank].max_hp - battle_participants[bank].current_hp;
-                damage_loc = damage * -1;
-                battlescript_push();
-                battlescripts_curr_instruction=&healberry_bugbite_bs;
-            }
-            break;
-        case ITEM_EFFECT_CHERIBERRY:
-            if (battle_participants[bank].status.flags.paralysis)
-            {
-                effect = 1;
-                battle_participants[bank].status.flags.paralysis = 0;
-                battlescript_push();
-                battlescripts_curr_instruction=&prlzcure_bugbite_bs;
-            }
-            break;
-        case ITEM_EFFECT_CHESTOBERRY:
-            if (battle_participants[bank].status.flags.sleep)
-            {
-                effect = 1;
-                battle_participants[bank].status.flags.sleep = 0;
-                battlescript_push();
-                battlescripts_curr_instruction=&slpcure_bugbite_bs;
-            }
-            break;
-        case ITEM_EFFECT_PECHABERRY:
-            if (battle_participants[bank].status.flags.poison || battle_participants[bank].status.flags.toxic_poison)
-            {
-                effect = 1;
-                battle_participants[bank].status.flags.poison = 0;
-                battle_participants[bank].status.flags.toxic_poison = 0;
-                battlescript_push();
-                battlescripts_curr_instruction=&psncure_bugbite_bs;
-            }
-            break;
-        case ITEM_EFFECT_RAWSTBERRY:
-            if (battle_participants[bank].status.flags.burn)
-            {
-                effect = 1;
-                battle_participants[bank].status.flags.burn = 0;
-                battlescript_push();
-                battlescripts_curr_instruction=&brncure_bugbite_bs;
-            }
-            break;
-        case ITEM_EFFECT_ASPEARBERRY:
-            if (battle_participants[bank].status.flags.freeze)
-            {
-                effect = 1;
-                battle_participants[bank].status.flags.freeze = 0;
-                battlescript_push();
-                battlescripts_curr_instruction=&frzcure_bugbite_bs;
-            }
-            break;
-
-        case ITEM_EFFECT_LEPPABERRY:
-            effect = handle_leppa_bugbite(bank,quality);
-            break;
-        case ITEM_EFFECT_PERSIMBERRY:
-            if (battle_participants[bank].status2.confusion)
-            {
-                battle_participants[bank].status2.confusion = 0;
-                effect = 2;
-                battlescript_push();
-                battlescripts_curr_instruction=&confcure_bugbite_bs;
-            }
-            break;
-        case ITEM_EFFECT_LUMBERRY:
-            if (battle_participants[bank].status.int_status || battle_participants[bank].status2.confusion)
-            {
-                copy_status_condition_text(bank, 1);
-                battle_participants[bank].status2.confusion = 0;
-                battle_participants[bank].status.int_status = 0;
-                effect = 1;
-                battlescript_push();
-                battlescripts_curr_instruction=&lum_bugbite_bs;
-            }
-            break;
-        case ITEM_EFFECT_FIGYBERRY:
-        case ITEM_EFFECT_WIKIBERRY:
-        case ITEM_EFFECT_MAGOBERRY:
-        case ITEM_EFFECT_AGUAVBERRY:
-        case ITEM_EFFECT_IAPAPABERRY:
-            effect = heal_and_confuse_berry_bug_bite(bank, item_effect, quality);
-            break;
-        case ITEM_EFFECT_LIECHIBERRY:
-        case ITEM_EFFECT_GANLONBERRY:
-        case ITEM_EFFECT_SALACBERRY:
-        case ITEM_EFFECT_PETAYABERRY:
-        case ITEM_EFFECT_APICOTBERRY:
-        case ITEM_EFFECT_STARFBERRY:
-            effect = stat_raise_berry_bug_bite(bank, item_effect);
-            break;
-        case ITEM_EFFECT_LANSATBERRY:
-            if (!(battle_participants[bank].status2.focus_energy))
-            {
-                battle_participants[bank].status2.focus_energy = 1;
-                effect = 2;
-                battlescript_push();
-                battlescripts_curr_instruction=&lansat_bugbite_bs;
-            }
-            break;
-    }
-    if(effect==0)
-    {
-        battlescript_push();
-        battlescripts_curr_instruction=&bugsteal_bs;
-    }
-    else
-    {
-        if (effect == 1)
-        {
-            active_bank = bank;
-            prepare_setattributes_in_battle(0, 0x28, 0, 4, &battle_participants[bank].status.flags);
-            mark_buffer_bank_for_execution(bank);
-        }
-    }
-    setup_berry_consume_buffers(bank);
 }
 
 u8 count_alive_mons(u8 bank)

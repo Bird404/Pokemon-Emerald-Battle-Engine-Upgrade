@@ -199,8 +199,9 @@ type_names 08016730
 type_names 08059C24
 type_names 0814F740
 type_names 081D2A30
-### moxie and exp catch battlescripts
-moxie_bs 08049C8C
+### after pokemon faints bs
+BS_ATK_FAINTED 08049C04
+BS_DEF_FAINTED 08049C8C
 ##### battle animation backgrounds
 battle_anim_bg_table 080A5038
 battle_anim_bg_table 080A5084

@@ -5,17 +5,17 @@
 u8 get_item_effect(u8 bank, u8 check_negating_effects);
 
 //resource gfx_healthbar = {0x083EF524, 0x80, 0x1234};
-struct image_resource gfx_indicator = {indicatorsTiles, 0x80, 0x1234};
-struct image_resource pal_indicator = {indicatorsPal, 0x1234};
+const struct SpriteTiles gfx_indicator = {indicatorsTiles, 0x80, 0x1234};
+const struct SpritePalette pal_indicator = {indicatorsPal, 0x1234};
 
-struct image_resource gfx_trigger = {mega_triggerTiles, 0x400, 0x2345};
-struct image_resource gfx_trigger_dbl = {mega_triggerTilesDbl, 0x400, 0x2345};
-struct image_resource pal_trigger = {mega_triggerPal, 0x2345};
-struct image_resource pal_trigger_dbl = {mega_triggerPalDbl, 0x2345};
+const struct SpriteTiles gfx_trigger = {mega_triggerTiles, 0x400, 0x2345};
+const struct SpriteTiles gfx_trigger_dbl = {mega_triggerTilesDbl, 0x400, 0x2345};
+const struct SpritePalette pal_trigger = {mega_triggerPal, 0x2345};
+const struct SpritePalette pal_trigger_dbl = {mega_triggerPalDbl, 0x2345};
 // 083F6CBO - 32x32?
 
 struct sprite mega_indicator = {0, 0x0, 0x0, 0x00, 0x0};
-//sprite mega_icon = {0x0, 0x4000, 0x000, 0x0};
+//const sprite mega_icon = {0x0, 0x4000, 0x000, 0x0};
 struct sprite mega_trigger = {0, 0x0, 0x8000, 0x800, 0};
 
 u8 can_set_mega_trigger(u8 bank);
@@ -35,11 +35,10 @@ u8 is_in_triggering_state(u8 bank);
 u8 is_multi_battle();
 
 /* Declare the colors the trigger button ignores */
-u16 ignored_cols[TRIGGER_NUM_IGNORED_COLORS] = {0x2147, 0x424F, 0x31AA, 0x00E4};
+const u16 ignored_cols[TRIGGER_NUM_IGNORED_COLORS] = {0x2147, 0x424F, 0x31AA, 0x00E4};
 
 u8 ignored_trigger_color(u16 color) {
-  u8 i;
-  for (i = 0; i < TRIGGER_NUM_IGNORED_COLORS; ++i) {
+  for (u32 i = 0; i < TRIGGER_NUM_IGNORED_COLORS; ++i) {
     if (ignored_cols[i] == color)
         return 1;
   }
@@ -345,8 +344,6 @@ void dp11_objects_pingpong(struct object *parent_object)
     parent_object->private[0]=(parent_object->private[0]+parent_object->private[1])&0xFF;
 }
 
-void obj_delete_and_free_tiles(struct object *parent_object);
-
 void healthbar_shake(struct object *parent_object)
 {
     u8 child_object_id=parent_object->private[1];
@@ -400,9 +397,6 @@ void healthbar_shake(struct object *parent_object)
         obj_delete_and_free_tiles(parent_object);
     }
 }
-void gpu_pal_obj_alloc_tag_and_apply(void *);
-void gpu_tile_obj_decompress_alloc_tag_and_upload(void *);
-u8 template_instanciate_forward_search(struct template *template, u16 x, u8 y, u8 derp);
 
 void healthbar_load_graphics(u8 state)
 {

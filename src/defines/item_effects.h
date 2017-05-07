@@ -4,7 +4,7 @@
 enum item_effects
 {
       ITEM_EFFECT_NOEFFECT , //0x0
-      ITEM_EFFECT_ORANBERRY , //0x1
+      ITEM_EFFECT_ORANBERRY, //0x1
       ITEM_EFFECT_CHERIBERRY , //0x2
       ITEM_EFFECT_CHESTOBERRY , //0x3
       ITEM_EFFECT_PECHABERRY , //0x4
@@ -124,7 +124,13 @@ enum item_effects
       ITEM_EFFECT_GEM , //0x8F //the extra is the type it boosts
       ITEM_EFFECT_DAM_REDUX_BERRY , //0x90 //the extra is the type it resists
       ITEM_EFFECT_PLATES , //0x91
-      ITEM_EFFECT_MEMORIES //0x92
+      ITEM_EFFECT_MEMORIES, //0x92
+      ITEM_EFFECT_TERRAINEXPANDER, //0x93
+      ITEM_EFFECT_PROTECTIVEPADS, //0x94 moves dont make contact
+      ITEM_EFFECT_ELECTRICSEED, //0x95
+      ITEM_EFFECT_GRASSYSEED, //0x96
+      ITEM_EFFECT_MISTYSEED, //0x97
+      ITEM_EFFECT_PSYCHICSEED, //0x98
 };
 
 #endif /* ITEM_BATTLE_EFFECTS_H_H */

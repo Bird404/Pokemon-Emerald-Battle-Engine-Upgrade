@@ -2,7 +2,6 @@
 .thumb
 
 .include "asm_defines.s"
-.include "macrotext.s"
 
 .align 2
 move_desc_table:

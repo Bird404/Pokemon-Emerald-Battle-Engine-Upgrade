@@ -1,15 +1,12 @@
 #include "defines.h"
 #include "static_references.h"
-#include <string.h>
-#include <stdlib.h>
 
 u8 check_ability(u8 bank, u8 ability);
 u8 get_airborne_state(u8 bank, u8 mode, u8 check_levitate);
 u8 item_battle_effects(u8 switchid, u8 bank, u8 moveturn);
 u8 affected_by_substitute(u8 substitute_bank);
-u8 change_stats(s8 arg1, s8 arg2, s8 arg3, void* battlescript_if_fails);
 u8 cant_become_paralyzed(u8 bank, u8 self_inflicted);
-u8 cant_poison(u8 bank, u8 self_inflicted);
+u8 cant_poison(u8 atk_bank, u8 def_bank, u8 self_inflicted);
 u8 cant_become_burned(u8 bank, u8 self_inflicted);
 u8 cant_become_freezed(u8 bank, u8 self_inflicted);
 u8 cant_fall_asleep(u8 bank, u8 self_inflicted);
@@ -24,7 +21,7 @@ u8 get_attacking_move_type();
 u16 type_effectiveness_calc(u16 move, u8 type, u8 atkbank, u8 defbank, u8 effectshandling);
 void* get_move_battlescript_ptr(u16 move);
 u8 get_target_of_move(u16 move, u8 target_given, u8 adjust);
-void move_to_buffer(u16 move);
+void move_to_buff1(u16 move);
 u8 check_mega_evo(u8 bank);
 u8 is_bank_present(u8 bank);
 u8 can_lose_item(u8 bank, u8 stickyhold_check, u8 sticky_message);
@@ -36,69 +33,72 @@ u8 get_item_effect(u8 bank, u8 check_negating_effects);
 u8 weather_abilities_effect();
 u8* get_slide_msg(u16 trainerID, u8 caseID);
 u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special_cases_argument, u16 move);
+u16 apply_statboost(u16 stat, u8 boost);
+u32 percent_boost(u32 number, u16 percent);
+bool move_effect_setter(bool primary, bool certain);
+u8 cant_become_confused(u8 bank);
+void bugbite_get_berry_effect(void);
 
-extern u8 type_effectiveness_table[TYPE_FAIRY-0x4][TYPE_FAIRY-0x4];
-
-const u8 sample_text[] = {0xDD, 0xFF};
-const u8 snowwarning_text[] = {0xFD, 0x13, 0xB4, 0xE7, 0, 0xFD, 0x1A, 0xFE, 0xEB, 0xDC, 0xDD, 0xE4, 0xE4, 0xD9, 0xD8, 0x00, 0xE9, 0xE4, 0x00, 0xD5, 0x00, 0xDC, 0xD5, 0xDD, 0xE0, 0xE7, 0xE8, 0xE3, 0xE6, 0xE1, 0xAB, 0xFF};
-const u8 extreme_sun_activation_text[] = {0xCE, 0xDC, 0xD9, 0x00, 0xE7, 0xE9, 0xE2, 0xE0, 0xDD, 0xDB, 0xDC, 0xE8, 0x00, 0xE8, 0xE9, 0xE6, 0xE2, 0xD9, 0xD8, 0xFE, 0xD9, 0xEC, 0xE8, 0xE6, 0xD9, 0xE1, 0xD9, 0xE0, 0xED, 0x00, 0xDC, 0xD5, 0xE6, 0xE7, 0xDC, 0xAB, 0xFF};
-const u8 heavyrain_activation_text[] = {0xBB, 0x00, 0xDC, 0xD9, 0xD5, 0xEA, 0xED, 0x00, 0xE6, 0xD5, 0xDD, 0xE2, 0x00, 0xD6, 0xD9, 0xDB, 0xD5, 0xE2, 0x00, 0xE8, 0xE3, 0x00, 0xDA, 0xD5, 0xE0, 0xE0, 0xAB, 0xFF};
-const u8 mysticalaircurrent_activation_text[] = {0xBB, 0x00, 0xE1, 0xED, 0xE7, 0xE8, 0xD9, 0xE6, 0xDD, 0xE3, 0xE9, 0xE7, 0x00, 0xD5, 0xDD, 0xE6, 0x00, 0xD7, 0xE9, 0xE6, 0xE6, 0xD9, 0xE2, 0xE8, 0xFE, 0xDD, 0xE7, 0x00, 0xE4, 0xE6, 0xE3, 0xE8, 0xD9, 0xD7, 0xE8, 0xDD, 0xE2, 0xDB, 0x00, 0xC0, 0xE0, 0xED, 0xDD, 0xE2, 0xDB, 0xAE, 0xE8, 0xED, 0xE4, 0xD9, 0x00, 0xCA, 0xE3, 0xDF, 0x1B, 0xE1, 0xE3, 0xE2, 0xAB, 0xFF};
-const u8 forewarn_text[] = {0xFD, 0x13, 0xB4, 0xE7, 0, 0xFD, 0x1A, 0xFE, 0xD5, 0xE0, 0xD9, 0xE6, 0xE8, 0xD9, 0xD8, 0, 0xDD, 0xE8, 0, 0xE8, 0xE3, 0x0, 0xFD, 0, 0xAB, 0xFF};
-const u8 slowstart_text[] = {0xFD, 0x13, 0x0, 0xD7, 0xD5, 0xE2, 0xB4, 0xE8, 0x00, 0xDB, 0xD9, 0xE8, 0x00, 0xDD, 0xE8, 0x00, 0xDB, 0xE3, 0xDD, 0xE2, 0xDB, 0xAB, 0xFF};
-const u8 anticipation_text[] = {0xFD, 0x13, 0, 0xE7, 0xDC, 0xE9, 0xD8, 0xD8, 0xD9, 0xE6, 0xD9, 0xD8, 0x00, 0xEB, 0xDD, 0xE8, 0xDC, 0x00, 0xD5, 0xE2, 0xE8, 0xDD, 0xD7, 0xDD, 0xE4, 0xD5, 0xE8, 0xDD, 0xE3, 0xE2, 0xAB ,0xFF};
-const u8 dryskin_damage_text[] = {0xFD, 15, 0xB4, 0xE7, 0, 0xFD, 24, 0x0, 0xE1, 0xD5, 0xDF, 0xD9, 0xE7, 0x00, 0xDD, 0xE7, 0xFE, 0xEA, 0xE9, 0xE0, 0xE2, 0xD9, 0xE6, 0xD5, 0xD6, 0xE0, 0xD9, 0x00, 0xE8, 0xE3, 0x00, 0xE7, 0xE9, 0xE2, 0xAB, 0xFF};
-const u8 solarpower_text[] = {0xFD, 15, 0xB4, 0xE7, 0, 0xFD, 24, 0x0, 0xE1, 0xD5, 0xDF, 0xD9, 0xE7, 0x0, 0xDD, 0xE8, 0x0, 0xD8, 0xE6, 0xD5, 0xEB, 0x0, 0xE4, 0xE3, 0xEB, 0xD9, 0xE6, 0xFE, 0xDA, 0xE6, 0xE3, 0xE1, 0x0, 0xE8, 0xDC, 0xD9, 0x0, 0xE7, 0xE9, 0xE2, 0x0, 0xDD, 0xE2, 0x00, 0xD9, 0xEC, 0xD7, 0xDC, 0xD5, 0xE2, 0xDB, 0xD9, 0x00, 0xDA, 0xE3, 0xE6, 0x00, 0xE0, 0xDD, 0xDA, 0xD9, 0xAB, 0xFF};
-const u8 harvest_text[] = {0xFD, 15, 0, 0xDC, 0xD5, 0xE6, 0xEA, 0xD9, 0xE7, 0xE8, 0xD9, 0xD8, 0x00, 0xE3, 0xE2, 0xD9, 0, 0xFD, 22, 0xAB, 0xFF};
-const u8 healer_text[] = {0xFD, 15, 0, 0xB4, 0xE7, 0, 0xFD, 24, 0, 0xD7, 0xE9, 0xE6, 0xD9, 0xD8, 0x00, 0xDD, 0xE8, 0xE7, 0x00, 0xE4, 0xD5, 0xE6, 0xE8, 0xE2, 0xD9, 0xE6, 0xB4, 0xE7, 0xFE, 0xFD, 0x0, 0xAB, 0xFF};
-const u8 pickup_text[] = {0xFD, 15, 0, 0xDA, 0xE3, 0xE9, 0xE2, 0xD8, 0x00, 0xE3, 0xE2, 0xD9, 0x00, 0xFD, 22, 0xAB, 0xFF};
-const u8 moldbreaker_text[] = {0xFD, 0x13, 0, 0xD6, 0xE6, 0xD9, 0xD5, 0xDF, 0xE7, 0x00, 0xE8, 0xDC, 0xD9, 0x00, 0xE1, 0xE3, 0xE0, 0xD8, 0xAB, 0xFF};
-const u8 turboblaze_text[] = {0xFD, 0x13, 0, 0xDD, 0xE7, 0x00, 0xE6, 0xD5, 0xD8, 0xDD, 0xD5, 0xE8, 0xDD, 0xE2, 0xDB, 0x00, 0xD5, 0x00, 0xD6, 0xE0, 0xD5, 0xEE, 0xDD, 0xE2, 0xDB, 0x00, 0xD5, 0xE9, 0xE6, 0xD5, 0xAB, 0xFF};
-const u8 terravolt_text[] = {0xFD, 0x13, 0, 0xDD, 0xE7, 0x00, 0xE6, 0xD5, 0xD8, 0xDD, 0xD5, 0xE8, 0xDD, 0xE2, 0xDB, 0x00, 0xD5, 0x00, 0xD6, 0xE9, 0xE6, 0xE7, 0xE8, 0xDD, 0xE2, 0xDB, 0x00, 0xD5, 0xE9, 0xE6, 0xD5, 0xAB, 0xFF};
-const u8 downloadatk_text[] = {0xFD, 0x13, 0xB4, 0xE7, 0x0, 0xFD, 0x1A, 0, 0xE6, 0xD5, 0xDD, 0xE7, 0xD9, 0xD8, 0x00, 0xDD, 0xE8, 0xE7, 0xFE, 0xBB, 0xE8, 0xE8, 0xD5, 0xD7, 0xDF, 0xAB, 0xFF};
-const u8 downloadspatk_text[] = {0xFD, 0x13, 0xB4, 0xE7, 0x0, 0xFD, 0x1A, 0, 0xE6, 0xD5, 0xDD, 0xE7, 0xD9, 0xD8, 0x00, 0xDD, 0xE8, 0xE7, 0xFE, 0xCD, 0xE4, 0xAD, 0, 0xBB, 0xE8, 0xE8, 0xD5, 0xD7, 0xDF, 0xAB, 0xFF};
-const u8 absorbabilityboost_text[] = {0xFD, 0x10, 0xB4, 0xE7, 0, 0xFD, 0x19, 0, 0xE6, 0xD5, 0xDD, 0xE7, 0xD9, 0xD8, 0x00, 0xDD, 0xE8, 0xE7, 0xFE, 0xFD, 0x0, 0xAB ,0xFF};
-const u8 absorbabilityimmune_text[] = {0xFD, 0x10, 0xB4, 0xE7, 0, 0xFD, 0x19, 0, 0xE1, 0xD5, 0xDF, 0xD9, 0xE7, 0x00, 0xDD, 0xE8, 0xFE, 0xDD, 0xE1, 0xE1, 0xE9, 0xE2, 0xD9, 0x00, 0xE8, 0xE3, 0x00, 0xFD, 0x00, 0xAE, 0xE8, 0xED, 0xE4, 0xD9, 0x00, 0xE1, 0xE3, 0xEA, 0xD9, 0xE7, 0xAB, 0xFF};
-/*0x190*/const u8 userteam_text[] = {Y_, o_, u_, r_, 0, t_, e_, a_, m_, Termin};
-/*0x191*/const u8 foeteam_text[] = {T_, h_, e_, 0, f_, o_, e_, Apos, s_, 0, t_, e_, a_, m_, Termin};
-/*0x192*/const u8 aftermath_text[] = {0xFD, 15, 0, 0xDD, 0xE7, 0x0, 0xDC, 0xE9, 0xE6, 0xE8, 0x00, 0xD6, 0xED, 0xFE, 0xFD, 16, 0xB4, 0xE7, 0, 0xFD, 25, 0xAB, 0xFF};
-/*0x193*/const u8 pickpocket_text[] = {0xFD, 16, 0, 0xE7, 0xE8, 0xE3, 0xE0, 0xD9, 0, 0xFD, 15, 0xB4, 0xE7, 0xFE, 0xFD, 22, 0xAB, 0xFF};
-/*0x194*/ const u8 mummy_text[] = {0xFD, 15, 0xB4, 0xE7, 0, 0xD5, 0xD6, 0xDD, 0xE0, 0xDD, 0xE8, 0xED, 0xFE, 0xD6, 0xD9, 0xD7, 0xD5, 0xE1, 0xD9, 0, 0xFD, 24, 0xAB, 0xFF};
+/*0x17C*/const u8 empty_text1[] = {0xFF};
+/*0x17D*/const u8 empty_text4[] = {0xFF};
+/*0x17E*/const u8 extreme_sun_activation_text[] = {0xCE, 0xDC, 0xD9, 0x00, 0xE7, 0xE9, 0xE2, 0xE0, 0xDD, 0xDB, 0xDC, 0xE8, 0x00, 0xE8, 0xE9, 0xE6, 0xE2, 0xD9, 0xD8, 0xFE, 0xD9, 0xEC, 0xE8, 0xE6, 0xD9, 0xE1, 0xD9, 0xE0, 0xED, 0x00, 0xDC, 0xD5, 0xE6, 0xE7, 0xDC, 0xAB, 0xFF};
+/*0x17F*/const u8 heavyrain_activation_text[] = {0xBB, 0x00, 0xDC, 0xD9, 0xD5, 0xEA, 0xED, 0x00, 0xE6, 0xD5, 0xDD, 0xE2, 0x00, 0xD6, 0xD9, 0xDB, 0xD5, 0xE2, 0x00, 0xE8, 0xE3, 0x00, 0xDA, 0xD5, 0xE0, 0xE0, 0xAB, 0xFF};
+/*0x180*/const u8 mysticalaircurrent_activation_text[] = {0xBB, 0x00, 0xE1, 0xED, 0xE7, 0xE8, 0xD9, 0xE6, 0xDD, 0xE3, 0xE9, 0xE7, 0x00, 0xD5, 0xDD, 0xE6, 0x00, 0xD7, 0xE9, 0xE6, 0xE6, 0xD9, 0xE2, 0xE8, 0xFE, 0xDD, 0xE7, 0x00, 0xE4, 0xE6, 0xE3, 0xE8, 0xD9, 0xD7, 0xE8, 0xDD, 0xE2, 0xDB, 0x00, 0xC0, 0xE0, 0xED, 0xDD, 0xE2, 0xDB, 0xAE, 0xE8, 0xED, 0xE4, 0xD9, 0x00, 0xCA, 0xE3, 0xDF, 0x1B, 0xE1, 0xE3, 0xE2, 0xAB, 0xFF};
+/*0x181*/const u8 forewarn_text[] = {I_, t_, Space, w_, a_, s_, Space, a_, l_, e_, r_, t_, e_, d_, Space, t_, o_, JumpLine, 0xFD, 17, Apos, s_, Space, 0xFD, 0, Exclam, 0xFF};
+/*0x182*/const u8 slowstart_text[] = {0xFD, 0x13, 0x0, 0xD7, 0xD5, 0xE2, 0xB4, 0xE8, 0x00, 0xDB, 0xD9, 0xE8, 0x00, 0xDD, 0xE8, 0x00, 0xDB, 0xE3, 0xDD, 0xE2, 0xDB, 0xAB, 0xFF};
+/*0x183*/const u8 anticipation_text[] = {0xFD, 19, Space, s_, h_, u_, d_, d_, e_, r_, e_, d_, Exclam, 0xFF};
+/*0x184*/const u8 empty_text3[] = {0xFF};
+/*0x185*/const u8 empty_text2[] = {0xFF};
+/*0x186*/const u8 harvest_text[] = {0xFD, 15, Space, h_, a_, r_, v_, e_, s_, t_, e_, d_, JumpLine, o_, n_, e_, Space, 0xFD, 22, Exclam, 0xFF};
+/*0x187*/const u8 healer_text[] = {0xFD, 15, 0, 0xB4, 0xE7, 0, 0xFD, 24, 0, 0xD7, 0xE9, 0xE6, 0xD9, 0xD8, 0x00, 0xDD, 0xE8, 0xE7, 0x00, 0xE4, 0xD5, 0xE6, 0xE8, 0xE2, 0xD9, 0xE6, 0xB4, 0xE7, 0xFE, 0xFD, 0x0, 0xAB, 0xFF};
+/*0x188*/const u8 empty_text5[] = {0xFF};
+/*0x189*/const u8 moldbreaker_text[] = {0xFD, 0x13, 0, 0xD6, 0xE6, 0xD9, 0xD5, 0xDF, 0xE7, 0x00, 0xE8, 0xDC, 0xD9, 0x00, 0xE1, 0xE3, 0xE0, 0xD8, 0xAB, 0xFF};
+/*0x18A*/const u8 turboblaze_text[] = {0xFD, 0x13, 0, 0xDD, 0xE7, 0x00, 0xE6, 0xD5, 0xD8, 0xDD, 0xD5, 0xE8, 0xDD, 0xE2, 0xDB, 0x00, 0xD5, 0x00, 0xD6, 0xE0, 0xD5, 0xEE, 0xDD, 0xE2, 0xDB, 0x00, 0xD5, 0xE9, 0xE6, 0xD5, 0xAB, 0xFF};
+/*0x18B*/const u8 terravolt_text[] = {0xFD, 0x13, 0, 0xDD, 0xE7, 0x00, 0xE6, 0xD5, 0xD8, 0xDD, 0xD5, 0xE8, 0xDD, 0xE2, 0xDB, 0x00, 0xD5, 0x00, 0xD6, 0xE9, 0xE6, 0xE7, 0xE8, 0xDD, 0xE2, 0xDB, 0x00, 0xD5, 0xE9, 0xE6, 0xD5, 0xAB, 0xFF};
+/*0x18C*/const u8 empty_text9[] = {0xFF};
+/*0x18D*/const u8 empty_text10[] = {0xFF};
+/*0x18E*/const u8 absorbabilityboost_text[] = {0xFD, 0x10, 0xB4, 0xE7, 0, 0xFD, 0x19, 0, 0xE6, 0xD5, 0xDD, 0xE7, 0xD9, 0xD8, 0x00, 0xDD, 0xE8, 0xE7, 0xFE, 0xFD, 0x0, 0xAB ,0xFF};
+/*0x18F*/const u8 absorbabilityimmune_text[] = {0xFD, 0x10, 0xB4, 0xE7, 0, 0xFD, 0x19, 0, 0xE1, 0xD5, 0xDF, 0xD9, 0xE7, 0x00, 0xDD, 0xE8, 0xFE, 0xDD, 0xE1, 0xE1, 0xE9, 0xE2, 0xD9, 0x00, 0xE8, 0xE3, 0x00, 0xFD, 0x00, 0xAE, 0xE8, 0xED, 0xE4, 0xD9, 0x00, 0xE1, 0xE3, 0xEA, 0xD9, 0xE7, 0xAB, 0xFF};
+/*0x190*/const u8 userteam_text[] = {y_, o_, u_, r_, Space, t_, e_, a_, m_, Termin};
+/*0x191*/const u8 foeteam_text[] = {t_, h_, e_, Space, f_, o_, e_, Apos, s_, Space, t_, e_, a_, m_, Termin};
+/*0x192*/const u8 aftermath_text[] = {0xFD, 15, Space, i_, s_, Space, h_, u_, r_, t_, Exclam, 0xFF};
+/*0x193*/const u8 pickpocket_text[] = {I_, t_, Space, s_, t_, o_, l_, e_, Space, 0xFD, 15, Apos, s_, JumpLine, 0xFD, 22, Exclam, 0xFF};
+/*0x194*/ const u8 mummy_text[] = {0xFD, 15, Apos, s_, Space, A_, b_, i_, l_, i_, t_, y_, JumpLine, b_, e_, c_, a_, m_, e_, Space, 0xFD, 24, Exclam, 0xFF};
 /*0x195*/ const u8 target_ability[] = {0xFD, 16, 0xB4, 0xE7, 0, 0xFD, 25, 0xAB, 0xFF};
-/*0x196*/ const u8 cursedbody_text[] = {0xFD, 16, 0xB4, 0xE7, 0, 0xFD, 25, 0, 0xD8, 0xDD, 0xE7, 0xD5, 0xD6, 0xE0, 0xD9, 0xD8, 0xFE, 0xFD, 15, 0xB4, 0xE7, 0, 0xFD, 0, 0xAB, 0xFF};
-/*0x197*/ const u8 drastically_text[] = {0xD8, 0xE6, 0xD5, 0xE7, 0xE8, 0xDD, 0xD7, 0xD5, 0xE0, 0xE0, 0xED, 0x0, 0xFF};
-/*0x198*/ const u8 pressure_text[] = {BuffCharac, 0x13, Space, i_, s_, Space, e_, x_, e_, r_, t_, i_, n_, g_, JumpLine, i_, t_, s_, Space, P_, r_, e_, s_, s_, u_, r_, e_, Exclam, Termin};
-/*0x199*/ const u8 unnerve_text[] = {0xFD, 0x0, 0, i_, s_, 0, t_, o_, o_, 0, n_, e_, r_, v_, o_, u_, s_, 0xFE, t_, o_, 0, e_, a_, t_, 0, B_, e_, r_, r_, i_, e_, s_, Exclam, Termin};
+/*0x196*/ const u8 cursedbody_text[] = {0xFD, 15, Apos, s_, Space, 0xFD, 54, JumpLine, w_, a_, s_, Space, d_, i_, s_, a_, b_, l_, e_, d_, Exclam, 0xFF};
+/*0x197*/ const u8 statchange_text[] = {0xFD, 19, Apos, s_, Space, 0xFD, 0, JumpLine, 0xFD, 58, 0xFD, 59, 0xFF};
+/*0x198*/ const u8 pressure_text[] = {BuffCharac, 0x13, Space, i_, s_, Space, e_, x_, e_, r_, t_, i_, n_, g_, JumpLine, i_, t_, s_, Space, p_, r_, e_, s_, s_, u_, r_, e_, Exclam, Termin};
+/*0x199*/ const u8 unnerve_text[] = {0xFD, 64, 0, i_, s_, 0, t_, o_, o_, 0, n_, e_, r_, v_, o_, u_, s_, 0xFE, t_, o_, 0, e_, a_, t_, 0, B_, e_, r_, r_, i_, e_, s_, Exclam, Termin};
 /*0x19A*/ const u8 aurabreak_text[] = {0xFD, 0x13, 0, r_, e_, v_, e_, r_, s_, e_, d_, 0, a_, l_, l_, 0, o_, t_, h_, e_, r_, 0xFE, P_, o_, k_, Poke_e, m_, o_, n_, Apos, s_, 0, a_, u_, r_, a_, s_, Exclam, 0xFF};
 /*0x19B*/ const u8 fairyaura_text[] = {BuffCharac, 0x13, Space, i_, s_, Space, r_, a_, d_, i_, a_, t_, i_, n_, g_, JumpLine, a_, Space, F_, a_, i_, r_, y_, Space, A_, u_, r_, a_, Exclam, Termin};
 /*0x19C*/ const u8 darkaura_text[] = {BuffCharac, 0x13, Space, i_, s_, Space, r_, a_, d_, i_, a_, t_, i_, n_, g_, JumpLine, a_, Space, D_, a_, r_, k_, Space, A_, u_, r_, a_, Exclam, Termin};
 /*0x19D*/ const u8 frisk_text[] = {BuffCharac, 0x13, Space, f_, r_, i_, s_, k_, e_, d_, Space, BuffCharac, 0x10, JumpLine, a_, n_, d_, Space,
                    f_, o_, u_, n_, d_, Space, i_, t_, s_, Space, BuffCharac, 0x16, Exclam, Termin};
 /*0x19E*/ const u8 hurtbyitem_text[] = {BuffCharac, 15, Space, i_,s_, Space, h_, u_, r_, t_, Space, b_, y_, Space, BuffCharac, 22, Exclam,0xFF};
-/*0x19F*/ const u8 got_burned_text[] = {BuffCharac, 15, Space, g_, o_, t_, Space, b_, u_, r_, n_, e_, d_, Exclam, 0xFF};
-/*0x1A0*/ const u8 got_badlypoisoned_text[] = {BuffCharac, 15, Space, g_, o_, t_, Space, b_, a_, d_, l_, y_, 0xFE, p_, o_, i_, s_, o_, n_, e_, d_, Exclam, 0xFF};
-/*0x1A1*/ const u8 airballoon_text[] = {BuffCharac, 18, Space, i_, s_, Space, f_, l_, o_, a_, t_, i_, n_, g_, Exclam, 0xFF};
+/*0x19F*/ const u8 flameorb_text[] = {BuffCharac, 15, Space, w_, a_, s_, Space, b_, u_, r_, n_, e_, d_, JumpLine, b_, y_, Space, t_, h_, e_, Space, 0xFD, 22, Exclam, 0xFF};
+/*0x1A0*/ const u8 toxicorb_text[] = {BuffCharac, 15, Space, w_, a_, s_, Space, b_, a_, d_, l_, y_, JumpLine, p_, o_, i_, s_, o_, n_, e_, d_, Space, b_, y_, Space, t_, h_, e_, Space, 0xFD, 22, Exclam, 0xFF};
+/*0x1A1*/ const u8 airballoon_text[] = {BuffCharac, 62, Space, f_, l_, o_, a_, t_, s_, Space, i_, n_, Space, t_, h_, e_, Space, a_, i_, r_, JumpLine, w_, i_, t_, h_, Space, i_, t_, s_, Space, 0xFD, 22, Exclam, 0xFF};
 /*0x1A2*/ const u8 bad_dreams_text[] = {BuffCharac, 0x10, Space, i_, s_, Space, t_, o_, r_, m_, e_, n_, t_, e_, d_, Space, b_, y_, JumpLine, b_, a_, d_, Space, d_, r_, e_, a_, m_, s_, Exclam, Termin};
-/*0x1A3*/ const u8 item_text[] = {BuffCharac, 16, Apos, Space, BuffCharac, 22, Exclam, 0xFF};
-/*0x1A4*/ const u8 rockyhelmet_text[] = {BuffCharac, 15, Space, i_, s_, Space, h_, u_, r_, t_, Space, b_, y_, JumpLine, BuffCharac, 16, Apos, Space, BuffCharac, 22, Exclam, 0xFF};
-/*0x1A5*/ const u8 popped_text[] = {BuffCharac, 16, Apos, Space, BuffCharac, 22, Space, p_, o_, p_, p_, e_, d_, Exclam, 0xFF};
-/*0x1A6*/ const u8 fellinlove_text[] = {BuffCharac, 15, Space, f_,e_,l_,l_, Space, i_, n_, Space, l_, o_, v_, e_, JumpLine, w_, i_, t_, h_, Space, BuffCharac, 16, Exclam, 0xFF};
+/*0x1A3*/ const u8 stickybarb_text[] = {BuffCharac, 15, Space, i_, s_, Space, h_, u_, r_, t_, JumpLine, b_, y_, Space, i_, t_, s_, Space, BuffCharac, 22, Exclam, 0xFF};
+/*0x1A4*/ const u8 rockyhelmet_text[] = {BuffCharac, 15, Space, w_, a_, s_, Space, h_, u_, r_, t_, JumpLine, b_, y_, Space, t_, h_, e_, Space, BuffCharac, 22, Exclam, 0xFF};
+/*0x1A5*/ const u8 popped_text[] = {BuffCharac, 16, Apos, s_, Space, BuffCharac, 22, JumpLine, p_, o_, p_, p_, e_, d_, Exclam, 0xFF};
+/*0x1A6*/ const u8 destinyknot_text[] = {BuffCharac, 15, Space, f_,e_,l_,l_, Space, i_, n_, Space, l_, o_, v_, e_, JumpLine, f_, r_, o_, m_, Space, t_, h_, e_, Space, BuffCharac, 22, Exclam, 0xFF};
 /*0x1A7*/ const u8 healblockend_text[] = {BuffCharac, 18, Apos, s_, Space, H_, e_, a_, l_, Space, B_, l_, o_, c_, k_, JumpLine, w_, o_, r_, e_, Space, o_, f_, f_, Exclam, 0xFF};
-/*0x1A8*/ const u8 magicbounce_text[] = {BuffCharac, 15, Apos, s_, Space, BuffCharac, 20, JumpLine, w_, a_, s_, Space, b_, o_, u_, n_, c_, e_, d_, Space, b_, a_, c_, k_, Space, b_, y_, Space, BuffCharac, 25, Exclam, 0xFF};
-/*0x1A9*/ const u8 angerpoint_text[] = {0xFD, 0x10, Apos, s_, 0, 0xFD, 0x19, 0 ,m_, a_, x_, e_, d_, 0, i_, t_, s_, 0xFE, a_, t_, t_, a_, c_, k_, Exclam, 0xFF};
-/*0x1AA*/ const u8 stealhrock_text[] = {P_, o_, i_, n_, t_, e_, d_, Space, s_, t_, o_, n_, e_, s_, Space, d_, u_, g_, Space, i_, n_, t_, o_, JumpLine, BuffCharac, 16, Exclam, 0xFF};
+/*0x1A8*/ const u8 empty_text8[] = {0xFF};
+/*0x1A9*/ const u8 angerpoint_text[] = {0xFD, 16, Space ,m_, a_, x_, e_, d_, JumpLine, i_, t_, s_, Space, A_, t_, t_, a_, c_, k_, Exclam, 0xFF};
+/*0x1AA*/ const u8 stealhrock_text[] = {P_, o_, i_, n_, t_, e_, d_, Space, s_, t_, o_, n_, e_, s_, Space, d_, u_, g_, JumpLine, i_, n_, t_, o_, Space, BuffCharac, 16, Exclam, 0xFF};
 /*0x1AB*/ const u8 stickyweb_text[] = {BuffCharac, 16, Space, w_, a_, s_, Space, c_, a_, u_, g_, h_, t_, Space, i_, n_, Space, a_, Space, S_, t_, i_, c_, k_, y_, Space, W_, e_, b_, Exclam, 0xFF};
-/*0x1AC*/ const u8 gotpoisoned_text[] = {BuffCharac, 16, Space, g_, o_, t_, Space, p_, o_, i_, s_, o_, n_, e_, d_, Exclam, 0xFF};
+/*0x1AC*/ const u8 empty_text6[] = {0xFF};
 /*0x1AD*/ const u8 absorbed_spikes_text[] = {T_, o_, x_, i_, c_, Space, S_, p_, i_, k_, e_, s_, Space, h_, a_, v_, e_, Space, b_, e_, e_, n_, JumpLine, a_, b_, s_, o_, r_, b_, e_, d_, Space, b_, y_, Space, BuffCharac, 16, Exclam, 0xFF};
 /*0x1AE*/ const u8 lost_some_hp_text[] = {BuffCharac, 15, Space, l_, o_, s_, t_, Space, s_, o_, m_, e_, Space, o_, f_, Space, i_, t_, s_, Space, H_, P_, Exclam, 0xFF};
-/*0x1AF*/ const u8 tauntended_text[] = {BuffCharac, 18, Space, i_, s_, Space, n_, o_, Space, l_, o_, n_, g_, e_, r_, Space, T_, a_, u_, n_, t_, e_, d_, Exclam, 0xFF};
+/*0x1AF*/ const u8 tauntended_text[] = {BuffCharac, 18, Apos, s_, Space, t_, a_, u_, n_, t_, JumpLine, w_, o_, r_, e_, Space, o_, f_, f_, Exclam, 0xFF};
 /*0x1B0*/ const u8 tormentended_text[] = {BuffCharac, 18, Space, i_, s_, Space, n_, o_, Space, l_, o_, n_, g_, e_, r_, Space, T_, o_, r_, m_, e_, n_, e_, d_, Exclam, 0xFF};
-/*0x1B1*/ const u8 healblockprevents_text[] = {H_, e_, a_, l_, Space, B_, l_, o_, c_, k_, Space, p_, r_, e_, v_, e_, n_, t_, s_, JumpLine, u_, s_, a_, g_, e_, Space, o_, f_, Space, BuffCharac, 0, Exclam, 0xFF};
-/*0x1B2*/ const u8 gravityprevents_text[] = {G_, r_, a_, v_, i_, t_, y_, Space, p_, r_, e_, v_, e_, n_, t_, s_, JumpLine, u_, s_, a_, g_, e_, Space, o_, f_, Space, BuffCharac, 0, Exclam, 0xFF};
-/*0x1B3*/ const u8 embargoprevents_text[] = {C_, a_, n_, Apos, t_, Space, u_, s_, e_, Space, BuffCharac, 0, Space, u_, n_, d_, e_, r_, JumpLine, t_, h_, e_, Space, e_, f_, f_, e_, c_, t_, s_, Space, o_, f_, Space, E_, m_, b_, a_, r_, g_, o_, Exclam, 0xFF};
-/*0x1B4*/ const u8 aromaveilprevents_text[] = {BuffCharac, 23, Space, p_, r_, e_, v_, e_, n_, t_, s_, BuffCharac, 16, f_, r_, o_, m_, BuffCharac, 0, Exclam, 0xFF};
-/*0x1B5*/ const u8 spikyshield_damage[] = {BuffCharac, 16, Apos, Space, S_, p_, i_, k_, y_, Space, S_, h_, i_, e_, l_, d_, JumpLine, h_, u_, r_, t_, s_, Space, BuffCharac, 15, Exclam, 0xFF};
-/*0x1B6*/ const u8 symbiosispassing_text[] = {BuffCharac, 16, Space, p_, a_, s_, s_, e_, d_, Space, i_, t_, s_, JumpLine, i_, t_, e_, m_, Space, t_, o_, Space, BuffCharac, 19, Exclam, 0xFF};
+/*0x1B1*/ const u8 healblockprevents_text[] = {H_, e_, a_, l_, Space, B_, l_, o_, c_, k_, Space, p_, r_, e_, v_, e_, n_, t_, s_, JumpLine, u_, s_, a_, g_, e_, Space, o_, f_, Space, BuffCharac, 54, Exclam, 0xFF};
+/*0x1B2*/ const u8 gravityprevents_text[] = {G_, r_, a_, v_, i_, t_, y_, Space, p_, r_, e_, v_, e_, n_, t_, s_, JumpLine, u_, s_, a_, g_, e_, Space, o_, f_, Space, BuffCharac, 54, Exclam, 0xFF};
+/*0x1B3*/ const u8 embargoprevents_text[] = {C_, a_, n_, Apos, t_, Space, u_, s_, e_, Space, BuffCharac, 54, Space, u_, n_, d_, e_, r_, JumpLine, t_, h_, e_, Space, e_, f_, f_, e_, c_, t_, s_, Space, o_, f_, Space, E_, m_, b_, a_, r_, g_, o_, Exclam, 0xFF};
+/*0x1B4*/ const u8 aromaveilprevents_text[] = {BuffCharac, 16, Space, i_, s_, Space, p_, r_, o_, t_, e_, c_, t_ , e_, d_, JumpLine, b_, y_, Space, BuffCharac, 23, Exclam, 0xFF};
+/*0x1B5*/ const u8 empty_text7[] = {0xFF};
+/*0x1B6*/ const u8 symbiosispassing_text[] = {BuffCharac, 17, Space, p_, a_, s_, s_, e_, d_, Space, i_, t_, s_, JumpLine, i_, t_, e_, m_, Space, t_, o_, Space, BuffCharac, 19, Exclam, 0xFF};
 /*0x1B7*/ const u8 restored_hp_text[] = {BuffCharac, 16, Space, r_, e_, s_, t_, o_, r_, e_, d_, Space, i_, t_, s_, Space, H_, P_, Exclam, 0xFF};
 /*0x1B8*/ const u8 replacement_healed_text[] = {T_, h_, e_, Space, r_, e_, p_, l_, a_, c_, e_, m_, e_, n_, t_, Space, w_, a_, s_, Space, f_, u_, l_, l_, y_, Space, h_, e_, a_, l_, e_, d_, Exclam, 0xFF};
 /*0x1B9*/ const u8 telekinesis_end_text[] = {BuffCharac, 15, Space, w_, a_, s_, Space, f_, r_, e_, e_, d_, Space, f_, r_, o_, m_, JumpLine, t_, h_, e_, Space, T_, e_, l_, e_, k_, i_, n_, e_, s_, i_, s_, Exclam, 0xFF};
@@ -142,11 +142,11 @@ const u8 absorbabilityimmune_text[] = {0xFD, 0x10, 0xB4, 0xE7, 0, 0xFD, 0x19, 0,
 /*0x1DF*/ const u8 afteryout_text[] = {BuffCharac, 16, Space, t_, o_, o_, k_, Space, t_, h_, e_, Space, k_, i_, n_, d_, Space, o_, f_, f_, e_, r_, Exclam, 0xFF};
 /*0x1E0*/ const u8 powder_text[] = {BuffCharac, 16, Space, i_, s_, JumpLine, c_, o_, v_, e_, r_, e_, d_, Space, i_, n_, Space, p_, o_, w_, d_, e_, r_, Exclam, 0xFF};
 /*0x1E1*/ const u8 powderdamage_text[] = {W_, h_, e_, n_, Space, t_, h_, e_, Space, f_, l_, a_, m_, e_, Space, t_, o_, u_, c_, h_, e_, d_, Space, t_, h_, e_, Space, p_, o_, w_, d_, e_, r_, JumpLine, o_, n_, Space, t_, h_, e_, Space, 0xFD, 15, Comma, Space, i_, t_, Space, e_, x_, p_, l_, o_, d_, e_, d_, Exclam, 0xFF};
-/*0x1E2*/ const u8 statchangesremoved_text[] = {0xFD, 17, Apos, s_, Space, s_, t_, a_, t_, s_, Space, c_,h_,a_,n_,g_,e_,s_, JumpLine, w_, e_, r_, e_, Space, r_, e_, m_, o_, v_, e_, d_, Exclam, 0xFF};
+/*0x1E2*/ const u8 statchangesremoved_text[] = {0xFD, 17, Apos, s_, Space, s_, t_, a_, t_, Space, c_,h_,a_,n_,g_,e_,s_, JumpLine, w_, e_, r_, e_, Space, r_, e_, m_, o_, v_, e_, d_, Exclam, 0xFF};
 /*0x1E3*/ const u8 electify_text[] = {0xFD, 16, Apos, s_, Space, m_, o_, v_, e_, s_, Space, h_, a_, v_, e_, Space, b_, e_, e_, n_, JumpLine, e_, l_, e_, c_, t_, r_, i_, f_, i_, e_, d_, Exclam, 0xFF};
-/*0x1E4*/ const u8 stealthrock2_text[] = {P_, o_, i_, n_, t_, e_, d_, Space, s_, t_, o_, n_, e_, s_, Space, f_, l_, o_, a_, t_, Space, a_, l_, l_, Space, a_, r_, o_, u_, n_, d_, JumpLine, t_, h_, e_, Space, o_, p_, p_, o_, n_, e_, n_, t_, Apos, s_, Space, s_, i_, d_, e_, Exclam, 0xFF};
-/*0x1E5*/ const u8 toxicspikes2_text[] = {P_, o_, i_, s_, o_, n_, Space, s_, p_, i_, k_, e_, s_, Space, w_, e_, r_, e_, Space, s_, c_, a_, t_, t_, e_, r_, e_, d_, JumpLine, a_, l_, l_, Space, a_, r_, o_, u_, n_, d_, Space, t_, h_, e_, Space, o_, p_, p_, o_, n_, e_, n_, t_, Apos, s_, Space, s_, i_, d_, e_, Exclam, 0xFF};
-/*0x1E6*/ const u8 stickyweb2_text[] = {A_, Space, s_, t_, i_, c_, k_, y_, Space, w_, e_, b_, Space, s_, p_, r_, e_, a_, d_, s_, Space, o_, u_, t_, Space, b_, e_, n_, e_, a_, t_, h_, JumpLine, t_, h_, e_, Space, o_, p_, p_, o_, n_, e_, n_, t_, Apos, s_, Space, s_, i_, d_, e_, Exclam, 0xFF};
+/*0x1E4*/ const u8 stealthrock2_text[] = {P_, o_, i_, n_, t_, e_, d_, Space, s_, t_, o_, n_, e_, s_, Space, f_, l_, o_, a_, t_, Space, i_, n_, Space, t_, h_, e_, Space, a_, i_, r_, JumpLine, a_, r_, o_, u_, n_, d_, Space, 0xFD, 63, Exclam, 0xFF};
+/*0x1E5*/ const u8 toxicspikes2_text[] = {P_, o_, i_, s_, o_, n_, Space, s_, p_, i_, k_, e_, s_, Space, w_, e_, r_, e_, Space, s_, c_, a_, t_, t_, e_, r_, e_, d_, JumpLine, a_, l_, l_, Space, a_, r_, o_, u_, n_, d_, Space, 0xFD, 63, Apos, s_, Space, f_, e_, e_, t_, Exclam, 0xFF};
+/*0x1E6*/ const u8 stickyweb2_text[] = {A_, Space, s_, t_, i_, c_, k_, y_, Space, w_, e_, b_, Space, s_, p_, r_, e_, a_, d_, s_, Space, o_, u_, t_, Space, b_, e_, n_, e_, a_, t_, h_, JumpLine, 0xFD, 63, Apos, s_, Space, f_, e_, e_, t_, Exclam, 0xFF};
 /*0x1E7*/ const u8 nimble_text[] = {0xFD, 15, Space, b_, e_, c_, a_, m_, e_, Space, n_, i_, m_, b_, l_, e_, Exclam, 0xFF};
 /*0x1E8*/ const u8 iondelugeset_text[] = {A_, Space, d_, e_, l_, u_, g_, e_, Space, o_, f_, Space, i_, o_, n_, s_, Space, s_, h_, o_, w_, e_, r_, s_, JumpLine, t_, h_, e_, Space, b_, a_, t_, t_, l_, e_, f_, i_, e_, l_, d_, Exclam, 0xFF};
 /*0x1E9*/ const u8 reflecttype_text[] = {0xFD, 15, Apos, s_, Space, t_, y_, p_, e_, Space, b_, e_, c_, a_, m_, e_, Space, t_, h_, e_, JumpLine, s_, a_, m_, e_, Space, a_, s_, Space, 0xFD, 16, Apos, s_, Space, t_, y_, p_, e_, Exclam, Termin};
@@ -163,7 +163,7 @@ const u8 absorbabilityimmune_text[] = {0xFD, 0x10, 0xB4, 0xE7, 0, 0xFD, 0x19, 0,
 /*0x1F4*/ const u8 psychosplit_text[] = {0xFD, 15, Space, s_, h_, a_, r_, e_, d_, Space, i_, t_, s_, JumpLine, 0xFD, 0, Space, w_, i_, t_, h_, Space, t_, h_, e_, Space, t_, a_, r_, g_, e_, t_, Exclam, 0xFF};
 /*0x1F5*/ const u8 stockpileend_text[] = {0xFD, 15, Apos, s_, Space, S_, t_, o_, c_, k_, p_, i_, l_, e_, JumpLine, e_, f_, f_, e_, c_, t_, Space, w_, o_, r_, e_, Space, o_, f_, f_, Exclam, 0xFF};
 /*0x1F6*/ const u8 geomancy_text[] = {0xFD, 15, Space, i_, s_, Space, a_, b_, o_, r_, b_, i_, n_,g_, Space, p_, o_, w_, e_, r_, Exclam, 0xFF};
-/*0x1F7*/ const u8 powerherb_text[] = {0xFD, 15, Space, b_, e_, c_, a_, m_, e_, Space, f_, u_, l_, l_, y_, Space, c_, h_, a_, r_, g_, e_, d_, JumpLine, d_, u_, e_, Space, t_, o_, Space, 0xFD, 22, Exclam, 0xFF};
+/*0x1F7*/ const u8 powerherb_text[] = {0xFD, 15, Space, b_, e_, c_, a_, m_, e_, Space, f_, u_, l_, l_, y_, Space, c_, h_, a_, r_, g_, e_, d_, JumpLine, d_, u_, e_, Space, t_, o_, Space, i_, t_, s_, Space, 0xFD, 22, Exclam, 0xFF};
 /*0x1F8*/ const u8 iceburn_text[] = {0xFD, 15, Space, b_, e_, c_, a_, m_, e_, Space, c_, l_, o_, a_, k_, e_, d_, JumpLine, i_, n_, Space ,f_, r_, e_, e_, z_, i_, n_, g_, Space, a_, i_, r_, Exclam, 0xFF};
 /*0x1F9*/ const u8 freezeshock_text[] = {0xFD, 15, Space, b_, e_, c_, a_, m_, e_, Space, c_, l_, o_, a_, k_, e_, d_, JumpLine, i_, n_, Space ,f_, r_, e_, e_, z_, i_, n_, g_, Space, l_, i_, g_, h_, t_, Exclam, 0xFF};\
 /*0x1FA*/ const u8 shadowforce_text[] = {0xFD, 15, Space, v_, a_, n_, i_, s_, h_, e_, d_, Space, i_, n_, s_, t_, a_, n_, t_, l_, y_, Exclam, 0xFF};
@@ -171,11 +171,11 @@ const u8 absorbabilityimmune_text[] = {0xFD, 0x10, 0xB4, 0xE7, 0, 0xFD, 0x19, 0,
 /*0x1FC*/ const u8 grassyterrain_text[] = {G_, r_, a_, s_, s_, Space, g_, r_, e_, w_, Space, t_, o_, Space, c_, o_, v_, e_, r_, Space, t_, h_, e_, Space, b_, a_, t_, t_, l_, e_, f_, i_, e_, l_, d_, Exclam, 0xFF};
 /*0x1FD*/ const u8 electricterrain_text[] = {A_, n_, Space, e_, l_, e_, c_, t_, r_, i_, c_, Space, c_, u_, r_, r_, e_, n_, t_, JumpLine, r_, u_, n_, s_, Space, a_, c_, r_, o_, s_, s_, Space, t_, h_, e_, Space, b_, a_, t_, t_, l_, e_, f_, i_, e_, l_, d_, Exclam, 0xFF};
 /*0x1FE*/ const u8 aquaring_text[] = {0xFD, 15, Space, s_, u_, r_, r_, o_, u_, n_, d_, e_, d_, Space, i_, t_, s_, e_, l_, f_, JumpLine, w_, i_, t_, h_, Space, a_, Space, v_, e_, i_, l_, Space, o_, f_, Space, w_, a_, t_, e_, r_,Exclam, 0xFF};
-/*0x1FF*/ const u8 aquaringheal_text[] = {A_, q_, u_, a_, Space, R_, i_, n_,g_, Space, r_, e_, s_, t_, o_, r_, e_, d_, Space, 0xFD, 15, Apos, s_, Space, H_, P_, Exclam, 0xFF};
+/*0x1FF*/ const u8 aquaringheal_text[] = {A_, q_, u_, a_, Space, R_, i_, n_,g_, Space, r_, e_, s_, t_, o_, r_, e_, d_, JumpLine, 0xFD, 15, Apos, s_, Space, H_, P_, Exclam, 0xFF};
 /*0x200*/ const u8 assaultvest_text[] = {T_, h_, e_, Space, e_, f_, f_, e_, c_, t_, s_, Space, o_, f_, Space, 0xFD, 22, JumpLine, p_, r_, e_, v_, e_, n_, t_, Space, u_, s_, i_, n_, g_, Space, s_, t_, a_, t_, u_, s_, Space, m_, o_, v_, e_, s_, Exclam, 0xFB, 0xFF};
 /*0x201*/ const u8 gravityprevents2_text[] = {0xFD, 18, Space, c_, a_, n_, Apos, t_, Space, u_, s_, e_, JumpLine, 0xFD, 20, Space, b_, e_, c_, a_, u_, s_, e_, Space, o_, f_, Space, g_, r_, a_, v_, i_, t_, y_, Exclam, 0xFB, 0xFF};
 /*0x202*/ const u8 healblockprevents2_text[] = {0xFD, 18, Space, c_, a_, n_, Apos, t_, Space, u_, s_, e_, JumpLine, 0xFD, 20, Space, b_, e_, c_, a_, u_, s_, e_, Space, o_, f_, Space, H_, e_, a_, l_, Space, B_, l_, o_, c_, k_, Exclam, 0xFB, 0xFF};
-/*0x203*/ const u8 let_it_move_first_text[] = {0xFD, 15, Apos, s_, Space, 0xFD, 0x16, Space, l_, e_, t_, s_, JumpLine, i_, t_, Space, m_, o_, v_, e_, Space, f_, i_, r_, s_, t_, Exclam, Termin };
+/*0x203*/ const u8 let_it_move_first_text[] = {0xFD, 15, Apos, s_, Space, 0xFD, 22, Space, l_, e_, t_, JumpLine, i_, t_, Space, m_, o_, v_, e_, Space, f_, i_, r_, s_, t_, Exclam, Termin};
 /*0x204*/ const u8 mega_evolved_text[] = {0xFD, 15, Space, h_, a_, s_, Space, M_, e_, g_, a_, Space, E_, v_, o_, l_, v_, e_, d_, JumpLine, i_, n_, t_, o_, Space, M_, e_, g_, a_, Space, 0xFD, 0, Exclam, 0xFB, 0xFF};
 /*0x205*/ const u8 mega_trigger_text[] = {0xFD, 15, Apos, s_, Space, 0xFD, 22, Space, i_, s_, Space, r_, e_, a_, c_, t_, i_, n_, g_, JumpLine, t_, o_, Space , 0xFD, 52, Apos, s_, Space, 0xFD, 1, Exclam, 0xFB, 0xFF};
 /*0x206*/ const u8 fervent_trigger_text[] = {BuffCharac, 52, Apos, s_, Space, f_, e_, r_, v_, e_, n_, t_, Space, w_, i_, s_, h_, JumpLine, r_, e_, a_, c_, h_, e_, d_, Space, BuffCharac, 0xF, Exclam, Termin};
@@ -197,11 +197,11 @@ const u8 absorbabilityimmune_text[] = {0xFD, 0x10, 0xB4, 0xE7, 0, 0xFD, 0x19, 0,
 /*0x215*/ const u8 skydroptooheavy_text[] = {0xFD, 16, Space, i_, s_, Space, t_, o_, o_, Space, h_, e_, a_, v_, y_, JumpLine, t_, o_, Space, b_, e_, Space, l_, i_, f_, t_, e_, d_, Exclam, 0xFF};
 /*0x216*/ const u8 fairylock_text[] = {N_, o_, Space, o_, n_, e_, Space, w_,i_,l_,l_, Space, b_, e_, Space, a_, b_, l_, e_, Space, t_, o_, JumpLine, r_, u_, n_, Space, a_, w_, a_, y_, Space, d_, u_, r_, i_, n_, g_, Space, t_, h_, e_, Space, n_, e_, x_, t_, Space, t_, u_, r_, n_, Exclam, 0xFF};
 /*0x217*/ const u8 illusion_off_text[] = {0xFD, 16, Apos, s_, Space, i_, l_, l_, u_, s_, i_, o_, n_, JumpLine, w_, o_, r_, e_, Space, o_, f_, f_, Exclam, 0xFF};
-/*0x218*/ const u8 protean_text[] = {0xFD, 15, Apos, s_, Space, 0xFD, 23, Space, m_, a_, d_, e_, JumpLine, i_, t_, Space, t_, h_, e_, Space, 0xFD, 0x0, Space, t_, y_, p_, e_, Exclam, 0xFF};
+/*0x218*/ const u8 protean_text[] = {0xFD, 15, Space, t_, r_, a_, n_, s_, f_, o_, r_, m_, e_, d_, Space, i_, n_, t_, o_, JumpLine, t_, h_, e_, Space, 0xFD, 0x0, Space, t_, y_, p_, e_, Exclam, 0xFF};
 /*0x219*/ const u8 gem_text[] = {T_, h_, e_, Space, 0xFD, 22, Space, s_, t_, r_, e_, n_, g_, t_, h_, e_, n_, e_, d_, JumpLine, 0xFD, 0x0, Apos, s_, Space, p_, o_, w_, e_, r_, Exclam, 0xFF};
 
-/*0x21A*/ const u8 telepathy_text[] = {0xFD, 16, Space, a_, v_, o_, i_, d_, s_, Space, a_, t_, t_, a_, c_, k_, s_, Space, b_, y_, JumpLine, i_, t_, s_, Space, a_, l_, l_, y_, Space, P_, o_, k_, Poke_e, m_, o_, n_, Exclam, Termin};
-/*0x21B*/ const u8 flame_burst_text[] = {T_, h_, e_, Space, b_, u_, r_, s_, t_, i_, n_, g_, Space, f_, l_, a_, m_, e_, s_, JumpLine, h_, i_, t_, Space, 0xFD, 15, Exclam, 0xFF};
+/*0x21A*/ const u8 telepathy_text[] = {0xFD, 16, Space, a_, v_, o_, i_, d_, s_, Space, a_, t_, t_, a_, c_, k_, s_, JumpLine, b_, y_, Space, i_, t_, s_, Space, a_, l_, l_, y_, Space, P_, o_, k_, Poke_e, m_, o_, n_, Exclam, Termin};
+/*0x21B*/ const u8 flame_burst_text[] = {T_, h_, e_, Space, b_, u_, r_, s_, t_, i_, n_, g_, Space, f_, l_, a_, m_, e_, s_, JumpLine, h_, i_, t_, Space, 0xFD, 17, Exclam, 0xFF};
 /*0x21C*/ const u8 zen_mode_text[] = {Z_, e_, n_, Space, M_, o_, d_, e_, Space, t_, r_, i_, g_, g_, e_, r_, e_, d_, Exclam, 0xFF};
 /*0x21D*/ const u8 zen_end_text[] = {Z_, e_, n_, Space, M_, o_, d_, e_, Space, e_, n_, d_, e_, d_, Exclam, 0xFF};
 /*0x21E*/ const u8 form_change_text[] = {0xFD, 0xF, Space, t_, r_, a_, n_, s_, f_, o_, r_, m_, e_, d_, Exclam, 0xFF};
@@ -209,8 +209,8 @@ const u8 absorbabilityimmune_text[] = {0xFD, 0x10, 0xB4, 0xE7, 0, 0xFD, 0x19, 0,
 /*0x21F*/ const u8 partner_wait_text[] = {0xFD, 0xF, Space, i_, s_, Space, w_, a_, i_, t_, i_, n_, g_, JumpLine, f_, o_, r_, Space, 0xFD, 0x13, Apos, s_, Space, m_, o_, v_, e_, Dot, Dot, Dot, Termin};
 /*0x220*/ const u8 combined_move_text[] = {T_, h_, e_, Space, t_, w_, o_, Space, m_, o_, v_, e_, s_, Space, h_, a_, v_, e_, Space, b_ ,e_, c_, o_, m_, e_, Space, o_, n_, e_, Exclam, JumpLine,
                                     I_, t_, Apos, s_, Space, a_, Space, c_, o_, m_, b_, i_, n_, e_, d_, Space, m_, o_, v_, e_, Exclam, Termin};
-/*0x221*/const u8 userteam_lc_text[] = {y_, o_, u_, r_, 0, t_, e_, a_, m_, Termin};
-/*0x222*/const u8 foeteam_lc_text[] = {t_, h_, e_, 0, f_, o_, e_, Apos, s_, 0, t_, e_, a_, m_, Termin};
+/*0x221*/const u8 userteam_uc_text[] = {Y_, o_, u_, r_, 0, t_, e_, a_, m_, Termin};
+/*0x222*/const u8 foeteam_uc_text[] = {T_, h_, e_, 0, f_, o_, e_, Apos, s_, 0, t_, e_, a_, m_, Termin};
 /*0x223*/const u8 fire_sea_text[] = {A_, Space, s_, e_, a_, Space, o_, f_, Space, f_, i_, r_, e_, Space, e_, n_, v_, e_, l_, o_, p_, e_, d_, JumpLine, Space, 0xFD, 0x0, Exclam, Termin};
 /*0x224*/const u8 fire_sea_hurt_text[] = {0xFD, 0xF, Space, i_, s_, Space, h_, u_, r_, t_, JumpLine, b_, y_, Space, t_, h_, e_, Space, s_, e_, a_, Space, o_, f_, Space, f_, i_, r_, e_, Exclam, Termin};
 /*0x225*/const u8 swamp_text[] = {A_, Space, s_, w_, a_, m_, p_, Space, e_, n_, v_, e_, l_, o_, p_, e_, d_, JumpLine, Space, 0xFD, 0x0, Exclam, Termin};
@@ -230,13 +230,30 @@ o_, n_, Space, 0xFD, 0x0, Apos, s_, Space, s_, i_, d_, e_, Exclam, Termin};
 /*0x22F*/const u8 trainer_sliding_text[] = {0xFD, 56, 0xFF};
 /*0x230*/const u8 sweetveilactivation_text[] = {0xFD, 16, Space, s_, u_, r_, r_, o_, u_, n_, d_, e_, d_, Space, i_, t_, s_, e_, l_, f_, JumpLine, w_, i_, t_, h_, Space, a_, Space, v_, e_, i_, l_, Space, o_, f_, Space, s_, w_, e_, e_, t_, n_, e_, s_, s_, Exclam, 0xFF};
 /*0x231*/const u8 sportend_text[] = {T_, h_, e_, Space, e_, f_, f_, e_, c_, t_, s_, Space, o_, f_, Space, 0xFD, 0, JumpLine, h_, a_, v_, e_, Space, f_, a_, d_, e_, d_, Exclam, 0xFF};
+/*0x232*/const u8 scr_active_ability_text[] = {0xFD, 19, 0xB4, 0xE7, 0, 0xFD, 26, 0xAB, 0xFF};
+/*0x233*/const u8 psychicterrain_text[] = {T_, h_, e_, Space, b_, a_, t_, t_, l_, e_, f_, i_, e_, l_, d_, Space, g_, o_, t_, Space, w_, e_, i_, r_, d_, Exclam, 0xFF};
+/*0x234*/const u8 laserfocus_text[] = {0xFD, 15, Space, c_, o_, n_, c_, e_, n_, t_, r_, a_, t_, e_, d_, JumpLine, i_, n_, t_, e_, n_, s_, l_, y_, Exclam, 0xFF};
+/*0x235*/const u8 auroraveil_text[] = {0xFD, 54, Space, m_, a_, d_, e_, Space, 0xFD, 57, JumpLine, s_, t_, r_, o_, n_, g_, e_, r_, Space, a_, g_, a_, i_, s_, t_, Space, p_, h_, y_, s_, i_, c_, a_, l_, Space, a_, n_, d_, Space, s_, p_, e_, c_, i_, a_, l_, 0xFA, m_, o_, v_, e_, s_, Exclam, 0xFF};
+/*0x236*/const u8 attacker_item_activates_text[] = {0xFD, 15, Apos, s_, Space, 0xFD, 22, JumpLine, a_, c_, t_, i_, v_, a_, t_, e_, d_, Exclam, 0xFF};
+/*0x237*/const u8 atk_ability_text[] = {0xFD, 15, Apos, s_, Space, 0xFD, 24, Exclam, 0xFF};
+/*0x238*/const u8 cantuse_text[] = {0xFD, 15, Space, c_, a_, n_, n_, o_, t_, JumpLine, u_, s_, e_, Space, 0xFD, 54, Exclam, 0xFF};
+/*0x239*/const u8 atkhpfull_text[] = {0xFD, 15, Apos, s_, JumpLine, H_, P_, Space, i_, s_, Space, f_, u_, l_, l_, Exclam, 0xFF};
+/*0x23A*/const u8 statfail_text[] = {0xFD, 19, Apos, s_, Space, 0xFD, 0, JumpLine, w_, o_, n_, Apos, t_, Space, g_, o_, Space, a_, n_, y_, Space, 0xFD, 60, Exclam, 0xFF};
+/*0x23B*/const u8 attackerhurt_text[] = {0xFD, 15, Space, w_, a_, s_, Space, h_, u_, r_, t_, Exclam, 0xFF};
+/*0x23C*/const u8 attackerfellinlove_text[] = {0xFD, 15, Space, f_, e_, l_, l_, JumpLine, i_, n_, Space, l_, o_, v_, e_, Exclam, 0xFF};
+/*0x23D*/const u8 itemstatraise_text[] = {T_, h_, e_, Space, 0xFD, 22, Space, 0xFD, 58, 0xFD, 61, JumpLine, 0xFD, 19, Apos, s_, Space, 0xFD, 0, Exclam, 0xFF};
+/*0x23E*/const u8 targetnoconfusion_text[] = {0xFD, 16, Space, d_, o_, e_, s_, n_, Apos, t_, JumpLine, b_, e_, c_, o_, m_, e_, Space, c_, o_, n_, f_, u_, s_, e_, d_, Exclam, 0xFF};
+/*0x23F*/const u8 burnuptext[] = {0xFD, 15, Space, b_, u_, r_, n_, e_, d_, JumpLine, i_, t_, s_, e_, l_, f_, Space, o_, u_, t_, Exclam, 0xFF};
+/*0x240*/const u8 attackeracquired[] = {0xFD, 15, Space, a_, c_, q_, u_, i_, r_, e_, d_, Space, 0xFD, 25, Exclam, 0xFF};
+/*0x241*/const u8 scractiveHPrestored[] = {0xFD, 19, Apos, s_, Space, H_, P_, JumpLine, w_, a_, s_, Space, r_, e_, s_, t_, o_, r_, e_, d_, Exclam, 0xFF};
 
-const u8* const new_strings_table[] = {sample_text, snowwarning_text, extreme_sun_activation_text, heavyrain_activation_text, mysticalaircurrent_activation_text, forewarn_text, slowstart_text, anticipation_text, dryskin_damage_text, solarpower_text, harvest_text, healer_text, pickup_text, moldbreaker_text, turboblaze_text, terravolt_text, downloadatk_text,
-downloadspatk_text, absorbabilityboost_text , absorbabilityimmune_text, userteam_text, foeteam_text,
-aftermath_text, pickpocket_text, mummy_text, target_ability, cursedbody_text, drastically_text, pressure_text, unnerve_text, aurabreak_text, fairyaura_text, darkaura_text, frisk_text, //0x19D
-hurtbyitem_text, got_burned_text, got_badlypoisoned_text, airballoon_text, bad_dreams_text, item_text, rockyhelmet_text, popped_text, fellinlove_text, healblockend_text, magicbounce_text,
-angerpoint_text, stealhrock_text, stickyweb_text, gotpoisoned_text, absorbed_spikes_text, lost_some_hp_text, tauntended_text, tormentended_text,
-healblockprevents_text, gravityprevents_text, embargoprevents_text, aromaveilprevents_text, spikyshield_damage, symbiosispassing_text,
+const u8* const new_strings_table[] = {empty_text1, empty_text4, extreme_sun_activation_text, heavyrain_activation_text, mysticalaircurrent_activation_text, forewarn_text, slowstart_text, anticipation_text, empty_text3, empty_text2, harvest_text,
+healer_text, empty_text5, moldbreaker_text, turboblaze_text, terravolt_text, empty_text9,
+empty_text10, absorbabilityboost_text , absorbabilityimmune_text, userteam_text, foeteam_text,
+aftermath_text, pickpocket_text, mummy_text, target_ability, cursedbody_text, statchange_text, pressure_text, unnerve_text, aurabreak_text, fairyaura_text, darkaura_text, frisk_text, //0x19D
+hurtbyitem_text, flameorb_text, toxicorb_text, airballoon_text, bad_dreams_text, stickybarb_text, rockyhelmet_text, popped_text, destinyknot_text, healblockend_text, empty_text8,
+angerpoint_text, stealhrock_text, stickyweb_text, empty_text6, absorbed_spikes_text, lost_some_hp_text, tauntended_text, tormentended_text,
+healblockprevents_text, gravityprevents_text, embargoprevents_text, aromaveilprevents_text, empty_text7, symbiosispassing_text,
 restored_hp_text, replacement_healed_text, telekinesis_end_text, embargoend_text, magnetriseend_text, wrapped_text,
 nofiremoves_text, nowatermoves_text, trickroom_ends, magicroom_ends, wonderoom_ends, gravity_ends_text, grassyterainends_text,
 mistyterrainends_text, electrerrainends_text, grassyterrain_heal, fogcontinues_text, fogends_text, obtaineditem,
@@ -252,9 +269,12 @@ gravityprevents2_text, healblockprevents2_text , let_it_move_first_text, mega_ev
 quash_text, allyswitch_text, topsyturvy_text, bestow_text, statushealpoison_text, statushealburn_text, statushealpar_text,
 statushealslp_text, statushealfrz_text, primal_reversion_text, congrats_player_text, happyhour_text, skydrop1_text, skydrop2_text,
 skydroptooheavy_text, fairylock_text, illusion_off_text, protean_text, gem_text, telepathy_text, flame_burst_text, zen_mode_text,
-zen_end_text, form_change_text, partner_wait_text, combined_move_text, userteam_lc_text, foeteam_lc_text, fire_sea_text, fire_sea_hurt_text,
+zen_end_text, form_change_text, partner_wait_text, combined_move_text, userteam_uc_text, foeteam_uc_text, fire_sea_text, fire_sea_hurt_text,
 swamp_text, rainbow_text, swamp_end_text, fire_sea_end_text, rainbow_end_text, berry_redux_text, pokeballblock_text, player_wonlost_text, trainerwon_text,
-skydrop_cantchooseaction_text, trainer_sliding_text, sweetveilactivation_text, sportend_text};
+skydrop_cantchooseaction_text, trainer_sliding_text, sweetveilactivation_text, sportend_text, scr_active_ability_text, psychicterrain_text,
+laserfocus_text, auroraveil_text, attacker_item_activates_text, atk_ability_text, cantuse_text, atkhpfull_text, statfail_text,
+attackerhurt_text, attackerfellinlove_text, itemstatraise_text, targetnoconfusion_text, burnuptext, attackeracquired,
+scractiveHPrestored};
 
 
 void battle_string_loader(u16 string_id)
@@ -299,66 +319,34 @@ void ability_switchin_effect(void)
     ability_battle_effects(0, new_battlestruct->various.active_bank, 0, 0, 0);
 }
 
-void apply_burn_animation()
-{
-    u8 active = active_bank;
-    active_bank = bank_attacker;
-    new_battlestruct->various.var1 = 0x10;
-    new_battlestruct->various.var2 = 0;
-    prepare_status_animation(0, 0, new_battlestruct->various.var1);
-    mark_buffer_bank_for_execution(bank_attacker);
-    active_bank = active;
-    return;
-}
-
-void change_attacker_item()
+void change_attacker_item(void)
 {
     active_bank = bank_attacker;
-    prepare_setattributes_in_battle(0, 2, 0, 4, &battle_participants[bank_attacker].held_item);
+    bb2_setattributes_in_battle(0, 2, 0, 4, &battle_participants[bank_attacker].held_item);
     mark_buffer_bank_for_execution(bank_attacker);
 }
 
-void try_to_raise_spd()
+void changestatvar_atk(u8 val)
 {
-    if (battle_participants[new_battlestruct->various.active_bank].spd_buff != 0xC)
+    if (val)
     {
-        battle_scripting.stat_changer = 0x13;
+        battle_scripting.stat_changer = val;
         battlescript_push();
-        battlescripts_curr_instruction = &changetargetstat_bs;
+        battlescripts_curr_instruction = BS_CHANGE_ATK_STAT;
     }
 }
 
-void try_to_lower_def()
+void changestatvar1_atk(void)
 {
-    if (battle_participants[new_battlestruct->various.active_bank].def_buff > 0)
-    {
-        battle_scripting.stat_changer = 0x92;
-        battlescript_push();
-        battlescripts_curr_instruction = &changetargetstat_bs;
-    }
+    changestatvar_atk(new_battlestruct->various.var1);
 }
 
-void changestatvar1()
+void changestatvar2_atk(void)
 {
-    if (new_battlestruct->various.var1)
-    {
-        battle_scripting.stat_changer = new_battlestruct->various.var1;
-        battlescript_push();
-        battlescripts_curr_instruction = &changetargetstat_bs;
-    }
+    changestatvar_atk(new_battlestruct->various.var2);
 }
 
-void changestatvar2()
-{
-    if (new_battlestruct->various.var2)
-    {
-        battle_scripting.stat_changer = new_battlestruct->various.var2;
-        battlescript_push();
-        battlescripts_curr_instruction = &changetargetstat_bs;
-    }
-}
-
-void frisk_target_item()
+void frisk_target_item(void)
 {   u16 curr_item=battle_participants[bank_target].held_item;
     if (curr_item)
     {
@@ -391,85 +379,53 @@ void set_type_msg_buffer()
     battle_text_buff1[3] = 0xFF;
 }
 
-void set_team_msg_buffer()
-{
-    battle_text_buff1[0] = 0xFD;
-    battle_text_buff1[1] = 0;
-    if (is_bank_from_opponent_side(battle_scripting.active_bank))
-        battle_text_buff1[2] = 0x90;
-    else
-        battle_text_buff1[2] = 0x91;
-    battle_text_buff1[3] = 0x1;
-    battle_text_buff1[4] = 0xFF;
-}
-
-void set_team_msg_buffer_lc()
-{
-    battle_text_buff1[0] = 0xFD;
-    battle_text_buff1[1] = 0;
-    if (is_bank_from_opponent_side(battle_scripting.active_bank))
-        battle_text_buff1[2] = 0x22;
-    else
-        battle_text_buff1[2] = 0x21;
-    battle_text_buff1[3] = 0x2;
-    battle_text_buff1[4] = 0xFF;
-}
-
-void bad_dreams_damage_calc()
+void bad_dreams_damage_calc(void)
 {
     damage_loc=get_1_8_of_max_hp(bank_target);
 }
 
-void weaknesspolicy()
-{
-    if (battle_participants[battle_scripting.active_bank].sp_atk_buff != 0xC)
-    {
-        battlescript_push();
-        battlescripts_curr_instruction = &weaknesspolicyspattack;
-    }
-    if (battle_participants[battle_scripting.active_bank].atk_buff != 0xC)
-    {
-        battlescript_push();
-        battlescripts_curr_instruction = &weaknesspolicyattack;
-    }
-    return;
-}
-
-void mentalherb()
+void mentalherb(void)
 {
     u8 bank = battle_scripting.active_bank;
+    void* toPush = NULL;
     if (disable_structs[bank].disable_timer)
     {
         disable_structs[bank].disable_timer = 0;
         disable_structs[bank].disabled_move = 0;
-        battlescript_push();
-        battlescripts_curr_instruction = &disable_end_bs;
+        toPush = &disable_end_bs;
     }
-    if (disable_structs[bank].encore_timer)
+    else if (disable_structs[bank].encore_timer)
     {
         disable_structs[bank].encore_timer = 0;
         disable_structs[bank].encored_move = 0;
-        battlescript_push();
-        battlescripts_curr_instruction = &encore_end_bs;
+        toPush = &encore_end_bs;
     }
-    if (disable_structs[bank].taunt_timer)
+    else if (disable_structs[bank].taunt_timer)
     {
         disable_structs[bank].taunt_timer = 0;
-        battlescript_push();
-        battlescripts_curr_instruction = &taunt_end_bs;
+        toPush = BS_TAUNTEND;
     }
-    if (new_battlestruct->bank_affecting[bank].heal_block)
+    else if (new_battlestruct->bank_affecting[bank].heal_block)
     {
         new_battlestruct->bank_affecting[bank].heal_block = 0;
-        battlescript_push();
-        battlescripts_curr_instruction = &healblock_end_bs;
+        toPush = BS_HEALBLOCKEND;
     }
-    return;
+    if (toPush)
+    {
+        battlescripts_curr_instruction -= 3;
+        battlescript_push();
+        battlescripts_curr_instruction = toPush;
+    }
 }
 
-void placeholder0x14()
+void callasm_nop(void)
 {
-    return;
+
+}
+
+void set_var1_to_0(void)
+{
+    new_battlestruct->various.var1 = 0;
 }
 
 void hazards_bank_switcher()
@@ -483,9 +439,7 @@ void hazards_bank_return()
     bank_target = new_battlestruct->various.active_bank;
 }
 
-u32 percent_boost(u32 number, u16 percent);
-
-void leechseed_update()
+void leechseed_update(void)
 {
     if (new_battlestruct->bank_affecting[bank_target].heal_block)
         damage_loc = 0;
@@ -493,44 +447,57 @@ void leechseed_update()
         damage_loc = percent_boost(damage_loc, 30);
 }
 
-void callasm_stat_change(u8 bank, void* battlescript_ptr)
+u8 check_beastboost(void)
 {
-    battle_scripting.stat_changer = read_byte(battlescripts_curr_instruction);
-    battlescripts_curr_instruction++;
-    battlescript_push();
-    battlescripts_curr_instruction = battlescript_ptr;
-    return;
+    u8 raiser = 0;
+    if (check_ability(bank_attacker, ABILITY_BEAST_BOOST))
+    {
+        u16 highest_stat = 0;
+        u8 statID = 0;
+        u16* stats = &battle_participants[bank_attacker].atk;
+        for (u8 i = 0; i < 5; i++)
+        {
+            if (stats[i] > highest_stat)
+            {
+                highest_stat = stats[i];
+                statID = i;
+            }
+        }
+        u8* buffs = &battle_participants[bank_attacker].atk_buff;
+        if (buffs[statID] != 0xC)
+            raiser = 0x11 + statID;
+    }
+    return raiser;
 }
 
-void target_stat_change()
-{
-    callasm_stat_change(bank_target, &changetargetstat_bs);
-}
-
-void attacker_stat_change()
-{
-    callasm_stat_change(bank_attacker, &changeattackerstat_bs);
-}
-
-void moxie_stat_raise()
+void moxie_stat_raise(void)
 {
     if (bank_attacker != bank_target && DAMAGING_MOVE(current_move))
     {
         u8 raiser = 0;
+        void* bs = NULL;
         if (current_move == MOVE_FELL_STINGER)
-            raiser = move_table[current_move].arg1;
-        else if (check_ability(bank_attacker, ABILITY_MOXIE))
-            raiser = 0x11;
+            raiser = move_table[current_move].arg1, bs = BS_CHANGE_ATK_STAT_SELFINFLICTED;
+        else if (check_ability(bank_attacker, ABILITY_MOXIE) && battle_participants[bank_attacker].atk_buff != 0xC)
+        {
+            raiser = 0x11, bs = BS_ATK_ABILITY_CHANGES_ATK_STAT;
+            record_usage_of_ability(bank_attacker, ABILITY_MOXIE);
+        }
+        else if ((raiser = check_beastboost()))
+        {
+            bs = BS_ATK_ABILITY_CHANGES_ATK_STAT;
+            record_usage_of_ability(bank_attacker, ABILITY_BEAST_BOOST);
+        }
         if (raiser)
         {
             battlescript_push();
-            battlescripts_curr_instruction = &changeattackerstat_bs;
+            battlescripts_curr_instruction = bs;
             battle_scripting.stat_changer = raiser;
         }
     }
 }
 
-void grassyterrainn_heal()
+void grassyterrainn_heal(void)
 {
     for (u8 i = 0; i < no_of_all_banks; i++)
     {
@@ -549,12 +516,12 @@ void grassyterrainn_heal()
     }
 }
 
-void callitemeffects()
+void callitemeffects(void)
 {
     item_battle_effects(1, active_bank, 0);
 }
 
-void damagecalc2()
+void damagecalc2(void)
 {
     s32 damage = 0;
     type_effectiveness_calc(current_move, get_attacking_move_type(), bank_attacker, bank_target, 1);
@@ -594,73 +561,22 @@ void damagecalc2()
     damage_loc = ATLEAST_ONE(damage);
 }
 
-void set_statchanger()
+void set_statchanger_to_arg1(void)
 {
     battle_scripting.stat_changer = move_table[current_move].arg1;
 }
 
-void checksubstitute()
+void set_statchanger_to_arg2(void)
+{
+    battle_scripting.stat_changer = move_table[current_move].arg2;
+}
+
+void checksubstitute(void)
 {
     if (affected_by_substitute(bank_target))
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
         battlescripts_curr_instruction += 4;
-}
-
-void statchangeeffect()
-{
-    u8 stat = move_table[current_move].arg1;
-    if (stat & 0x80)
-    {
-        stat ^= 0x80;
-        battle_communication_struct.move_effect = stat + 7;
-    }
-    else
-        battle_communication_struct.move_effect = stat;
-}
-
-u8 checkifstatchangehaseffect()
-{
-    u8 stats_to_change = move_table[current_move].arg1;
-    s8 by_how_much = move_table[current_move].arg2;
-    u8 bank = bank_target;
-    if (move_table[current_move].target == move_target_user)
-        bank = bank_attacker;
-    for (u8 i = 0; i < 7; i++)
-    {
-        if (stats_to_change & bits_table[i])
-        {
-            u8* stat_ptr = &battle_participants[bank].atk_buff + i;
-            if (by_how_much < 0)
-            {
-                if (*stat_ptr != 0)
-                    return 1;
-            }
-            else
-            {
-                if (*stat_ptr != 0xC)
-                    return 1;
-            }
-        }
-    }
-    return 0;
-}
-
-void statcheck_return()
-{
-    new_battlestruct->various.var1 = 0;
-    if (checkifstatchangehaseffect())
-        return;
-    battlescripts_curr_instruction = &return_bs;
-}
-
-void doublestatchange_check()
-{
-    new_battlestruct->various.var1 = 0;
-    if (checkifstatchangehaseffect())
-        battlescripts_curr_instruction += 4;
-    else
-        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
 }
 
 u8 bit_to_stat(u8 value)
@@ -682,98 +598,117 @@ u8 bit_to_stat(u8 value)
     return 0;
 }
 
-void dostatchanges()
+u8 get_howmany_stats_can_change_custom(u8 bank, bool self_inflicted, u8 stats_to_change, s8 by_how_much)
+{
+    u8 statsNO = 0;
+    for (u8 i = 0; i < 7; i++)
+    {
+        if (stats_to_change & bits_table[i])
+        {
+            if (can_change_stat(bank, self_inflicted, by_how_much | bit_to_stat(bits_table[i])))
+                statsNO++;
+        }
+    }
+
+    return statsNO;
+}
+
+u8 get_howmany_stats_can_change(u8 bank, bool self_inflicted, u16 move)
+{
+    return get_howmany_stats_can_change_custom(bank, self_inflicted, move_table[move].arg1, move_table[move].arg2);
+}
+
+void multiplestats_prepare(void) //gets number of stats that get changed, u8 bank ptr location if no stats
+{
+    new_battlestruct->various.var1 = 0;
+
+    u8 bank = read_byte(battlescripts_curr_instruction);
+    bool self_inflicted = bank & 0x40;
+    bank = get_battle_bank(BIC(bank, 0x40));
+
+    u8 statsNO = get_howmany_stats_can_change(bank, self_inflicted, current_move);
+    new_battlestruct->various.var2 = statsNO;
+
+    if (statsNO)
+        battlescripts_curr_instruction += 5;
+    else
+        battlescripts_curr_instruction = (void*)read_word(battlescripts_curr_instruction + 1);
+}
+
+void multiplestats_prepare_custom(void) //u8 bank, u8 stats to change, s8 by how much, ptr when fails
+{
+    new_battlestruct->various.var1 = 0;
+
+    u8 bank = read_byte(battlescripts_curr_instruction);
+    bool self_inflicted = bank & 0x40;
+    bank = get_battle_bank(BIC(bank, 0x40));
+
+    u8 statsNO = get_howmany_stats_can_change_custom(bank, self_inflicted, read_byte(battlescripts_curr_instruction + 1), read_word(battlescripts_curr_instruction + 2));
+    new_battlestruct->various.var2 = statsNO;
+
+    if (statsNO)
+    {
+        battlescripts_curr_instruction += 7;
+    }
+    else
+        battlescripts_curr_instruction = (void*)read_word(battlescripts_curr_instruction + 3);
+}
+
+bool do_multiple_stats(u8 stats_to_change, s8 by_how_much)
 {
     u16* done_stats = &new_battlestruct->various.var1;
-    u8 stats_to_change = move_table[current_move].arg1;
-    s8 by_how_much = move_table[current_move].arg2;
-    u8 affects_user = 0x40;
-    bank_partner_def = bank_attacker;
-    if (move_table[current_move].target != move_target_user && move_table[current_move].base_power == 0 && move_table[current_move].split == 2)
-    {
-        affects_user = 0;
-        bank_partner_def = bank_target;
-    }
+
     for (u8 i = 0; i < 7; i++)
     {
         if (stats_to_change & bits_table[i] && !(*done_stats & bits_table[i]))
         {
-            void* stat_msg = 0;
             *done_stats |= bits_table[i];
+            battlescripts_curr_instruction -= 3;
+            battlescript_push();
+            battlescripts_curr_instruction = (void*)(read_word(battlescripts_curr_instruction + 3));
             battle_scripting.stat_changer = by_how_much | bit_to_stat(bits_table[i]);
-            void* curr_instr = battlescripts_curr_instruction;
-            if (change_stats(by_how_much, bit_to_stat(bits_table[i]), affects_user, curr_instr - 3) == 0) //it worked
+            if (new_battlestruct->various.var2 > 1)
             {
-                if (battle_scripting.stat_changer & 0x80)
-                    stat_msg = &stat_lower;
-                else
-                    stat_msg = &stat_raise;
+                battle_scripting.stat_changer |= STAT_MULTIPLE;
             }
-            else
-            {
-                if (battle_scripting.stat_changer & 0x80)
-                    stat_msg = &cant_lower_bs;
-                else
-                    stat_msg = &cant_raise_bs;
-            }
-            if (battlescripts_curr_instruction == curr_instr)
-            {
-                battlescripts_curr_instruction -= 3;
-                battlescript_push();
-                battlescripts_curr_instruction = stat_msg;
-            }
-            break;
+            return 1;
         }
     }
+    new_battlestruct->various.dont_play_stat_anim = 0;
+    battlescripts_curr_instruction += 4;
+    return 0;
 }
 
-void checkifcanconfuse()
+void do_multiple_stats_from_movetable(void)
 {
-    void* failaddress = (void*) read_word(battlescripts_curr_instruction);
-    u8 fail = 0;
-    if (battle_participants[bank_target].status2.confusion)
-    {
-        u8 stat_to_change = move_table[current_move].arg1;
-        if (stat_to_change == 0)
-            fail = 1;
+    do_multiple_stats(move_table[current_move].arg1, move_table[current_move].arg2);
+}
 
-        u8* stat_ptr = &battle_participants[bank_target].hp_buff + (stat_to_change & 7);
-        if (stat_to_change & 0x80)
-        {
-            if (*stat_ptr == 0)
-                fail = 1;
-        }
-        else
-        {
-            if (*stat_ptr == 0xC)
-                fail = 1;
-        }
-    }
-    if (fail)
-        battlescripts_curr_instruction = failaddress;
-    else
+void do_multiple_stats_custom(void) //ptr to do a stat change, u8 stats to change, s8 by how much
+{
+    u8 to_change = read_byte(battlescripts_curr_instruction + 4);
+    s8 howmuch = read_word(battlescripts_curr_instruction + 5);
+    if (!do_multiple_stats(to_change, howmuch))
+        battlescripts_curr_instruction += 2;
+}
+
+void checkifcanconfuse_or_changestats(void)
+{
+    if (!cant_become_confused(bank_target) || can_change_stat(bank_target, 0, move_table[current_move].arg1))
         battlescripts_curr_instruction += 4;
+    else
+        battlescripts_curr_instruction = (void*)(read_word(battlescripts_curr_instruction));
 }
 
-void confuse_applystatchange()
+void jumpifcantpoison(void)
 {
-    u8 stat_to_change = move_table[current_move].arg1;
-    battle_scripting.stat_changer = stat_to_change;
-    if (stat_to_change !=0 && change_stats(stat_to_change & 0xF0, stat_to_change & 7, 0, 0) == 0)
+    switch (cant_poison(bank_attacker, bank_target, 0))
     {
-         bank_partner_def = bank_target;
-         battlescript_push();
-         if (battle_scripting.stat_changer & 0x80)
-             battlescripts_curr_instruction = &stat_lower;
-         else
-             battlescripts_curr_instruction = &stat_raise;
-    }
-}
-
-void jumpifcantpoison()
-{
-    switch (cant_poison(bank_target, 0))
-    {
+    case 0: //gets poisoned
+        //record corrosion ability if is of steel or poison type
+        if (is_of_type(bank_target, TYPE_STEEL) || is_of_type(bank_target, TYPE_POISON))
+            record_usage_of_ability(bank_attacker, ABILITY_CORROSION);
+        break;
     case 1: //already poisoned
         battlescripts_curr_instruction = (void*) 0x82D8F52;
         break;
@@ -788,10 +723,13 @@ void jumpifcantpoison()
         record_usage_of_ability(bank_target, last_used_ability);
         battlescripts_curr_instruction = (void*) 0x82D8F63;
         break;
+    case 5: //safeguard
+        battlescripts_curr_instruction = (void*) 0x82DAD01;
+        break;
     }
 }
 
-void jumpifcantparalyze()
+void jumpifcantparalyze(void)
 {
     switch (cant_become_paralyzed(bank_target, 0))
     {
@@ -812,7 +750,7 @@ void jumpifcantparalyze()
     }
 }
 
-void jumpifcantburn()
+void jumpifcantburn(void)
 {
     switch (cant_become_burned(bank_target, 0))
     {
@@ -828,33 +766,23 @@ void jumpifcantburn()
     }
 }
 
-void statustoeffect()
+void statustoeffect(void)
 {
-    u8 stat_to_change = move_table[current_move].arg1;
-    if (stat_to_change & STATUS_BURN)
-        battle_communication_struct.move_effect = 3;
-    else if (stat_to_change & STATUS_FREEZE)
-        battle_communication_struct.move_effect = 4;
-    else if (stat_to_change & STATUS_SLEEP)
-        battle_communication_struct.move_effect = 1;
-    else if (stat_to_change & STATUS_PARALYSIS)
-        battle_communication_struct.move_effect = 5;
-    else if (stat_to_change & STATUS_POISON)
-        battle_communication_struct.move_effect = 2;
-    else if (stat_to_change & STATUS_TOXIC_POISON)
-        battle_communication_struct.move_effect = 6;
-    else
-        battle_communication_struct.move_effect = 0;
-    return;
+    new_battlestruct->move_effect.effect1 = move_table[current_move].arg1;
 }
 
-void half_hp_damage()
+void statustoeffect2(void)
+{
+    new_battlestruct->move_effect.effect1 = move_table[current_move].arg2;
+}
+
+void half_hp_damage(void)
 {
     damage_loc = ATLEAST_ONE(battle_participants[get_battle_bank(read_byte(battlescripts_curr_instruction))].max_hp / 2);
     battlescripts_curr_instruction++;
 }
 
-void jumpifonlyonepokemon()
+void jumpifonlyonepokemon(void)
 {
     if (count_party_pokemon(bank_attacker) <= 1)
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
@@ -862,12 +790,11 @@ void jumpifonlyonepokemon()
         battlescripts_curr_instruction += 4;
 }
 
-void setlunardanceeffect()
+void setlunardanceeffect(void)
 {
     new_battlestruct->side_affecting[is_bank_from_opponent_side(bank_attacker)].lunardance = 1;
     damage_loc = battle_participants[bank_attacker].current_hp;
     hitmarker |= HITMARKER_IGNORE_SUBSTITUTE;
-    return;
 }
 
 u8 moveargweather_check(u8 arg)
@@ -937,7 +864,7 @@ void checkifcantransfercondition()
     {
         battlescripts_curr_instruction += 4;
         active_bank = bank_target;
-        prepare_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &target_struct->status);
+        bb2_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &target_struct->status);
         mark_buffer_bank_for_execution(bank_target);
     }
     return;
@@ -1056,21 +983,21 @@ void gravity_ender()
             new_battlestruct->bank_affecting[i].magnet_rise = 0;
             bank_attacker = i;
             effect = 1;
-            instruction = &magnetrise_end_return_bs;
+            instruction = BS_MAGNETRISEEND;
         }
         else if (status3[i].on_air)
         {
             status3[i].on_air = 0;
             battle_participants[i].status2.multiple_turn_move = 0;
             bank_attacker = i;
-            instruction = &gravitybringsdown_bs;
+            instruction = BS_GRAVITYBRINGSDOWN;
             effect = 1;
         }
         else if (check_ability(i, ABILITY_LEVITATE) && !new_battlestruct->various.gravity_levitate)
         {
             new_battlestruct->various.gravity_levitate = 1;
             bank_attacker = i;
-            instruction = &gravitybringsdown_bs;
+            instruction = BS_GRAVITYBRINGSDOWN;
             effect = 1;
         }
     }
@@ -1197,7 +1124,7 @@ const u8 forbidenabilitiestable4[] = {ABILITY_MULTITYPE, ABILITY_TRUANT, ABILITY
 
 u8 findability_in_table(u8 ability, const u8* table)
 {
-    for (u8 i = 0; table[i] != 0xFF; i++)
+    for (u32 i = 0; table[i] != 0xFF; i++)
     {
         if (table[i] == ability)
             return 1;
@@ -1268,8 +1195,8 @@ void ability_change()
     return;
 }
 
-void roomsetter()
-{ //order of table trickoff, trickon, wonderoff, wonderon, magicoff, magicon
+void roomsetter(void)
+{ //order of table trickoff 0, trickon 1, wonderoff 2, wonderon 3, magicoff 4, magicon 5
     switch (current_move)
     {
     case MOVE_TRICK_ROOM:
@@ -1613,16 +1540,15 @@ void sethealblock()
     }
 }
 
-void traptarget()
+void traptarget(void)
 {
     battle_participants[bank_target].status2.cant_escape = 1;
 }
 
-u16 mefirstforbiddenmoves[] = {MOVE_COVET, MOVE_THIEF, MOVE_STRUGGLE, MOVE_CHATTER, MOVE_COUNTER, MOVE_METAL_BURST, MOVE_LIGHT_SCREEN, MOVE_ME_FIRST, MOVE_FOCUS_PUNCH, 0xFFFF};
-
-void mefirst_check()
+void mefirst_check(void)
 {
     u16 chosen_move = chosen_move_by_banks[bank_target];
+    static const u16 mefirstforbiddenmoves[] = {MOVE_COVET, MOVE_THIEF, MOVE_STRUGGLE, MOVE_CHATTER, MOVE_COUNTER, MOVE_METAL_BURST, MOVE_LIGHT_SCREEN, MOVE_ME_FIRST, MOVE_FOCUS_PUNCH, 0xFFFF};
     if (get_bank_turn_order(bank_target) > current_move_turn && move_table[chosen_move].base_power && !find_move_in_table(chosen_move, &mefirstforbiddenmoves[0]))
      {
          battlescripts_curr_instruction += 4;
@@ -1751,7 +1677,7 @@ void make_pokemon_one_type()
     return;
 }
 
-void defog_effect()
+void defog_effect(void)
 {
     bank_attacker = turn_order[current_move_turn];
     u8 attackers_side = is_bank_from_opponent_side(bank_attacker);
@@ -1767,7 +1693,7 @@ void defog_effect()
         target_timer->reflect_timer = 0;
         bank_attacker = target_timer->reflect_bank;
         ptr_to_script = &defogblows_bs;
-        move_to_buffer(MOVE_REFLECT);
+        move_to_buff1(MOVE_REFLECT);
     }
     else if (target_side->light_screen_on)
     {
@@ -1776,7 +1702,7 @@ void defog_effect()
         target_timer->lightscreen_timer = 0;
         bank_attacker = target_timer->lightscreen_bank;
         ptr_to_script = &defogblows_bs;
-        move_to_buffer(MOVE_LIGHT_SCREEN);
+        move_to_buff1(MOVE_LIGHT_SCREEN);
     }
     else if (target_side->mist_on)
     {
@@ -1785,7 +1711,7 @@ void defog_effect()
         target_timer->mist_timer = 0;
         bank_attacker = target_timer->mist_bank;
         ptr_to_script = &defogblows_bs;
-        move_to_buffer(MOVE_MIST);
+        move_to_buff1(MOVE_MIST);
     }
     else if (target_side->safeguard_on)
     {
@@ -1794,7 +1720,7 @@ void defog_effect()
         target_timer->safeguard_timer = 0;
         bank_attacker = target_timer->safeguard_bank;
         ptr_to_script = &defogblows_bs;
-        move_to_buffer(MOVE_SAFEGUARD);
+        move_to_buff1(MOVE_SAFEGUARD);
     }
     else if (target_side->spikes_on)
     {
@@ -1808,23 +1734,26 @@ void defog_effect()
     {
         effect = 1;
         new_battlestruct->side_affecting[targets_side].stealthrock = 0;
+        battle_communication_struct.multistring_chooser = 0;
         bank_attacker = bank_target;
-        ptr_to_script = &rapidspinonstealthrock_bs;
+        ptr_to_script = BS_RAPIDSPIN_SPINS;
     }
     else if (new_battlestruct->side_affecting[targets_side].toxic_spikes_psn)
     {
         effect = 1;
         new_battlestruct->side_affecting[targets_side].toxic_spikes_psn = 0;
         new_battlestruct->side_affecting[targets_side].toxic_spikes_badpsn = 0;
+        battle_communication_struct.multistring_chooser = 2;
         bank_attacker = bank_target;
-        ptr_to_script = &rapidspinontoxicspikes_bs;
+        ptr_to_script = BS_RAPIDSPIN_SPINS;
     }
     else if (new_battlestruct->side_affecting[targets_side].sticky_web)
     {
         effect = 1;
         new_battlestruct->side_affecting[targets_side].sticky_web = 0;
+        battle_communication_struct.multistring_chooser = 1;
         bank_attacker = bank_target;
-        ptr_to_script = &rapidspinonstickyweb_bs;
+        ptr_to_script = BS_RAPIDSPIN_SPINS;
     }
     else if (side_affecting_halfword[attackers_side].spikes_on)
     {
@@ -1837,20 +1766,20 @@ void defog_effect()
     {
         effect = 1;
         new_battlestruct->side_affecting[attackers_side].stealthrock = 0;
-        ptr_to_script = &rapidspinonstealthrock_bs;
+        ptr_to_script = BS_RAPIDSPIN_SPINS;
     }
     else if (new_battlestruct->side_affecting[attackers_side].toxic_spikes_psn)
     {
         effect = 1;
         new_battlestruct->side_affecting[attackers_side].toxic_spikes_psn = 0;
         new_battlestruct->side_affecting[attackers_side].toxic_spikes_badpsn = 0;
-        ptr_to_script = &rapidspinontoxicspikes_bs;
+        ptr_to_script = BS_RAPIDSPIN_SPINS;
     }
     else if (new_battlestruct->side_affecting[attackers_side].sticky_web)
     {
         effect = 1;
         new_battlestruct->side_affecting[attackers_side].sticky_web = 0;
-        ptr_to_script = &rapidspinonstickyweb_bs;
+        ptr_to_script = BS_RAPIDSPIN_SPINS;
     }
     if (effect)
     {
@@ -1867,12 +1796,11 @@ void defog_effect()
         bank_attacker = turn_order[current_move_turn];
         battlescripts_curr_instruction += 4;
     }
-    return;
 }
 
 const u16 copycat_forbidden_moves[] = {MOVE_ASSIST, MOVE_BELCH, MOVE_BESTOW, MOVE_CHATTER, MOVE_CIRCLE_THROW, MOVE_COPYCAT, MOVE_COUNTER, MOVE_COVET, MOVE_DESTINY_BOND, MOVE_DETECT, MOVE_DRAGON_TAIL, MOVE_ENDURE, MOVE_FEINT, MOVE_FOCUS_PUNCH, MOVE_FOLLOW_ME, MOVE_HELPING_HAND, MOVE_HOLD_HANDS, MOVE_KINGS_SHIELD, MOVE_MAT_BLOCK, MOVE_ME_FIRST, MOVE_METRONOME, MOVE_MIMIC, MOVE_MIRROR_COAT, MOVE_MIRROR_MOVE, MOVE_NATURE_POWER, MOVE_PROTECT, MOVE_RAGE_POWDER, MOVE_ROAR, MOVE_SKETCH, MOVE_SLEEP_TALK, MOVE_SNATCH, MOVE_SPIKY_SHIELD, MOVE_STRUGGLE, MOVE_SWITCHEROO, MOVE_THIEF, MOVE_TRANSFORM, MOVE_TRICK, MOVE_WHIRLWIND, 0x0, 0xFFFF};
 
-void copycat_move()
+void copycat_move(void)
 {
     if (find_move_in_table(new_battlestruct->various.previous_move, copycat_forbidden_moves))
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
@@ -1971,11 +1899,11 @@ void psychosplits()
     }
 }
 
-void stockpile_record()
+void stockpile_record(void)
 {
     struct battle_participant* attacker_stats = &battle_participants[bank_attacker];
-    u8* stockpile_def = (u8*)&(new_battlestruct->various.var2);
-    u8* stockpile_spdef = (u8*)&(new_battlestruct->various.var2) + 1;
+    u8* stockpile_def = &bank_partner_atk;
+    u8* stockpile_spdef = &bank_partner_def;
     struct bank_affecting* attacker_stockpile = &new_battlestruct->bank_affecting[bank_attacker];
     switch (read_byte(battlescripts_curr_instruction))
     {
@@ -1994,13 +1922,13 @@ void stockpile_record()
             new_battlestruct->various.var2 = 0;
             attacker_stockpile->stockpile_def_changes = 0;
             attacker_stockpile->stockpile_sp_def_changes = 0;
-            break;
         }
+        break;
     }
     battlescripts_curr_instruction++;
 }
 
-void twoturn_moves()
+void twoturn_moves(void)
 {
     u8 adder;
     u8* stringchooser = &battle_communication_struct.multistring_chooser;
@@ -2051,49 +1979,79 @@ void twoturn_moves()
     battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction + 4 * adder);
 }
 
-void powerherb_check()
+void powerherb_check(void)
 {
     if (get_item_effect(bank_attacker, 1) == ITEM_EFFECT_POWERHERB)
     {
         last_used_item = battle_participants[bank_attacker].held_item;
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
         battlescript_push();
-        battlescripts_curr_instruction = &powerherb_bs;
+        battlescripts_curr_instruction = BS_POWERHERB;
     }
     else
         battlescripts_curr_instruction += 4;
 }
 
-void set_terrain()
+void reset_terrains(struct field_affecting* field)
+{
+    field->misty_terrain = 0;
+    field->psychic_terrain = 0;
+    field->grassy_terrain = 0;
+    field->electic_terrain = 0;
+}
+
+u8 terrains_get_turns(u8 bank)
+{
+    if (get_item_effect(bank, 1) == ITEM_EFFECT_TERRAINEXPANDER)
+        return 8;
+    return 5;
+}
+
+void set_terrain(void)
 {
     u8 fail = 0;
+    struct field_affecting* field = &new_battlestruct->field_affecting;
+    u8 turns = terrains_get_turns(bank_attacker);
     switch (current_move)
     {
     case MOVE_MISTY_TERRAIN:
-        if (new_battlestruct->field_affecting.misty_terrain)
+        if (field->misty_terrain)
             fail = 1;
         else
         {
-            new_battlestruct->field_affecting.misty_terrain = 5;
+            reset_terrains(field);
+            field->misty_terrain = turns;
             battle_communication_struct.multistring_chooser = 0;
         }
         break;
     case MOVE_GRASSY_TERRAIN:
-        if (new_battlestruct->field_affecting.grassy_terrain)
+        if (field->grassy_terrain)
             fail = 1;
         else
         {
-            new_battlestruct->field_affecting.grassy_terrain = 5;
+            reset_terrains(field);
+            field->grassy_terrain = turns;
             battle_communication_struct.multistring_chooser = 1;
         }
         break;
     case MOVE_ELECTRIC_TERRAIN:
-        if (new_battlestruct->field_affecting.electic_terrain)
+        if (field->electic_terrain)
             fail = 1;
         else
         {
-            new_battlestruct->field_affecting.electic_terrain = 5;
+            reset_terrains(field);
+            field->electic_terrain = turns;
             battle_communication_struct.multistring_chooser = 2;
+        }
+        break;
+    case MOVE_PSYCHIC_TERRAIN:
+        if (field->psychic_terrain)
+            fail = 1;
+        else
+        {
+            reset_terrains(field);
+            field->psychic_terrain = turns;
+            battle_communication_struct.multistring_chooser = 3;
         }
         break;
     }
@@ -2103,7 +2061,7 @@ void set_terrain()
         battlescripts_curr_instruction += 4;
 }
 
-void setaquaring()
+void setaquaring(void)
 {
     if (new_battlestruct->bank_affecting[bank_attacker].aqua_ring)
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
@@ -2117,7 +2075,7 @@ void setaquaring()
 
 void get_trainer_name_for_mega()
 {
-    char* trainer_name;
+    const u8* trainer_name;
     //to do multi battle checks
     if (is_bank_from_opponent_side(bank_attacker))
     {
@@ -2125,9 +2083,9 @@ void get_trainer_name_for_mega()
     }
     else
     {
-        trainer_name = get_player_name_address();
+        trainer_name = sav2->name;
     }
-    strcpy_xFF_terminated_0(&battle_text_buff3, trainer_name);
+    strcpy_xFF_terminated_0(battle_text_buff3, trainer_name);
 }
 
 void update_hpbar(u8 bank)
@@ -2141,29 +2099,27 @@ void update_hpbar(u8 bank)
     update_bank_graphical_elements(obj_ID, poke_address, 0); //0 updates all things; gender, exp, hp, etc.
 }
 
-void mega_evo_updatehpbar()
+void mega_evo_updatehpbar(void)
 {
     update_hpbar(bank_attacker);
 }
 
-void mega_evo_pursuit_check()
+void mega_evo_pursuit_check(void)
 {
     battlescripts_curr_instruction -= 3;
     if (!check_mega_evo(bank_attacker))
         battlescripts_curr_instruction += 3;
-    return;
 }
 
-void jumpifuserhasnoHP()
+void jumpifuserhasnoHP(void)
 {
     if (battle_participants[bank_attacker].current_hp)
         battlescripts_curr_instruction += 4;
     else
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
-    return;
 }
 
-void quash_setter() //0 - first, 1 - second, 2 - third, 3 - fourth
+void quash_setter(void) //0 - first, 1 - second, 2 - third, 3 - fourth
 {
     u8 target_turn = get_bank_turn_order(bank_target);
     u8 attacker_turn = get_bank_turn_order(bank_attacker);
@@ -2186,10 +2142,9 @@ void quash_setter() //0 - first, 1 - second, 2 - third, 3 - fourth
             }
         }
     }
-    return;
 }
 
-void beatup_getloopcounter()
+void beatup_getloopcounter(void)
 {
     struct pokemon* poke;
     if (is_bank_from_opponent_side(bank_attacker))
@@ -2319,98 +2274,90 @@ void allyswitch_dataswitch()
     battle_scripting.active_bank = ally_bank;
 }
 
-u8 check_magneticflux_bank(u8 bank)
+bool check_magneticflux_bank(u8 bank)
 {
-    if (is_bank_present(bank) && (check_ability(bank, ABILITY_PLUS) || check_ability(bank, ABILITY_MINUS)) && !(battle_participants[bank].def_buff == 0xC && battle_participants[bank].sp_def_buff == 0xC))
-    {
+    if (is_bank_present(bank) && (check_ability(bank, ABILITY_PLUS) || check_ability(bank, ABILITY_MINUS)))
         return 1;
+    return 0;
+}
+
+void can_magneticflux_work(void)
+{
+    u8 side = is_bank_from_opponent_side(bank_attacker);
+    for (u8 i = 0; i < no_of_all_banks; i++)
+    {
+        if (side == is_bank_from_opponent_side(i) && check_magneticflux_bank(i) && get_howmany_stats_can_change(i, 1, current_move))
+        {
+            battlescripts_curr_instruction += 4;
+            another_active_bank = 0;
+            bank_partner_def = bank_attacker; //save bank
+            return;
+        }
+    }
+    battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+}
+
+void magnetic_flux_effect(void)
+{
+    u8 side = is_bank_from_opponent_side(bank_attacker);
+    for (u8 i = 0; i < no_of_all_banks; i++)
+    {
+        if (side == is_bank_from_opponent_side(i) && !(another_active_bank & bits_table[i]) && check_magneticflux_bank(i))
+        {
+            another_active_bank |= bits_table[i];
+            battlescripts_curr_instruction -= 3;
+            battlescript_push();
+            battlescripts_curr_instruction = BS_MULTIPLESTATCHANCE_ATK_CERTAIN;
+            bank_attacker = i;
+            return;
+        }
+    }
+    bank_attacker = bank_partner_def; //restore bank
+}
+
+bool check_flowershield_bank(u8 bank, u16 move)
+{
+    if (is_bank_present(bank) && is_of_type(bank, TYPE_GRASS))
+    {
+        if (move_table[move].type != TYPE_GROUND || GROUNDED(bank))
+            return 1;
     }
     return 0;
 }
 
-void can_magneticflux_work()
+void canuse_flowershield(void)
 {
-    u8 effect = 0;
-    u8 side = is_bank_from_opponent_side(bank_attacker);
     for (u8 i = 0; i < no_of_all_banks; i++)
     {
-        if (side == is_bank_from_opponent_side(i) && check_magneticflux_bank(i))
+        if (check_flowershield_bank(i, current_move) && get_howmany_stats_can_change(i, 1, current_move))
         {
-            effect = 1;
-            new_battlestruct->various.var1 = 0;
-            new_battlestruct->various.var2 = 0;
-            another_active_bank = bank_attacker;
-            break;
-        }
-    }
-    if (effect)
-        battlescripts_curr_instruction += 4;
-    else
-        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
-}
-
-void magnetic_flux_effect()
-{
-    u8 side = is_bank_from_opponent_side(bank_attacker);
-    for (u8 i = 0; i < no_of_all_banks; i++)
-    {
-        if (side == is_bank_from_opponent_side(i) && ((new_battlestruct->various.var2 & bits_table[i]) == 0) && check_magneticflux_bank(i))
-        {
-            if (new_battlestruct->various.var1 == move_table[current_move].arg1)
-            {
-                new_battlestruct->various.var1 = 0;
-                new_battlestruct->various.var2 |= bits_table[i];
-                battlescripts_curr_instruction -= 3;
-                break;
-            }
-            bank_attacker = i;
-            dostatchanges();
+            battlescripts_curr_instruction += 4;
+            another_active_bank = 0;
+            bank_partner_def = bank_attacker; //save bank
             return;
         }
     }
-    bank_attacker = another_active_bank;
+    battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
 }
 
-u8 get_flowershieldbank()
+void flowershield_effect(void)
 {
     for (u8 i = 0; i < no_of_all_banks; i++)
     {
-        u8* stat_ptr = &battle_participants[i].hp_buff + bit_to_stat(move_table[current_move].arg1);
-        if (is_bank_present(i) && !(crit_loc & bits_table[i]) && is_of_type(i, TYPE_GRASS) && *stat_ptr != 0xC)
+        if (!(another_active_bank & bits_table[i]) && check_flowershield_bank(i, current_move))
         {
-            if (move_table[current_move].type != TYPE_GROUND || GROUNDED(i))
-                return i;
+            another_active_bank |= bits_table[i];
+            battlescripts_curr_instruction -= 3;
+            battlescript_push();
+            battlescripts_curr_instruction = BS_MULTIPLESTATCHANCE_ATK_CERTAIN;
+            bank_attacker = i;
+            return;
         }
     }
-    return 0xFF;
+    bank_attacker = bank_partner_def; //restore bank
 }
 
-void canuse_flowershield()
-{
-    if (get_flowershieldbank() == 0xFF)
-        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
-    else
-    {
-        battlescripts_curr_instruction += 4;
-        new_battlestruct->various.var2 = bank_attacker;
-    }
-}
-
-void flowershield_effect()
-{
-    u8 bank = get_flowershieldbank();
-    if (bank != 0xFF)
-    {
-        crit_loc |= bits_table[bank];
-        bank_attacker = bank;
-        dostatchanges();
-        return;
-    }
-    bank_attacker = new_battlestruct->various.var2;
-    return;
-}
-
-void canuselastresort()
+void canuselastresort(void)
 {
     s8 lastresort_pos = get_move_position(bank_attacker, current_move);
     u8 known_moves = 0;
@@ -2474,10 +2421,10 @@ void bestow_effect()
         last_used_item = *user_item;
         *user_item = 0;
         active_bank = bank_attacker;
-        prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, user_item);
+        bb2_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, user_item);
         mark_buffer_bank_for_execution(active_bank);
         active_bank = bank_target;
-        prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, target_item);
+        bb2_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, target_item);
         mark_buffer_bank_for_execution(active_bank);
     }
     else
@@ -2570,7 +2517,7 @@ void party_heal()
         condition = *user_status;
         *user_status = 0;
         active_bank = bank_attacker;
-        prepare_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, user_status);
+        bb2_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, user_status);
         mark_buffer_bank_for_execution(active_bank);
         instuction = &PARTYHEAL_USER;
     }
@@ -2582,7 +2529,7 @@ void party_heal()
         battle_participants[ally].status.int_status = 0;
         active_bank = ally;
         battle_scripting.active_bank = ally;
-        prepare_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &battle_participants[ally].status.int_status);
+        bb2_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &battle_participants[ally].status.int_status);
         mark_buffer_bank_for_execution(active_bank);
         instuction = &PARTYHEAL_ALLY;
     }
@@ -2672,25 +2619,22 @@ void canusefling()
         battlescripts_curr_instruction += 4;
 }
 
-void happyhour_effect()
+void happyhour_effect(void)
 {
     new_battlestruct->various.happyhour_bonus = 1;
 }
 
-void canuseskydrop()
+void canuseskydrop(void)
 {
     if (bank_target == (bank_attacker ^ 2) || new_battlestruct->field_affecting.gravity)
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else if (get_poke_weight(bank_target) > 2000)
-    {
-        battlescripts_curr_instruction = &skydrop_tooheavy_bs;
-        move_outcome.failed = 1;
-    }
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction + 4);
     else
-        battlescripts_curr_instruction += 4;
+        battlescripts_curr_instruction += 8;
 }
 
-void skydropup()
+void skydropup(void)
 {
     new_battlestruct->bank_affecting[bank_attacker].sky_drop_attacker = 1;
     new_battlestruct->bank_affecting[bank_target].sky_drop_target = 1;
@@ -2715,18 +2659,18 @@ void healthbox_target_update()
     update_hpbar(bank_target);
 }
 
-void return_hitmarker_animation()
+void return_hitmarker_animation(void)
 {
     hitmarker |= new_battlestruct->various.var1;
     (*battle_graphics.graphics_data->species_info)[bank_target].transformed_species = 0;
 }
 
-void transformed_species_to_0()
+void transformed_species_to_0(void)
 {
     (*battle_graphics.graphics_data->species_info)[battle_scripting.active_bank].transformed_species = 0;
 }
 
-void attacker_bank_exchange()
+void attacker_bank_exchange(void)
 {
     u8 temp = bank_attacker;
     bank_attacker = new_battlestruct->various.active_bank;
@@ -2738,7 +2682,7 @@ void setup_form_change_buffers(u8 bank, u16 target_species)
     u16* species =  &battle_participants[bank].poke_species;
     *species=target_species;
     active_bank = bank;
-    prepare_setattributes_in_battle(0, REQUEST_SPECIES_BATTLE, 0, 2, species);
+    bb2_setattributes_in_battle(0, REQUEST_SPECIES_BATTLE, 0, 2, species);
     mark_buffer_bank_for_execution(active_bank);
 }
 
@@ -2778,29 +2722,24 @@ void aegi_change()
     in_battle_form_change(bank_attacker,false,false);
 }
 
-void type_stat_form_change()
+void type_stat_form_change(void)
 {
     //in_battle_form_change(new_battlestruct->various.active_bank,false,true);
     in_battle_form_change(battle_scripting.active_bank,false,true);
 }
 
-void set_transfrom_palchange()
+void set_transfrom_palchange(void)
 {
    (*battle_graphics.graphics_data->species_info)[bank_attacker].pal_change = 1;
     new_battlestruct->bank_affecting[bank_attacker].transform_tid = get_attributes(get_bank_poke_ptr(bank_target), ATTR_TID, 0);
 }
 
-void bug_bite_end_tasks()
+void bug_bite_set_berry_eaten(void)
 {
-    u16* berry = &battle_participants[bank_target].held_item;
-    *berry = 0;
-    active_bank = bank_target;
-    prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, berry);
-    mark_buffer_bank_for_execution(bank_target);
     berry_eaten(bank_attacker,false);
 }
 
-void belch_canceler()
+void belch_canceler(void)
 {
     if(!((is_bank_from_opponent_side(bank_attacker) && new_battlestruct->various.eaten_berry_opponent&bits_table[battle_team_id_by_side[bank_attacker]])
        || (!is_bank_from_opponent_side(bank_attacker) && new_battlestruct->various.eaten_berry_player&bits_table[battle_team_id_by_side[bank_attacker]])))
@@ -2926,7 +2865,6 @@ void print_combined_attack_message()
 void set_fire_sea()
 {
     battle_scripting.active_bank=bank_target;
-    set_team_msg_buffer_lc();
     b_std_message(0x223, 0);
     battle_communication_struct.is_message_displayed = 1;
 }
@@ -2934,7 +2872,6 @@ void set_fire_sea()
 void set_swamp()
 {
     battle_scripting.active_bank=bank_target;
-    set_team_msg_buffer_lc();
     b_std_message(0x225, 0);
     battle_communication_struct.is_message_displayed = 1;
 }
@@ -2942,7 +2879,6 @@ void set_swamp()
 void set_rainbow()
 {
     battle_scripting.active_bank=bank_attacker;
-    set_team_msg_buffer_lc();
     b_std_message(0x226, 0);
     battle_communication_struct.is_message_displayed = 1;
 }
@@ -2978,12 +2914,245 @@ void conider_trainermsg_firstfaint(void)
     }
 }
 
-const void* callasm_table[] = {&ability_switchin_effect /*0*/, &apply_burn_animation /*1*/, &change_attacker_item /*2*/, &try_to_lower_def /*3*/, &try_to_raise_spd /*4*/,
-&changestatvar1 /*5*/, &changestatvar2 /*6*/, &frisk_target_item /*7*/, &set_stat_msg_buffer /*8*/, &set_type_msg_buffer /*9*/, &set_team_msg_buffer /*10*/, &bad_dreams_damage_calc /*11*/,
-&weaknesspolicy /*12*/, &mentalherb /*13*/, &placeholder0x14 /*14*/, &hazards_bank_switcher /*15*/, &hazards_bank_return /*16*/, &leechseed_update /*17*/,
-&target_stat_change /*18*/, &attacker_stat_change /*19*/, &moxie_stat_raise /*20*/, &grassyterrainn_heal /*21*/, &callitemeffects /*22*/,
-&placeholder0x14 /*23*/, &damagecalc2 /*24*/, &set_statchanger /*25*/, &checksubstitute /*26*/, &statchangeeffect /*27*/,
-&doublestatchange_check /*28*/, &dostatchanges /*29*/, &statcheck_return /*30*/, &checkifcanconfuse /*31*/, &confuse_applystatchange /*32*/,
+void can_purify_work(void)
+{
+    if (battle_participants[bank_target].status.int_status && !check_ability(bank_target, ABILITY_COMATOSE))
+    {
+        battlescripts_curr_instruction += 4;
+        battle_participants[bank_target].status.int_status = 0;
+        active_bank = bank_target;
+        bb2_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &battle_participants[bank_target].status.int_status);
+        mark_buffer_bank_for_execution(active_bank);
+    }
+    else
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+}
+
+void dont_play_move_anim(void)
+{
+    new_battlestruct->various.dont_play_move_anim = 1;
+}
+
+void jump_if_can_poison(void)
+{
+    if (!cant_poison(bank_attacker, bank_target, 0))
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else
+        battlescripts_curr_instruction += 4;
+}
+
+void set_laser_focus(void)
+{
+    if (new_battlestruct->bank_affecting[bank_attacker].always_crit)
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else
+    {
+        new_battlestruct->bank_affecting[bank_attacker].always_crit = 2;
+        battlescripts_curr_instruction += 4;
+    }
+}
+
+void set_aurora_veil(void)
+{
+    u8 side = is_bank_from_opponent_side(bank_attacker);
+    if (!new_battlestruct->side_affecting[side].aurora_veil && weather_abilities_effect() && (battle_weather.flags.hail || battle_weather.flags.permament_hail))
+    {
+        u8 turns = 5;
+        if (get_item_effect(bank_attacker, 1) == ITEM_EFFECT_LIGHTCLAY)
+            turns = 8;
+        new_battlestruct->side_affecting[side].aurora_veil = turns;
+        battlescripts_curr_instruction += 4;
+    }
+    else
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+}
+
+void check_terrain_seeds(void)
+{
+    for (u8 i = 0; i < no_of_all_banks; i++)
+    {
+        enum item_effects item = get_item_effect(i, 1);
+        u8 stat = 0;
+        if (new_battlestruct->field_affecting.grassy_terrain && item == ITEM_EFFECT_GRASSYSEED)
+            stat = 0x12;
+        else if (new_battlestruct->field_affecting.electic_terrain && item == ITEM_EFFECT_ELECTRICSEED)
+            stat = 0x12;
+        else if (new_battlestruct->field_affecting.misty_terrain && item == ITEM_EFFECT_MISTYSEED)
+            stat = 0x15;
+        else if (new_battlestruct->field_affecting.psychic_terrain && item == ITEM_EFFECT_PSYCHICSEED)
+            stat = 0x15;
+        if (stat)
+        {
+            battle_scripting.active_bank = i;
+            battle_scripting.stat_changer = stat;
+            last_used_item = battle_participants[i].held_item;
+            battlescripts_curr_instruction -= 3;
+            battlescript_push();
+            battlescripts_curr_instruction = BS_ITEMSTATRAISE;
+            break;
+        }
+    }
+}
+
+void check_soulheart(void)
+{
+    u16* done = &new_battlestruct->various.var1;
+    //conserve the bank
+    if (*done == 0)
+        new_battlestruct->various.var2 = bank_attacker;
+    for (u8 i = 0; i < no_of_all_banks; i++)
+    {
+        if (check_ability(i, ABILITY_SOUL_HEART) && is_bank_present(i) && !(*done & bits_table[i]))
+        {
+            *done |= bits_table[i];
+            record_usage_of_ability(i, ABILITY_SOUL_HEART);
+            battle_scripting.stat_changer = 0x14;
+            bank_attacker = i;
+            battlescripts_curr_instruction -= 3;
+            battlescript_push();
+            battlescripts_curr_instruction = BS_ATK_ABILITY_CHANGES_ATK_STAT;
+            return;
+        }
+        static const u8 cant_receive_abilities[] = {ABILITY_FLOWER_GIFT, ABILITY_FORECAST, ABILITY_ILLUSION, ABILITY_IMPOSTER, ABILITY_MULTITYPE, ABILITY_STANCE_CHANGE, ABILITY_TRACE, ABILITY_WONDER_GUARD, ABILITY_ZEN_MODE};
+        if ((check_ability(i, ABILITY_POWER_OF_ALCHEMY) || check_ability(i, ABILITY_RECEIVER)) && !battle_participants[i ^ 2].current_hp
+                 && !findability_in_table(battle_participants[i ^ 2].ability_id ,cant_receive_abilities) && is_bank_present(i) && !(*done & bits_table[i]))
+        {
+
+            *done |= bits_table[i];
+            bank_attacker = i;
+            battlescripts_curr_instruction -= 3;
+            battlescript_push();
+            battlescripts_curr_instruction = BS_RECEIVER;
+            return;
+        }
+    }
+    //return the bank
+    bank_attacker = new_battlestruct->various.var2;
+}
+
+void receiver_effect(void)
+{
+    u8 new_ability = battle_participants[bank_attacker ^ 2].ability_id;
+    battle_participants[bank_attacker].ability_id = new_ability;
+    abilities_by_banks[bank_attacker] = new_ability;
+    record_usage_of_ability(bank_attacker, new_ability);
+    last_used_ability = new_ability;
+}
+
+void canuse_strengthsap(void)
+{
+    //move fails only when target's stat is already at -6
+    u8 statID = move_table[current_move].arg1 & 0xF;
+    u8 stat_multiplier = *(&battle_participants[bank_target].hp_buff + (statID));
+    if (stat_multiplier) //move works
+    {
+        battlescripts_curr_instruction += 4;
+        //get stat value * multiplier
+
+        u32 to_heal = apply_statboost(*(&battle_participants[bank_target].atk + (statID - 1)), stat_multiplier);
+        if (get_item_effect(bank_attacker, 1) == ITEM_EFFECT_BIGROOT)
+            to_heal = percent_boost(to_heal, 30);
+
+        damage_loc = to_heal *(-1);
+    }
+    else
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+
+}
+
+void jumpifattackerfullhp(void)
+{
+    if (FULL_HP(bank_attacker))
+        battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
+    else
+        battlescripts_curr_instruction += 4;
+}
+
+void set_effect1_formove(void)
+{
+    new_battlestruct->move_effect.effect1 = read_hword(battlescripts_curr_instruction);
+    battlescripts_curr_instruction += 2;
+}
+
+void shiftgear_checkifworks(void)
+{
+    u8 statsNO = 0;
+
+    set_statchanger_to_arg1();
+    if (change_stats(bank_attacker, stat_get_bits_arg(1, 0, 0), battlescripts_curr_instruction) == STAT_CHANGED)
+        statsNO++;
+
+    set_statchanger_to_arg2();
+    if (change_stats(bank_attacker, stat_get_bits_arg(1, 0, 0), battlescripts_curr_instruction) == STAT_CHANGED)
+        statsNO++;
+
+    if (statsNO)
+    {
+        new_battlestruct->various.var2 = statsNO;
+        battlescripts_curr_instruction += 4;
+    }
+    else
+        battlescripts_curr_instruction = (void*)read_word(battlescripts_curr_instruction);
+}
+
+void shiftgear_orr_if_multiple(void)
+{
+    if (new_battlestruct->various.var2 > 1)
+        battle_scripting.stat_changer |= STAT_MULTIPLE;
+}
+
+void dont_stat_if_multiple(void)
+{
+    if (new_battlestruct->various.var2 > 1)
+        new_battlestruct->various.dont_play_stat_anim = 1;
+}
+
+void jumpifalloppositepokemonbehindsubstitute(void)
+{
+    u8 bank1 = bank_attacker ^ 1;
+    u8 bank2 = bank1 ^ 2;
+    if (affected_by_substitute(bank1) && affected_by_substitute(bank2))
+        battlescripts_curr_instruction = (void*)read_word(battlescripts_curr_instruction);
+    else
+        battlescripts_curr_instruction += 4;
+}
+
+void triattackrand(void)
+{
+    u16* effect = &new_battlestruct->move_effect.effect1;
+    switch (__umodsi3(rng(), 3))
+    {
+    case 0:
+        *effect = MOVEEFFECT_BRN;
+        break;
+    case 1:
+        *effect = MOVEEFFECT_FRZ;
+        break;
+    default:
+        *effect = MOVEEFFECT_PRLZ;
+        break;
+    }
+}
+
+void jumpifnotarg1type(void)
+{
+    if (!is_of_type(bank_attacker, move_table[current_move].arg1))
+        battlescripts_curr_instruction = (void*)read_word(battlescripts_curr_instruction);
+    else
+        battlescripts_curr_instruction += 4;
+}
+
+void set_stats_to_play(void)
+{
+    new_battlestruct->various.dont_play_stat_anim = 0;
+}
+
+const void* callasm_table[] = {&ability_switchin_effect /*0*/, &callasm_nop /*1*/, &change_attacker_item /*2*/, &callasm_nop /*3*/, &callasm_nop /*4*/,
+&changestatvar1_atk /*5*/, &changestatvar2_atk /*6*/, &frisk_target_item /*7*/, &set_stat_msg_buffer /*8*/, &set_type_msg_buffer /*9*/, &callasm_nop /*10*/, &bad_dreams_damage_calc /*11*/,
+&callasm_nop /*12*/, &mentalherb /*13*/, &callasm_nop /*14*/, &hazards_bank_switcher /*15*/, &hazards_bank_return /*16*/, &leechseed_update /*17*/,
+&callasm_nop /*18*/, &callasm_nop /*19*/, &moxie_stat_raise /*20*/, &grassyterrainn_heal /*21*/, &callitemeffects /*22*/,
+&set_var1_to_0 /*23*/, &damagecalc2 /*24*/, &set_statchanger_to_arg1 /*25*/, &checksubstitute /*26*/, &callasm_nop /*27*/,
+&multiplestats_prepare /*28*/, &do_multiple_stats_from_movetable /*29*/, &callasm_nop /*30*/, &checkifcanconfuse_or_changestats /*31*/, &callasm_nop /*32*/,
 &jumpifcantpoison /*33*/, &jumpifcantparalyze /*34*/, &jumpifcantburn /*35*/, &statustoeffect /*36*/, &half_hp_damage /*37*/,
 &jumpifonlyonepokemon /*38*/, &setlunardanceeffect /*39*/, &weatherhpheal /*40*/, &checkifcantransfercondition /*41*/, &choosestatusinflictiontext /*42*/,
 &roostactivation /*43*/, &gravitysetter /*44*/, &gravity_ender /*45*/, &setidentifierbit /*46*/, &breakprotection /*47*/,
@@ -2999,11 +3168,16 @@ const void* callasm_table[] = {&ability_switchin_effect /*0*/, &apply_burn_anima
 &can_magneticflux_work /*96*/, &magnetic_flux_effect /*97*/, &canuse_flowershield /*98*/, &flowershield_effect /*99*/, &canuselastresort /*100*/,
 &topsyturvy_effect /*101*/, &bestow_effect /*102*/, &conversion_effect /*103*/, &party_heal /*104*/, &accupressure_effect /*105*/, &mega_primal_cry /*106*/,
 &canusefling /*107*/, &happyhour_effect /*108*/, &canuseskydrop /*109*/, &skydropup /*110*/, &canusefairylock /*111*/, &healthbox_target_update /*112*/,
-&return_hitmarker_animation /*113*/, &transformed_species_to_0 /*114*/, &aegi_change /*115*/, &set_transfrom_palchange /*116*/, &bug_bite_end_tasks /*117*/,
+&return_hitmarker_animation /*113*/, &transformed_species_to_0 /*114*/, &aegi_change /*115*/, &set_transfrom_palchange /*116*/, &bug_bite_set_berry_eaten /*117*/,
 &type_stat_form_change/*118*/, &setup_zen_buffers/*119*/, &belch_canceler/*120*/, &attacker_bank_exchange/*121*/, &print_from_nbsvar2/*122*/,
 &attackerhp_to_zero /*123*/, &reset_bg2x /*124*/, &check_and_set_pledge/*125*/, &print_combined_attack_message/*126*/, &print_attack_message/*127*/,
-&set_message_bank_buffer_to_ally /*128*/, &set_fire_sea /*129*/, &set_swamp /*130*/, &set_rainbow/*131*/, &set_team_msg_buffer_lc/*132*/,
-&save_trainerslide_pokeobj /*133*/, &restore_trainerslide_pokeobj /*134*/, &conider_trainermsg_firstfaint /*135*/};
+&set_message_bank_buffer_to_ally /*128*/, &set_fire_sea /*129*/, &set_swamp /*130*/, &set_rainbow/*131*/, &callasm_nop/*132*/,
+&save_trainerslide_pokeobj /*133*/, &restore_trainerslide_pokeobj /*134*/, &conider_trainermsg_firstfaint /*135*/, &can_purify_work /*136*/,
+&dont_play_move_anim /*137*/, &jump_if_can_poison /*138*/, &set_laser_focus /*139*/, &set_aurora_veil /*140*/, &check_terrain_seeds /*141*/,
+&check_soulheart /*142*/, &canuse_strengthsap /*143*/, &jumpifattackerfullhp /*144*/, &set_effect1_formove /*145*/, &set_statchanger_to_arg2 /*146*/,
+&shiftgear_checkifworks /*147*/, &shiftgear_orr_if_multiple /*148*/, &dont_stat_if_multiple /*149*/, &jumpifalloppositepokemonbehindsubstitute /*150*/,
+&triattackrand /*151*/, &statustoeffect2 /*152*/, &multiplestats_prepare_custom /*153*/, &do_multiple_stats_custom /*154*/, &jumpifnotarg1type /*155*/,
+&set_stats_to_play /*156*/, &receiver_effect /*157*/, &bugbite_get_berry_effect /*158*/};
 
 void callasm_cmd(void)
 {

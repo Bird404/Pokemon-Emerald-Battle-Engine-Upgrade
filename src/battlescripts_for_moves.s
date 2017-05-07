@@ -4,23 +4,12 @@
 .include "asm_defines.s"
 .include "defines/bs_commands.s"
 
-.equ MOVE_FAILED, 0x082D9F1A
-.equ MOVE_MISSED, 0x082D8A5E
-.equ ENDTURN, 0x82D8A4E
 .equ EndTurnTracker, 0x2024488
 .equ CURRENT_MOVE, 0x20241EA
 .equ EffectChooser, 0x2024335
-.equ MultiStringChooser, 0x2024337
-.equ MoveOutcome, 0x202427C
-.equ HitMarker, 0x2024280
-.equ OutcomeMissed, 1
-.equ OutcomeNotaffected, 8
-.equ OutcomeFailed, 0x20
-.equ OutcomeSturdied, 0x100
 .equ HitMarkerNoAnimations, 0x80
 .equ HitMarkerHitsSubstitute, 0x100
 .equ HitMarkerHitsOnAir, 0x10000
-.equ StatChanger, 0x0202448E
 
 .macro jumpifmove jumpifmove_move jumpifmove_address
 jumpifhalfword 0x0 0x020241EA \jumpifmove_move \jumpifmove_address
@@ -30,55 +19,8 @@ jumpifhalfword 0x0 0x020241EA \jumpifmove_move \jumpifmove_address
 jumpifhalfword 0x1 0x020241EA \jumpifnotmove_move \jumpifnotmove_address
 .endm
 
-@@@macros for callasms
-.macro jumpifsubstituteaffects jumpifsubstituteaffects_address
-.byte 0x83
-.hword 26
-.word \jumpifsubstituteaffects_address
-.endm
-
-.macro jumpifcantchangetwostats jumpifcantchangetwostats_address
-.byte 0x83
-.hword 28
-.word \jumpifcantchangetwostats_address
-.endm
-
-.macro doublestatchange
-.byte 0x83
-.hword 29
-.endm
-
-.macro jumpifcantconfuseandchangestats jumpifcantconfuseandchangestats_address
-.byte 0x83
-.hword 31
-.word \jumpifcantconfuseandchangestats_address
-.endm
-
-.macro jumpifonlyonepokemoninteam jumpifonlyonepokemoninteam_address
-.byte 0x83
-.hword 38
-.word \jumpifonlyonepokemoninteam_address
-.endm
-
-.macro weatherhpheal weatherhphealbank
-.byte 0x83
-.hword 40
-.byte \weatherhphealbank
-.endm
-
-.macro jumpifnoally jumpifnoally_address
-.byte 0x83
-.hword 59
-.word \jumpifnoally_address
-.endm
-
-.macro jumpifuserhasnoHP jumpifuserhasnoHP_address
-.byte 0x83
-.hword 91
-.word \jumpifuserhasnoHP_address
-.endm
-
 .align 2
+.global battlescripts_table
 battlescripts_table:
 .word ATTACKING_MOVE	@ 0	Just attacks target(Tackle)
 .word FIXED_DAMAGE		@1 Sonicboom, Dragon Rage, etc.
@@ -184,7 +126,7 @@ battlescripts_table:
 .word 0x082D96A5 		@101 Spite
 .word BELLYDRUMLIKE		@102 Belly Drum
 .word 0x082D968E 		@103 destiny bond
-.word 0x082D986D		@104 Curse
+.word CURSE_EFFECT		@104 Curse; arg1 is stats to raise; arg 2 by how much, speed loss is hardcoded
 .word ROLLOUT         	@105 Rollout, Ice Ball
 .word FURYCUTTER     	@106 fury cutter
 .word 0x082D964C		@107 Sleep Talk
@@ -235,10 +177,10 @@ battlescripts_table:
 .word PSYCHIC_SPLITS	@152 Power/Guard Split; no args, read from ID
 .word TELEKINESIS      	@153 Telekinesis
 .word SMACK_DOWN 		@154 Smack Down
-.word CHANGE_TARGET_TYPE_TO	@155 @arg1 is type to change target into
+.word CHANGE_TARGET_TYPE_TO	@155 @arg1 is type to change target into; soak
 .word SHELLSMASH		@156 Shell Smash
 .word SKYDROP			@157 Sky Drop
-.word SHIFTGEAR			@158 Shift Gear; arg1 stats to raise + 2; arg2 stats to raise + 1
+.word SHIFTGEAR			@158 Shift Gear; changes two stats arg1 stat1, arg2 stat2
 .word QUASHH			@159 Quash
 .word FAKEOUT			@160 Fake Out
 .word 0x082D99B7		@161 Sandstorm
@@ -260,6 +202,137 @@ battlescripts_table:
 .word DRAGON_TAIL       @177 Dragon Tail, Circle Throw etc.
 .word FINAL_GAMBIT      @178 Final Gambit
 .word PLEDGE_EFFECT     @179 Pledge Moves
+.word PURIFY_EFFECT		@180 Purify, heals target's 
+.word TARGETSTAT_CONDITION	@181 Toxic Thread, arg1 is stat value, arg2 is status flag to be applied
+.word NEXTHITWILLCRIT		@182 Laser Focus
+.word AURORAVEIL_EFFECT	@183 Aurora Veil
+.word STRENGTHSAP_EFFECT	@184 Strength Sap; arg1 is stat value
+.word LOSETYPE_EFFECT		@185 Burn Up; arg1 is type the user has to be and the type the user loses
+.word CONFUSE_STATCHANGE	@186 Swagger, Flatter; arg1 is stat value
+
+CONFUSE_STATCHANGE:
+	attackcanceler
+	jumpifsubstituteaffects MOVE_FAILED
+	accuracycheck MOVE_MISSED 0x0
+	jumpifcantconfuseandchangestats MOVE_FAILED
+	attackstring
+	ppreduce
+	attackanimation
+	waitanimation
+	callasm_cmd 25 @sets stat changer to arg1
+	call BS_CHANGE_DEF_STAT
+	callasm_cmd 137 @dont play animation
+	goto_cmd CONFUSE_TARGET_TRY
+
+CURSE_EFFECT:
+	jumpiftype2 bank_attacker TYPE_GHOST 0x82D98E5 @ghost curse
+	attackcanceler
+	jumpifstat bank_attacker Not_Equal_To STAT_ATK 0xC CURSESPD
+	jumpifstat bank_attacker Not_Equal_To STAT_DEF 0xC CURSESPD
+	jumpifstat bank_attacker Equals STAT_SPD 0x0 MOVE_FAILED
+CURSESPD:
+	setbyte AnimDecider 0x1
+	attackstring
+	ppreduce
+	attackanimation
+	waitanimation
+	callasm_cmd 137 @dont play animation
+	setbyte StatChanger 0x93
+	call ONE_STAT_USER_CHANGE_PRINT
+	callasm_cmd 28 @checks if can change stats and gets how many
+	.byte bank_attacker | STAT_SELF_INFLICTED
+	.word CURSEATKDEF
+CURSEATKDEF:
+	callasm_cmd 29 @do all stat changes that are possible
+	.word BS_CHANGE_ATK_STAT_SELFINFLICTED
+	goto_cmd ENDTURN
+
+LOSETYPE_EFFECT:
+	setbyte EffectChooser 17 | 0x40
+	attackcanceler
+	callasm_cmd 155 @check if has the necessary type
+	.word MOVE_FAILED
+	goto_cmd ATTACKING_MOVE + 1
+
+STRENGTHSAP_EFFECT:
+	attackcanceler
+	callasm_cmd 143
+	.word MOVE_FAILED
+	accuracycheck MOVE_MISSED 0x0
+	attackstring
+	ppreduce
+	call ONE_STAT_TARGET_RET + 2
+	callasm_cmd 144 @jump if has full HP
+	.word BS_PRINT_ATKHPFULL
+	callasm_cmd 137 @already animated
+	goto_cmd 0x082D8B0B @hp drain effect
+	
+BS_PRINT_ATKHPFULL:
+	pause_cmd 0x10
+	printstring 0x239
+	waitmessage 0x40
+	goto_cmd ENDTURN
+
+AURORAVEIL_EFFECT:
+	attackcanceler
+	callasm_cmd 140
+	.word MOVE_FAILED
+	attackstring
+	ppreduce
+	attackanimation
+	waitanimation
+	printstring 0x235
+	waitmessage 0x40
+	goto_cmd ENDTURN
+
+NEXTHITWILLCRIT:
+	attackcanceler
+	callasm_cmd 139
+	.word MOVE_FAILED
+	attackstring
+	ppreduce
+	attackanimation
+	waitanimation
+	printstring 0x234
+	waitmessage 0x40
+	goto_cmd ENDTURN
+
+TARGETSTAT_CONDITION:
+	attackcanceler
+	jumpifsubstituteaffects MOVE_FAILED
+	accuracycheck MOVE_MISSED 0x0
+	attackstring
+	ppreduce
+	callasm_cmd 138 @jump if can poison
+	.word TARGETSTAT_CONDITION_ANIMATE
+TARGETSTAT_CONDITION_TRY_STAT:
+	call ONE_STAT_TARGET_RET + 2
+	bichalfword MoveOutcome OutcomeMissed | OutcomeFailed
+	callasm_cmd 33 @jumpifcant poison
+	callasm_cmd 152 @sets correct move effect based on arg2
+	seteffectprimary
+	goto_cmd ENDTURN
+	
+TARGETSTAT_CONDITION_ANIMATE:
+	attackanimation
+	waitanimation
+	callasm_cmd 137 @already animated
+	goto_cmd TARGETSTAT_CONDITION_TRY_STAT
+
+PURIFY_EFFECT:
+	attackcanceler
+	callasm_cmd 136
+	.word MOVE_FAILED
+	accuracycheck MOVE_MISSED 0xFFFF
+	attackstring
+	ppreduce
+	attackanimation
+	waitanimation
+	statusiconeupdate bank_target
+	waitstate
+	orword hitmarker HITMARKER_NOATTACKSTRING
+	callasm_cmd 137 @dont play animation
+	goto_cmd HPHEAL_user + 1
 
 DAMAGE_TRAP:
 	setbyte EffectChooser 0x39
@@ -297,6 +370,7 @@ SKYDROP:
 	jumpifsubstituteaffects MOVE_FAILED
 	callasm_cmd 109
 	.word MOVE_FAILED
+	.word SKYDROP_TOOHEAVY
 	accuracycheck MOVE_MISSED 0x0
 	ppreduce
 	printstring 0x213
@@ -304,6 +378,15 @@ SKYDROP:
 	attackanimation
 	waitanimation
 	callasm_cmd 110
+	goto_cmd ENDTURN
+	
+SKYDROP_TOOHEAVY:
+	attackstring
+	ppreduce
+	orbyte MoveOutcome OutcomeFailed
+	pause_cmd 0x10
+	printstring 0x215
+	waitmessage 0x40
 	goto_cmd ENDTURN
 	
 SKYDROP_SECONDTURN:
@@ -481,16 +564,24 @@ CONVERSIONS:
 TARGETSTATSWITCH:
 	attackcanceler
 	jumpifsubstituteaffects MOVE_FAILED
-	jumpifcantchangetwostats MOVE_FAILED
 	accuracycheck MOVE_MISSED 0x0
+	callasm_cmd 28
+	.byte bank_target
+	.word TARGETSTATSWITCH_CHECKSWITCH
+TARGETSTATSWITCHWORKS:
 	attackstring
 	ppreduce
 	attackanimation
 	waitanimation
 	callasm_cmd 29 @do all stat changes that are possible
+	.word BS_CHANGE_DEF_STAT
 	setbyte EndTurnTracker 0x0
 	cmd49 0x0 0x0
 	goto_cmd MOVE_TRY_SWITCHING
+	
+TARGETSTATSWITCH_CHECKSWITCH:
+	jumpifonlyonepokemoninteam MOVE_FAILED
+	goto_cmd TARGETSTATSWITCHWORKS
 
 BESTOW:
 	attackcanceler
@@ -525,7 +616,6 @@ LASTRESORT:
 
 GRASSTYPESSTATRAISE:
 	attackcanceler
-	setbyte 0x02024211 0x0
 	callasm_cmd 98
 	.word MOVE_FAILED
 	attackstring
@@ -542,13 +632,13 @@ VENOMDRENCH:
 
 MAGNETICFLUX:
 	attackcanceler
-	callasm_cmd 96
+	callasm_cmd 96 @check if move can work
 	.word MOVE_FAILED
 	attackstring
 	ppreduce
 	attackanimation
 	waitanimation
-	callasm_cmd 97
+	callasm_cmd 97 @do all multiple stats for all banks
 	goto_cmd ENDTURN
 
 ALLYSWITCH:
@@ -607,98 +697,36 @@ SHELLSMASH:
 SHELLSMASHDEF:
 	attackanimation
 	waitanimation
-	setbyte StatChanger 0x92
-	statbuffchange 0x41 SHELLSMASHSPDEF
-	jumpifbyte 0x1 0x2024337 0x2 SHELLSMASHDEFCHANGE
-	pause_cmd 0x10
-	call STATBUFF_CHANGE_NEGATIVE_MSG
-	goto_cmd SHELLSMASHSPDEF
-SHELLSMASHDEFCHANGE:
-	call STATBUFF_CHANGE_NEGATIVE
-SHELLSMASHSPDEF:
-	setbyte StatChanger 0x95
-	statbuffchange 0x41 SHELLSMASHATK
-	jumpifbyte 0x1 0x2024337 0x2 SHELLSMASHSPDEF_CHANGE
-	pause_cmd 0x10
-	call STATBUFF_CHANGE_NEGATIVE_MSG
-	goto_cmd SHELLSMASHATK
-SHELLSMASHSPDEF_CHANGE:
-	call STATBUFF_CHANGE_NEGATIVE
+	callasm_cmd 153 @prepare custom multiple stats
+	.byte bank_attacker | STAT_SELF_INFLICTED, MLTS_DEF | MLTS_SPDEF, 0x90
+	.word SHELLSMASHATK
+	callasm_cmd 154 @raise multiple stats
+	.word BS_CHANGE_ATK_STAT_SELFINFLICTED
+	.byte MLTS_DEF | MLTS_SPDEF, 0x90
 SHELLSMASHATK:
-	setbyte StatChanger 0x21
-	statbuffchange 0x41 SHELLSMASHSPATK
-	jumpifbyte 0x1 0x2024337 0x2 SHELLSMASHATK_CHANGE
-	pause_cmd 0x10
-	call STATBUFF_CHANGE_POSITIVE_MSG
-	goto_cmd SHELLSMASHSPATK
-SHELLSMASHATK_CHANGE:
-	call STATBUFF_CHANGE_POSITIVE
-SHELLSMASHSPATK:
-	setbyte StatChanger 0x24
-	statbuffchange 0x41 SHELLSMASHSPD
-	jumpifbyte 0x1 0x2024337 0x2 SHELLSMASHSPATK_CHANGE
-	pause_cmd 0x10
-	call STATBUFF_CHANGE_POSITIVE_MSG
-	goto_cmd SHELLSMASHSPD
-SHELLSMASHSPATK_CHANGE:
-	call STATBUFF_CHANGE_POSITIVE
-SHELLSMASHSPD:
-	setbyte StatChanger 0x23
-	statbuffchange 0x41 ENDTURN
-	jumpifbyte 0x1 0x2024337 0x2 SHELLSMASHSPD_CHANGE
-	pause_cmd 0x10
-	call STATBUFF_CHANGE_POSITIVE_MSG
+	callasm_cmd 153 @prepare custom multiple stats
+	.byte bank_attacker | STAT_SELF_INFLICTED, MLTS_ATK | MLTS_SPATK | MLTS_SPD, 0x20
+	.word SHELLSMASHEND
+	callasm_cmd 154 @raise multiple stats
+	.word BS_CHANGE_ATK_STAT_SELFINFLICTED
+	.byte MLTS_ATK | MLTS_SPATK | MLTS_SPD, 0x20
+SHELLSMASHEND:
 	goto_cmd ENDTURN
-SHELLSMASHSPD_CHANGE:
-	call STATBUFF_CHANGE_POSITIVE
-	goto_cmd ENDTURN
-	
-STATBUFF_CHANGE_POSITIVE:
-	cmd47
-	playanimation 0x1 0x1 0x2024484
-STATBUFF_CHANGE_POSITIVE_MSG:
-	printfromtable 0x85CC89C
-	waitmessage 0x40
-	return_cmd
-	
-STATBUFF_CHANGE_NEGATIVE:
-	cmd47
-	playanimation 0x1 0x1 0x2024484
-STATBUFF_CHANGE_NEGATIVE_MSG:
-	printfromtable 0x85CC8A8
-	waitmessage 0x40
-	return_cmd
 
 SHIFTGEAR:
 	attackcanceler
-	callasm_cmd 28
+	callasm_cmd 147
 	.word MOVE_FAILED
 	attackstring
 	ppreduce
 	attackanimation
 	waitanimation
-	setbyte StatChanger 0x23
-	statbuffchange bank_attacker | Override SHIFTGEARATTACK
-	jumpifbyte 0x1 0x2024337 0x2 SHIFTGEARSPEED
-	pause_cmd 0x10
-	goto_cmd SHIFTGEARSPEEDMSG
-SHIFTGEARSPEED:
-	call STATBUFF_CHANGE_POSITIVE
-	goto_cmd SHIFTGEARATTACK
-SHIFTGEARSPEEDMSG:
-	call STATBUFF_CHANGE_POSITIVE_MSG
-SHIFTGEARATTACK:
-	setbyte StatChanger 0x11
-	statbuffchange bank_attacker | Override SHIFTGEAREND
-	jumpifbyte 0x1 0x2024337 0x2 SHIFTGEARATTACKBOOST
-	pause_cmd 0x10
-	goto_cmd SHIFTGEARATTACKBOOST_MSG
-SHIFTGEARATTACKBOOST:
-	call STATBUFF_CHANGE_POSITIVE
-	goto_cmd SHIFTGEAREND
-SHIFTGEARATTACKBOOST_MSG:
-	call STATBUFF_CHANGE_POSITIVE_MSG
-SHIFTGEAREND:
+	callasm_cmd 25 @sets stat changer to arg1
+	callasm_cmd 148 @makes it multiple if changes two stats
+	call BS_CHANGE_ATK_STAT_SELFINFLICTED
+	callasm_cmd 146 @sets stat changer to arg2
+	callasm_cmd 149 @dont play animation if changes two stats
+	call BS_CHANGE_ATK_STAT_SELFINFLICTED
 	goto_cmd ENDTURN
 
 AQUA_RING:
@@ -723,6 +751,7 @@ TERRAINCHANGE:
 	waitanimation
 	printfromtable terrainstrings
 	waitmessage 0x40
+	callasm_cmd 141 @check battle pokemon for terrain seeds
 	goto_cmd ENDTURN
 
 MIMIC:
@@ -784,10 +813,14 @@ STOCKPILE:
 	waitanimation
 	printstring 0x73
 	waitmessage 0x40
-	jumpifcantchangetwostats ENDTURN
 	callasm_cmd 83 @stockpile record
 	.byte 0x0
+	callasm_cmd 28 @prepare stat changes
+	.byte bank_attacker | STAT_SELF_INFLICTED
+	.word STOCKPILE_RECORD
 	callasm_cmd 29 @do all stat changes that are possible
+	.word BS_CHANGE_ATK_STAT_SELFINFLICTED
+STOCKPILE_RECORD:
 	callasm_cmd 83 @stockpile record
 	.byte 0x1
 	goto_cmd ENDTURN
@@ -867,7 +900,7 @@ DEFOG:
 DEFOG_STAT_LOWER:
 	attackanimation
 	waitanimation
-	cmd47
+	set_statchange_values
 	playanimation 0x0 0x1 0x2024484
 DEFOG_STAT_MSG:
 	setbyte MultiStringChooser 1
@@ -1001,18 +1034,7 @@ TWOTURNSTATRAISE_THENATTACK:
 	jumpifsecondarystatus bank_attacker 0x1000 TWOTURNSTATRAISE_ACTUALMOVE
 	call TWOTURN_LOADINGTURN
 	callasm_cmd 25 @sets stat to change based on arg1
-	statbuffchange 0x41 TWOTURNSTATDIDNTWORK @won't grow any higher
-	jumpifbyte 0x1 0x2024337 0x2 TWOTURNSTAT_WORKED @worked
-	pause_cmd 0x20
-TWOTURNSTATDIDNTWORK:
-	printfromtable 0x85CC89C
-	waitmessage 0x40
-	goto_cmd TWOTURNSTATRAISE_THENATTACK__
-TWOTURNSTAT_WORKED:
-	cmd47
-	playanimation 0x1 0x1 0x2024484
-	printfromtable 0x85CC89C
-	waitmessage 0x40
+	call BS_CHANGE_ATK_STAT_SELFINFLICTED
 TWOTURNSTATRAISE_THENATTACK__:
 	callasm_cmd 85 @power herb check
 	.word TWOTURNSTATRAISE_ACTUALMOVE
@@ -1069,7 +1091,7 @@ SNORE_WORKED:
 	waitmessage 0x40
 	statusanimation bank_attacker
 SNORE_GOTO:
-	goto_cmd ATTACK_FLINCH_CHANCE_CANCELLER_DONE
+	goto_cmd ATTACK_FLINCH_CHANCE
 
 KNOCKOFF:
 	setbyte EffectChooser 0x10
@@ -1094,7 +1116,7 @@ SMACK_DOWN:
 	goto_cmd ATTACKING_MOVE
 
 TRIATTACK:
-	setbyte EffectChooser 0x9
+	callasm_cmd 151 @sets the effect to prlz/frz/brn
 	goto_cmd ATTACKING_MOVE
 
 ROLLOUT:
@@ -1366,7 +1388,7 @@ FAKEOUT:
 	attackcanceler
 	jumpifnotfirstturn MOVE_FAILED
 	accuracycheck MOVE_MISSED 0x0
-	setbyte EffectChooser 0x88
+	seteffect1 MOVEEFFECT_FLINCH
 	goto_cmd SUCCESS_MOVE_ATTACK_WITH_CALC
 	
 SETYAWN:
@@ -1995,32 +2017,12 @@ CRASHED:
 	goto_cmd ENDTURN
 
 ATTACK_FLINCH_CHANCE:
-	attackcanceler
-ATTACK_FLINCH_CHANCE_CANCELLER_DONE:
-	accuracycheck MOVE_MISSED 0x0
-	attackstring
-	ppreduce
-	setbyte EffectChooser 8
-	critcalc
-	damagecalc
-	damageadjustment
-	attackanimation
-	waitanimation
-	effectiveness_sound
-	hitanim bank_target
-	waitstate
-	graphicalhpupdate bank_target
-	datahpupdate bank_target
-	critmessage
-	waitmessage 0x40
-	resultmessage
-	waitmessage 0x40
-	seteffectsecondary @calculation for both flinch and status effect are done in the function
-	faintpokemon 0x0 0x0 0x0 @faint target
-	goto_cmd ENDTURN
-
+	seteffect1 MOVEEFFECT_FLINCH
+	goto_cmd ATTACKING_MOVE
+	
 RECOIL_ATTACK:
-	setbyte EffectChooser 0x30 | 0x80
+	callasm_cmd 36 @changes status flag in arg1 to correct effect chooser value
+	setbyte EffectChooser 0x30 | 0x40
 	goto_cmd ATTACKING_MOVE
 
 ATTACK_STATUS_CHANCE:
@@ -2040,7 +2042,7 @@ BURN_TARGET:
 	jumpifhalverset 0x0 0x20 0x82DAD01
 	attackanimation
 	waitanimation
-	setbyte EffectChooser 3
+	seteffect1 MOVEEFFECT_BRN
 	seteffectprimary
 	goto_cmd ENDTURN
 
@@ -2055,15 +2057,15 @@ PARALYZE_TARGET:
 	jumpifhalverset 0x0 0x20 0x82DAD01
 	attackanimation
 	waitanimation
-	setbyte EffectChooser 5
+	seteffect1 MOVEEFFECT_PRLZ
 	seteffectprimary
 	goto_cmd ENDTURN
 
 BADLY_POISON_TARGET:
-	setbyte EffectChooser 6
+	seteffect1 MOVEEFFECT_TOXIC
 	goto_cmd TRY_POISONING
 POISON_TARGET:
-	setbyte EffectChooser 2
+	seteffect1 MOVEEFFECT_PSN
 TRY_POISONING:
 	attackcanceler
 	jumpifsubstituteaffects MOVE_FAILED
@@ -2089,7 +2091,7 @@ PUT_TARGET_TO_SLEEP:
 	jumpifhalverset 0x0 0x20 0x82DAD01
 	attackanimation
 	waitanimation
-	setbyte EffectChooser 0x1
+	seteffect1 MOVEEFFECT_SLP
 	seteffectprimary
 	goto_cmd ENDTURN
 	
@@ -2104,99 +2106,140 @@ PUT_TARGET_TO_SLEEP_MSGS:
 .hword 0x75, 0x76, 0x77, 0x230
 
 ATTACK_CONFUSION_CHANCE:
-	setbyte EffectChooser 7
+	seteffect1 MOVEEFFECT_CONFUSE
 	goto_cmd ATTACKING_MOVE
 
 CONFUSE_TARGET:
 	attackcanceler
 	jumpifsubstituteaffects MOVE_FAILED
-	jumpifcantconfuseandchangestats MOVE_FAILED
 	accuracycheck MOVE_MISSED 0x0
 	attackstring
 	ppreduce
+CONFUSE_TARGET_TRY:
+	jumpifsecondarystatus bank_target STATUS2_CONFUSION ALREADYCONFUSED
+	jumpifability bank_target ABILITY_OWN_TEMPO CANT_CONFUSE_DUETOABILITY
 	attackanimation
 	waitanimation
-	callasm_cmd 32 @this will try to change stats
-	jumpifsecondarystatus bank_target 7 CANTCONFUSE
-	jumpifhalverset 0x0 0x20 CANTCONFUSE
-	jumpifability bank_target ABILITY_OWN_TEMPO CANT_CONFUSE_DUETOABILITY
-	setbyte EffectChooser 7
+	seteffect1 MOVEEFFECT_CONFUSE
 	seteffectprimary
 	goto_cmd ENDTURN
 	
 CANT_CONFUSE_DUETOABILITY:
-	recordability bank_target
-	printstring 0xCA
-	waitmessage 0x40
+	pause_cmd 0x10
+	call CANT_CONFUSE_DUETOABILITY_PRINT
+	orbyte MoveOutcome OutcomeFailed
 	goto_cmd ENDTURN
 	
-CANTCONFUSE:
-	cmd76 0x1 0x17
-	pause_cmd 0x20
+.global CANT_CONFUSE_DUETOABILITY_PRINT
+CANT_CONFUSE_DUETOABILITY_PRINT:
+	recordability bank_target
+	call BS_PRINT_DEF_ABILITY
+	printstring 0x23E
+	waitmessage 0x40
+	return_cmd
+	
+ALREADYCONFUSED:
+	pause_cmd 0x10
 	printstring 0x44
 	waitmessage 0x40
+	orbyte MoveOutcome OutcomeFailed
 	goto_cmd ENDTURN
 
 ATTACK_MULTIPLESTAT_CHANCE_USER:
-	setbyte EffectChooser 0x2F
-	orbyte EffectChooser 0x40
+	seteffect1 MOVEEFFECT_MULTIPLESTATS | MOVEEFFECT_AFFECTSUSER
 	goto_cmd ATTACKING_MOVE
 
 MULTIPLE_STAT_CHANGE_TARGET:
 	attackcanceler
 	jumpifsubstituteaffects MOVE_FAILED
-	jumpifcantchangetwostats MOVE_FAILED
 	accuracycheck MOVE_MISSED 0x0
+	callasm_cmd 28 @checks if can change stats and gets how many
+	.byte bank_target
+	.word MOVE_FAILED
 	attackstring
 	ppreduce
 	attackanimation
 	waitanimation
 	callasm_cmd 29 @do all stat changes that are possible
+	.word BS_CHANGE_DEF_STAT
 	goto_cmd ENDTURN
 
 MULTIPLE_STAT_CHANGE_USER:
 	attackcanceler
-	jumpifcantchangetwostats MOVE_FAILED
+	callasm_cmd 28 @checks if can change stats and gets how many
+	.byte bank_attacker | STAT_SELF_INFLICTED
+	.word MOVE_FAILED
 	attackstring
 	ppreduce
 	attackanimation
 	waitanimation
 	callasm_cmd 29 @do all stat changes that are possible
+	.word BS_CHANGE_ATK_STAT_SELFINFLICTED
 	goto_cmd ENDTURN
 
 ATTACK_TARGETSTAT_CHANCE:
-	callasm_cmd 27
+	callasm_cmd 25 @sets stat to change based on arg1
+	seteffect1 MOVEEFFECT_STATCHANGE
 	goto_cmd ATTACKING_MOVE
 
 ATTACK_USERSTAT_CHANCE:
-	callasm_cmd 27 @converts arg1 stat to correct effect
-	orbyte EffectChooser 0x40
+	callasm_cmd 25 @sets stat to change based on arg1
+	seteffect1 MOVEEFFECT_STATCHANGE | MOVEEFFECT_AFFECTSUSER
 	goto_cmd ATTACKING_MOVE
-
+	
 ONE_STAT_TARGET:
 	attackcanceler
 	jumpifsubstituteaffects MOVE_FAILED
 	accuracycheck MOVE_MISSED 0x0
 ONE_STAT_TARGET_WORKED:
+	call ONE_STAT_TARGET_RET
+	goto_cmd ENDTURN
+
+ONE_STAT_TARGET_RET:
 	attackstring
 	ppreduce
 	callasm_cmd 25 @sets stat to change based on arg1
-	statbuffchange 0x1 0x82D8D60
-	jumpifbyte 0x3 0x2024337 0x2 0x82D8D4E
-	jumpifbyte 0x0 0x2024337 0x3 0x82D8D60
-	pause_cmd 0x20
-	goto_cmd 0x82D8D58
-
+	statbuffchange bank_target ONE_STAT_RETURN
+	jumpifbyte Equals 0x2024337 0x1 ONE_STAT_TARGET_SUCCESS
+.global ONE_STAT_PRINT
+ONE_STAT_PRINT:
+	pause_cmd 0x10
+	printfromtable statchange_strings
+	waitmessage 0x40
+.global ONE_STAT_RETURN
+ONE_STAT_RETURN:
+	return_cmd
+ONE_STAT_TARGET_SUCCESS:
+	attackanimation
+	waitanimation
+.global ONE_STAT_TARGET_STATANIM
+ONE_STAT_TARGET_STATANIM:
+	set_statchange_values
+	playanimation bank_target 0x1 0x2024484
+	goto_cmd ONE_STAT_PRINT
+	
 ONE_STAT_USER:
 	attackcanceler
 ONE_STAT_USER_WORKED:
+	call ONE_STAT_USER_RET
+	goto_cmd ENDTURN
+
+ONE_STAT_USER_RET:
 	attackstring
 	ppreduce
 	callasm_cmd 25 @sets stat to change based on arg1
-	statbuffchange 0x41 0x82D8CC7 @won't grow any higher
-	jumpifbyte 0x1 0x2024337 0x2 0x82D8CBD @worked
-	pause_cmd 0x20
-	goto_cmd 0x82D8CC7 @failed
+ONE_STAT_USER_CHANGE_PRINT:
+	statbuffchange bank_attacker | STAT_SELF_INFLICTED ONE_STAT_RETURN
+	jumpifbyte Equals 0x2024337 0x1 ONE_STAT_USER_SUCCESS
+	goto_cmd ONE_STAT_PRINT
+ONE_STAT_USER_SUCCESS:
+	attackanimation
+	waitanimation
+.global ONE_STAT_USER_STATANIM
+ONE_STAT_USER_STATANIM:
+	set_statchange_values
+	playanimation bank_attacker 0x1 0x2024484
+	goto_cmd ONE_STAT_PRINT
 
 FIXED_DAMAGE:
 	attackcanceler

@@ -17,6 +17,13 @@
 #define PR_spiky_shield 0x6
 #define PR_mat_block 0x7
 #define PR_crafty_shield 0x8
+#define PR_baneful_bunker 0x9
+
+enum move_split{
+    MOVE_PHYSICAL, //0
+    MOVE_SPECIAL, //1
+    MOVE_STATUS, //2
+};
 
 enum poke_sprite{
     SPRITE_BACK = 0,
@@ -113,6 +120,39 @@ enum map_type{
 #define STAT_ACCURACY 6
 #define STAT_EVASION 7
 
+#define STAT_PRINTABILITY       0x1
+#define STAT_CHANGE_VALUES      0x2
+#define STAT_SELFINFLICTED      0x40
+
+#define STAT_CHANGED        0x0
+#define STAT_UNABLE         0x1
+#define STAT_CANT_GO_UP     0x2
+#define STAT_CANT_GO_DOWN   0x3
+
+inline u8 stat_get_bits_arg(bool self_inflicted, bool print_ability, bool change_stats)
+{
+    u8 bits = 0;
+    if (self_inflicted)
+        bits |= STAT_SELFINFLICTED;
+    if (print_ability)
+        bits |= STAT_PRINTABILITY;
+    if (change_stats)
+        bits |= STAT_CHANGE_VALUES;
+    return bits;
+}
+
+u8 change_stats(u8 bank, u8 bits, void* bs_unable);
+
+inline bool can_change_stat(u8 bank, bool self_inflicted, u8 statchanger)
+{
+    battle_scripting.stat_changer = statchanger;
+    if (change_stats(bank, stat_get_bits_arg(self_inflicted, 0, 0), 0) == STAT_CHANGED)
+        return 1;
+    return 0;
+}
+
+#define EFFECT2_AFFECTSUSER 0x40
+
 #define BACKGROUND_GRASS 0x0
 #define BACKGROUND_LONG_GRASS 0x1
 #define BACKGROUND_SAND 0x2
@@ -192,6 +232,11 @@ enum trainer_class{
 
 #define POKE_BURMY(species) (species == POKE_BURMY_PLANT || species == POKE_BURMY_SAND || species == POKE_BURMY_TRASH)
 
+#define STAT_NEGATIVE 0x80
+#define STAT_STAGES 0x70
+#define STAT_STATID 0x7
+#define STAT_MULTIPLE 0x8
+
 #define MOVE_WORKED !(move_outcome.failed || move_outcome.missed || move_outcome.not_affected)
 #define TARGET_TURN_DAMAGED (special_statuses[bank_target].moveturn_losthp)
 #define DAMAGING_MOVE(move) (move_table[move].split!=2)
@@ -219,14 +264,20 @@ enum trainer_class{
 #define get_1_4_of_max_hp(bank)(ATLEAST_ONE(battle_participants[bank].max_hp >> 2))
 #define BIC(value, bit)(value & (~(bit)))
 #define NEG_AND(value, to_neg)(value & (to_neg * (-1)))
+#define BANK_PSN(bank)((battle_participants[bank].status.flags.poison || battle_participants[bank].status.flags.toxic_poison))
+#define FULL_HP(bank)((battle_participants[bank].current_hp == battle_participants[bank].max_hp))
 
 #define TRAINER_STEVEN 0xC03
 #define PARTNER_ANIMATES 0x8000
 #define PARTNER_CUSTOM 0x4000
 
-#define REQUEST_SPECIES_BATTLE 0x1
+#define REQUEST_SPECIES_BATTLE  0x1
 #define REQUEST_HELDITEM_BATTLE 0x2
-#define REQUEST_STATUS_BATTLE 0x28
+#define REQUEST_PPMOVE1_BATTLE  0x9
+#define REQUEST_PPMOVE2_BATTLE  0xA
+#define REQUEST_PPMOVE3_BATTLE  0xB
+#define REQUEST_PPMOVE4_BATTLE  0xC
+#define REQUEST_STATUS_BATTLE   0x28
 
 #define GROUNDED(bank) (get_airborne_state(bank, 0, 1) <= 2)
 

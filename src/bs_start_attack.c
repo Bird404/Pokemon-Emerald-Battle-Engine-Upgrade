@@ -17,7 +17,7 @@ void setup_berry_consume_buffers(u8 bank);
 u8 get_attacking_move_type();
 u8 check_ability(u8 bank, u8 ability);
 u16 get_speed(u8 bank);
-u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro);
+u8 has_ability_effect(u8 bank, u8 mold_breaker);
 u8 get_item_effect(u8 bank, u8 check_negating_effects);
 
 bool is_bank_present(u8 bank)
@@ -229,7 +229,7 @@ u8 calculate_move_type(u8 bank, u16 move, u8 set_bonus)
             break;
         }
         u8 ate=0;
-        if(move_type == TYPE_EGG && (DAMAGING_MOVE(move)) && has_ability_effect(bank,0,1) && move_table[move].type==TYPE_NORMAL)
+        if(move_type == TYPE_EGG && (DAMAGING_MOVE(move)) && has_ability_effect(bank,0) && move_table[move].type==TYPE_NORMAL)
         {
             switch(ability)
             {
@@ -246,18 +246,18 @@ u8 calculate_move_type(u8 bank, u16 move, u8 set_bonus)
                 ate=1;
                 break;
             case ABILITY_GALVANIZE:
-            move_type=TYPE_ELECTRIC;
-            ate=1;
-            break;
+                move_type=TYPE_ELECTRIC;
+                ate=1;
+                break;
             }
         }
 
-        if(ate && set_bonus)
+        if (ate && set_bonus)
             new_battlestruct->various.ate_bonus=1;
 
-        if(find_move_in_table(current_move, &sound_moves[0]) && check_ability(bank,ABILITY_LIQUID_VOICE) && move_type==TYPE_EGG)
+        if (find_move_in_table(move, sound_moves) && check_ability(bank,ABILITY_LIQUID_VOICE) && move_type == TYPE_EGG)
         {
-            move_type=TYPE_WATER;
+            move_type = TYPE_WATER;
         }
     }
     if((new_battlestruct->field_affecting.ion_deluge)
@@ -266,7 +266,7 @@ u8 calculate_move_type(u8 bank, u16 move, u8 set_bonus)
     return move_type;
 }
 
-void set_attacking_move_type()
+void set_attacking_move_type(void)
 {
     u8 move_type = calculate_move_type(bank_attacker, current_move, 1);
     if (move_type != TYPE_EGG)
@@ -277,21 +277,17 @@ void set_attacking_move_type()
         battle_stuff_ptr->dynamic_move_type = 0;
 }
 
-void clear_move_outcome()
+inline void clear_move_outcome(void)
 {
-    *(u16 *)(0x202427C)=0;
+    memset(&move_outcome, 0, sizeof(struct move_outcome));
 }
 
 void* get_move_battlescript_ptr(u16 move)
 {
-    u32* ptr_to_movesciprts_table = (void*) 0x0804E9EC;
-    u32* ptr_to_movescript = (void*) *ptr_to_movesciprts_table + move_table[move].script_id * 4;
-    return (void*) *ptr_to_movescript;
+    return battlescripts_table[move_table[move].script_id];
 }
 
-u8 is_multi_battle();
-
-void reset_indicators_height()
+void reset_indicators_height(void)
 {
     struct mega_related* mega = &new_battlestruct->mega_related;
     for(u8 i = 0; i<no_of_all_banks ;i++)
@@ -328,7 +324,7 @@ u8 check_mega_evo(u8 bank)
             bank_mega_mode=new_battlestruct->mega_related.user_trigger;
             if(bank_mega_mode)
             {
-                if(!is_multi_battle())
+                if(!battle_flags.multibattle)
                 {
                     new_battlestruct->mega_related.evo_happened_pbs|=0x5;
                 }
@@ -339,7 +335,7 @@ u8 check_mega_evo(u8 bank)
                 objects[new_battlestruct->mega_related.trigger_id].private[ANIM_STATE]=DISABLE;
             }
         }
-        else if(bank==2 && !is_multi_battle())
+        else if(bank==2 && !battle_flags.multibattle)
         {
             bank_mega_mode=new_battlestruct->mega_related.ally_trigger;
             if(bank_mega_mode)
@@ -581,7 +577,7 @@ void bs_start_attack()
             if (change)
             {
                 active_bank = bank_attacker;
-                prepare_setattributes_in_battle(0, REQUEST_SPECIES_BATTLE, 0, 2, species);
+                bb2_setattributes_in_battle(0, REQUEST_SPECIES_BATTLE, 0, 2, species);
                 mark_buffer_bank_for_execution(active_bank);
                 battlescript_push();
                 battlescripts_curr_instruction = &aegislash_change_bs;
@@ -606,7 +602,7 @@ void set_focus_charge()
     }
 }
 
-void bc_preattacks()
+void bc_preattacks(void)
 {
     u8 play_script=0;
     u8 *count = &(battle_stuff_ptr->pre_attacks_bank_counter);
@@ -620,16 +616,15 @@ void bc_preattacks()
             if(menu_choice_pbs[bank_attacker]==0)
             {
                 u8 item_effect=get_item_effect(bank_attacker,1);
-                s8 alteration_occurs=get_bracket_alteration_factor(bank_attacker,item_effect);
-                if(alteration_occurs==1)
+                if(get_bracket_alteration_factor(bank_attacker,item_effect) == 1)
                 {
                     if(item_effect==ITEM_EFFECT_QUICKCLAW)
                     {
-                        call_bc_move_exec(&quickclaw_bs);
+                        call_bc_move_exec(BS_QUICKCLAW);
                     }
                     else if(item_effect==ITEM_EFFECT_CUSTAPBERRY)
                     {
-                        call_bc_move_exec(&custapberry_bs);
+                        call_bc_move_exec(BS_CUSTAPBERRY);
                         setup_berry_consume_buffers(bank_attacker);
                     }
                     play_script=1;

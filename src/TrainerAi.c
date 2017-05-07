@@ -16,7 +16,7 @@ u8 affected_by_substitute(u8 substitute_bank);
 u8 find_move_in_table(u16 move, const u16* table_ptr);
 u8 get_first_to_strike(u8 bank1, u8 bank2, u8 ignore_priority);
 u8 get_item_effect(u8 bank, u8 check_negating_effects);
-u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro);
+u8 has_ability_effect(u8 bank, u8 mold_breaker);
 u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special_cases_argument, u16 move);
 void canuselastresort();
 void belch_canceler();
@@ -43,7 +43,7 @@ u8 tai_getmovetype(u8 atk_bank, u16 move)
         return move_table[move].type;
 }
 
-u8 was_impossible_used(u8 bank)
+u8 was_impossible_used(/*u8 bank*/)
 {
     return 0;
 }
@@ -64,7 +64,7 @@ u16 ai_get_move(u8 bank, u8 slot)
         return battle_resources->battle_history->used_moves[bank].moves[slot];
 }
 
-u8 has_poke_hidden_ability(u16 species)
+u8 has_poke_hidden_ability(/*u16 species*/)
 {
     return 0;
 }
@@ -206,7 +206,7 @@ u32 ai_calculate_damage(u8 atk_bank, u8 def_bank, u16 move)
             no_of_hits = 2 + __umodsi3(rng(), 3) + __umodsi3(rng(), 2); //2 + 0/1/2 + 0/1 = 2/3/4/5
     }
     u32 damage = damage_loc * no_of_hits;
-    if (no_of_hits == 1 && has_ability_effect(def_bank, 1, 1) && battle_participants[def_bank].ability_id == ABILITY_STURDY && battle_participants[def_bank].current_hp == battle_participants[def_bank].max_hp)
+    if (no_of_hits == 1 && has_ability_effect(def_bank, 1) && battle_participants[def_bank].ability_id == ABILITY_STURDY && battle_participants[def_bank].current_hp == battle_participants[def_bank].max_hp)
         damage = battle_participants[def_bank].max_hp - 1;
     if (affected_by_substitute(def_bank))
     {
@@ -682,7 +682,7 @@ void tai55_isstatchangepositive()
     tai_current_instruction++;
 }
 
-void tai56_getstatvaluemovechanges() //u8 bank
+void tai56_getstatvaluemovechanges(void) //u8 bank
 {
     u8 stat = get_stat_move_changes(AI_STATE->curr_move);
     u8 bank = get_ai_bank(read_byte(tai_current_instruction + 1));
@@ -690,7 +690,7 @@ void tai56_getstatvaluemovechanges() //u8 bank
     tai_current_instruction += 2;
 }
 
-void tai57_jumpifbankaffecting() //u8 bank, u8 case, void* ptr
+void tai57_jumpifbankaffecting(void) //u8 bank, u8 case, void* ptr
 {
     u8 bank = get_ai_bank(read_byte(tai_current_instruction + 1));
     u8 value = 0;
@@ -718,6 +718,9 @@ void tai57_jumpifbankaffecting() //u8 bank, u8 case, void* ptr
     case 6: //telekinesis
         value = bank_aff->telekinesis;
         break;
+    case 7: //laser focus
+        value = bank_aff->always_crit;
+        break;
     }
     if (value)
         tai_current_instruction = (void*) (read_word(tai_current_instruction + 3));
@@ -725,7 +728,7 @@ void tai57_jumpifbankaffecting() //u8 bank, u8 case, void* ptr
         tai_current_instruction += 7;
 }
 
-void tai63_jumpiffieldaffecting() //u8 case, void* ptr
+void tai63_jumpiffieldaffecting(void) //u8 case, void* ptr
 {
     u8 value = 0;
     struct field_affecting* Field = &new_battlestruct->field_affecting;
@@ -764,7 +767,7 @@ void tai63_jumpiffieldaffecting() //u8 case, void* ptr
         tai_current_instruction += 6;
 }
 
-void tai64_isbankinlovewith() //u8 bank1, u8 bank2
+void tai64_isbankinlovewith(void) //u8 bank1, u8 bank2
 {
     u32* var = &AI_STATE->var;
     u8 bank1 = get_ai_bank(read_byte(tai_current_instruction + 1));
@@ -776,13 +779,13 @@ void tai64_isbankinlovewith() //u8 bank1, u8 bank2
     tai_current_instruction += 3;
 }
 
-void tai65_vartovar2()
+void tai65_vartovar2(void)
 {
     new_battlestruct->trainer_AI.var2 = AI_STATE->var;
     tai_current_instruction++;
 }
 
-void tai66_jumpifvarsEQ() //void* ptr
+void tai66_jumpifvarsEQ(void) //void* ptr
 {
     if (new_battlestruct->trainer_AI.var2 == AI_STATE->var)
         tai_current_instruction = (void*) (read_word(tai_current_instruction + 1));
@@ -861,7 +864,7 @@ void tai6A_discouragehazards()
     tai_current_instruction++;
 }
 
-void tai6B_sharetype() //u8 bank1, u8 bank2
+void tai6B_sharetype(void) //u8 bank1, u8 bank2
 {
     u8 banks[2];
     banks[0] = get_ai_bank(read_byte(tai_current_instruction + 1));
@@ -887,7 +890,7 @@ void tai6B_sharetype() //u8 bank1, u8 bank2
     tai_current_instruction += 3;
 }
 
-void tai6C_isbankpresent() //u8 bank
+void tai6C_isbankpresent(void) //u8 bank
 {
     u8 bank = get_ai_bank(read_byte(tai_current_instruction + 1));
     u32* var = &AI_STATE->var;
@@ -936,7 +939,7 @@ void tai6F_discouragesports()
     tai_current_instruction++;
 }
 
-void tai70_jumpifnewsideaffecting() //u8 bank, u8 case, void* ptr
+void tai70_jumpifnewsideaffecting(void) //u8 bank, u8 case, void* ptr
 {
     u8 side = is_bank_from_opponent_side(get_ai_bank(read_byte(tai_current_instruction + 1)));
     u8 value = 0;
@@ -948,6 +951,9 @@ void tai70_jumpifnewsideaffecting() //u8 bank, u8 case, void* ptr
         break;
     case 1: //lucky chant
         value = SideAff->lucky_chant;
+        break;
+    case 2: //aurora veil
+        value = SideAff->aurora_veil;
         break;
     }
     if (value)
@@ -1475,7 +1481,7 @@ void tai84_jumpifcantusemove()
         tai_current_instruction = (void*) (read_word(tai_current_instruction + 1));
 }
 
-void tai85_canmultiplestatwork()
+void tai85_canmultiplestatwork(void)
 {
     u8 bank;
     u8 max;
@@ -1506,7 +1512,7 @@ void tai85_canmultiplestatwork()
     tai_current_instruction++;
 }
 
-void tai86_jumpifhasattackingmovewithtype() //u8 bank, u8 type, void* ptr
+void tai86_jumpifhasattackingmovewithtype(void) //u8 bank, u8 type, void* ptr
 {
     u8 bank = get_ai_bank(read_byte(tai_current_instruction + 1));
     u8 type = read_byte(tai_current_instruction + 2);

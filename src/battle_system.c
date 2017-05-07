@@ -4,7 +4,6 @@
 bool load_weather_from_overworld();
 bool handle_primal_reversion(u8 bank);
 u8 check_ability(u8 bank, u8 ability);
-u8 change_stats(s8 arg1, s8 arg2, s8 arg3, void* battlescript_if_fails);
 void statustoeffect();
 u8 find_move_in_table(u16 move, const u16* table_ptr);
 u8 healblock_forbidden_moves(u16 move, u8 with_leechseed);
@@ -16,21 +15,25 @@ struct pokemon* get_party_ptr(u8 bank);
 u8 is_poke_valid(struct pokemon* poke);
 u8 is_bank_present(u8 bank);
 u8 handle_leppa(u8 bank, u8 quality, enum call_mode calling_mode);
-u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro);
+u8 has_ability_effect(u8 bank, u8 mold_breaker);
 u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special_cases_argument, u16 move);
 u8 count_party_pokemon(u8 bank);
 u8* get_slide_msg(u16 trainerID, u8 caseID);
+u8 not_magicguard(u8 bank);
+bool does_move_make_contact(u16 move, u8 atk_bank);
+void reset_terrains(struct field_affecting* field);
+u8 terrains_get_turns(u8 bank);
+s8 get_priority(u16 move, u8 bank);
+u8 cant_fall_asleep(u8 bank, u8 self_inflicted);
+u8 cant_become_burned(u8 bank, u8 self_inflicted);
+u8 cant_become_freezed(u8 bank, u8 self_inflicted);
+u8 cant_become_paralyzed(u8 bank, u8 self_inflicted);
+u8 cant_poison(u8 atk_bank, u8 def_bank, u8 self_inflicted);
+void move_to_buff1(u16 move);
+u8 change_stats(u8 bank, u8 bits, void* bs_unable);
+u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn);
 
-enum COMMON_ITEM_EFFECT
-{
-    NO_ITEM_EFFECT,
-    NO_COMMON_ITEM_EFFECT,
-    ALTER_NON_VOLATILE_STATUS,
-    PP_RESTORE_ITEM,
-    HP_RESTORE_ITEM,
-};
-
-u8 get_attacking_move_type()
+u8 get_attacking_move_type(void)
 {
     u8 move_type=battle_stuff_ptr->dynamic_move_type&0x3F;
     if(!move_type)
@@ -43,14 +46,32 @@ u8 get_attacking_move_type()
     return move_type;
 }
 
-u8 get_item_effect(u8 bank, u8 check_negating_effects)
+u8 check_field_for_ability(enum poke_abilities ability, u8 side_to_ignore, u8 mold)
+{
+    for (u8 i = 0; i < no_of_all_banks; i++)
+    {
+        if (is_bank_present(i) && is_bank_from_opponent_side(i) != side_to_ignore && battle_participants[i].ability_id == ability && has_ability_effect(i, mold))
+            return i + 1;
+    }
+    return 0;
+}
+
+enum poke_abilities get_ally_ability(u8 bank, u8 mold)
+{
+    u8 ally = bank ^ 2;
+    if (is_bank_present(ally) && has_ability_effect(ally, mold))
+        return battle_participants[ally].ability_id;
+    return 0;
+}
+
+u8 get_item_effect(u8 bank, bool check_negating_effects)
 {
     u16 held_item = battle_participants[bank].held_item;
     if (check_negating_effects)
     {
         if (check_ability(bank, ABILITY_KLUTZ) || new_battlestruct->field_affecting.magic_room || new_battlestruct->bank_affecting[bank].embargo)
             return ITEM_EFFECT_NOEFFECT;
-        if (get_item_pocket_id(held_item)==4 && ability_battle_effects(12, bank, ABILITY_UNNERVE, 0, 0))
+        if (get_item_pocket_id(held_item)==4 && check_field_for_ability(ABILITY_UNNERVE, is_bank_from_opponent_side(bank), 0))
             return ITEM_EFFECT_NOEFFECT;
     }
     if (held_item == ITEM_ENIGMABERRY)
@@ -59,7 +80,7 @@ u8 get_item_effect(u8 bank, u8 check_negating_effects)
     }
     else
     {
-        return get_item_battle_function(battle_participants[bank].held_item);
+        return get_item_battle_function(held_item);
     }
 }
 
@@ -76,12 +97,11 @@ void set_type(u8 bank, u8 type)
     battle_participants[bank].type1 = type;
     battle_participants[bank].type2 = type;
     new_battlestruct->bank_affecting[bank].type3 = type;
-    return;
 }
 
-bool weather_abilities_effect()
+bool weather_abilities_effect(void)
 {
-    if (ability_battle_effects(19, 0, ABILITY_AIR_LOCK, 0, 0) || ability_battle_effects(19, 0, ABILITY_CLOUD_NINE, 0, 0))
+    if (check_field_for_ability(ABILITY_CLOUD_NINE, 3, 0) || check_field_for_ability(ABILITY_AIR_LOCK, 3, 0))
         return false;
     else
         return true;
@@ -129,7 +149,7 @@ u8 try_cherrim_change(u8 bank)
     {
         battle_participants[bank].poke_species = species_to_change;
         active_bank = bank;
-        prepare_setattributes_in_battle(0, REQUEST_SPECIES_BATTLE, 0, 2, &battle_participants[bank].poke_species);
+        bb2_setattributes_in_battle(0, REQUEST_SPECIES_BATTLE, 0, 2, &battle_participants[bank].poke_species);
         mark_buffer_bank_for_execution(bank);
         return 1;
     }
@@ -138,40 +158,37 @@ u8 try_cherrim_change(u8 bank)
 
 void copy_status_condition_text(u8 bank, u8 confusion)
 {
-    u32* status_flag;
+    const u8* status_flag = NULL;
     if (battle_participants[bank].status.flags.sleep)
     {
-        status_flag = &sleep_status_flag;
+        status_flag = sleep_status_flag;
     }
-    else if (battle_participants[bank].status.flags.poison || battle_participants[bank].status.flags.toxic_poison)
+    else if (BANK_PSN(bank))
     {
-        status_flag = &poison_status_flag;
+        status_flag = poison_status_flag;
     }
     else if (battle_participants[bank].status.flags.freeze)
     {
-        status_flag = &freeze_status_flag;
+        status_flag = freeze_status_flag;
     }
     else if (battle_participants[bank].status.flags.paralysis)
     {
-        status_flag = &paralysis_status_flag;
+        status_flag = paralysis_status_flag;
     }
     else if (battle_participants[bank].status.flags.burn)
     {
-        status_flag = &burn_status_flag;
+        status_flag = burn_status_flag;
     }
     else if (confusion && battle_participants[bank].status2.confusion)
     {
         status_flag = (void*)0x0831BC98;
     }
     else
-    {
         return;
-    }
-    strcpy_xFF_terminated_0(&battle_text_buff1, status_flag);
-    return;
+    strcpy_xFF_terminated_0(battle_text_buff1, status_flag);
 }
 
-u8 type_effectiveness_table[TYPE_FAIRY-0x4][TYPE_FAIRY-0x4] = {
+const u8 type_effectiveness_table[TYPE_FAIRY-0x4][TYPE_FAIRY-0x4] = {
     {10,10,10,10,10,05,10,00,05,10,10,10,10,10,10,10,10,10,10}, //normal
     {20,10,05,05,10,20,05,00,20,10,10,10,10,10,05,20,10,20,05}, //fight
     {10,20,10,10,10,05,20,10,05,10,10,10,20,05,10,10,10,10,10}, //flying
@@ -207,7 +224,7 @@ u16 get_airborne_state(u8 bank, u8 mode, u8 check_levitate)
         || new_battlestruct->bank_affecting[bank].smacked_down
         || status3[bank].rooted)
         return 1;
-    if (check_levitate && battle_participants[bank].ability_id == ABILITY_LEVITATE && has_ability_effect(bank,mode,1))
+    if (check_levitate && battle_participants[bank].ability_id == ABILITY_LEVITATE && has_ability_effect(bank,mode))
         return 4;
     if ((mode==0 && is_of_type(bank,TYPE_FLYING)) || get_item_effect(bank, true) == ITEM_EFFECT_AIRBALLOON ||
         new_battlestruct->bank_affecting[bank].magnet_rise || new_battlestruct->bank_affecting[bank].telekinesis)
@@ -278,7 +295,7 @@ u16 damage_type_effectiveness_update(u16 move, u8 attacking_type, u8 defending_t
         else if(airstatus>2 && move!=MOVE_THOUSAND_ARROWS)
             effect = 0;
     }
-    else if (current_move == MOVE_FREEZEDRY && defending_type == TYPE_WATER)
+    else if (move == MOVE_FREEZEDRY && defending_type == TYPE_WATER)
     {
         effect = 20;
     }
@@ -313,20 +330,14 @@ u16 apply_type_effectiveness(u16 move, u16 chained_effect, u8 move_type, u8 targ
     return chained_effect;
 }
 
-u16 dual_type_moves[]={MOVE_FLYING_PRESS,0xFFFF};
-
 u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8 effects_handling_and_recording)
 {
     u8 airstatus = get_airborne_state(def_bank,1,effects_handling_and_recording);
     u16 chained_effect = 64;
-    for (u8 i = 0; dual_type_moves[i]!= 0xFFFF; i++)
+    if (find_move_in_table(move, dual_type_moves))
     {
-        if (move == dual_type_moves[i])
-        {
-            chained_effect = apply_type_effectiveness(move, chained_effect, move_table[move].arg2,
-                                                      def_bank, atk_bank, airstatus);
-            break;
-        }
+        chained_effect = apply_type_effectiveness(move, chained_effect, move_table[move].arg2,
+                                                  def_bank, atk_bank, airstatus);
     }
     chained_effect = apply_type_effectiveness(move, chained_effect, move_type, def_bank, atk_bank, airstatus);
     if(chained_effect>64)
@@ -374,27 +385,16 @@ u16 get_forewarn_move(u8 bank)
                 else if (move_table[curr_move].base_power == 1)
                 {
                         u16 curr_power;
-                        if (move_table[curr_move].script_id == 38) //one hit ko moves
+                        if (move_table[curr_move].script_id == 70) //one hit ko moves
                             curr_power = 160;
                         else if (curr_move == MOVE_COUNTER || curr_move == MOVE_METAL_BURST || curr_move == MOVE_MIRROR_COAT)
                             curr_power = 120;
                         else
                         {
-                            u8 j = 0;
-                            while (true)
-                            {
-                                if (forewarn_moves[j] == curr_move)
-                                {
-                                    curr_power = 80;
-                                    break;
-                                }
-                                else if (forewarn_moves[j] == 0xFFFF)
-                                {
-                                    curr_power = 1;
-                                    break;
-                                }
-                                j++;
-                            }
+                            if (find_move_in_table(curr_move, forewarn_moves))
+                                curr_power = 80;
+                            else
+                                curr_power = 1;
                         }
                         if (curr_power > best_power)
                         {
@@ -415,41 +415,27 @@ u16 get_forewarn_move(u8 bank)
         return most_powerful_move;
 }
 
-u8 anticipation_shudder(u8 bank)
+bool anticipation_shudder(u8 bank)
 {
-    u8 shudder = false;
     u8 banks_side = is_bank_from_opponent_side(bank);
-    for (u8 i2 = 0; i2 < no_of_all_banks; i2++)
+    for (u8 opposing = 0; opposing < no_of_all_banks; opposing++)
     {
-        if (banks_side != is_bank_from_opponent_side(i2) && battle_participants[i2].current_hp)
+        if (banks_side != is_bank_from_opponent_side(opposing) && is_bank_present(opposing))
         {
             for (u8 i = 0; i < 4; i++)
             {
-                if (move_table[battle_participants[i2].moves[i]].script_id == 38) //one hit ko move check
+                u16 move = battle_participants[opposing].moves[i];
+                if (move_table[move].script_id == 70) //one hit ko move check
+                    return 1;
+                if (move_table[move].base_power)
                 {
-                    shudder = true;
-                    break;
-                }
-                else
-                {
-                    if (move_table[battle_participants[i2].moves[i]].base_power)
-                    {
-                        u16 move_now = current_move;
-                        current_move = battle_participants[i2].moves[i];
-                        u16 damage = type_effectiveness_calc(battle_participants[i2].moves[i],
-                                    move_table[battle_participants[i2].moves[i]].type,bank,i2,0);
-                        current_move = move_now;
-                        if (damage > 64)
-                        {
-                            shudder = true;
-                            break;
-                        }
-                    }
+                    if (apply_type_effectiveness(move, 64, move_table[move].type, bank, opposing, 0) > 64)
+                        return 1;
                 }
             }
         }
     }
-    return shudder;
+    return 0;
 }
 
 void record_usage_of_move(u8 bank, u16 move)
@@ -479,18 +465,77 @@ u8 prepare_castform_switch(u8 effect, u8 bank)
     return effect;
 }
 
-u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro)
+u8 has_ability_effect(u8 bank, u8 mold_breaker)
 {
-    u8 attacker_ability;
-    if (gastro && new_battlestruct->bank_affecting[bank].gastro_acided)
+    if (new_battlestruct->bank_affecting[bank].gastro_acided)
         return false;
-    if (mold_breaker)
-    {   attacker_ability=battle_participants[bank_attacker].ability_id;
-        if(has_ability_effect(bank_attacker,0,1) && (attacker_ability==ABILITY_MOLD_BREAKER
+
+    u8 bank_ability = battle_participants[bank].ability_id;
+    if (mold_breaker && bank != bank_attacker && bank_ability != ABILITY_SHADOW_SHIELD && bank_ability != ABILITY_PRISM_ARMOR && bank_ability != ABILITY_FULL_METAL_BODY)
+    {
+        u8 attacker_ability = battle_participants[bank_attacker].ability_id;
+        if(!new_battlestruct->bank_affecting[bank_attacker].gastro_acided && (attacker_ability==ABILITY_MOLD_BREAKER
                || attacker_ability==ABILITY_TERAVOLT || attacker_ability==ABILITY_TURBOBLAZE))
             return false;
     }
     return true;
+}
+
+bool can_berserk_activate(u8 bank)
+{
+    struct battle_participant* berserker = &battle_participants[bank];
+    u16 max_hp = berserker->max_hp;
+    u16 curr_hp = berserker->current_hp;
+    //curr hp must be less than 50%
+    if (curr_hp < (max_hp / 2))
+    {
+        //poke had to have more than 50% of hp before taking the hit
+        if ((hp_dealt + curr_hp) > (max_hp / 2))
+            return 1;
+    }
+    return 0;
+}
+
+bool ability_try_status_effect(u16 move_effect, bool contact)
+{
+    if (contact && percent_chance(30))
+    {
+        new_battlestruct->move_effect.effect1 = move_effect;
+        battlescript_push();
+        battlescripts_curr_instruction = BS_DEF_ABILITY_STATUS;
+        hitmarker |= HITMAKRER_IGNORE_SAFEGUARD;
+        return 1;
+    }
+    return 0;
+}
+
+void steal_bank_item(u8 thief_bank, u8 victim_bank)
+{
+    u16 item = battle_participants[victim_bank].held_item;
+    //remove victim's item
+    battle_participants[victim_bank].held_item = 0;
+    active_bank = victim_bank;
+    bb2_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, &battle_participants[victim_bank].held_item);
+    mark_buffer_bank_for_execution(victim_bank);
+
+    //set item to the thief
+    battle_participants[thief_bank].held_item = item;
+    active_bank = thief_bank;
+    bb2_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, &battle_participants[thief_bank].held_item);
+    mark_buffer_bank_for_execution(thief_bank);
+
+    //set the item to the global variable
+    last_used_item = item;
+}
+
+bool try_stealing_bank_item(u8 thief_bank, u8 victim_bank)
+{
+    if (battle_participants[victim_bank].held_item && !battle_participants[thief_bank].held_item)
+    {
+        steal_bank_item(thief_bank, victim_bank);
+        return 1;
+    }
+    return 0;
 }
 
 u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special_cases_argument, u16 move)
@@ -512,8 +557,6 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
     u8 common_effect=0;
     void* script_ptr;
     u8 adder=0;
-    u8 move_effect=0;
-    u8 contact =move_table[curr_move].move_flags.flags.makes_contact;
     switch (switch_id)
     {
     case 0: //switch-in abilities
@@ -534,65 +577,60 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         switch (last_used_ability)
         {
         case ABILITY_MOLD_BREAKER:
-            script_ptr = &moldbreaker_message_bs;
+            battle_communication_struct.multistring_chooser = 0;
+        MOLDBREAKER_MSG:
+            script_ptr = BS_MOLDBREAKER;
             common_effect=1;
             break;
         case ABILITY_TURBOBLAZE:
-            script_ptr = &turboblaze_bs;
-            common_effect=1;
-            break;
+            battle_communication_struct.multistring_chooser = 1;
+            goto MOLDBREAKER_MSG;
         case ABILITY_TERAVOLT:
-            script_ptr = &terravolt_bs;
-            common_effect=1;
-            break;
+            battle_communication_struct.multistring_chooser = 2;
+            goto MOLDBREAKER_MSG;
         case ABILITY_PRESSURE:
-            script_ptr = &pressure_bs;
-            common_effect=1;
-            break;
-        case ABILITY_UNNERVE:
-            script_ptr = &unnerve_bs;
+            script_ptr = BS_PRESSURE;
             common_effect=1;
             break;
         case ABILITY_AURA_BREAK:
-            script_ptr = &aurabreak_bs;
+            script_ptr = BS_AURABREAK;
             common_effect=1;
             break;
         case ABILITY_FAIRY_AURA:
-            script_ptr = &fairyaura_bs;
+            script_ptr = BS_FAIRYAURA;
             common_effect=1;
             break;
         case ABILITY_DARK_AURA:
-            script_ptr = &darkaura_bs;
+            script_ptr = BS_DARKAURA;
             common_effect=1;
+            break;
+        case ABILITY_UNNERVE:
+            bank_attacker = bank;
+            bank_target = bank ^ 1;
+            execute_battle_script(BS_UNNERVE);
+            effect = 1;
             break;
         case ABILITY_DOWNLOAD:
             {
                 u16 def_sum = 0;
                 u16 spdef_sum = 0;
-                u8 banks_side = is_bank_from_opponent_side(bank);
                 for (u8 i = 0; i < no_of_all_banks; i++)
                 {
-                    if (i != bank && banks_side!= is_bank_from_opponent_side(i))
+                    if (i != bank && bank_side!= is_bank_from_opponent_side(i))
                     {
                         def_sum += battle_participants[i].def;
                         spdef_sum += battle_participants[i].sp_def;
                     }
                 }
-                if ((def_sum == spdef_sum && COIN_FLIP(0, 1)) || (spdef_sum < def_sum))
-                {
-                    battle_participants[bank].sp_atk_buff++;
-                    script_ptr = &downloadspatk_bs;
-                }
+                if (spdef_sum >= def_sum)
+                    battle_scripting.stat_changer = 0x24;
                 else
-                {
-                    battle_participants[bank].atk_buff++;
-                    script_ptr = &downloadatk_bs;
-                }
-                    effect = 1;
-                    battle_scripting.active_bank = bank;
-                    execute_battle_script(script_ptr);
-                    break;
+                    battle_scripting.stat_changer = 0x21;
+                effect = 1;
+                bank_attacker = bank;
+                execute_battle_script(BS_DOWNLOAD);
             }
+            break;
         case ABILITY_DROUGHT:
             if (!(battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun || battle_weather.flags.heavy_rain || battle_weather.flags.air_current))
             {
@@ -604,12 +642,11 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 else
                     battle_effects_duration.weather_dur = 5;
 
-                script_ptr = (void*) 0x082DB52A;
-                execute_battle_script(script_ptr);
+                execute_battle_script((void*) 0x082DB52A);
                 battle_scripting.active_bank = bank;
                 dontlock=1;
             }
-        break;
+            break;
         case ABILITY_DRIZZLE:
             if (!(battle_weather.flags.rain || battle_weather.flags.permament_rain || battle_weather.flags.downpour || battle_weather.flags.harsh_sun || battle_weather.flags.heavy_rain || battle_weather.flags.air_current))
             {
@@ -620,8 +657,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 else
                     battle_effects_duration.weather_dur = 5;
 
-                script_ptr = (void*) 0x082DB430;
-                execute_battle_script(script_ptr);
+                execute_battle_script((void*) 0x082DB430);
                 battle_scripting.active_bank = bank;
                 dontlock=1;
             }
@@ -636,8 +672,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 else
                     battle_effects_duration.weather_dur = 5;
 
-                script_ptr = (void*) 0x082DB470;
-                execute_battle_script(script_ptr);
+                execute_battle_script((void*) 0x082DB470);
                 battle_scripting.active_bank = bank;
                 dontlock=1;
             }
@@ -652,7 +687,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 else
                     battle_effects_duration.weather_dur = 5;
 
-                execute_battle_script(&snow_warning_bs);
+                execute_battle_script(BS_SNOWWARNING);
                 battle_scripting.active_bank = bank;
                 dontlock=1;
             }
@@ -662,7 +697,8 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             {
                 effect = true;
                 battle_weather.int_bw = weather_harsh_sun | weather_permament_sun;
-                execute_battle_script(&desolateland_bs);
+                execute_battle_script(BS_DESOLATELAND);
+                battle_scripting.active_bank = bank;
                 dontlock=1;
             }
             break;
@@ -671,7 +707,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             {
                 effect = true;
                 battle_weather.int_bw = weather_heavy_rain | weather_permament_rain;
-                execute_battle_script(&primoridalsea_bs);
+                execute_battle_script(BS_PRIMORDIALSEA);
                 battle_scripting.active_bank = bank;
                 dontlock=1;
             }
@@ -681,7 +717,8 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             {
                 effect = true;
                 battle_weather.int_bw = weather_air_current;
-                execute_battle_script(&deltastream_bs);
+                execute_battle_script(BS_DELTASTREAM);
+                battle_scripting.active_bank = bank;
                 dontlock=1;
             }
             break;
@@ -698,25 +735,23 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 if (best_move)
                 {
                     effect = true;
-                    record_usage_of_move(bank, best_move);
+                    u8 forewarn_bank = bank ^ 1;
+                    if (get_move_position(forewarn_bank, best_move) == -1)
+                        forewarn_bank ^= 2;
+                    record_usage_of_move(forewarn_bank, best_move);
                     battle_scripting.active_bank = bank;
-                    execute_battle_script(&forewarn_bs);
-                    battle_text_buff1[0] = 0xFD;
-                    battle_text_buff1[1] = 0x2;
-                    battle_text_buff1[2] = best_move;
-                    battle_text_buff1[3] = (best_move >> 8);
-                    battle_text_buff1[4] = 0xFF;
+                    bank_partner_def = forewarn_bank;
+                    execute_battle_script(BS_FOREWARN);
+                    move_to_buff1(best_move);
                 }
             }
             break;
         case ABILITY_ANTICIPATION:
+            if (anticipation_shudder(bank))
             {
-                if (anticipation_shudder(bank))
-                {
-                    effect = true;
-                    battle_scripting.active_bank = bank;
-                    execute_battle_script(&anticipation_bs);
-                }
+                effect = true;
+                battle_scripting.active_bank = bank;
+                execute_battle_script(BS_ANTICIPATION);
             }
             break;
         case ABILITY_IMPOSTER:
@@ -725,24 +760,19 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 if (is_bank_present(opposing_bank) && !battle_participants[opposing_bank].status2.transformed && !battle_participants[bank].status2.transformed)
                 {
                     effect = 1;
-                    execute_battle_script(&transform_bs);
+                    execute_battle_script(BS_IMPOSTER);
                     current_move = MOVE_TRANSFORM;
                     bank_attacker = bank;
                     bank_target = opposing_bank;
-                    battle_scripting.active_bank = bank;
-                    new_battlestruct->various.active_bank = bank;
                     dontlock=1;
                 }
             }
             break;
         case ABILITY_INTIMIDATE:
-            {
-                script_ptr = (void*) 0x082DB4B8;
-                execute_battle_script(script_ptr);
-                battle_stuff_ptr->intimidate_user=bank;
-                bank_attacker = bank;
-                effect=true;
-            }
+            execute_battle_script(BS_INTIMIDATE);
+            battle_stuff_ptr->intimidate_user=bank;
+            bank_attacker = bank;
+            effect=true;
             break;
         case ABILITY_TRACE:
             {
@@ -822,12 +852,44 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             dontlock=1;
             break;
         case ABILITY_SLOW_START:
+            new_battlestruct->bank_affecting[bank].slowstart_duration = 5;
+            common_effect = 1;
+            script_ptr = BS_SLOWSTART_MSG1;
+            break;
+        case ABILITY_ELECTRIC_SURGE:
+            if (!new_battlestruct->field_affecting.electic_terrain)
             {
-                new_battlestruct->bank_affecting[bank].slowstart_duration = 5;
-                effect = true;
-                battle_scripting.active_bank = bank;
-                execute_battle_script(&slowstart_bs);
-                battle_scripting.active_bank = bank;
+                common_effect = 1;
+                reset_terrains(&new_battlestruct->field_affecting);
+                new_battlestruct->field_affecting.electic_terrain = terrains_get_turns(bank);
+                script_ptr = BS_ELECTRIC_SURGE;
+            }
+            break;
+        case ABILITY_MISTY_SURGE:
+            if (!new_battlestruct->field_affecting.misty_terrain)
+            {
+                common_effect = 1;
+                reset_terrains(&new_battlestruct->field_affecting);
+                new_battlestruct->field_affecting.misty_terrain = terrains_get_turns(bank);
+                script_ptr = BS_MISTY_SURGE;
+            }
+            break;
+        case ABILITY_GRASSY_SURGE:
+            if (!new_battlestruct->field_affecting.grassy_terrain)
+            {
+                common_effect = 1;
+                reset_terrains(&new_battlestruct->field_affecting);
+                new_battlestruct->field_affecting.grassy_terrain = terrains_get_turns(bank);
+                script_ptr = BS_GRASSY_SURGE;
+            }
+            break;
+        case ABILITY_PSYCHIC_SURGE:
+            if (!new_battlestruct->field_affecting.psychic_terrain)
+            {
+                common_effect = 1;
+                reset_terrains(&new_battlestruct->field_affecting);
+                new_battlestruct->field_affecting.psychic_terrain = terrains_get_turns(bank);
+                script_ptr = BS_PSYCHIC_SURGE;
             }
             break;
         }
@@ -841,7 +903,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             status3[bank].switchinlock=1;
         break;
     case 1: //end turn abilities
-        if (!(battle_participants[bank].current_hp && has_ability_effect(bank, 0, 1)))
+        if (!(battle_participants[bank].current_hp && has_ability_effect(bank, 0)))
             break;
         bank_attacker = bank;
         switch (last_used_ability)
@@ -851,8 +913,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 {
                     if (battle_participants[bank].current_hp < battle_participants[bank].max_hp && !new_battlestruct->bank_affecting[bank].heal_block)
                     {
-                        script_ptr = (void*) 0x082DB45C;
-                        execute_battle_script(script_ptr);
+                        execute_battle_script(BS_ABILITYHPCHANGE_END3);
                         damage_loc = get_1_16_of_max_hp(bank) * (-1);
                         effect = true;
                     }
@@ -865,8 +926,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     {
                         if (battle_participants[bank].current_hp < battle_participants[bank].max_hp && !new_battlestruct->bank_affecting[bank].heal_block)
                         {
-                            script_ptr = (void*) 0x082DB45C;
-                            execute_battle_script(script_ptr);
+                            execute_battle_script(BS_ABILITYHPCHANGE_END3);
                             damage_loc = get_1_8_of_max_hp(bank) * (-1);
                             effect = true;
                         }
@@ -874,7 +934,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     else if (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)
                     {
                         damage_loc = get_1_8_of_max_hp(bank);
-                        execute_battle_script(&dryskindamage_bs);
+                        execute_battle_script(BS_ABILITYHPCHANGE_END3);
                         effect = true;
                     }
                 }
@@ -883,17 +943,17 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 if (weather_abilities_effect() && (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun))
                 {
                     damage_loc = get_1_8_of_max_hp(bank);
-                    execute_battle_script(&solarpower_bs);
+                    execute_battle_script(BS_ABILITYHPCHANGE_END3);
                     effect = true;
                 }
                 break;
             case ABILITY_HARVEST:
                 if (get_item_pocket_id(battle_stuff_ptr->used_held_items[bank]) == 4 && !battle_participants[bank].held_item)
                 {
-                    if ((weather_abilities_effect() && (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)) || COIN_FLIP(0, 1) == 0)
+                    if ((weather_abilities_effect() && (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)) || (rng() & 1))
                     {
                         effect = true;
-                        execute_battle_script(&harvest_bs);
+                        execute_battle_script(BS_HARVEST);
                     }
                 }
                 break;
@@ -910,7 +970,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                             battle_scripting.active_bank = friendly_bank;
                             active_bank = friendly_bank;
                             battle_participants[friendly_bank].status.int_status = 0;
-                            prepare_setattributes_in_battle(0, 0x28, 0, 4, &battle_participants[friendly_bank].status);
+                            bb2_setattributes_in_battle(0, 0x28, 0, 4, &battle_participants[friendly_bank].status);
                             mark_buffer_bank_for_execution(friendly_bank);
                         }
                     }
@@ -933,11 +993,11 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                         if (i != bank && *used_held_item && new_battlestruct->various.recently_used_item == *used_held_item)
                         {
                             effect = true;
-                            execute_battle_script(&pickup_bs);
+                            execute_battle_script(BS_PICKUP);
                             battle_participants[bank].held_item = *used_held_item;
                             last_used_item = *used_held_item;
                             active_bank = bank;
-                            prepare_setattributes_in_battle(0, 2, 0, 2,&battle_participants[bank].held_item);
+                            bb2_setattributes_in_battle(0, 2, 0, 2,&battle_participants[bank].held_item);
                             mark_buffer_bank_for_execution(bank);
                             new_battlestruct->various.recently_used_item = 0;
                             *used_held_item = 0;
@@ -955,12 +1015,8 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 if (battle_participants[bank].spd_buff != 0xC && disable_structs[bank].is_first_turn != 2)
                 {
                     effect = 1;
-                    battle_participants[bank].spd_buff++;
-                    battle_scripting.active_bank = bank;
-                    battle_scripting.field10 = 0x11;
-                    battle_scripting.field11 = 0;
-                    script_ptr = (void*) 0x082DB444;
-                    execute_battle_script(script_ptr);
+                    battle_scripting.stat_changer = 0x10 | STAT_SPD;
+                    execute_battle_script(BS_ATK_ABILITY_CHANGES_ATK_STAT_END3);
                 }
                 break;
             case ABILITY_TRUANT:
@@ -974,30 +1030,23 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     for (u8 i = 0; i < 7; i ++)
                     {
                         if (*(stat_ptr + i) != 0xC)
-                        {
                             raiseable_stats |= bits_table[i];
-                        }
                         if (*(stat_ptr + i) != 0)
-                        {
                             lowerable_stats |= bits_table[i];
-                        }
                     }
                     if (raiseable_stats || lowerable_stats)
                     {
                         effect = true;
-                        execute_battle_script(&moody_bs);
+                        execute_battle_script(BS_MOODY);
                         new_battlestruct->various.var1 = 0;
                         new_battlestruct->various.var2 = 0;
-                        battle_scripting.active_bank = bank;
-                        bank_target = bank;
                         while (raiseable_stats != 0)
                         {
                             u8 rand_stat = __umodsi3(rng(), 7);
                             if (raiseable_stats & bits_table[rand_stat])
                             {
                                 new_battlestruct->various.var1 = 0x21 + rand_stat;
-                                if (lowerable_stats & bits_table[rand_stat])
-                                    lowerable_stats ^= bits_table[rand_stat];
+                                lowerable_stats = BIC(lowerable_stats, bits_table[rand_stat]);
                                 break;
                             }
                         }
@@ -1011,8 +1060,8 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                             }
                         }
                     }
-                    break;
                 }
+                break;
             }
        if (common_effect && battle_participants[bank].status.int_status)
         {
@@ -1024,12 +1073,12 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             active_bank = bank;
             battle_scripting.active_bank = bank;
             battle_participants[bank].status.int_status = 0;
-            prepare_setattributes_in_battle(0, 0x28, 0, 4, &battle_participants[bank].status);
+            bb2_setattributes_in_battle(0, 0x28, 0, 4, &battle_participants[bank].status);
             mark_buffer_bank_for_execution(bank);
         }
         break;
     case 2: //abilities that affect certain moves
-        if (!has_ability_effect(bank, 1, 1))
+        if (!has_ability_effect(bank, 1))
             break;
         const u16* table_ptr = NULL;
         switch (last_used_ability)
@@ -1043,6 +1092,14 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         case ABILITY_OVERCOAT:
             table_ptr = powder_moves;
             break;
+        case ABILITY_DAZZLING:
+        case ABILITY_QUEENLY_MAJESTY:
+            if (get_priority(curr_move, bank_attacker) >= 1)
+            {
+                effect = 1;
+                battlescripts_curr_instruction = BS_CANTUSE_PRIORITY;
+            }
+            break;
         }
         if (table_ptr != NULL && find_move_in_table(current_move, table_ptr))
         {
@@ -1055,265 +1112,288 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         }
         break;
     case 3: //abilities that affect type except telepathy
-            if (curr_move && has_ability_effect(bank, 1, 1))
-            {
-                if (protect_structs[bank_attacker].flag2_notfirststrike)
-                    adder = 1;
-                u8 stat=0;
+        if (curr_move && has_ability_effect(bank, 1))
+        {
+            if (protect_structs[bank_attacker].flag2_notfirststrike)
+                adder = 1;
+            u8 stat=0;
 
-                switch (last_used_ability)
-                {
-                case ABILITY_TELEPATHY:
-                if((bank_target == (bank_attacker^2)) && is_bank_present(bank_target) && DAMAGING_MOVE(move))
+            switch (last_used_ability)
+            {
+            case ABILITY_TELEPATHY:
+                if((bank == (bank_attacker^2)) && is_bank_present(bank) && DAMAGING_MOVE(curr_move))
                 {
                     effect=true;
-                    battlescripts_curr_instruction = (&telepathy_bs)+adder;
+                    battlescripts_curr_instruction = (BS_TELEPATHY)+adder;
                 }
-                    break;
-                case ABILITY_WATER_ABSORB:
-                case ABILITY_DRY_SKIN:
-                    if (move_type == TYPE_WATER)
-                        common_effect=1;
-                    break;
-                case ABILITY_VOLT_ABSORB:
-                    if (move_type == TYPE_ELECTRIC)
-                        common_effect=1;
-                    break;
-                case ABILITY_FLASH_FIRE:
-                    if (move_type == TYPE_FIRE)
-                    {
-                        effect = 1;
-                        battle_resources->ability_flags_ptr->flags_ability[bank].flag1_flashfire = 1;
-                        script_ptr = (void*) 0x082DB5A7;
-                        script_ptr += adder;
-                        battlescripts_curr_instruction = script_ptr;
-                    }
-                    break;
-                case ABILITY_LIGHTNING_ROD:
-                    if (move_type == TYPE_ELECTRIC && (!is_of_type(bank,TYPE_GROUND) || get_item_effect(bank,1)==ITEM_EFFECT_RINGTARGET))
-                    {
-                        common_effect=2;
-                        stat=4;
-                    }
-                    break;
-                case ABILITY_STORM_DRAIN:
-                    if (move_type == TYPE_WATER)
-                    {
-                        common_effect=2;
-                        stat=4;
-                    }
-                    break;
-                case ABILITY_SAP_SIPPER:
-                    if (move_type == TYPE_GRASS)
-                    {
-                        common_effect=2;
-                        stat=1;
-                    }
-                    break;
-                case ABILITY_MOTOR_DRIVE:
-                    if (move_type == TYPE_ELECTRIC)
-                    {
-                        common_effect=2;
-                        stat=3;
-                    }
-                    break;
-                }
-                if(common_effect==1)
+                break;
+            case ABILITY_WATER_ABSORB:
+            case ABILITY_DRY_SKIN:
+                if (move_type == TYPE_WATER)
+                    common_effect=1;
+                break;
+            case ABILITY_VOLT_ABSORB:
+                if (move_type == TYPE_ELECTRIC)
+                    common_effect=1;
+                break;
+            case ABILITY_FLASH_FIRE:
+                if (move_type == TYPE_FIRE)
                 {
-                    if (battle_participants[bank].max_hp == battle_participants[bank].current_hp || new_battlestruct->bank_affecting[bank].heal_block)
-                        script_ptr = (void*) 0x082DB591;
-                    else
-                    {
-                        script_ptr = (void*) 0x082DB56E;
-                        damage_loc = get_1_4_of_max_hp(bank) * (-1);
-                    }
+                    effect = 1;
+                    battle_resources->ability_flags_ptr->flags_ability[bank].flag1_flashfire = 1;
+                    script_ptr = (void*) 0x082DB5A7;
                     script_ptr += adder;
                     battlescripts_curr_instruction = script_ptr;
-                    effect = true;
                 }
-                else if(common_effect==2)
+                break;
+            case ABILITY_LIGHTNING_ROD:
+                if (move_type == TYPE_ELECTRIC && (!is_of_type(bank,TYPE_GROUND) || get_item_effect(bank,1)==ITEM_EFFECT_RINGTARGET))
                 {
-                    u8* stat_ptr = &battle_participants[bank].hp_buff;
-                    stat_ptr += stat;
-
-                    if((*stat_ptr)!=0xC)
-                    {
-                        battle_scripting.stat_changer=0x20+stat;
-                        *stat_ptr +=1 ;
-                        script_ptr = &absorb_ability_boost_bs;
-                    }
-                    else
-                        script_ptr = &absorb_ability_immune_bs;
-                    script_ptr += adder;
-                    effect = true;
-                    battlescripts_curr_instruction = script_ptr;
+                    common_effect=2;
+                    stat=4;
                 }
-            }
-            break;
-    case 4: //move end turn abilities
-        {
-            if (has_ability_effect(bank, 0, 1) && !(move_outcome.not_affected || move_outcome.failed || move_outcome.missed)
-                && battle_participants[bank_attacker].current_hp && (special_statuses[bank_target].moveturn_losthp))
-            {
-                u16 curr_hp = battle_participants[bank].current_hp;
-                switch (last_used_ability)
+                break;
+            case ABILITY_STORM_DRAIN:
+                if (move_type == TYPE_WATER)
                 {
-                case ABILITY_STATIC:
-                    move_effect = 0x45;
-                    common_effect=1;
-                    break;
-                case ABILITY_FLAME_BODY:
-                    move_effect = 0x43;
-                    common_effect=1;
-                    break;
-                case ABILITY_POISON_POINT:
-                    move_effect = 0x42;
-                    common_effect=1;
-                    break;
-                case ABILITY_EFFECT_SPORE:
-                    if(!(has_ability_effect(bank_attacker, 0, 1) &&
-                         (battle_participants[bank_attacker].ability_id==ABILITY_OVERCOAT))) //add safety goggles check
-                    {
-                        move_effect=(rng()&3);
-                        if(move_effect==0)
-                            move_effect=0x41;
-                        else if(move_effect==1)
-                            move_effect=0x42;
-                        else
-                            move_effect=0x45;
-                        common_effect=1;
-                    }
-                    break;
-                case ABILITY_AFTERMATH:
-                    if (curr_hp == 0 && contact && !(ability_battle_effects(0x13, 0, ABILITY_DAMP, 0, 0)) && !(has_ability_effect(bank_attacker, 0, 1) && battle_participants[bank_attacker].ability_id == ABILITY_MAGIC_GUARD))
-                    {
-                        damage_loc = get_1_4_of_max_hp(bank_attacker);
-                        effect = true;
-                        battlescript_push();
-                        battlescripts_curr_instruction = &aftermath_bs;
-                    }
-                    break;
-                case ABILITY_MUMMY:
-                    if (contact && battle_participants[bank_attacker].ability_id != ABILITY_MUMMY && battle_participants[bank_attacker].ability_id != ABILITY_STANCE_CHANGE && battle_participants[bank_attacker].ability_id != ABILITY_MULTITYPE)
-                    {
-                        effect = true;
-                        battle_participants[bank_attacker].ability_id = battle_participants[bank].ability_id;
-                        battlescript_push();
-                        battlescripts_curr_instruction = &mummy_bs;
-                    }
-                    break;
-                case ABILITY_GOOEY:
-                    if (contact && battle_participants[bank_attacker].spd_buff > 0)
-                    {
-                        effect = true;
-                        battle_scripting.stat_changer = 0x93;
-                        battlescript_push();
-                        battlescripts_curr_instruction = &gooey_bs;
-                    }
-                    break;
-                case ABILITY_CURSED_BODY:
-                    if (!disable_structs[bank_attacker].disabled_move && percent_chance(30) && !ability_battle_effects(12, bank_attacker, ABILITY_AROMA_VEIL, 1, 0))
-                    {
-                        disable_structs[bank_attacker].disabled_move = curr_move;
-                        disable_structs[bank_attacker].disable_timer = 3;
-                        battlescript_push();
-                        battlescripts_curr_instruction = &cursedbody_bs;
-                        effect = true;
-                        battle_text_buff1[0] = 0xFD;
-                        battle_text_buff1[1] = 0x2;
-                        battle_text_buff1[2] = curr_move;
-                        battle_text_buff1[3] = (curr_move >> 8);
-                        battle_text_buff1[4] = 0xFF;
-                    }
-                    break;
-                case ABILITY_ROUGH_SKIN:
-                case ABILITY_IRON_BARBS:
-                    if (contact && !(has_ability_effect(bank_attacker, 0, 1) && battle_participants[bank_attacker].ability_id == ABILITY_MAGIC_GUARD))
-                    {
-                        damage_loc = get_1_8_of_max_hp(bank_attacker);
-                        effect = true;
-                        battlescript_push();
-                        void* roughskin_bs = (void*) 0x082DB654;
-                        battlescripts_curr_instruction = roughskin_bs;
-                    }
-                    break;
-                case ABILITY_RATTLED:
-                    if (battle_participants[bank].spd_buff != 0xC && (move_type == TYPE_BUG || move_type == TYPE_DARK || move_type == TYPE_GHOST))
-                    {
-                        effect = true;
-                        battlescript_push();
-                        battlescripts_curr_instruction = &rattled_bs;
-                        battle_scripting.stat_changer = 0x13;
-                    }
-                    break;
-                case ABILITY_JUSTIFIED:
-                    if (battle_participants[bank].atk_buff != 0xC && move_type == TYPE_DARK)
-                    {
-                        effect = true;
-                        battlescript_push();
-                        battlescripts_curr_instruction = &rattled_bs;
-                        battle_scripting.stat_changer = 0x11;
-                    }
-                    break;
-                case ABILITY_STEADFAST:
-                    if (curr_hp && battle_participants[bank].spd_buff != 0xC && battle_participants[bank].status2.flinched)
-                    {
-                        effect = true;
-                        battlescript_push();
-                        battlescripts_curr_instruction = &rattled_bs;
-                        battle_scripting.stat_changer = 0x13;
-                    }
-                    break;
-                case ABILITY_ANGER_POINT:
-                    if (curr_hp && crit_loc==2 && special_statuses[bank].moveturn_losthp && battle_participants[bank].atk_buff != 0xC)
-                    {
-                        effect = true;
-                        battlescript_push();
-                        battlescripts_curr_instruction = &angerpoint_bs;
-                        battle_participants[bank].atk_buff=0xC;
-                    }
-                    break;
-                case ABILITY_WEAK_ARMOR:
-                    if (curr_hp && special_statuses[bank].moveturn_losthp_physical && (battle_participants[bank].def_buff > 0 || battle_participants[bank].spd_buff != 0xC))
-                    {
-                        effect = true;
-                        battlescript_push();
-                        battlescripts_curr_instruction = &weakarmor_bs;
-                        new_battlestruct->various.active_bank = bank;
-                    }
-                    break;
-                case ABILITY_CUTE_CHARM:
-                    if (battle_participants[bank_attacker].ability_id != ABILITY_OBLIVIOUS && percent_chance(30) && contact && !ability_battle_effects(12, bank_attacker, ABILITY_AROMA_VEIL, 1, 0))
-                    {
-                        u8 target_gender = gender_from_pid(battle_participants[bank].poke_species, battle_participants[bank].pid);
-                        u8 attacker_gender = gender_from_pid(battle_participants[bank_attacker].poke_species, battle_participants[bank_attacker].pid);
-                        if (target_gender != attacker_gender && target_gender != 0xFF && attacker_gender != 0xFF && ((battle_participants[bank_attacker].status2.in_love & bits_table[bank_target]) == 0))
-                        {
-                            effect = true;
-                            battle_participants[bank_attacker].status2.in_love |= bits_table[bank];
-                            battlescript_push();
-                            battlescripts_curr_instruction = (void*) 0x082DB66F;
-                        }
-                    }
-                    break;
+                    common_effect=2;
+                    stat=4;
                 }
-                if (common_effect && contact && percent_chance(30))
+                break;
+            case ABILITY_SAP_SIPPER:
+                if (move_type == TYPE_GRASS)
                 {
-                    battle_communication_struct.move_effect = move_effect;
-                    battlescript_push();
-                    script_ptr = (void*) 0x082DB67C;
-                    battlescripts_curr_instruction = script_ptr;
-                    hitmarker |= HITMAKRER_IGNORE_SAFEGUARD;
-                    effect = true;
+                    common_effect=2;
+                    stat=1;
+                }
+                break;
+            case ABILITY_MOTOR_DRIVE:
+                if (move_type == TYPE_ELECTRIC)
+                {
+                    common_effect=2;
+                    stat=3;
                 }
                 break;
             }
+            if(common_effect==1)
+            {
+                if (battle_participants[bank].max_hp == battle_participants[bank].current_hp || new_battlestruct->bank_affecting[bank].heal_block)
+                    script_ptr = (void*) 0x082DB591;
+                else
+                {
+                    script_ptr = (void*) 0x082DB56E;
+                    damage_loc = get_1_4_of_max_hp(bank) * (-1);
+                }
+                script_ptr += adder;
+                battlescripts_curr_instruction = script_ptr;
+                effect = true;
+            }
+            else if(common_effect==2)
+            {
+                u8* stat_ptr = &battle_participants[bank].hp_buff;
+                stat_ptr += stat;
 
+                if((*stat_ptr)!=0xC)
+                {
+                    battle_scripting.stat_changer=0x20+stat;
+                    *stat_ptr +=1 ;
+                    script_ptr = &absorb_ability_boost_bs;
+                }
+                else
+                    script_ptr = &absorb_ability_immune_bs;
+                script_ptr += adder;
+                effect = true;
+                battlescripts_curr_instruction = script_ptr;
+            }
         }
+        break;
+    case 4: //move end turn abilities
+        if (has_ability_effect(bank, 0) && MOVE_WORKED && (special_statuses[bank_target].moveturn_losthp) && battle_participants[bank_attacker].current_hp)
+        {
+            u16 curr_hp = battle_participants[bank].current_hp;
+            u8 contact = does_move_make_contact(curr_move, bank_attacker);
+            switch (last_used_ability)
+            {
+            case ABILITY_STATIC:
+            ENDTURN_PARALYZE:
+                if (!cant_become_paralyzed(bank_attacker, 0))
+                    effect = ability_try_status_effect(MOVEEFFECT_PRLZ | MOVEEFFECT_AFFECTSUSER, contact);
+                break;
+            case ABILITY_FLAME_BODY:
+                if (!cant_become_burned(bank_attacker, 0))
+                    effect = ability_try_status_effect(MOVEEFFECT_BRN | MOVEEFFECT_AFFECTSUSER, contact);
+                break;
+            case ABILITY_POISON_POINT:
+            ENDTURN_PSN:
+                if (!cant_poison(bank_target, bank_attacker, 0))
+                    effect = ability_try_status_effect(MOVEEFFECT_PSN | MOVEEFFECT_AFFECTSUSER, contact);
+                break;
+            case ABILITY_EFFECT_SPORE:
+                if(!is_of_type(bank_attacker, TYPE_GRASS) && !check_ability(bank_attacker, ABILITY_OVERCOAT) && get_item_effect(bank_attacker, 1) != ITEM_EFFECT_SAFETYGOOGLES) //add safety goggles check
+                {
+                    switch(__umodsi3(rng(), 3))
+                    {
+                    case 0:
+                        goto ENDTURN_PARALYZE;
+                    case 1:
+                        goto ENDTURN_PSN;
+                    default:
+                        if (!cant_fall_asleep(bank_attacker, 0))
+                            effect = ability_try_status_effect(MOVEEFFECT_SLP | MOVEEFFECT_AFFECTSUSER, contact);
+                    }
+                }
+                break;
+            case ABILITY_AFTERMATH:
+                if (battle_participants[bank_attacker].current_hp && curr_hp == 0 && contact && !(ability_battle_effects(0x13, 0, ABILITY_DAMP, 0, 0)) && !(has_ability_effect(bank_attacker, 0) && battle_participants[bank_attacker].ability_id == ABILITY_MAGIC_GUARD))
+                {
+                    damage_loc = get_1_4_of_max_hp(bank_attacker);
+                    effect = true;
+                    battlescript_push();
+                    battlescripts_curr_instruction = BS_AFTERMATH;
+                }
+                break;
+            case ABILITY_INNARDS_OUT:
+                if (curr_hp == 0 && not_magicguard(bank_attacker))
+                {
+                    damage_loc = hp_dealt;
+                    effect = true;
+                    battlescript_push();
+                    battlescripts_curr_instruction = BS_AFTERMATH;
+                }
+                break;
+            case ABILITY_MUMMY:
+                if (contact && battle_participants[bank_attacker].ability_id != ABILITY_MUMMY && battle_participants[bank_attacker].ability_id != ABILITY_STANCE_CHANGE && battle_participants[bank_attacker].ability_id != ABILITY_MULTITYPE)
+                {
+                    effect = true;
+                    battle_participants[bank_attacker].ability_id = ABILITY_MUMMY;
+                    battlescript_push();
+                    battlescripts_curr_instruction = BS_MUMMY;
+                }
+                break;
+            case ABILITY_CURSED_BODY:
+                if (!disable_structs[bank_attacker].disabled_move && percent_chance(30) && !check_field_for_ability(ABILITY_AROMA_VEIL, bank_side, 0))
+                {
+                    disable_structs[bank_attacker].disabled_move = curr_move;
+                    disable_structs[bank_attacker].disable_timer = 3;
+                    battlescript_push();
+                    battlescripts_curr_instruction = BS_CURSEDBODY;
+                    effect = true;
+                }
+                break;
+            case ABILITY_ROUGH_SKIN:
+            case ABILITY_IRON_BARBS:
+                if (contact && not_magicguard(bank_attacker))
+                {
+                    damage_loc = get_1_8_of_max_hp(bank_attacker);
+                    effect = true;
+                    battlescript_push();
+                    battlescripts_curr_instruction = BS_ROUGHSKIN;
+                }
+                break;
+            case ABILITY_GOOEY:
+            case ABILITY_TANGLING_HAIR:
+                if (contact && battle_participants[bank_attacker].spd_buff != 0)
+                {
+                    effect = true;
+                    battlescript_push();
+                    battlescripts_curr_instruction = BS_DEF_ABILITY_CHANGES_ATK_STAT;
+                    battle_scripting.stat_changer = 0x93;
+                }
+                break;
+            case ABILITY_RATTLED:
+                if (curr_hp && battle_participants[bank].spd_buff != 0xC && (move_type == TYPE_BUG || move_type == TYPE_DARK || move_type == TYPE_GHOST))
+                {
+                    effect = true;
+                    battlescript_push();
+                    battlescripts_curr_instruction = BS_DEF_ABILITY_CHANGES_DEF_STAT;
+                    battle_scripting.stat_changer = 0x13;
+                }
+                break;
+            case ABILITY_JUSTIFIED:
+                if (curr_hp && battle_participants[bank].atk_buff != 0xC && move_type == TYPE_DARK)
+                {
+                    effect = true;
+                    battlescript_push();
+                    battlescripts_curr_instruction = BS_DEF_ABILITY_CHANGES_DEF_STAT;
+                    battle_scripting.stat_changer = 0x11;
+                }
+                break;
+            case ABILITY_STEADFAST:
+                if (curr_hp && battle_participants[bank].spd_buff != 0xC && battle_participants[bank].status2.flinched)
+                {
+                    effect = true;
+                    battlescript_push();
+                    battlescripts_curr_instruction = BS_DEF_ABILITY_CHANGES_DEF_STAT;
+                    battle_scripting.stat_changer = 0x13;
+                }
+                break;
+            case ABILITY_ANGER_POINT:
+                if (curr_hp && crit_loc==2 && special_statuses[bank].moveturn_losthp && battle_participants[bank].atk_buff != 0xC)
+                {
+                    effect = true;
+                    battlescript_push();
+                    battlescripts_curr_instruction = BS_ANGERPOINT;;
+                    battle_participants[bank].atk_buff=0xC;
+                }
+                break;
+            case ABILITY_WEAK_ARMOR:
+                if (curr_hp && special_statuses[bank].moveturn_losthp_physical && (battle_participants[bank].def_buff > 0 || battle_participants[bank].spd_buff != 0xC))
+                {
+                    effect = true;
+                    battlescript_push();
+                    battlescripts_curr_instruction = BS_WEAK_ARMOR;
+                    new_battlestruct->various.active_bank = bank;
+                }
+                break;
+            case ABILITY_CUTE_CHARM:
+                if (!check_ability(bank_attacker, ABILITY_OBLIVIOUS) && percent_chance(30) && contact && !check_field_for_ability(ABILITY_AROMA_VEIL, bank_side, 0))
+                {
+                    u8 target_gender = gender_from_pid(battle_participants[bank].poke_species, battle_participants[bank].pid);
+                    u8 attacker_gender = gender_from_pid(battle_participants[bank_attacker].poke_species, battle_participants[bank_attacker].pid);
+                    if (target_gender != attacker_gender && target_gender != 0xFF && attacker_gender != 0xFF && ((battle_participants[bank_attacker].status2.in_love & bits_table[bank_target]) == 0))
+                    {
+                        effect = true;
+                        battle_participants[bank_attacker].status2.in_love |= bits_table[bank];
+                        battlescript_push();
+                        battlescripts_curr_instruction = BS_CUTECHARM;
+                    }
+                }
+                break;
+            case ABILITY_STAMINA:
+                if (curr_hp && battle_participants[bank].def_buff != 0xC)
+                {
+                    effect = true;
+                    battlescript_push();
+                    battlescripts_curr_instruction = BS_DEF_ABILITY_CHANGES_DEF_STAT;
+                    battle_scripting.stat_changer = 0x12;
+                }
+                break;
+            case ABILITY_WATER_COMPACTION:
+                if (curr_hp && battle_participants[bank].def_buff != 0xC && move_type == TYPE_WATER)
+                {
+                    effect = true;
+                    battlescript_push();
+                    battlescripts_curr_instruction = BS_DEF_ABILITY_CHANGES_DEF_STAT;
+                    battle_scripting.stat_changer = 0x22;
+                }
+                break;
+            case ABILITY_BERSERK:
+                if (curr_hp && battle_participants[bank].sp_atk_buff != 0xC && can_berserk_activate(bank) && !new_battlestruct->various.sheerforce_bonus
+                    && multihit_counter <= 1)
+                {
+                    effect = true;
+                    battlescript_push();
+                    battlescripts_curr_instruction = BS_DEF_ABILITY_CHANGES_DEF_STAT;
+                    battle_scripting.stat_changer = 0x14;
+                }
+                break;
+            }
+        }
+        break;
     case 5: //status immunities
         for (u8 i = 0; i < no_of_all_banks; i++)
         {
-            if (has_ability_effect(i, 0, 1))
+            if (has_ability_effect(i, 0))
             {
                 switch (battle_participants[i].ability_id)
                 {
@@ -1346,7 +1426,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     if (battle_participants[i].status2.in_love)
                     {
                         battle_participants[i].status2.in_love = 0;
-                        strcpy_xFF_terminated_0(&battle_text_buff1, (void*) 0x0831BCA0);
+                        strcpy_xFF_terminated_0(battle_text_buff1, (const u8*) 0x0831BCA0);
                         effect = true;
                     }
                     break;
@@ -1354,21 +1434,20 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                     if (battle_participants[i].status2.confusion)
                     {
                         battle_participants[i].status2.confusion = 0;
-                        strcpy_xFF_terminated_0(&battle_text_buff1, (void*) 0x0831BC98);
+                        strcpy_xFF_terminated_0(battle_text_buff1, (const u8*) 0x0831BC98);
                         effect = true;
                     }
                     break;
                 }
-                if (common_effect==1)
+                if (common_effect)
                 {
                     copy_status_condition_text(i,0);
                     battle_participants[i].status.int_status = 0;
                     effect=true;
                     battlescript_push();
                     battlescripts_curr_instruction = (void*) 0x082DB68C;
-                    active_bank = i;
-                    battle_scripting.active_bank = i;
-                    prepare_setattributes_in_battle(0, 0x28, 0, 4, &battle_participants[i].status);
+                    battle_scripting.active_bank = active_bank = i;
+                    bb2_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &battle_participants[i].status);
                     mark_buffer_bank_for_execution(active_bank);
                     break;
                 }
@@ -1378,24 +1457,22 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         }
         break;
     case 6: //check castform and cherrim
+        for (u8 i = 0; i < no_of_all_banks; i++)
         {
-            for (u8 i = 0; i < no_of_all_banks; i++)
+            if (check_ability(i, ABILITY_FORECAST))
             {
-                if (battle_participants[i].ability_id==ABILITY_FORECAST && has_ability_effect(i,0,1))
+                effect = prepare_castform_switch(castform_switch(i), i);
+                if (effect == true)
+                    break;
+            }
+            else if (check_ability(i, ABILITY_FLOWER_GIFT))
+            {
+                if (try_cherrim_change(i))
                 {
-                    effect = prepare_castform_switch(castform_switch(i), i);
-                    if (effect == true)
-                        break;
-                }
-                else if (battle_participants[i].ability_id==ABILITY_FLOWER_GIFT && has_ability_effect(i,0,1))
-                {
-                    if (try_cherrim_change(i))
-                    {
-                        effect = 1;
-                        execute_battle_script(&cherrimswitch_bs);
-                        battle_scripting.active_bank = i;
-                        break;
-                    }
+                    effect = 1;
+                    execute_battle_script(&cherrimswitch_bs);
+                    battle_scripting.active_bank = i;
+                    break;
                 }
             }
         }
@@ -1403,7 +1480,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
      case 7: //user's synchronize
         adder=0x40;
     case 8: //target's synchronize after static etc.
-        if(battle_participants[bank].ability_id==ABILITY_SYNCHRONIZE && has_ability_effect(bank,0,1) && battle_stuff_ptr->synchronize_effect_chooser)
+        if(battle_participants[bank].ability_id==ABILITY_SYNCHRONIZE && has_ability_effect(bank,0) && battle_stuff_ptr->synchronize_effect_chooser)
         {
             effect=true;
             hitmarker &= 0xFFFFBFFF;
@@ -1416,93 +1493,56 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
         }
         break;
     case 10:
-        if (has_ability_effect(bank, 0, 1) && !(move_outcome.not_affected || move_outcome.failed || move_outcome.missed)
+        if (has_ability_effect(bank, 0) && MOVE_WORKED
                 && battle_participants[bank_attacker].current_hp && (special_statuses[bank_target].moveturn_losthp))
         {
+            u8 contact = does_move_make_contact(curr_move, bank_attacker);
             switch(last_used_ability)
             {
                 case ABILITY_MAGICIAN:
-                    if (battle_participants[bank].held_item || current_move==MOVE_DOOM_DESIRE || current_move==MOVE_FUTURE_SIGHT
-                        || (battle_participants[bank_target].ability_id == ABILITY_STICKY_HOLD && has_ability_effect(bank_target,0,1)))
+                    if (current_move==MOVE_DOOM_DESIRE || current_move==MOVE_FUTURE_SIGHT
+                        || check_ability(bank_target, ABILITY_STICKY_HOLD))
                         break;
-                    u16 *target_held_item=&battle_participants[bank_target].held_item;
-                    if((*target_held_item)!=0 && (*target_held_item)!=0xAF)
+                    if (try_stealing_bank_item(bank_attacker, bank_target))
                     {
-                        last_used_item = *target_held_item;
-                        battle_stuff_ptr->choiced_move[bank_target]=0;
-                        battle_participants[bank].held_item = last_used_item;
-                        *target_held_item = 0;
                         battlescript_push();
-                        battlescripts_curr_instruction = (void *)(0x82DB422); // to add flavour text
+                        battlescripts_curr_instruction = BS_MAGICIAN;
                         effect = true;
-                        active_bank = bank;
-                        prepare_setattributes_in_battle(0, 2, 0, 2, &battle_participants[active_bank].held_item);
-                        mark_buffer_bank_for_execution(active_bank);
-                        active_bank = bank_target;
-                        prepare_setattributes_in_battle(0, 2, 0, 2, &battle_participants[active_bank].held_item);
-                        mark_buffer_bank_for_execution(active_bank);
+                        bank_partner_def = bank_target; //for animation
                     }
                     break;
                 case ABILITY_POISON_TOUCH:
-                    if(contact && percent_chance(30))
+                    if (battle_participants[bank_target].current_hp && contact && !cant_poison(bank, bank_target, 0) && percent_chance(30))
                     {
-                        hitmarker|=HITMAKRER_IGNORE_SAFEGUARD;
-                        battle_communication_struct.move_effect=2;
+                        new_battlestruct->move_effect.effect1 = MOVEEFFECT_PSN;
                         battlescript_push();
-                        battlescripts_curr_instruction = (void *) 0x082DB67F;
+                        battlescripts_curr_instruction = BS_ATK_ABILITY_STATUS;
                         effect=true;
                     }
                     break;
                 case ABILITY_STENCH:
-                    if(contact && percent_chance(10) && get_item_effect(bank,1)!=ITEM_EFFECT_KINGSROCK) //not working
+                    if (contact && percent_chance(10)) //todo later
                     {
-                        hitmarker|=HITMAKRER_IGNORE_SAFEGUARD;
-                        battle_communication_struct.move_effect=8;
-                        battlescript_push();
-                        battlescripts_curr_instruction = (void *) 0x082DB67F;
-                        effect=true;
+
                     }
                     break;
             }
         }
         break;
     case 12: //check opposing field for ability
-        for (u8 i = 0; i < no_of_all_banks; i++)
-        {
-            if (is_bank_from_opponent_side(i) != bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument, 1))
-            {
-                last_used_ability = ability_to_check;
-                effect = i + 1;
-                break;
-            }
-        }
+        effect = check_field_for_ability(ability_to_check, bank_side, special_cases_argument);
         break;
     case 13: //check bank field for ability
-        for (u8 i = 0; i < no_of_all_banks; i++)
-        {
-            if (is_bank_from_opponent_side(i) == bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument, 1))
-            {
-                last_used_ability = ability_to_check;
-                effect = i + 1;
-                break;
-            }
-        }
+        effect = check_field_for_ability(ability_to_check, bank_side ^ 1, special_cases_argument);
         break;
-    case 14: //check field affecting; whole field for ability
-        for (u8 i = 0; i < no_of_all_banks; i++)
-        {
-            if (battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument, 1))
-            {
-                effect = i + 1;
-                last_used_ability = ability_to_check;
-                break;
-            }
-        }
+    case 14: //check whole field for ability
+    case 19:
+        effect = check_field_for_ability(ability_to_check, 3, special_cases_argument);
         break;
     case 15: //check field except the bank
         for (u8 i = 0; i < no_of_all_banks; i++)
         {
-            if (battle_participants[i].ability_id == ability_to_check && i != bank && has_ability_effect(i, special_cases_argument, 1))
+            if (battle_participants[i].ability_id == ability_to_check && i != bank && has_ability_effect(i, special_cases_argument))
             {
                 effect = i + 1;
                 last_used_ability = ability_to_check;
@@ -1513,7 +1553,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
     case 16: //count instances of ability in the opponent field
         for (u8 i = 0; i < no_of_all_banks; i++)
         {
-            if (is_bank_from_opponent_side(i) != bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument, 1))
+            if (is_bank_from_opponent_side(i) != bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument))
             {
                 effect++;
                 last_used_ability = ability_to_check;
@@ -1523,7 +1563,7 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
     case 17: //count instances of ability in the banks field
         for (u8 i = 0; i < no_of_all_banks; i++)
         {
-            if (is_bank_from_opponent_side(i) == bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument, 1))
+            if (is_bank_from_opponent_side(i) == bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument))
             {
                 effect++;
                 last_used_ability = ability_to_check;
@@ -1533,38 +1573,20 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
     case 18: //count instances of ability except bank
         for (u8 i = 0; i < no_of_all_banks; i++)
         {
-            if ( i != bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument, 1))
+            if ( i != bank_side && battle_participants[i].ability_id == ability_to_check && has_ability_effect(i, special_cases_argument))
             {
                 effect++;
                 last_used_ability = ability_to_check;
             }
         }
         break;
-    case 19: //check whole field for ability with a hp check
-        for (u8 i = 0; i < no_of_all_banks; i ++)
+    case 20: //check ally
+        if (get_ally_ability(bank, special_cases_argument) == ability_to_check)
         {
-            if (battle_participants[i].ability_id == ability_to_check && battle_participants[i].current_hp && has_ability_effect(i, special_cases_argument, 1))
-            {
-                effect = i + 1;
-                last_used_ability = ability_to_check;
-                break;
-            }
+            effect = (bank ^ 2);
+            last_used_ability = ability_to_check;
         }
         break;
-    case 20: //check ally
-        {
-            u8 ally = bank ^ 2;
-            for (u8 i = 0; i < no_of_all_banks; i ++)
-            {
-                if (battle_participants[i].ability_id == ability_to_check && i == ally && has_ability_effect(i, special_cases_argument, 1))
-                {
-                    effect = i + 1;
-                    last_used_ability = ability_to_check;
-                    break;
-                }
-            }
-            break;
-        }
     case 21: // color change
         if (check_ability(bank,ABILITY_COLOR_CHANGE) && curr_move != MOVE_STRUGGLE &&
             battle_participants[bank].current_hp && MOVE_WORKED && TARGET_TURN_DAMAGED &&
@@ -1576,106 +1598,32 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
             battle_text_buff1[3] = 0xFF;
             effect = true;
             battlescript_push();
-            void* colorchange_bs = (void*) 0x082DB64D;
-            battlescripts_curr_instruction = colorchange_bs;
+            battlescripts_curr_instruction = (void*) 0x082DB64D;
             set_type(bank, move_type);
         }
         break;
     case 22:
-        if(check_ability(bank,ABILITY_PICKPOCKET) && MOVE_WORKED && TARGET_TURN_DAMAGED &&
-            battle_participants[bank].current_hp && battle_participants[bank_attacker].current_hp)
+        if (check_ability(bank,ABILITY_PICKPOCKET) && MOVE_WORKED && TARGET_TURN_DAMAGED && battle_participants[bank].current_hp)
         {
-            if (!contact || battle_participants[bank].held_item
+            if (!does_move_make_contact(curr_move, bank_attacker)
                 || (new_battlestruct->various.sheerforce_bonus)
-                || (battle_participants[bank_attacker].ability_id == ABILITY_STICKY_HOLD
-                    && has_ability_effect(bank_attacker,0,1)))
+                || (check_ability(bank_attacker, ABILITY_STICKY_HOLD)))
                 break;
-            u16 *user_held_item=&battle_participants[bank_attacker].held_item;
-            if((*user_held_item)!=0 && (*user_held_item)!=0xAF)
+            if (try_stealing_bank_item(bank, bank_attacker))
             {
-                last_used_item = *user_held_item;
-                battle_stuff_ptr->choiced_move[bank_attacker]=0;
-                battle_participants[bank].held_item = last_used_item;
-                *user_held_item = 0;
                 battlescript_push();
-                battlescripts_curr_instruction = &pickpocket_bs;
+                battlescripts_curr_instruction = BS_PICKPOCKET;
                 effect = true;
-                active_bank = bank;
-                prepare_setattributes_in_battle(0, 2, 0, 2, &battle_participants[active_bank].held_item);
-                mark_buffer_bank_for_execution(active_bank);
-                active_bank = bank_attacker;
-                prepare_setattributes_in_battle(0, 2, 0, 2, &battle_participants[active_bank].held_item);
-                mark_buffer_bank_for_execution(active_bank);
             }
         }
         break;
     }
-    if (effect && last_used_ability != 0xFF && switch_id < 0xB)
+    if (effect && last_used_ability != 0xFF && (switch_id <= 12 || switch_id >= 21))
         record_usage_of_ability(bank, last_used_ability);
     return effect;
 }
 
-u8 white_herb_effect(u8 bank, enum call_mode calling_mode)
-{
-    u8 effect = NO_ITEM_EFFECT;
-    u8* stat = &battle_participants[bank].atk_buff;
-    for (u8 i = 0; i < 7; i++)
-    {
-        if (*(stat + i) < 6)
-        {
-            *(stat + i) = 6;
-            effect = NO_COMMON_ITEM_EFFECT;
-        }
-    }
-    if (effect)
-    {
-        battle_scripting.active_bank = bank;
-        active_bank = bank;
-        bank_attacker = bank;
-        if (calling_mode == BATTLE_TURN)
-        {
-            call_bc_move_exec((void*) 0x082DB7AE);
-        }
-        else
-        {
-            battlescript_push();
-            battlescripts_curr_instruction = ((void*) 0x082DB7B4);
-        }
-    }
-    return effect;
-}
-
-u8 get_all_item_quality(u8 bank)
-{
-    if (battle_participants[bank].held_item == ITEM_ENIGMABERRY)
-        return enigma_berry_battle[bank].quality;
-    else
-        return get_item_quality(battle_participants[bank].held_item);
-}
-
-u8 mental_herb_effect(u8 bank, enum call_mode calling_mode)
-{
-    u8 effect = NO_ITEM_EFFECT;
-    if (disable_structs[bank].disable_timer || disable_structs[bank].encore_timer || disable_structs[bank].taunt_timer || battle_participants[bank].status2.tormented || battle_participants[bank].status2.in_love || new_battlestruct->bank_affecting[bank].heal_block)
-    {
-        effect = NO_COMMON_ITEM_EFFECT;
-        if(calling_mode==BATTLE_TURN)
-        {
-            call_bc_move_exec(&mentalherb_bs);
-        }
-        else
-        {
-            battlescript_push();
-            battlescripts_curr_instruction = (&mentalherb_endmove_bs);
-        }
-        battle_scripting.active_bank = bank;
-        active_bank = bank;
-        bank_attacker = bank;
-    }
-    return effect;
-}
-
-u8 cant_poison(u8 bank, u8 self_inflicted)
+u8 cant_poison(u8 atk_bank, u8 def_bank, u8 self_inflicted)
 {   //0 == can poison
     //1 == is already poisoned
     //2 == has other major condition
@@ -1683,17 +1631,17 @@ u8 cant_poison(u8 bank, u8 self_inflicted)
     //4 == ability doesn't allow it
     //5 == safeguard protection
     //8 == misty terrain doesn't allow it
-    if (battle_participants[bank].status.flags.poison || battle_participants[bank].status.flags.toxic_poison)
+    if (battle_participants[def_bank].status.flags.poison || battle_participants[def_bank].status.flags.toxic_poison)
         return 1;
-    if (battle_participants[bank].status.int_status)
+    if (battle_participants[def_bank].status.int_status)
         return 2;
-    if (is_of_type(bank, TYPE_POISON) || is_of_type(bank, TYPE_STEEL))
+    if ((is_of_type(def_bank, TYPE_POISON) || is_of_type(def_bank, TYPE_STEEL)) && atk_bank != def_bank && !self_inflicted && !check_ability(atk_bank, ABILITY_CORROSION))
         return 3;
-    if ((has_ability_effect(bank, 0, 1) && (battle_participants[bank].ability_id == ABILITY_IMMUNITY || (battle_participants[bank].ability_id == ABILITY_LEAF_GUARD && (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)))))
+    if ((has_ability_effect(def_bank, 0) && (battle_participants[def_bank].ability_id == ABILITY_IMMUNITY || (battle_participants[def_bank].ability_id == ABILITY_LEAF_GUARD && (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)))))
         return 4;
-    if (side_affecting_halfword[is_bank_from_opponent_side(bank)].safeguard_on && !self_inflicted)
+    if (side_affecting_halfword[is_bank_from_opponent_side(def_bank)].safeguard_on && !self_inflicted)
         return 5;
-    if (new_battlestruct->field_affecting.misty_terrain && get_airborne_state(bank, 1, 1) <= 2 && !self_inflicted)
+    if (new_battlestruct->field_affecting.misty_terrain && get_airborne_state(def_bank, 1, 1) <= 2 && !self_inflicted)
         return 8;
     return 0;
 }
@@ -1713,7 +1661,7 @@ u8 cant_fall_asleep(u8 bank, u8 self_inflicted)
         return 1;
     if (battle_participants[bank].status.int_status)
         return 2;
-    if ((has_ability_effect(bank, 0, 1) && (battle_participants[bank].ability_id == ABILITY_VITAL_SPIRIT || battle_participants[bank].ability_id == ABILITY_INSOMNIA || (battle_participants[bank].ability_id == ABILITY_LEAF_GUARD && (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)))))
+    if ((has_ability_effect(bank, 0) && (battle_participants[bank].ability_id == ABILITY_VITAL_SPIRIT || battle_participants[bank].ability_id == ABILITY_INSOMNIA || (battle_participants[bank].ability_id == ABILITY_LEAF_GUARD && (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)))))
         return 4;
     if (side_affecting_halfword[is_bank_from_opponent_side(bank)].safeguard_on && !self_inflicted)
         return 5;
@@ -1746,7 +1694,7 @@ u8 cant_become_paralyzed(u8 bank, u8 self_inflicted)
         return 2;
     if (is_of_type(bank, TYPE_ELECTRIC))
         return 3;
-    if ((has_ability_effect(bank, 0, 1) && (battle_participants[bank].ability_id == ABILITY_LIMBER || (battle_participants[bank].ability_id == ABILITY_LEAF_GUARD && (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)))))
+    if ((has_ability_effect(bank, 0) && (battle_participants[bank].ability_id == ABILITY_LIMBER || (battle_participants[bank].ability_id == ABILITY_LEAF_GUARD && (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)))))
         return 4;
     if (side_affecting_halfword[is_bank_from_opponent_side(bank)].safeguard_on && !self_inflicted)
         return 5;
@@ -1769,7 +1717,7 @@ u8 cant_become_burned(u8 bank, u8 self_inflicted)
         return 2;
     if (is_of_type(bank, TYPE_FIRE))
         return 3;
-    if ((has_ability_effect(bank, 0, 1) && (battle_participants[bank].ability_id == ABILITY_WATER_VEIL || (battle_participants[bank].ability_id == ABILITY_LEAF_GUARD && (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)))))
+    if ((has_ability_effect(bank, 0) && (battle_participants[bank].ability_id == ABILITY_WATER_VEIL || (battle_participants[bank].ability_id == ABILITY_LEAF_GUARD && (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)))))
         return 4;
     if (side_affecting_halfword[is_bank_from_opponent_side(bank)].safeguard_on && !self_inflicted)
         return 5;
@@ -1793,7 +1741,7 @@ u8 cant_become_freezed(u8 bank, u8 self_inflicted)
         return 2;
     if (is_of_type(bank, TYPE_ICE))
         return 3;
-    if ((has_ability_effect(bank, 0, 1) && (battle_participants[bank].ability_id == ABILITY_MAGMA_ARMOR || (battle_participants[bank].ability_id == ABILITY_LEAF_GUARD && (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)))))
+    if ((has_ability_effect(bank, 0) && (battle_participants[bank].ability_id == ABILITY_MAGMA_ARMOR || (battle_participants[bank].ability_id == ABILITY_LEAF_GUARD && (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)))))
         return 4;
     if (side_affecting_halfword[is_bank_from_opponent_side(bank)].safeguard_on && !self_inflicted)
         return 5;
@@ -1804,728 +1752,19 @@ u8 cant_become_freezed(u8 bank, u8 self_inflicted)
     return 0;
 }
 
-u8 hp_condition(u8 bank, u8 percent) //1 = 50 %, 2 = 25 %
+bool poison_heal_check(void)
 {
-    struct battle_participant* ptr_to_struct = &battle_participants[bank];
-    if (ptr_to_struct->ability_id == ABILITY_GLUTTONY && has_ability_effect(bank, 0, 1) && percent > 1)
-    {
-        percent--;
-        record_usage_of_ability(bank, ABILITY_GLUTTONY);
-    }
-    if (ptr_to_struct->current_hp && ptr_to_struct->current_hp <= (ptr_to_struct->max_hp >> percent))
-        return 1;
-    return 0;
-}
-
-void setup_berry_consume_buffers(u8 bank)
-{
-    new_battlestruct->bank_affecting[bank].eaten_berry = 1;
-    if(!is_bank_from_opponent_side(bank))
-    {
-        new_battlestruct->various.eaten_berry_player|=bits_table[battle_team_id_by_side[bank]];
-    }
-    else
-    {
-        new_battlestruct->various.eaten_berry_opponent|=bits_table[battle_team_id_by_side[bank]];
-    }
-}
-
-u8 heal_and_confuse_berry(u8 bank, u8 item_effect, u8 quality, enum call_mode calling_mode)
-{
-    u8 effect = NO_ITEM_EFFECT;
-    //This assumes that the effect ids of these has different contiguous effects.
-    if(hp_condition(bank, 1) && !new_battlestruct->bank_affecting[bank].heal_block)
-    {
-        s32 max_hp = battle_participants[bank].max_hp;
-        s32 current_hp = battle_participants[bank].current_hp;
-        u8 flavour = item_effect - ITEM_EFFECT_FIGYBERRY;
-        s32 damage = (max_hp / quality);
-        if (damage == 0)
-            damage = 1;
-        if (damage > (max_hp - current_hp))
-            damage = (max_hp - current_hp);
-        damage_loc = damage * -1;
-        effect = HP_RESTORE_ITEM;
-        if (get_poke_flavour_relation(battle_participants[bank].pid, flavour) == FLAVOUR_DISLIKED)
-        {
-            if(calling_mode==BATTLE_TURN)
-            {
-                call_bc_move_exec((void*)0x082DB824);
-            }
-            else
-            {
-                battlescript_push();
-                battlescripts_curr_instruction=&healandconfuse_endmove_bs;
-            }
-        }
-        else
-        {
-            if(calling_mode==BATTLE_TURN)
-            {
-                call_bc_move_exec((void*)0x082DB7C4);
-            }
-            else
-            {
-                battlescript_push();
-                battlescripts_curr_instruction=&healberry_endmove_bs;
-            }
-        }
-        battle_text_buff1[0] = 0xFD;
-        battle_text_buff1[1] = 8;
-        battle_text_buff1[2] = 1;
-        battle_text_buff1[3] = 0xFF;
-    }
-    return effect;
-
-}
-
-u8 stat_raise_berry(u8 bank, u8 item_effect, enum call_mode calling_mode)
-{
-    u8 effect = NO_ITEM_EFFECT;
-    u8 stat_to_check = 0xC;
-    if (hp_condition(bank, 2))
-    {
-        u8 stat_to_raise = item_effect - ITEM_EFFECT_LIECHIBERRY;
-        if(check_ability(bank,ABILITY_CONTRARY))
-        {
-            stat_to_check = 0;
-        }
-        if(item_effect == ITEM_EFFECT_STARFBERRY)
-        {
-            u8 doable = 0;
-            for (u8 i = 0; i < 5; i++)
-            {
-                if (*(&battle_participants[bank].atk_buff + i) != stat_to_raise)
-                    doable |= bits_table[i];
-            }
-            while (doable)
-            {
-                u8 rand = __umodsi3(rng(), 5);
-                if (doable & bits_table[rand])
-                {
-                    effect = NO_COMMON_ITEM_EFFECT;
-                    battle_scripting.stat_changer = 0x21 + rand;
-                    battle_scripting.field10 = 0xF + rand;
-                    battle_scripting.field11 = 0;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            if (*(&battle_participants[bank].atk_buff + stat_to_raise) != stat_to_check)
-            {
-                effect = NO_COMMON_ITEM_EFFECT;
-                battle_text_buff1[0] = 0xFD;
-                battle_text_buff1[1] = 0x5;
-                battle_text_buff1[2] = stat_to_raise + 1;
-                battle_text_buff1[3] = 0xFF;
-                bank_partner_def = bank;
-                battle_scripting.stat_changer = 0x11 + stat_to_raise;
-                battle_scripting.field10 = 0xF + stat_to_raise;
-                battle_scripting.field11 = 0;
-            }
-        }
-        if(effect)
-        {
-            if(calling_mode==BATTLE_TURN)
-            {
-                call_bc_move_exec((void*)0x82DB84E);
-            }
-            else
-            {
-                battlescript_push();
-                battlescripts_curr_instruction=&statraise_berry_endmove_bs;
-            }
-        }
-    }
-    return effect;
-}
-
-u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
-{
-    u8 item_effect = get_item_effect(bank, 1);
-    u8 effect = NO_ITEM_EFFECT;
-
-    u8 quality = get_all_item_quality(bank);
-    switch (switchid)
-    {
-    case 0: //switch in items
-        switch (item_effect)
-        {
-        case ITEM_EFFECT_AMULETCOIN:
-            {
-                u8* money_multiplier = &battle_stuff_ptr->money_multiplier;
-                if (!is_bank_from_opponent_side(bank) && *money_multiplier != 2)
-                {
-                    *money_multiplier = 2;
-                    effect = NO_COMMON_ITEM_EFFECT;
-                }
-            }
-            break;
-        case ITEM_EFFECT_WHITEHERB:
-            effect = white_herb_effect(bank, BATTLE_TURN);
-            break;
-        case ITEM_EFFECT_AIRBALLOON:
-            if (!new_battlestruct->field_affecting.gravity)
-            {
-                effect = NO_COMMON_ITEM_EFFECT;
-                active_bank = bank;
-                call_bc_move_exec(&airballon_bs);
-                record_usage_of_item(bank, ITEM_EFFECT_AIRBALLOON);
-            }
-        }
-        break;
-    case 1: //battle end turn
-        switch (item_effect)
-        {
-        case ITEM_EFFECT_ORANBERRY:
-            if (hp_condition(bank, 1) && !move_turn && !new_battlestruct->bank_affecting[bank_target].heal_block)
-            {
-                effect = HP_RESTORE_ITEM;
-                if (quality > battle_participants[bank].max_hp - battle_participants[bank].current_hp)
-                    quality = battle_participants[bank].max_hp - battle_participants[bank].current_hp;
-                damage_loc = quality * -1;
-                call_bc_move_exec((void*)0x082DB7C4);
-            }
-            break;
-        case ITEM_EFFECT_SITRUSBERRY:
-            if (hp_condition(bank, 1) && !move_turn && !new_battlestruct->bank_affecting[bank_target].heal_block)
-            {
-                effect = HP_RESTORE_ITEM;
-                s32 damage = battle_participants[bank].max_hp >> 2;
-                if (damage > battle_participants[bank].max_hp - battle_participants[bank].current_hp)
-                    damage = battle_participants[bank].max_hp - battle_participants[bank].current_hp;
-                damage_loc = damage * -1;
-                call_bc_move_exec((void*)0x082DB7C4);
-            }
-            break;
-        case ITEM_EFFECT_CHERIBERRY:
-            if (battle_participants[bank].status.flags.paralysis)
-            {
-                effect = ALTER_NON_VOLATILE_STATUS;
-                battle_participants[bank].status.flags.paralysis = 0;
-                call_bc_move_exec((void*)0x082DB706);
-            }
-            break;
-        case ITEM_EFFECT_CHESTOBERRY:
-            if (battle_participants[bank].status.flags.sleep)
-            {
-                effect = ALTER_NON_VOLATILE_STATUS;
-                battle_participants[bank].status.flags.sleep = 0;
-                call_bc_move_exec((void*)0x082DB766);
-            }
-            break;
-        case ITEM_EFFECT_PECHABERRY:
-            if (battle_participants[bank].status.flags.poison || battle_participants[bank].status.flags.toxic_poison)
-            {
-                effect = ALTER_NON_VOLATILE_STATUS;
-                battle_participants[bank].status.flags.poison = 0;
-                battle_participants[bank].status.flags.toxic_poison = 0;
-                call_bc_move_exec((void*)0x082DB71E);
-            }
-            break;
-        case ITEM_EFFECT_RAWSTBERRY:
-            if (battle_participants[bank].status.flags.burn)
-            {
-                effect = ALTER_NON_VOLATILE_STATUS;
-                battle_participants[bank].status.flags.burn = 0;
-                call_bc_move_exec((void*)0x082DB736);
-            }
-            break;
-        case ITEM_EFFECT_ASPEARBERRY:
-            if (battle_participants[bank].status.flags.freeze)
-            {
-                effect = ALTER_NON_VOLATILE_STATUS;
-                battle_participants[bank].status.flags.freeze = 0;
-                call_bc_move_exec((void*)0x082DB74E);
-            }
-            break;
-        case ITEM_EFFECT_LEPPABERRY:
-            if(!move_turn && handle_leppa(bank,quality,BATTLE_TURN))
-            {
-                effect = NO_COMMON_ITEM_EFFECT;
-            }
-            break;
-        case ITEM_EFFECT_PERSIMBERRY:
-            if (battle_participants[bank].status2.confusion)
-            {
-                battle_participants[bank].status2.confusion = 0;
-                effect = NO_COMMON_ITEM_EFFECT;
-                call_bc_move_exec((void*)0x82DB77E);
-            }
-            break;
-        case ITEM_EFFECT_LUMBERRY:
-            if (battle_participants[bank].status.int_status || battle_participants[bank].status2.confusion)
-            {
-                copy_status_condition_text(bank, 1);
-                battle_participants[bank].status2.confusion = 0;
-                battle_participants[bank].status.int_status = 0;
-                effect = ALTER_NON_VOLATILE_STATUS;
-                call_bc_move_exec((void*)0x082DB794);
-            }
-            break;
-        case ITEM_EFFECT_FIGYBERRY:
-        case ITEM_EFFECT_WIKIBERRY:
-        case ITEM_EFFECT_MAGOBERRY:
-        case ITEM_EFFECT_AGUAVBERRY:
-        case ITEM_EFFECT_IAPAPABERRY:
-            effect = heal_and_confuse_berry(bank, item_effect, quality, BATTLE_TURN);
-            break;
-        case ITEM_EFFECT_LIECHIBERRY:
-        case ITEM_EFFECT_GANLONBERRY:
-        case ITEM_EFFECT_SALACBERRY:
-        case ITEM_EFFECT_PETAYABERRY:
-        case ITEM_EFFECT_APICOTBERRY:
-        case ITEM_EFFECT_STARFBERRY:
-            effect = stat_raise_berry(bank, item_effect, BATTLE_TURN);
-            break;
-        case ITEM_EFFECT_LANSATBERRY:
-            if (hp_condition(bank, 2))
-            {
-                if (!(battle_participants[bank].status2.focus_energy))
-                {
-                    battle_participants[bank].status2.focus_energy = 1;
-                    effect = NO_COMMON_ITEM_EFFECT;
-                    call_bc_move_exec((void*)0x82DB869);
-                }
-            }
-            break;
-        case ITEM_EFFECT_WHITEHERB:
-            effect = white_herb_effect(bank, BATTLE_TURN);
-            break;
-        case ITEM_EFFECT_MENTALHERB:
-            effect = mental_herb_effect(bank, BATTLE_TURN);
-            break;
-        case ITEM_EFFECT_STICKYBARB:
-            STICKYBARB:
-            if (battle_participants[bank].current_hp && !move_turn && !(has_ability_effect(bank, 0, 1) && battle_participants[bank].ability_id == ABILITY_MAGIC_GUARD))
-            {
-                effect = NO_COMMON_ITEM_EFFECT;
-                damage_loc = battle_participants[bank].max_hp >> 3;
-                call_bc_move_exec(&itemhurt_bs);
-                record_usage_of_item(bank, get_item_effect(bank, 0));
-            }
-            break;
-        case ITEM_EFFECT_BLACKSLUDGE:
-            if (!is_of_type(bank, TYPE_POISON))
-            {
-                goto STICKYBARB;
-            }
-        case ITEM_EFFECT_LEFTOVERS:
-            if (battle_participants[bank].max_hp != battle_participants[bank].current_hp && battle_participants[bank].current_hp && !move_turn && !new_battlestruct->bank_affecting[bank_target].heal_block)
-            {
-                effect = HP_RESTORE_ITEM;
-                damage_loc = get_1_16_of_max_hp(bank) * -1;
-                call_bc_move_exec((void*)0x082DB7F1);
-                record_usage_of_item(bank, get_item_effect(bank, 0));
-            }
-            break;
-        }
-        if(effect)
-        {
-            active_bank = bank;
-            battle_scripting.active_bank = bank;
-            bank_attacker = bank;
-        }
-        break;
-    case 2: //having effect on target items
-        active_bank = bank;
-        battle_scripting.active_bank = bank;
-        u8 move_type = get_attacking_move_type();
-        u8 stat_to_compare = 0xC;
-        if(check_ability(bank,ABILITY_CONTRARY))
-        {
-            stat_to_compare = 0x0;
-        }
-        switch (item_effect)
-        {
-        case ITEM_EFFECT_WEAKNESSPOLICY:
-            if (MOVE_WORKED && TARGET_TURN_DAMAGED && move_outcome.super_effective && battle_participants[bank].current_hp)
-            {
-                if (battle_participants[bank].atk_buff != 0xC || battle_participants[bank].sp_atk_buff != 0xC)
-                {
-                    effect = NO_COMMON_ITEM_EFFECT;
-                    battle_scripting.field11 = 0;
-                    battlescript_push();
-                    battlescripts_curr_instruction = &weaknesspolicy_bs;
-                    bank_partner_def = bank;
-                }
-            }
-            break;
-        case ITEM_EFFECT_REDCARD:
-            battle_scripting.active_bank = bank_attacker;
-        case ITEM_EFFECT_EJECTBUTTON:
-            if ((MOVE_WORKED && TARGET_TURN_DAMAGED) && battle_participants[bank].current_hp && multihit_counter <= 1)
-            {
-                void* current_instruction = battlescripts_curr_instruction;
-                battlescripts_curr_instruction = &can_switch_bs;
-                jump_if_cannot_switch_atk4F();
-                if ((u32)battlescripts_curr_instruction != 1)
-                {
-                    effect = NO_COMMON_ITEM_EFFECT;
-                    battlescripts_curr_instruction = current_instruction;
-                    battlescript_push();
-                    battlescripts_curr_instruction = &ejectbutton_bs;
-                }
-                else
-                     battlescripts_curr_instruction = current_instruction;
-            }
-            break;
-        case ITEM_EFFECT_ROCKYHELMET:
-            if (move_table[current_move].move_flags.flags.makes_contact && (MOVE_WORKED && TARGET_TURN_DAMAGED)
-                 && !(battle_participants[bank_attacker].status2.substitute) && battle_participants[bank_attacker].current_hp)
-            {
-                damage_loc = ATLEAST_ONE(battle_participants[bank_attacker].max_hp / 6);
-                effect = NO_COMMON_ITEM_EFFECT;
-                battlescript_push();
-                battlescripts_curr_instruction = &rockyhelmet_bs;
-                record_usage_of_item(bank, ITEM_EFFECT_ROCKYHELMET);
-            }
-            break;
-        case ITEM_EFFECT_STICKYBARB:
-            if (move_table[current_move].move_flags.flags.makes_contact && (MOVE_WORKED && TARGET_TURN_DAMAGED) && !(battle_participants[bank_attacker].status2.substitute) && battle_participants[bank_attacker].current_hp && battle_participants[bank_attacker].held_item == 0)
-            {
-                effect = NO_COMMON_ITEM_EFFECT;
-                u16* target_item = &battle_participants[bank].held_item;
-                u16* attacker_item = &battle_participants[bank_attacker].held_item;
-                *attacker_item = *target_item;
-                *target_item = 0;
-                active_bank = bank;
-                prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, target_item);
-                mark_buffer_bank_for_execution(bank);
-                active_bank = bank_attacker;
-                prepare_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, attacker_item);
-                mark_buffer_bank_for_execution(active_bank);
-                battlescript_push();
-                battlescripts_curr_instruction = &stickybarbswap;
-                bank = bank_attacker;
-            }
-            break;
-        case ITEM_EFFECT_AIRBALLOON:
-            if (MOVE_WORKED && TARGET_TURN_DAMAGED)
-            {
-                effect = NO_COMMON_ITEM_EFFECT;
-                battlescript_push();
-                battlescripts_curr_instruction = &balloonpops_bs;
-            }
-            break;
-        case ITEM_EFFECT_DESTINYKNOT:
-            if (battle_participants[bank].status2.in_love && battle_participants[bank].current_hp && !(has_ability_effect(bank_attacker, 0, 1) && battle_participants[bank_attacker].ability_id == ABILITY_OBLIVIOUS))
-            {
-                if (!(battle_participants[bank_attacker].status2.in_love & bits_table[bank]))
-                {
-                    battle_participants[bank_attacker].status2.in_love |= bits_table[bank];
-                    effect = NO_COMMON_ITEM_EFFECT;
-                    battlescript_push();
-                    battlescripts_curr_instruction = &destinyknot_bs;
-                }
-            }
-            break;
-        case ITEM_EFFECT_LUMINOUSMOSS:
-            if (move_type == TYPE_WATER && battle_participants[bank].sp_def_buff != stat_to_compare && (MOVE_WORKED && TARGET_TURN_DAMAGED) && battle_participants[bank].current_hp)
-            {
-                battle_scripting.stat_changer = 0x15;
-                battle_scripting.field10 = 0xF + 4;
-                goto STATRAISE;
-            }
-            break;
-            STATRAISE:
-                effect = NO_COMMON_ITEM_EFFECT;
-                bank_partner_def = bank;
-                battlescript_push();
-                battlescripts_curr_instruction = &statraise_bs;
-                battle_scripting.field11 = 0;
-            break;
-        case ITEM_EFFECT_CELLBATTERY:
-            if (move_type == TYPE_ELECTRIC && battle_participants[bank].atk_buff != stat_to_compare && (MOVE_WORKED && TARGET_TURN_DAMAGED) && battle_participants[bank].current_hp)
-            {
-                battle_scripting.stat_changer = 0x11;
-                battle_scripting.field10 = 0xF;
-                goto STATRAISE;
-            }
-            break;
-        case ITEM_EFFECT_SNOWBALL:
-            if (move_type == TYPE_ICE && battle_participants[bank].atk_buff != stat_to_compare && (MOVE_WORKED && TARGET_TURN_DAMAGED) && battle_participants[bank].current_hp)
-            {
-                battle_scripting.stat_changer = 0x11;
-                battle_scripting.field10 = 0xF;
-                goto STATRAISE;
-            }
-            break;
-        case ITEM_EFFECT_ABSORBBULB:
-            if (move_type == TYPE_WATER && battle_participants[bank].sp_atk_buff != stat_to_compare && (MOVE_WORKED && TARGET_TURN_DAMAGED) && battle_participants[bank].current_hp)
-            {
-                battle_scripting.stat_changer = 0x14;
-                battle_scripting.field10 = 0xF + 3;
-                goto STATRAISE;
-            }
-            break;
-
-        }
-        break;
-    case 3: //move turn
-        for (u8 i = 0; i < no_of_all_banks; i++)
-        {
-            item_effect = get_item_effect(i, 1);
-            quality = get_all_item_quality(i);
-            last_used_item = battle_participants[i].held_item;
-            bank = i;
-            switch (item_effect)
-            {
-            case ITEM_EFFECT_ORANBERRY:
-                if (hp_condition(bank, 1) && !move_turn && !new_battlestruct->bank_affecting[bank_target].heal_block)
-                {
-                    effect = HP_RESTORE_ITEM;
-                    if (quality > battle_participants[bank].max_hp - battle_participants[bank].current_hp)
-                        quality = battle_participants[bank].max_hp - battle_participants[bank].current_hp;
-                    damage_loc = quality;
-                    damage_loc = damage_loc*-1;
-                    battlescript_push();
-                    battlescripts_curr_instruction=&healberry_endmove_bs;
-                }
-                break;
-            case ITEM_EFFECT_SITRUSBERRY:
-                if (hp_condition(bank, 1) && !move_turn && !new_battlestruct->bank_affecting[bank_target].heal_block)
-                {
-                    effect = HP_RESTORE_ITEM;
-                    s32 damage = battle_participants[bank].max_hp >> 2;
-                    if (damage > battle_participants[bank].max_hp - battle_participants[bank].current_hp)
-                        damage = battle_participants[bank].max_hp - battle_participants[bank].current_hp;
-                    battlescript_push();
-                    battlescripts_curr_instruction=&healberry_endmove_bs;
-                }
-                break;
-            case ITEM_EFFECT_CHERIBERRY:
-                if (battle_participants[bank].status.flags.paralysis)
-                {
-                    battle_participants[bank].status.flags.paralysis = 0;
-                    effect = ALTER_NON_VOLATILE_STATUS;
-                    battlescript_push();
-                    battlescripts_curr_instruction = (void*) 0x82DB70C;
-                }
-                break;
-            case ITEM_EFFECT_CHESTOBERRY:
-                if (battle_participants[bank].status.flags.sleep)
-                {
-                    battle_participants[bank].status.flags.sleep = 0;
-                    effect = ALTER_NON_VOLATILE_STATUS;
-                    battlescript_push();
-                    battlescripts_curr_instruction = (void*) 0x82DB76C;
-                }
-                break;
-            case ITEM_EFFECT_PECHABERRY:
-                if (battle_participants[bank].status.flags.poison || battle_participants[bank].status.flags.toxic_poison)
-                {
-                    battle_participants[bank].status.flags.poison = 0;
-                    battle_participants[bank].status.flags.toxic_poison = 0;
-                    effect = ALTER_NON_VOLATILE_STATUS;
-                    battlescript_push();
-                    battlescripts_curr_instruction = (void*) 0x82DB724;
-                }
-                break;
-            case ITEM_EFFECT_RAWSTBERRY:
-                if (battle_participants[bank].status.flags.burn)
-                {
-                    effect = ALTER_NON_VOLATILE_STATUS;
-                    battle_participants[bank].status.flags.burn = 0;
-                    battlescript_push();
-                    battlescripts_curr_instruction = (void*) 0x82DB73C;
-                }
-                break;
-            case ITEM_EFFECT_ASPEARBERRY:
-                if (battle_participants[bank].status.flags.freeze)
-                {
-                    effect = ALTER_NON_VOLATILE_STATUS;
-                    battle_participants[bank].status.flags.freeze = 0;
-                    battlescript_push();
-                    battlescripts_curr_instruction = (void*) 0x82DB754;
-                }
-                break;
-            case ITEM_EFFECT_PERSIMBERRY:
-                if (battle_participants[bank].status2.confusion)
-                {
-                    battle_participants[bank].status2.confusion = 0;
-                    effect = NO_COMMON_ITEM_EFFECT;
-                    battlescript_push();
-                    battlescripts_curr_instruction = (void*) 0x82DB784;
-                }
-                break;
-            case ITEM_EFFECT_LUMBERRY:
-                if (battle_participants[bank].status.int_status || battle_participants[bank].status2.confusion)
-                {
-                    copy_status_condition_text(bank, 1);
-                    battle_participants[bank].status2.confusion = 0;
-                    battle_participants[bank].status.int_status = 0;
-                    effect = ALTER_NON_VOLATILE_STATUS;
-                    battlescript_push();
-                    battlescripts_curr_instruction = (void*) 0x82DB79A;
-                }
-                break;
-            case ITEM_EFFECT_LEPPABERRY:
-                if((multihit_counter==0 || multihit_counter==1) && handle_leppa(bank,quality,BATTLE_TURN))
-                {
-                    effect = NO_COMMON_ITEM_EFFECT;
-                }
-            break;
-            case ITEM_EFFECT_FIGYBERRY:
-            case ITEM_EFFECT_WIKIBERRY:
-            case ITEM_EFFECT_MAGOBERRY:
-            case ITEM_EFFECT_AGUAVBERRY:
-            case ITEM_EFFECT_IAPAPABERRY:
-                effect = heal_and_confuse_berry(i, item_effect, quality, MOVE_TURN);
-                break;
-            case ITEM_EFFECT_LIECHIBERRY:
-            case ITEM_EFFECT_GANLONBERRY:
-            case ITEM_EFFECT_SALACBERRY:
-            case ITEM_EFFECT_PETAYABERRY:
-            case ITEM_EFFECT_APICOTBERRY:
-            case ITEM_EFFECT_STARFBERRY:
-                effect = stat_raise_berry(i, item_effect, MOVE_TURN);
-                break;
-            case ITEM_EFFECT_LANSATBERRY:
-                if (hp_condition(bank, 2))
-                {
-                    if (!(battle_participants[bank].status2.focus_energy))
-                    {
-                        battle_participants[bank].status2.focus_energy = 1;
-                        effect = NO_COMMON_ITEM_EFFECT;
-                        battlescript_push();
-                        battlescripts_curr_instruction = &lansat_endmove_bs;
-                    }
-                }
-                break;
-            case ITEM_EFFECT_WHITEHERB:
-                effect = white_herb_effect(bank, MOVE_TURN);
-                break;
-            case ITEM_EFFECT_MENTALHERB:
-                effect = mental_herb_effect(bank, MOVE_TURN);
-                break;
-            }
-            if (effect)
-            {
-                bank_attacker = bank;
-                active_bank = bank;
-                another_active_bank = bank;
-                battle_scripting.active_bank = bank;
-                break;
-            }
-        }
-        break;
-    case 4:
-        {
-            quality = get_all_item_quality(bank_attacker);
-            item_effect = get_item_effect(bank_attacker, 1);
-            switch (item_effect)
-            {
-            case ITEM_EFFECT_KINGSROCK:
-                if (MOVE_WORKED && special_statuses[bank_target].moveturn_losthp && percent_chance(quality) && move_table[current_move].move_flags.flags.affected_by_kingsrock)
-                {
-                    battle_participants[bank_target].status2.flinched = 1;
-                    record_usage_of_item(bank_attacker, ITEM_EFFECT_KINGSROCK);
-                }
-                break;
-            case ITEM_EFFECT_SHELLBELL:
-                if (MOVE_WORKED && special_statuses[bank_target].moveturn_losthp && special_statuses[bank_target].moveturn_losthp != 0xFFFF && bank_target != bank_attacker
-                    && battle_participants[bank_attacker].current_hp && battle_participants[bank_attacker].current_hp <= battle_participants[bank_attacker].max_hp &&
-                    !new_battlestruct->bank_affecting[bank_target].heal_block)
-                {
-                    new_battlestruct->various.accumulated_damage += special_statuses[bank_target].moveturn_losthp;
-                    special_statuses[bank_target].moveturn_losthp = 0;
-                }
-                break;
-            case ITEM_EFFECT_LIFEORB:
-                if (MOVE_WORKED && special_statuses[bank_target].moveturn_losthp && special_statuses[bank_target].moveturn_losthp != 0xFFFF &&
-                     bank_target != bank_attacker)
-                {
-                    new_battlestruct->various.life_orbed = 1;
-                }
-                break;
-            }
-        }
-        break;
-    case 5: //toxic and flame orb
-        switch (item_effect)
-        {
-        case ITEM_EFFECT_FLAMEORB:
-            if (!cant_become_burned(bank, 1))
-            {
-                effect = ALTER_NON_VOLATILE_STATUS;
-                battle_participants[bank].status.flags.burn = 1;
-                call_bc_move_exec(&flameorb_bs);
-                record_usage_of_item(bank, ITEM_EFFECT_FLAMEORB);
-            }
-            break;
-        case ITEM_EFFECT_TOXICORB:
-            if (!cant_poison(bank, 1))
-            {
-                effect = ALTER_NON_VOLATILE_STATUS;
-                battle_participants[bank].status.flags.toxic_poison = 1;
-                call_bc_move_exec(&toxicorb_bs);
-                record_usage_of_item(bank, ITEM_EFFECT_TOXICORB);
-            }
-            break;
-        }
-        break;
-    }
-    if (effect)
-    {
-        u16 item = battle_participants[bank].held_item;
-        last_used_item = item;
-        if(get_item_pocket_id(item)==4)
-        {
-            setup_berry_consume_buffers(bank);
-        }
-        if (effect == ALTER_NON_VOLATILE_STATUS)
-        {
-            active_bank = bank;
-            prepare_setattributes_in_battle(0, 0x28, 0, 4, &battle_participants[bank].status.flags);
-            mark_buffer_bank_for_execution(bank);
-        }
-    }
-    return effect;
-}
-
-u8 not_magicguard(u8 bank);
-
-u8 berry_eaten(u8 bank, bool from_remove_item)
-{
-    u8 cheek_pouch = 0;
-    if (new_battlestruct->bank_affecting[bank].eaten_berry)
-    {
-        new_battlestruct->bank_affecting[bank].eaten_berry = 0;
-        if (check_ability(bank, ABILITY_CHEEK_POUCH) && battle_participants[bank].current_hp != battle_participants[bank].max_hp)
-        {
-            cheek_pouch = 1;
-            damage_loc = ATLEAST_ONE(battle_participants[bank].max_hp / 3) * -1;
-
-            if(from_remove_item)
-            {
-                battlescripts_curr_instruction -=2;
-            }
-            battlescript_push();
-            battlescripts_curr_instruction = &cheekpouch_bs;
-            battle_scripting.active_bank = bank;
-
-            record_usage_of_ability(bank, ABILITY_CHEEK_POUCH);
-        }
-    }
-    return cheek_pouch;
-}
-
-u8 poison_heal_check()
-{
-    u8 effect = 0;
     if (check_ability(active_bank, ABILITY_POISON_HEAL))
     {
-        effect = 1;
-        if (!(new_battlestruct->bank_affecting[active_bank].heal_block || battle_participants[active_bank].current_hp == battle_participants[active_bank].max_hp))
+        if (!new_battlestruct->bank_affecting[active_bank].heal_block && !FULL_HP(active_bank))
         {
             damage_loc = get_1_8_of_max_hp(active_bank) * -1;
-            call_bc_move_exec(&poisonheal_bs);
+            call_bc_move_exec(BS_ABILITYHPCHANGE_END2);
+            record_usage_of_ability(active_bank, ABILITY_POISON_HEAL);
         }
+        return 1;
     }
-    return effect;
+    return 0;
 }
 
 u8 check_if_move_failed(u8 bank)
@@ -2552,13 +1791,6 @@ u8 check_if_move_failed(u8 bank)
 
 u8 affected_by_substitute(u8 substitute_bank);
 
-void effect_stat_change(void* pointer)
-{
-    battle_scripting.stat_changer = battle_communication_struct.move_effect;
-    battlescript_push();
-    battlescripts_curr_instruction = pointer;
-}
-
 u8 canlose_megastone(u8 bank, u16 item)
 {
     if (get_item_battle_function(item) == ITEM_EFFECT_MEGASTONE)
@@ -2582,8 +1814,10 @@ u8 canlose_megastone(u8 bank, u16 item)
     return 1;
 }
 
-u8 is_item_a_plate(u16 item)
+bool is_item_a_plate(u16 item)
 {
+    if (get_item_battle_function(item) == ITEM_EFFECT_PLATES)
+        return 1;
     return 0;
 }
 
@@ -2593,7 +1827,7 @@ u8 can_lose_item(u8 bank, u8 stickyhold_check, u8 sticky_message)
     u16 item = battle_participants[bank].held_item;
     u8 item_effect = get_item_effect(bank, 0);
     u16 species = battle_participants[bank].poke_species;
-    if (stickyhold_check && battle_participants[bank].ability_id == ABILITY_STICKY_HOLD && has_ability_effect(bank, 1, 1))
+    if (stickyhold_check && battle_participants[bank].ability_id == ABILITY_STICKY_HOLD && has_ability_effect(bank, 1))
     {
         can_lose = 0;
         if (sticky_message)
@@ -2627,229 +1861,7 @@ u8 calculate_effect_chance(u8 bank, u16 move)
     return percent_chance(effect);
 }
 
-void move_effect_setter(u8 primary, u8 certain)
-{
-    battlescripts_curr_instruction++;
-    u8 *move_effect = &battle_communication_struct.move_effect;
-    u8 affects_user = 0;
-    u8 bank_to_apply;
-    if (*move_effect & 0x40)
-    {
-        bank_to_apply = bank_attacker;
-        battle_scripting.active_bank = bank_target;
-        affects_user = 0x40;
-        *move_effect ^= 0x40;
-    }
-    else
-    {
-        bank_to_apply = bank_target;
-        battle_scripting.active_bank = bank_attacker;
-    }
-    bank_partner_def = bank_to_apply;
-    if (check_ability(bank_attacker, ABILITY_SHEER_FORCE) && bank_to_apply != bank_attacker && !primary && find_move_in_table(current_move, &sheerforce_moves_table[0]) && *move_effect < 0x30)
-        *move_effect = 0; //move effects past 0x30 affect always the attacker
-    else if (!MOVE_WORKED)
-        *move_effect = 0;
-    struct battle_participant* applier_bank = &battle_participants[bank_to_apply];
-    u16 current_hp = applier_bank->current_hp;
-    u8 substitute = 0;
-    if (affected_by_substitute(bank_to_apply) && !affects_user)
-        substitute = 1;
-    u8 shield_dust = 0;
-    if (applier_bank->ability_id == ABILITY_SHIELD_DUST && has_ability_effect(bank_to_apply, 1, 1) && !primary)
-        shield_dust = 1;
-
-    u8 status_change = 8;
-    if (*move_effect == 9) //tri attack
-    {
-        switch (__umodsi3(rng(), 3)) //random number
-        {
-        case 0:
-            *move_effect = 1;
-            break;
-        case 1:
-            *move_effect = 3;
-            break;
-        default:
-            *move_effect = 4;
-            break;
-        }
-    }
-    u8 status_table = status_flags_for_move_effects[*move_effect];
-    void* script_pointer = battlescripts_for_moveeffects[*move_effect];
-    void* ability_prevention = 0;
-
-    switch (*move_effect)
-    {
-        case 0:
-            return;
-        case 1: //put to sleep
-            if (current_hp && !shield_dust && !substitute)
-                status_change = cant_fall_asleep(bank_to_apply, 0);
-            break;
-        case 2: //poison
-        case 6: //bad poison
-            if (current_hp && !shield_dust && !substitute)
-            {
-                ability_prevention = (void*) 0x082DB5E9;
-                status_change = cant_poison(bank_to_apply, 0);
-            }
-            break;
-        case 3: //burn
-            if (current_hp && !shield_dust && !substitute)
-                status_change = cant_become_burned(bank_to_apply, 0);
-            break;
-        case 4: //freeze
-            if (current_hp && !shield_dust && !substitute)
-                status_change = cant_become_freezed(bank_to_apply, 0);
-            break;
-        case 5: //paralysis
-            if (current_hp && !shield_dust && !substitute)
-            {
-                ability_prevention = (void*) 0x082DB5DD;
-                status_change = cant_become_paralyzed(bank_to_apply, 0);
-            }
-            break;
-        case 7: //confusion
-            if (current_hp && !shield_dust && !substitute && !applier_bank->status2.confusion && !check_ability(bank_to_apply, ABILITY_OWN_TEMPO))
-            {
-                applier_bank->status2.confusion = 2 + __umodsi3(rng(), 4);
-                battlescript_push();
-                battlescripts_curr_instruction = script_pointer;
-            }
-            break;
-        case 8: //flinch
-            statustoeffect();
-            if (*move_effect && current_hp && !shield_dust && !substitute && calculate_effect_chance(bank_attacker, current_move))
-            {
-                battlescripts_curr_instruction--;
-                move_effect_setter(0, 0);
-            }
-            if (current_hp && !shield_dust && !substitute && calculate_effect_chance(bank_attacker, current_move))
-            {
-                if (check_ability(bank_to_apply, ABILITY_INNER_FOCUS))
-                {
-                    if (certain || primary)
-                    {
-                        last_used_ability = ABILITY_INNER_FOCUS;
-                        record_usage_of_ability(bank_to_apply, ABILITY_INNER_FOCUS);
-                        battlescripts_curr_instruction = (void*) 0x82DB603;
-                    }
-                }
-                else
-                {
-                    if (get_bank_turn_order(bank_to_apply) > current_move_turn)
-                        applier_bank->status2.flinched = 1;
-                }
-            }
-            break;
-        case 0x11: //stat +1
-        case 0x12:
-        case 0x13:
-        case 0x14:
-        case 0x15:
-        case 0x16:
-        case 0x17:
-            if (change_stats(0x10, *move_effect &7, affects_user, 0) == 0 && current_hp)
-                effect_stat_change(&stat_raise);
-            break;
-        case 0x18: //atk - 1
-        case 0x19: //def - 1
-        case 0x1A: //spd - 1
-        case 0x1B: //sp atk - 1
-        case 0x1C: //sp def - 1
-        case 0x1D: //accuracy - 1
-        case 0x1E: //evasion - 1
-            if (change_stats(0x90, (*move_effect - 7) &7, affects_user, 0) == 0 && current_hp)
-                effect_stat_change(&stat_lower);
-            break;
-        case 0x21:
-        case 0x22:
-        case 0x23:
-        case 0x24:
-        case 0x25:
-        case 0x26:
-        case 0x27:
-            if (change_stats(0x20, *move_effect &7, affects_user, 0) == 0 && current_hp)
-                effect_stat_change(&stat_raise);
-            break;
-        case 0x28: //atk - 2
-        case 0x29: //def - 2
-        case 0x2A: //spd - 2
-        case 0x2B: //sp atk - 2
-        case 0x2C: //sp def - 2
-        case 0x2D: //accuracy - 2
-        case 0x2E: //evasion - 2
-            if (change_stats(0xA0, (*move_effect - 7) &7 , affects_user, 0) == 0 && current_hp)
-                effect_stat_change(&stat_lower);
-            break;
-        case 0x2F: //multiple stats change
-            battlescript_push();
-            battlescripts_curr_instruction = &attackingstatschange_bs;
-            break;
-        default:
-            new_battlestruct->various.move_primary_effect = *move_effect;
-            if(affects_user)
-            {
-                new_battlestruct->various.move_primary_effect |= 0x40;
-            }
-            if (*move_effect != 10 && *move_effect != 0x37) //wake up slap/smelling salts && set two-turn move
-            {
-                statustoeffect();
-                if (*move_effect && current_hp && !shield_dust && !substitute && calculate_effect_chance(bank_attacker, current_move))
-                {
-                    battlescripts_curr_instruction--;
-                    move_effect_setter(0, 0);
-                }
-            }
-        }
-
-    if (status_change != 8)
-    {
-        switch (status_change)
-        {
-        case 0: //can apply condition
-            battlescript_push();
-            if (status_table == 7)
-                applier_bank->status.flags.sleep = 2 + __umodsi3(rng(), 4);
-            else
-                applier_bank->status.int_status |= status_table;
-
-            battlescripts_curr_instruction = script_pointer;
-            active_bank = bank_to_apply;
-            prepare_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &applier_bank->status);
-            mark_buffer_bank_for_execution(active_bank);
-            if (hitmarker & 0x2000)
-            {
-                battle_communication_struct.multistring_chooser = 1;
-                hitmarker &= 0xFFFFDFFF;
-            }
-            else
-                battle_communication_struct.multistring_chooser = 0;
-            if (*move_effect == 1 || *move_effect == 4)
-                reset_several_turns_stuff(bank_to_apply);
-            else
-                battle_stuff_ptr->synchronize_effect_chooser = *move_effect;
-            break;
-        case 4: //ability prevents it
-            if (primary || certain)
-            {
-                last_used_ability = battle_participants[bank_to_apply].ability_id;
-                record_usage_of_ability(bank_to_apply, last_used_ability);
-                if (ability_prevention)
-                {
-                    battlescript_push();
-                    battlescripts_curr_instruction = ability_prevention;
-                }
-            }
-            break;
-        }
-    }
-    *move_effect = 0;
-    return;
-}
-
-bool battle_turn_move_effects()
+bool battle_turn_move_effects(void)
 {
     u8 effect = 0;
     hitmarker |= 0x1000020;
@@ -2877,7 +1889,7 @@ bool battle_turn_move_effects()
                     ptr_to_struct->powder = 0;
                     ptr_to_struct->quashed = 0;
                     ptr_to_struct->spiky_shield = 0;
-                    break;
+                    ptr_to_struct->baneful_bunker = 0;
                 case 1: //ingrain
                     if (current_hp && current_hp < attacker_struct->max_hp && status3[active_bank].rooted && !ptr_to_struct->heal_block)
                     {
@@ -2892,7 +1904,7 @@ bool battle_turn_move_effects()
                         damage_loc = get_1_16_of_max_hp(active_bank) * -1;
                         effect = 1;
                         hitmarker |= HITMARKER_IGNORE_SUBSTITUTE;
-                        call_bc_move_exec(&aquaring_bs);
+                        call_bc_move_exec(BS_AQUARING);
                     }
                     break;
                 case 3: //end turn ability effects
@@ -2913,9 +1925,9 @@ bool battle_turn_move_effects()
                         effect = 1;
                         bank_target = status3[active_bank].leech_seed_hp_receiver; //funny this bank is a 'target' of receiving hp and the one losing it is the 'attacker'
                         damage_loc = get_1_8_of_max_hp(bank_attacker);
-                        battle_scripting.field10 = bank_target;
-                        battle_scripting.field11 = bank_attacker;
-                        call_bc_move_exec(&leechseed_updated_bs);
+                        battle_scripting.AnimInfo1 = bank_target;
+                        battle_scripting.AnimInfo2 = bank_attacker;
+                        call_bc_move_exec(BS_LEECHSEED);
                     }
                     break;
                 case 8: //poison
@@ -2980,16 +1992,12 @@ bool battle_turn_move_effects()
                     if (current_hp && attacker_struct->status2.trapped_in_wrap)
                     {
                         u16 trapped_move = battle_stuff_ptr->trapped_move[active_bank];
-                        battle_text_buff1[0] = 0xFD;
-                        battle_text_buff1[1] = 2;
-                        battle_text_buff1[2] = trapped_move;
-                        battle_text_buff1[3] = trapped_move >> 8;
-                        battle_text_buff1[4] = 0xFF;
+                        move_to_buff1(trapped_move);
                         attacker_struct->status2.trapped_in_wrap--;
                         if (attacker_struct->status2.trapped_in_wrap && not_magicguard(active_bank)) //we're doing damage
                         {
-                            battle_scripting.field10 = trapped_move;
-                            battle_scripting.field11 = trapped_move >> 8;
+                            battle_scripting.AnimInfo1 = trapped_move;
+                            battle_scripting.AnimInfo2 = trapped_move >> 8;
                             if (get_item_effect(new_battlestruct->bank_affecting[active_bank].wrap_bank, 1) == ITEM_EFFECT_BINDINGBAND)
                                 damage_loc = ATLEAST_ONE(attacker_struct->max_hp / 6);
                             else
@@ -3010,14 +2018,14 @@ bool battle_turn_move_effects()
                         for (u8 i = 0; i < no_of_all_banks; i++)
                         {
                             bank_attacker = i;
-                            if (battle_participants[i].status.flags.sleep && !(battle_participants[i].ability_id == ABILITY_SOUNDPROOF && has_ability_effect(i, 0, 1)))
+                            if (battle_participants[i].status.flags.sleep && !(battle_participants[i].ability_id == ABILITY_SOUNDPROOF && has_ability_effect(i, 0)))
                             {
                                 battle_participants[i].status.flags.sleep = 0;
                                 battle_participants[i].status2.nightmare = 0;
                                 battle_communication_struct.multistring_chooser = 1;
                                 call_bc_move_exec((void*)0x82DB234);
                                 active_bank = i;
-                                prepare_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &battle_participants[i].status);
+                                bb2_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &battle_participants[i].status);
                                 mark_buffer_bank_for_execution(active_bank);
                                 effect = 5;
                                 break;
@@ -3111,7 +2119,7 @@ bool battle_turn_move_effects()
                         if (ptr_to_struct->embargo == 0)
                         {
                             effect = 1;
-                            call_bc_move_exec(&embargo_end_bs);
+                            call_bc_move_exec(BS_EMBARGOEND);
                         }
                     }
                     break;
@@ -3133,7 +2141,7 @@ bool battle_turn_move_effects()
                         if (ptr_to_struct->heal_block == 0)
                         {
                             effect = 1;
-                            call_bc_move_exec(&healblock_end_bs2);
+                            call_bc_move_exec(BS_HEALBLOCKEND_END2);
                         }
                     }
                     break;
@@ -3144,15 +2152,15 @@ bool battle_turn_move_effects()
                         if (ptr_to_struct->magnet_rise == 0)
                         {
                             effect = 1;
-                            call_bc_move_exec(&magnetrise_end_bs);
+                            call_bc_move_exec(BS_MAGNETRISEEND_END2);
                         }
                     }
                     break;
-                case 22: //clear always hits flag
+                case 22: //clear always hits flag and always crit flag
                     if (status3[active_bank].always_hits)
-                    {
                         status3[active_bank].always_hits--;
-                    }
+                    if (new_battlestruct->bank_affecting[active_bank].always_crit)
+                        new_battlestruct->bank_affecting[active_bank].always_crit--;
                     break;
                 case 23: //charge timer decrement
                     if (disable_structs[active_bank].charge_timer)
@@ -3169,7 +2177,7 @@ bool battle_turn_move_effects()
                         if (disable_structs[active_bank].taunt_timer == 0)
                         {
                             effect = 1;
-                            call_bc_move_exec(&tauntend2_bs);
+                            call_bc_move_exec(BS_TAUNTEND_END2);
                         }
                     }
                     break;
@@ -3182,7 +2190,7 @@ bool battle_turn_move_effects()
                             reset_several_turns_stuff(active_bank);
                             effect = 1;
                             battle_participants[active_bank].status.flags.sleep = 2 + __umodsi3(rng(), 4); //2 + 0/1/2/3
-                            prepare_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &battle_participants[active_bank].status);
+                            bb2_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &battle_participants[active_bank].status);
                             mark_buffer_bank_for_execution(active_bank);
                             bank_partner_def = active_bank;
                             call_bc_move_exec((void*) 0x082DB378);
@@ -3237,19 +2245,18 @@ bool battle_turn_move_effects()
 
 u8 get_first_to_strike(u8 bank1, u8 bank2, u8 ignore_priority);
 
-void move_to_buffer(u16 move)
+void move_to_buff1(u16 move)
 {
     battle_text_buff1[0] = 0xFD;
     battle_text_buff1[1] = 2;
     battle_text_buff1[2] = move;
     battle_text_buff1[3] = move >> 8;
     battle_text_buff1[4] = 0xFF;
-    return;
 }
 
-bool update_turn_counters()
+bool update_turn_counters(void)
 {
-    #define TURN_LAST_CASE 28
+    #define TURN_LAST_CASE 29
     bool effect = 0;
     for (bank_attacker = 0; bank_attacker < no_of_all_banks; bank_attacker++)
     {
@@ -3275,8 +2282,9 @@ bool update_turn_counters()
                 new_battlestruct->field_affecting.trick_room--;
                 if (new_battlestruct->field_affecting.trick_room == 0)
                 {
+                    battle_communication_struct.multistring_chooser = 0;
                     effect = 1;
-                    call_bc_move_exec(&trickroomends_bs);
+                    call_bc_move_exec(BS_ROOMEND);
                 }
             }
             *statetracker +=1;
@@ -3287,8 +2295,9 @@ bool update_turn_counters()
                 new_battlestruct->field_affecting.magic_room--;
                 if (new_battlestruct->field_affecting.magic_room == 0)
                 {
+                    battle_communication_struct.multistring_chooser = 4;
                     effect = 1;
-                    call_bc_move_exec(&magicroomends_bs);
+                    call_bc_move_exec(BS_ROOMEND);
                 }
             }
             *statetracker +=1;
@@ -3299,8 +2308,9 @@ bool update_turn_counters()
                 new_battlestruct->field_affecting.wonder_room--;
                 if (new_battlestruct->field_affecting.wonder_room == 0)
                 {
+                    battle_communication_struct.multistring_chooser = 2;
                     effect = 1;
-                    call_bc_move_exec(&wonderoomends_bs);
+                    call_bc_move_exec(BS_ROOMEND);
                 }
             }
             *statetracker +=1;
@@ -3312,7 +2322,7 @@ bool update_turn_counters()
                 if (new_battlestruct->field_affecting.gravity == 0)
                 {
                     effect = 1;
-                    call_bc_move_exec(&gravityends_bs);
+                    call_bc_move_exec(BS_GRAVITYEND);
                 }
             }
             *statetracker +=1;
@@ -3323,8 +2333,9 @@ bool update_turn_counters()
                 new_battlestruct->field_affecting.grassy_terrain--;
                 if (new_battlestruct->field_affecting.grassy_terrain == 0)
                 {
+                    battle_communication_struct.multistring_chooser = 0;
                     effect = 1;
-                    call_bc_move_exec(&grassyterrainends_bs);
+                    call_bc_move_exec(BS_TERRAINEND);
                 }
                 else
                 {
@@ -3344,8 +2355,9 @@ bool update_turn_counters()
                 new_battlestruct->field_affecting.misty_terrain--;
                 if (new_battlestruct->field_affecting.misty_terrain == 0)
                 {
+                    battle_communication_struct.multistring_chooser = 1;
                     effect = 1;
-                    call_bc_move_exec(&mistyterrainends_bs);
+                    call_bc_move_exec(BS_TERRAINEND);
                 }
 
             }
@@ -3357,8 +2369,9 @@ bool update_turn_counters()
                 new_battlestruct->field_affecting.electic_terrain--;
                 if (new_battlestruct->field_affecting.electic_terrain == 0)
                 {
+                    battle_communication_struct.multistring_chooser = 2;
                     effect = 1;
-                    call_bc_move_exec(&electrterrainends_bs);
+                    call_bc_move_exec(BS_TERRAINEND);
                 }
             }
             *statetracker +=1;
@@ -3371,7 +2384,7 @@ bool update_turn_counters()
                 {
                     effect = 1;
                     call_bc_move_exec(BS_PRINT_SPORT_FADED);
-                    move_to_buffer(MOVE_MUD_SPORT);
+                    move_to_buff1(MOVE_MUD_SPORT);
                 }
             }
             *statetracker +=1;
@@ -3384,7 +2397,7 @@ bool update_turn_counters()
                 {
                     effect = 1;
                     call_bc_move_exec(BS_PRINT_SPORT_FADED);
-                    move_to_buffer(MOVE_WATER_SPORT);
+                    move_to_buff1(MOVE_WATER_SPORT);
                 }
             }
             *statetracker +=1;
@@ -3427,7 +2440,7 @@ bool update_turn_counters()
                         bank_attacker = side_timers[*sidebank].reflect_bank;
                         effect = 1;
                         call_bc_move_exec((void*)0x82DACFA);
-                        move_to_buffer(MOVE_REFLECT);
+                        move_to_buff1(MOVE_REFLECT);
                     }
                 }
                 *sidebank+=1;
@@ -3451,7 +2464,7 @@ bool update_turn_counters()
                         effect = 1;
                         call_bc_move_exec((void*)0x82DACFA);
                         battle_communication_struct.multistring_chooser = *sidebank;
-                        move_to_buffer(MOVE_LIGHT_SCREEN);
+                        move_to_buff1(MOVE_LIGHT_SCREEN);
                     }
                 }
                 *sidebank+=1;
@@ -3462,7 +2475,30 @@ bool update_turn_counters()
                 *statetracker +=1;
             }
             break;
-        case 13: //mist
+        case 13: //aurora veil
+            while (*sidebank <= 1 && effect == 0)
+            {
+                if (new_battlestruct->side_affecting[*sidebank].aurora_veil)
+                {
+                    new_battlestruct->side_affecting[*sidebank].aurora_veil--;
+                    if (new_battlestruct->side_affecting[*sidebank].aurora_veil == 0)
+                    {
+                        bank_attacker = *sidebank;
+                        effect = 1;
+                        call_bc_move_exec((void*)0x82DACFA);
+                        battle_communication_struct.multistring_chooser = *sidebank;
+                        move_to_buff1(MOVE_AURORA_VEIL);
+                    }
+                }
+                *sidebank+=1;
+            }
+            if (effect == 0)
+            {
+                *sidebank = 0;
+                *statetracker +=1;
+            }
+            break;
+        case 14: //mist
             while (*sidebank <= 1 && effect == 0)
             {
                 if (side_affecting_halfword[*sidebank].mist_on)
@@ -3475,7 +2511,7 @@ bool update_turn_counters()
                         effect = 1;
                         call_bc_move_exec((void*)0x82DACFA);
                         battle_communication_struct.multistring_chooser = *sidebank;
-                        move_to_buffer(MOVE_MIST);
+                        move_to_buff1(MOVE_MIST);
                     }
                 }
                 *sidebank+=1;
@@ -3486,7 +2522,7 @@ bool update_turn_counters()
                 *statetracker +=1;
             }
             break;
-        case 14: //safeguard
+        case 15: //safeguard
             while (*sidebank <= 1 && effect == 0)
             {
                 if (side_affecting_halfword[*sidebank].safeguard_on)
@@ -3499,7 +2535,7 @@ bool update_turn_counters()
                         effect = 1;
                         call_bc_move_exec((void*)0x82DAD0B);
                         battle_communication_struct.multistring_chooser = *sidebank;
-                        move_to_buffer(MOVE_SAFEGUARD);
+                        move_to_buff1(MOVE_SAFEGUARD);
                     }
                 }
                 *sidebank+=1;
@@ -3510,7 +2546,7 @@ bool update_turn_counters()
                 *statetracker +=1;
             }
             break;
-        case 15: //lucky chant
+        case 16: //lucky chant
             while (*sidebank <= 1 && effect == 0)
             {
                 if (new_battlestruct->side_affecting[*sidebank].lucky_chant)
@@ -3522,7 +2558,7 @@ bool update_turn_counters()
                         effect = 1;
                         call_bc_move_exec((void*)0x82DACFA);
                         battle_communication_struct.multistring_chooser = *sidebank;
-                        move_to_buffer(MOVE_LUCKY_CHANT);
+                        move_to_buff1(MOVE_LUCKY_CHANT);
                     }
                 }
                 *sidebank+=1;
@@ -3533,7 +2569,7 @@ bool update_turn_counters()
                 *statetracker +=1;
             }
             break;
-        case 16: //tailwind
+        case 17: //tailwind
             while (*sidebank <= 1 && effect == 0)
             {
                 if (new_battlestruct->side_affecting[*sidebank].tailwind)
@@ -3545,7 +2581,7 @@ bool update_turn_counters()
                         effect = 1;
                         call_bc_move_exec((void*)0x82DACFA);
                         battle_communication_struct.multistring_chooser = *sidebank;
-                        move_to_buffer(MOVE_TAILWIND);
+                        move_to_buff1(MOVE_TAILWIND);
                     }
                 }
                 *sidebank+=1;
@@ -3556,7 +2592,7 @@ bool update_turn_counters()
                 *statetracker +=1;
             }
             break;
-        case 17: //swamp
+        case 18: //swamp
             while (*sidebank <= 1 && effect == 0)
             {
                 if (new_battlestruct->side_affecting[*sidebank].swamp_spd_reduce)
@@ -3578,7 +2614,7 @@ bool update_turn_counters()
                 *statetracker +=1;
             }
             break;
-        case 18: //sea of fire
+        case 19: //sea of fire
             while (*sidebank <= 5 && effect == 0)
             {
                 u8 side = (*sidebank)&1;
@@ -3636,7 +2672,7 @@ bool update_turn_counters()
                 *statetracker +=1;
             }
             break;
-        case 19: //rainbow
+        case 20: //rainbow
             while (*sidebank <= 1 && effect == 0)
             {
                 if (new_battlestruct->side_affecting[*sidebank].rainbow)
@@ -3658,7 +2694,7 @@ bool update_turn_counters()
                 *statetracker +=1;
             }
             break;
-        case 20: //wish
+        case 21: //wish
             while (*sidebank < no_of_all_banks && effect == 0)
             {
                 if (battle_effects_duration.wish_duration[*sidebank])
@@ -3679,7 +2715,7 @@ bool update_turn_counters()
                 *statetracker +=1;
             }
             break;
-        case 21: //new struct
+        case 22: //new struct
             while (*sidebank <= 1)
             {
                 if (new_battlestruct->side_affecting[*sidebank].ally_fainted_last_turn)
@@ -3696,7 +2732,7 @@ bool update_turn_counters()
             }
             *sidebank = 0;
             *statetracker += 1;
-        case 22: //echo voice
+        case 23: //echo voice
             {
                 bool echo_used = 0;
                 for (u8 i = 0; i < no_of_all_banks; i++)
@@ -3716,7 +2752,7 @@ bool update_turn_counters()
                 }
                 *statetracker += 1;
             }
-        case 23: //rain
+        case 24: //rain
             if (battle_weather.flags.rain || battle_weather.flags.downpour || battle_weather.flags.heavy_rain || battle_weather.flags.permament_rain)
             {
                 effect = 1;
@@ -3741,7 +2777,7 @@ bool update_turn_counters()
             *sidebank = 0;
             *statetracker += 1;
             break;
-        case 24: //sun
+        case 25: //sun
             if (battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun)
             {
                 effect = 1;
@@ -3756,7 +2792,7 @@ bool update_turn_counters()
             }
             *statetracker += 1;
             break;
-        case 25: //darude
+        case 26: //darude
             if (battle_weather.flags.sandstorm || battle_weather.flags.permament_sandstorm)
             {
                 effect = 1;
@@ -3768,12 +2804,12 @@ bool update_turn_counters()
                     battle_weather.flags.sandstorm = 0;
                     call_bc_move_exec((void*)0x82DACC9);
                 }
-                battle_scripting.field10 = 0xC;
+                battle_scripting.AnimInfo1 = 0xC;
                 battle_communication_struct.multistring_chooser = 0;
             }
             *statetracker += 1;
             break;
-        case 26: //hail
+        case 27: //hail
             if (battle_weather.flags.hail || battle_weather.flags.permament_hail)
             {
                 effect = 1;
@@ -3785,12 +2821,12 @@ bool update_turn_counters()
                     battle_weather.flags.hail = 0;
                     call_bc_move_exec((void*)0x82DACC9);
                 }
-                battle_scripting.field10 = 0xD;
+                battle_scripting.AnimInfo1 = 0xD;
                 battle_communication_struct.multistring_chooser = 1;
             }
             *statetracker += 1;
             break;
-        case 27: //fog
+        case 28: //fog
             if (battle_weather.flags.fog || battle_weather.flags.permament_fog)
             {
                 effect = 1;
@@ -3953,14 +2989,14 @@ u8 check_move_limitations(u8 bank, u8 not_usable_moves, struct move_limitation l
     return not_usable_moves;
 }
 
-u8 message_cant_choose_move()
+bool message_cant_choose_move(void)
 {
     u8 bank = another_active_bank = active_bank;
     struct battle_participant* checking_bank = &battle_participants[bank];
     u8 move_index = battle_bufferB[bank].args[1];
     u16 checking_move = checking_bank->moves[move_index];
     void** loc_to_store_bs = (void*) 0x2024220 + bank * 4;
-    u8 cant = 0;
+    bool cant = 0;
     u8 item_effect = get_item_effect(bank, 1);
     if (checking_bank->current_pp[move_index] == 0)
     {
@@ -3978,7 +3014,7 @@ u8 message_cant_choose_move()
     {
         cant = 1;
         last_used_item = checking_bank->held_item;
-        *loc_to_store_bs = &assaultvest_bs;
+        *loc_to_store_bs = BS_CANTSELECT_ASSAULTVEST;
     }
     else if (status3[bank].imprision && check_if_imprisioned(bank, checking_move))
     {
@@ -4006,13 +3042,13 @@ u8 message_cant_choose_move()
     {
         cant = 1;
         current_move = checking_move;
-        *loc_to_store_bs = &gravityprevents2_bs;
+        *loc_to_store_bs = BS_CANTSELECT_GRAVITY;
     }
     else if (new_battlestruct->bank_affecting[bank].heal_block && healblock_forbidden_moves(checking_move, 0))
     {
         cant = 1;
         current_move = checking_move;
-        *loc_to_store_bs = &cantselecthealblock_bs;
+        *loc_to_store_bs = BS_CANTSELECT_HEALBLOCK;
     }
     return cant;
 }
@@ -4046,7 +3082,7 @@ s8 can_switch(u8 bank) //1 - can; 0 - can't; -1 can't due to abilities
     return 1;
 }
 
-u8 wonderguard_good_move(u8 wonder_bank, u8 bank, u16 move, u8 check_status)
+bool wonderguard_good_move(u8 wonder_bank, u8 bank, u16 move, u8 check_status)
 {
     u16 effectiveness = type_effectiveness_calc(move, move_table[move].type, bank, wonder_bank, 0);
     if (DAMAGING_MOVE(move) && effectiveness > 64) //move is super effective
@@ -4056,7 +3092,7 @@ u8 wonderguard_good_move(u8 wonder_bank, u8 bank, u16 move, u8 check_status)
         u8 movescript = move_table[move].script_id;
         if (movescript == 13 || movescript == 14) //if we can poison the bank, switch isn't necessary
         {
-            if (!cant_poison(wonder_bank, 0))
+            if (!cant_poison(bank, wonder_bank, 0))
                 return 1;
         }
         else if (movescript == 16) //if we can burn the bank, switch isn't necessary
@@ -4073,7 +3109,7 @@ u8 wonderguard_good_move(u8 wonder_bank, u8 bank, u16 move, u8 check_status)
     return 0;
 }
 
-u8 can_poke_be_switched_into(u8 index, u8 bank)
+bool can_poke_be_switched_into(u8 index, u8 bank)
 {
     u8 bank_to_ignore = bank;
     if (battle_flags.double_battle && is_bank_present(bank ^ 2))
@@ -4093,7 +3129,7 @@ u8 can_poke_be_switched_into(u8 index, u8 bank)
     return 0;
 }
 
-u8 ai_switch_wonderguard()
+bool ai_switch_wonderguard(void)
 {
     u8 worth = 0;
     u8 wonder_bank = 0;
@@ -4153,7 +3189,7 @@ u8 ai_switch_wonderguard()
     return 0;
 }
 
-u8 ai_ability_switch()
+bool ai_ability_switch(void)
 {
     if (check_ability(active_bank, ABILITY_NATURAL_CURE))
     {
@@ -4166,7 +3202,7 @@ u8 ai_ability_switch()
     return 0;
 }
 
-u8 tai_should_switch()
+bool tai_should_switch(void)
 {
     if (!can_switch(active_bank))
         return 0;
@@ -4195,3 +3231,4 @@ u8 tai_should_switch()
     }
     return 0;
 }
+

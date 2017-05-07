@@ -1,21 +1,19 @@
 #include "defines.h"
 #include "static_references.h"
 
-#define MOVE_PHYSICAL 0
-#define MOVE_SPECIAL 1
-#define MOVE_STATUS 2
-
 u8 get_airborne_state(u8 bank, u8 mode, u8 check_levitate);
 u8 can_lose_item(u8 bank, u8 stickyholdcheck, u8 sticky_message);
 u8 is_item_a_plate(u16 item);
 u16 get_item_extra_param(u16 item);
 u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special_cases_argument, u16 move);
 u8 get_item_effect(u8 bank, u8 check_negating_effects);
-u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro);
+u8 has_ability_effect(u8 bank, u8 mold_breaker);
 s8 get_move_position(u8 bank, u16 move);
 u8 weather_abilities_effect();
 u8 is_of_type(u8 bank, u8 type);
 bool check_ability(u8 bank, u8 ability);
+u8 is_bank_present(u8 bank);
+void move_to_buff1(u16 move);
 
 struct natural_gift{
     u8 move_power;
@@ -31,8 +29,6 @@ struct fling{
 };
 
 const struct fling fling_table[] = { {ITEM_CHOICEBAND, 10, 0}, {ITEM_BRIGHTPOWDER, 10, 0}, {ITEM_FOCUSBAND, 10, 0}, {ITEM_LEFTOVERS, 10, 0}, {ITEM_MENTALHERB, 10, 0}, {ITEM_METALPOWDER, 10, 0}, {ITEM_SILKSCARF, 10, 0}, {ITEM_SILVERPOWDER, 10, 0}, {ITEM_SOFTSAND, 10, 0}, {ITEM_SOOTHEBELL, 10, 0}, {ITEM_WHITEHERB, 10, 0}, {ITEM_ANTIDOTE, 30, 0}, {ITEM_PARLYZHEAL, 30, 0}, {ITEM_AWAKENING, 30, 0}, {ITEM_BURNHEAL, 30, 0}, {ITEM_ICEHEAL, 30, 0}, {ITEM_FULLHEAL, 30, 0}, {ITEM_FULLRESTORE, 30, 0}, {ITEM_LAVACOOKIE, 30, 0}, {ITEM_POTION, 30, 0}, {ITEM_SUPERPOTION, 30, 0}, {ITEM_HYPERPOTION, 30, 0}, {ITEM_MAXPOTION, 30, 0}, {ITEM_HEALPOWDER, 30, 0}, {ITEM_ENERGYPOWDER, 30, 0}, {ITEM_ENERGYROOT, 30, 0}, {ITEM_REVIVALHERB, 30, 0}, {ITEM_REVIVE, 30, 0}, {ITEM_MAXREVIVE, 30, 0}, {ITEM_SODAPOP, 30, 0}, {ITEM_LEMONADE, 30, 0}, {ITEM_SODAPOP, 30, 0}, {ITEM_MOOMOOMILK, 30, 0}, {ITEM_BERRYJUICE, 30, 0}, {ITEM_ETHER, 30, 0}, {ITEM_MAXETHER, 30, 0}, {ITEM_ELIXIR, 30, 0}, {ITEM_MAXELIXIR, 30, 0}, {ITEM_REPEL, 30, 0}, {ITEM_SUPERREPEL, 30, 0}, {ITEM_MAXREPEL, 30, 0}, {ITEM_PROTEIN, 30, 0}, {ITEM_ZINC, 30, 0}, {ITEM_CALCIUM, 30, 0}, {ITEM_CARBOS, 30, 0}, {ITEM_HPUP, 30, 0}, {ITEM_PPUP, 30, 0}, {ITEM_PPMAX, 30, 0}, {ITEM_REDSHARD, 30, 0}, {ITEM_BLUESHARD, 30, 0}, {ITEM_YELLOWSHARD, 30, 0}, {ITEM_GREENSHARD, 30, 0}, {ITEM_XACCURACY, 30, 0}, {ITEM_XDEFEND, 30, 0}, {ITEM_XSPEED, 30, 0}, {ITEM_XATTACK, 30, 0}, {ITEM_XSPECIAL, 30, 0}, {ITEM_YELLOWFLUTE, 30, 0}, {ITEM_BLACKFLUTE, 30, 0}, {ITEM_WHITEFLUTE, 30, 0}, {ITEM_REDFLUTE, 30, 0}, {ITEM_BLUEFLUTE, 30, 0}, {ITEM_AMULETCOIN, 30, 0}, {ITEM_BIGMUSHROOM, 30, 0}, {ITEM_BIGPEARL, 30, 0}, {ITEM_BLACKBELT, 30, 0}, {ITEM_CHARCOAL, 30, 0}, {ITEM_CLEANSETAG, 30, 0}, {ITEM_DEEPSEASCALE, 30, 0}, {ITEM_DRAGONSCALE, 30, 0}, {ITEM_ESCAPEROPE, 30, 0}, {ITEM_EVERSTONE, 30, 0}, {ITEM_EXPSHARE, 30, 0}, {ITEM_FIRESTONE, 30, 0}, {ITEM_FLUFFYTAIL, 30, 0}, {ITEM_HEARTSCALE, 30, 0}, {ITEM_KINGSROCK, 30, 0}, {ITEM_LEAFSTONE, 30, 0}, {ITEM_LIGHTBALL, 30, 0}, {ITEM_LUCKYEGG, 30, 0}, {ITEM_MAGNET, 30, 0}, {ITEM_METALCOAT, 30, 0}, {ITEM_MIRACLESEED, 30, 0}, {ITEM_MOONSTONE, 30, 0}, {ITEM_MYSTICWATER, 30, 0}, {ITEM_NEVERMELTICE, 30, 0}, {ITEM_NUGGET, 30, 0}, {ITEM_PEARL, 30, 0}, {ITEM_POKEDOLL, 30, 0}, {ITEM_SACREDASH, 30, 0}, {ITEM_SCOPELENS, 30, 0}, {ITEM_SHELLBELL, 30, 0}, {ITEM_SHOALSALT, 30, 0}, {ITEM_SHOALSHELL, 30, 0}, {ITEM_SMOKEBALL, 30, 0}, {ITEM_SOULDEW, 30, 0}, {ITEM_SPELLTAG, 30, 0}, {ITEM_STARDUST, 30, 0}, {ITEM_STARPIECE, 30, 0}, {ITEM_SUNSTONE, 30, 0}, {ITEM_THUNDERSTONE, 30, 0}, {ITEM_TINYMUSHROOM, 30, 0}, {ITEM_TWISTEDSPOON, 30, 0}, {ITEM_UPGRADE, 30, 0}, {ITEM_WATERSTONE, 30, 0}, {ITEM_LUCKYPUNCH, 40, 0}, {ITEM_SHARPBEAK, 50, 0}, {ITEM_MACHOBRACE, 60, 0}, {ITEM_STICK, 60, 0}, {ITEM_DRAGONFANG, 70, 0}, {ITEM_POISONBARB, 70, 0}, {ITEM_QUICKCLAW, 80, 0}, {ITEM_DEEPSEATOOTH, 90, 0}, {ITEM_THICKCLUB, 90, 0}, {ITEM_DOMEFOSSIL, 100, 0}, {ITEM_HELIXFOSSIL, 100, 0}, {ITEM_OLDAMBER, 100, 0}, {ITEM_ROOTFOSSIL, 100, 0}, {ITEM_CLAWFOSSIL, 100, 0}, {0xFFFF, 0, 0} };
-
-const struct stat_fractions stat_buffs[] = { {2, 8}, {2, 7}, {2, 6}, {2, 5}, {2, 4}, {2, 3}, {2, 2}, {3, 2}, {4, 2}, {5, 2}, {6, 2}, {7, 2}, {8, 2} };
 
 bool can_evolve(u16 species)
 {
@@ -88,10 +84,16 @@ u16 percent_to_modifier(u8 percent) //20 gives exactly 0x1333, 30 is short on 1
     return 0x1000 + (percent * 819 / 20);
 }
 
+u16 apply_statboost(u16 stat, u8 boost)
+{
+    static const struct stat_fractions stat_buffs[13] = { {2, 8}, {2, 7}, {2, 6}, {2, 5}, {2, 4}, {2, 3}, {2, 2}, {3, 2}, {4, 2}, {5, 2}, {6, 2}, {7, 2}, {8, 2} };
+    return stat * stat_buffs[boost].dividend / stat_buffs[boost].divisor;
+}
+
 u16 get_poke_weight(u8 bank)
 {
     u16 poke_weight = get_height_or_weight(species_to_national_dex(battle_participants[bank].poke_species), 1);
-    if (has_ability_effect(bank, 1, 1))
+    if (has_ability_effect(bank, 1))
     {
         switch (battle_participants[bank].ability_id)
         {
@@ -104,9 +106,8 @@ u16 get_poke_weight(u8 bank)
         }
     }
     if (get_item_effect(bank, 1) == ITEM_EFFECT_FLOATSTONE)
-    {
-        poke_weight *= 2;
-    }
+        poke_weight /= 2;
+
     s16 to_sub = 1000 * new_battlestruct->bank_affecting[bank].autonomize_uses;
     poke_weight -= to_sub;
     if (poke_weight < 1)
@@ -149,38 +150,36 @@ u16 get_speed(u8 bank)
         break;
     }
     //take abilities into account
-    if (has_ability_effect(bank, 0, 1))
+    if (has_ability_effect(bank, 0))
     {
         u8 weather_effect = weather_abilities_effect();
         switch (battle_participants[bank].ability_id)
         {
         case ABILITY_CHLOROPHYLL:
             if (weather_effect && (battle_weather.flags.harsh_sun || battle_weather.flags.permament_sun || battle_weather.flags.sun))
-            {
                 speed *= 2;
-            }
             break;
         case ABILITY_SWIFT_SWIM:
             if (weather_effect && (battle_weather.flags.rain || battle_weather.flags.downpour || battle_weather.flags.permament_rain || battle_weather.flags.heavy_rain))
-            {
                 speed *= 2;
-            }
             break;
         case ABILITY_SAND_RUSH:
             if (weather_effect && (battle_weather.flags.sandstorm || battle_weather.flags.permament_sandstorm))
-            {
                 speed *= 2;
-            }
+            break;
+        case ABILITY_SLUSH_RUSH:
+            if (weather_effect && (battle_weather.flags.hail || battle_weather.flags.permament_hail))
+                speed *= 2;
+            break;
+        case ABILITY_SURGE_SURFER:
+            if (new_battlestruct->field_affecting.electic_terrain)
+                speed *= 2;
             break;
         case ABILITY_QUICK_FEET:
             if (battle_participants[bank].status.flags.poison || battle_participants[bank].status.flags.toxic_poison || battle_participants[bank].status.flags.burn)
-            {
                 speed *= 2;
-            }
             else if (battle_participants[bank].status.flags.paralysis)
-            {
                 speed *= 4;
-            }
             break;
         }
     }
@@ -196,7 +195,7 @@ u16 get_speed(u8 bank)
     //paralysis
     if (battle_participants[bank].status.flags.paralysis)
         speed /= 4;
-    speed = (speed * stat_buffs[battle_participants[bank].spd_buff].dividend / stat_buffs[battle_participants[bank].spd_buff].divisor);
+    speed = apply_statboost(speed, battle_participants[bank].spd_buff);
 
     return speed;
 }
@@ -494,6 +493,7 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
             }
             break;
     }
+    curr_move_BP = base_power;
     return base_power;
 }
 
@@ -506,12 +506,19 @@ bool find_move_in_table(u16 move, const u16* table_ptr)
     return false;
 }
 
+bool does_move_make_contact(u16 move, u8 atk_bank)
+{
+    if (move_table[move].move_flags.flags.makes_contact && !check_ability(atk_bank, ABILITY_LONG_REACH) && get_item_effect(atk_bank, 1) != ITEM_EFFECT_PROTECTIVEPADS)
+        return 1;
+    return 0;
+}
+
 u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u16 base_power)
 {
     u16 modifier = 0x1000;
     u8 move_split = move_table[move].split;
     u16 quality_atk_modifier = percent_to_modifier(get_item_quality(battle_participants[atk_bank].held_item));
-    if (has_ability_effect(atk_bank, 0, 1))
+    if (has_ability_effect(atk_bank, 0))
     {
         switch (battle_participants[atk_bank].ability_id)
         {
@@ -602,7 +609,7 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
         case ABILITY_WATER_BUBBLE:
             if (move_type == TYPE_WATER)
             {
-                modifier = chain_modifier(modifier, 0x1400);
+                modifier = chain_modifier(modifier, 0x2000);
             }
             break;
         case ABILITY_STEELWORKER:
@@ -625,23 +632,38 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
             modifier = chain_modifier(modifier, 0x1547);
         }
     }
+    //check partner abilities
+    u8 atk_partner = atk_bank ^ 2;
+    if (is_bank_present(atk_partner) && has_ability_effect(atk_partner, 0))
+    {
+        switch (battle_participants[atk_partner].ability_id)
+        {
+        case ABILITY_BATTERY:
+            if (move_split == MOVE_SPECIAL)
+                modifier = chain_modifier(modifier, 0x14CD);
+            break;
+        }
+    }
 
-    if (has_ability_effect(def_bank, 1, 1))
+    //check target abilities
+    if (has_ability_effect(def_bank, 1))
     {
         switch (battle_participants[def_bank].ability_id)
         {
         case ABILITY_HEATPROOF:
         case ABILITY_WATER_BUBBLE:
             if (move_type == TYPE_FIRE)
-            {
                 modifier = chain_modifier(modifier, 0x800);
-            }
             break;
         case ABILITY_DRY_SKIN:
             if (move_type == TYPE_FIRE)
-            {
                 modifier = chain_modifier(modifier, 0x1400);
-            }
+            break;
+        case ABILITY_FLUFFY:
+            if (does_move_make_contact(move, atk_bank))
+                modifier = chain_modifier(modifier, 0x800);
+            if (move_type == TYPE_FIRE)
+                modifier = chain_modifier(modifier, 0x2000);
             break;
         }
     }
@@ -905,7 +927,7 @@ u16 get_attack_stat(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
         attack_boost = battle_participants[stat_bank].sp_atk_buff;
     }
 
-    if (has_ability_effect(def_bank, 1, 1) && battle_participants[def_bank].ability_id == ABILITY_UNAWARE)
+    if (has_ability_effect(def_bank, 1) && battle_participants[def_bank].ability_id == ABILITY_UNAWARE)
     {
         attack_boost = 6;
     }
@@ -914,11 +936,12 @@ u16 get_attack_stat(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
         attack_boost = 6;
     }
 
-    attack_stat = (attack_stat * stat_buffs[attack_boost].dividend / stat_buffs[attack_boost].divisor);
+    //apply stat boost to attack stat
+    attack_stat = apply_statboost(attack_stat, attack_boost);
 
     //final modifications
     u16 modifier = 0x1000;
-    if (has_ability_effect(atk_bank, 0, 1))
+    if (has_ability_effect(atk_bank, 0))
     {
         u8 pinch_abilities;
         if (battle_participants[atk_bank].current_hp >= (battle_participants[atk_bank].max_hp / 3))
@@ -1087,14 +1110,13 @@ u16 get_def_stat(u16 move, u8 atk_bank, u8 def_bank)
         def_boost = battle_participants[def_bank].def_buff;
     }
 
-    if (has_ability_effect(atk_bank, 0, 1) && battle_participants[atk_bank].ability_id == ABILITY_UNAWARE)
-        def_boost = 6;
-    else if ((move == MOVE_CHIP_AWAY || move == MOVE_SACRED_SWORD) && def_boost > 6)
+    if (check_ability(atk_bank, ABILITY_UNAWARE) || find_move_in_table(move, ignore_targetstats_moves))
         def_boost = 6;
     else if (crit_loc == 2 && def_boost > 6)
         def_boost = 6;
 
-    def_stat = def_stat * stat_buffs[def_boost].dividend / stat_buffs[def_boost].divisor;
+    //apply def boost to the stat
+    def_stat = apply_statboost(def_stat, def_boost);
 
     u16 modifier = 0x1000;
 
@@ -1107,20 +1129,20 @@ u16 get_def_stat(u16 move, u8 atk_bank, u8 def_bank)
         u8 flowergift_bank = ability_battle_effects(13, def_bank, ABILITY_FLOWER_GIFT, 0, 0);
         if (flowergift_bank)
         {
-            if (has_ability_effect(flowergift_bank - 1, 1, 1))
+            if (has_ability_effect(flowergift_bank - 1, 1))
                 modifier = chain_modifier(modifier, 0x1800);
         }
     }
 
-    if (has_ability_effect(def_bank, 1, 1) && battle_participants[def_bank].ability_id == ABILITY_MARVEL_SCALE && battle_participants[def_bank].status.int_status && chosen_def == 0)
+    if (has_ability_effect(def_bank, 1) && battle_participants[def_bank].ability_id == ABILITY_MARVEL_SCALE && battle_participants[def_bank].status.int_status && chosen_def == 0)
     {
         modifier = chain_modifier(modifier, 0x1800);
     }
-    else if (has_ability_effect(def_bank, 1, 1) && battle_participants[def_bank].ability_id == ABILITY_FUR_COAT && chosen_def == 0)
+    else if (has_ability_effect(def_bank, 1) && battle_participants[def_bank].ability_id == ABILITY_FUR_COAT && chosen_def == 0)
     {
         modifier = chain_modifier(modifier, 0x2000);
     }
-    else if (has_ability_effect(def_bank, 1, 1) && battle_participants[def_bank].ability_id == ABILITY_GRASS_PELT && new_battlestruct->field_affecting.grassy_terrain && chosen_def == 0)
+    else if (has_ability_effect(def_bank, 1) && battle_participants[def_bank].ability_id == ABILITY_GRASS_PELT && new_battlestruct->field_affecting.grassy_terrain && chosen_def == 0)
     {
         modifier = chain_modifier(modifier, 0x1800);
     }
@@ -1163,7 +1185,20 @@ u16 get_def_stat(u16 move, u8 atk_bank, u8 def_bank)
 }
 
 u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8 effects_handling_and_recording);
-u8 does_move_target_multiple();
+u8 does_move_target_multiple(void);
+u8 count_alive_on_target_side(void);
+
+u16 calc_reflect_modifier(u8 atk_bank, u16 final_modifier)
+{
+    if (crit_loc != 2 && !((check_ability(atk_bank, ABILITY_INFILTRATOR))))
+    {
+        if (count_alive_on_target_side() == 2 && battle_flags.double_battle)
+            final_modifier = chain_modifier(final_modifier, 0xA8F);
+        else
+            final_modifier = chain_modifier(final_modifier, 0x800);
+    }
+    return final_modifier;
+}
 
 void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u16 chained_effectiveness)
 {
@@ -1210,7 +1245,7 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u16 chained_e
     if (move_type != TYPE_EGG && is_of_type(atk_bank, move_type) && move != MOVE_STRUGGLE)
     {
         damage = apply_modifier(0x1800, damage);
-        if (has_ability_effect(atk_bank, 0, 1) && battle_participants[atk_bank].ability_id == ABILITY_ADAPTABILITY)
+        if (check_ability(atk_bank, ABILITY_ADAPTABILITY))
             final_modifier = 0x2000;
     }
     //type effectiveness
@@ -1225,37 +1260,39 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u16 chained_e
     damage = ATLEAST_ONE(damage);
     //final modifiers
     u8 move_split = move_table[move].split;
-    if ((side_affecting_halfword[def_bank & 1].reflect_on && move_split == MOVE_PHYSICAL) ||(side_affecting_halfword[def_bank & 1].light_screen_on && move_split == MOVE_SPECIAL))
-    {
-        if (crit_loc != 2 && !((has_ability_effect(atk_bank, 0, 1) && battle_participants[atk_bank].ability_id == ABILITY_INFILTRATOR)))
-        {
-            if (count_alive_pokes_on_side(2) == 2 && battle_flags.double_battle)
-                final_modifier = chain_modifier(final_modifier, 0xA8F);
-            else
-                final_modifier = chain_modifier(final_modifier, 0x800);
-        }
-    }
+
+    //check reflect/light screen
+    u8 def_side = is_bank_from_opponent_side(def_bank);
+    if ((side_affecting_halfword[def_side].reflect_on && move_split == MOVE_PHYSICAL) ||(side_affecting_halfword[def_side].light_screen_on && move_split == MOVE_SPECIAL))
+        final_modifier = calc_reflect_modifier(atk_bank, final_modifier);
+
+    //check aurora veil
+    if (new_battlestruct->side_affecting[def_side].aurora_veil)
+        final_modifier = calc_reflect_modifier(atk_bank, final_modifier);
+
     u8 atk_ability = battle_participants[atk_bank].ability_id;
     u8 def_ability = battle_participants[def_bank].ability_id;
-    if (def_ability == ABILITY_MULTISCALE && has_ability_effect(def_bank, 1, 1))
+    //halve damage if full HP
+    if (FULL_HP(def_bank) && (def_ability == ABILITY_SHADOW_SHIELD || def_ability == ABILITY_MULTISCALE) && has_ability_effect(def_bank, 1))
     {
         final_modifier = chain_modifier(final_modifier, 0x800);
     }
-    if (atk_ability == ABILITY_TINTED_LENS && move_outcome.not_very_effective && has_ability_effect(atk_bank, 0, 1))
+    if (atk_ability == ABILITY_TINTED_LENS && move_outcome.not_very_effective && has_ability_effect(atk_bank, 0))
     {
         final_modifier = chain_modifier(final_modifier, 0x2000);
     }
     if (ability_battle_effects(20, def_bank, ABILITY_FRIEND_GUARD, 0, 1))
     {
         if((atk_ability != ABILITY_MOLD_BREAKER && atk_ability != ABILITY_TERAVOLT &&
-            atk_ability != ABILITY_TURBOBLAZE) || !has_ability_effect(atk_bank,0,1))
+            atk_ability != ABILITY_TURBOBLAZE) || !has_ability_effect(atk_bank,0))
             final_modifier = chain_modifier(final_modifier, 0xC00);
     }
-    if (atk_ability == ABILITY_SNIPER && crit_loc == 2 && has_ability_effect(atk_bank, 0, 1))
+    if (atk_ability == ABILITY_SNIPER && crit_loc == 2 && has_ability_effect(atk_bank, 0))
     {
         final_modifier = chain_modifier(final_modifier, 0x1800);
     }
-    if ((def_ability == ABILITY_FILTER || def_ability == ABILITY_SOLID_ROCK) && move_outcome.super_effective && has_ability_effect(def_bank, 1, 1))
+    //reduces power of super effective moves
+    if (move_outcome.super_effective && ((def_ability == ABILITY_FILTER || def_ability == ABILITY_SOLID_ROCK || def_ability == ABILITY_PRISM_ARMOR) && has_ability_effect(def_bank, 1)))
     {
         final_modifier = chain_modifier(final_modifier, 0xC00);
     }
@@ -1302,9 +1339,9 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u16 chained_e
     damage_loc = ATLEAST_ONE(damage);
 }
 
-u8 get_attacking_move_type();
+u8 get_attacking_move_type(void);
 
-void damage_calc_cmd_05()
+void damage_calc_cmd_05(void)
 {
     u8 move_type=get_attacking_move_type();
     u16 item = battle_participants[bank_attacker].held_item;
@@ -1313,20 +1350,14 @@ void damage_calc_cmd_05()
     {
         last_used_item = item;
         new_battlestruct->various.gem_boost = 1;
-        battle_text_buff1[0] = 0xFD;
-        battle_text_buff1[1] = 0x2;
-        battle_text_buff1[2] = current_move;
-        battle_text_buff1[3] = current_move >> 8;
-        battle_text_buff1[4] = 0xFF;
+        move_to_buff1(current_move);
         battlescript_push();
-        battlescripts_curr_instruction = &gem_bs;
+        battlescripts_curr_instruction = BS_GEM_MSG;
         return;
     }
     damage_calc(current_move, move_type, bank_attacker, bank_target, chained_effectiveness);
-    if(new_battlestruct->various.parental_bond_mode==PBOND_CHILD)
-    {
-        damage_loc=damage_loc>>1;
-    }
+    if (new_battlestruct->various.parental_bond_mode == PBOND_CHILD)
+        damage_loc /= 2;
+
     battlescripts_curr_instruction++;
-    return;
 }

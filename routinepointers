@@ -10,13 +10,16 @@ final_damagecalc_cmd7 0831BD2C
 callasm_cmd 0831BF1C
 atk00_move_canceller 0831BD10
 atk02_attackstring 0831BD18
+atk09_attackanimation 0831BD34
 atk0C_datahpupdate 0831BD40
 atk0F_resultmessage 0831BD4C
 atk13_printfromtable 0831BD5C
 atk15_setmoveeffectchance 0831BD64
+atk16_setmoveeffectprimary 0831BD68
+atk17_setmoveeffectsecondary 0831BD6C
 atk23_exp_evs_lvlup 0831BD9C
 atk42_jump_if_type 0831BE18
-atk47_graphical_statchange 0831BE2C
+atk47_set_statchange_values 0831BE2C
 atk49_move_end_turn 0831BE34
 atk56_prepare_fainting_cry 0831BE68
 atk5C_hitanimation 0831BE80
@@ -30,6 +33,7 @@ atk7E_set_reflect 0831BF08
 atk7F_set_leech_seed 0831BF0C
 atk84_jumpifcannotsleep 0831BF20
 atk88_drain_damage 0831BF30
+atk89_changestats 0831BF34
 atk8D_multihit_move_loop_counter 0831BF44
 atk92_set_lightscreen 0831BF58
 atk93_ko_move 0831BF5C

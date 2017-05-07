@@ -8,7 +8,73 @@
 @banks
 .equ bank_target, 0x0
 .equ bank_attacker, 0x1
+.equ bank_partner_def, 0x2
 .equ bank_scripting_active, 10
+
+@script locations
+.equ MOVE_FAILED, 0x082D9F1A
+.equ MOVE_MISSED, 0x082D8A5E
+.equ ENDTURN, 0x82D8A4E
+.equ StatChanger, 0x0202448E
+.equ HitMarker, 0x2024280
+.equ MultiStringChooser, 0x2024337
+.equ AnimDecider, 0x202448C
+.equ MoveOutcome, 0x202427C
+.equ OutcomeMissed, 1
+.equ OutcomeNotaffected, 8
+.equ OutcomeFailed, 0x20
+.equ OutcomeSturdied, 0x100
+
+.equ STAT_SELF_INFLICTED, 0x40
+
+@ callasm defines
+@@@macros for callasms
+.macro jumpifsubstituteaffects jumpifsubstituteaffects_address
+.byte 0x83
+.hword 26
+.word \jumpifsubstituteaffects_address
+.endm
+
+.macro jumpifcantchangetwostats jumpifcantchangetwostats_address
+.byte 0x83
+.hword 28
+.word \jumpifcantchangetwostats_address
+.endm
+
+.macro doublestatchange
+.byte 0x83
+.hword 29
+.endm
+
+.macro jumpifcantconfuseandchangestats jumpifcantconfuseandchangestats_address
+.byte 0x83
+.hword 31
+.word \jumpifcantconfuseandchangestats_address
+.endm
+
+.macro jumpifonlyonepokemoninteam jumpifonlyonepokemoninteam_address
+.byte 0x83
+.hword 38
+.word \jumpifonlyonepokemoninteam_address
+.endm
+
+.macro weatherhpheal weatherhphealbank
+.byte 0x83
+.hword 40
+.byte \weatherhphealbank
+.endm
+
+.macro jumpifnoally jumpifnoally_address
+.byte 0x83
+.hword 59
+.word \jumpifnoally_address
+.endm
+
+.macro jumpifuserhasnoHP jumpifuserhasnoHP_address
+.byte 0x83
+.hword 91
+.word \jumpifuserhasnoHP_address
+.endm
 
 @@@@@@@@@@@@@@@@@ Macro
 
@@ -158,9 +224,9 @@ jumpifbyte 0x4 0x202427C 0x29 \jumpiftypenotaffected_address
 .word \faintpokemon_parameter3
 .endm
 
-.macro cmd1a cmd1a_parameter1
+.macro cmd1a cmd1abank
 .byte 0x1A
-.byte cmd1a_parameter1
+.byte \cmd1abank
 .endm
 
 .macro cmd1b cmd1b_bank
@@ -434,7 +500,7 @@ jumpifbyte 0x4 0x202427C 0x29 \jumpiftypenotaffected_address
 .word \cmd46_word
 .endm
 
-.macro cmd47
+.macro set_statchange_values
 .byte 0x47
 .endm
 
@@ -513,9 +579,9 @@ jumpifbyte 0x4 0x202427C 0x29 \jumpiftypenotaffected_address
 .word \cmd55_word
 .endm
 
-.macro cmd56 cmd56_bank_or_side
+.macro playfaintingcry playfaintingcrybank
 .byte 0x56
-.byte \cmd56_bank_or_side
+.byte \playfaintingcrybank
 .endm
 
 .macro cmd57
@@ -592,17 +658,17 @@ jumpifbyte 0x4 0x202427C 0x29 \jumpiftypenotaffected_address
 .byte \statusanimation_bank
 .endm
 
-.macro cmd65 cmd65_bank_or_side cmd65_address
+.macro status2animation status2animationbank status2animationstatus
 .byte 0x65
-.byte \cmd65_bank_or_side
-.word \cmd65_address
+.byte \status2animationbank
+.word \status2animationstatus
 .endm
 
-.macro cmd66 cmd66_bank_or_side cmd66_bank_or_side2 cmd66_address
+.macro chosenstatusanimation chosenstatusanimationbank chosenstatusanimationbankstatus chosenstatusanimationbankaddress
 .byte 0x66
-.byte \cmd66_bank_or_side
-.byte \cmd66_bank_or_side2
-.word \cmd66_address
+.byte \chosenstatusanimationbank
+.byte \chosenstatusanimationbankstatus
+.word \chosenstatusanimationbankaddress
 .endm
 
 .macro cmd67
@@ -1278,4 +1344,8 @@ jumpifbyte 0x4 0x202427C 0x29 \jumpiftypenotaffected_address
 .byte \cmdf8_bank
 .endm
 
-
+@a new move setter callasm_cmd
+.macro seteffect1 seteffecteffect
+callasm_cmd 145
+.hword \seteffecteffect
+.endm

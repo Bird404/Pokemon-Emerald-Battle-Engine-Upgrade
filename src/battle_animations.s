@@ -8,7 +8,7 @@
 .align 2
 NewPlayAnimationTable:
 .word CASTFORM_CHANGE_ANIM
-.word STAT_CHANGE_ANIM
+.word StatChangeAnimation
 .word SUBSTITUTE_DESTROYED_ANIM
 .word CREATE_SUBSTITUTE_ANIM
 .word anim_table4
@@ -37,10 +37,27 @@ NewPlayAnimationTable:
 .word anim_table_x1b
 .word anim_table_x1c
 .word anim_table_x1d
-.word MegaEvoAnimation
-.word AlphaPrimalAnimation
-.word OmegaPrimalAnimation
-.word SpriteChangeAnimation
+.word MegaEvoAnimation		@0x1e
+.word AlphaPrimalAnimation	@0x1f
+.word OmegaPrimalAnimation	@0x20
+.word SpriteChangeAnimation	@0x21
+.word TargetStealsAttackersItemAnimation	@0x22
+.word PartnerAtkStealsPartnerDefItemAnimation	@0x23
+
+PartnerAtkStealsPartnerDefItemAnimation:
+	loadparticle 0x27f0 
+	launchtask AnimTask_banks_to_partnerbanks +1 0x2 0x0
+	goto 0x082D834D @goto ITEM_STOLEN_ANIM with changed banks
+
+TargetStealsAttackersItemAnimation:
+	loadparticle 0x27f0 
+	launchtask AnimTask_target_attacks +1 0x2 0x0
+	goto 0x082D834D @goto ITEM_STOLEN_ANIM with changed banks
+
+StatChangeAnimation:
+	launchtask ANIMTASK_prepare_statargs + 1 0x5 0x0  
+	waitanimation 
+	endanimation 
 
 SpriteChangeAnimation:
 	pokespritetoBG bank_target

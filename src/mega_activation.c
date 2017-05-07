@@ -2,7 +2,7 @@
 
 u8 get_item_effect(u8 bank, u8 check_negating_effects);
 
-void reset_indicators_height_except_bank(u8  bank)
+void reset_indicators_height_except_bank(u8 bank)
 {
     struct mega_related* mega = &new_battlestruct->mega_related;
     for(u8 i = 0; i<no_of_all_banks ;i++)
@@ -38,19 +38,9 @@ void set_mega_triggers(u8 bank,u8 set_mode)
         new_battlestruct->mega_related.link_indicator[bank] = set_mode;
 }
 
-bool is_multi_battle()
-{
-    bool is_multi=false;
-    if(battle_flags.multibattle)
-    {
-        is_multi = true;
-    }
-    return is_multi;
-}
-
 u32 get_item_extra_param(u16 item)
 {
-    return item_table->items[item].extra_param;
+    return (*item_table)[item].extra_param;
 }
 
 u16 get_mega_species(u8 bank, u8 chosen_method)
@@ -119,7 +109,7 @@ u8 can_set_mega_trigger(u8 bank)
     bool res=0;
     int mega_mode=0;
     if(bank==0 && !(mega->user_trigger) &&
-       ((is_multi_battle() && !(mega->evo_happened_pbs&0x1)) || !(mega->evo_happened_pbs&0x5)))
+       ((battle_flags.multibattle && !(mega->evo_happened_pbs&0x1)) || !(mega->evo_happened_pbs&0x5)))
     {
         res=true;
     }

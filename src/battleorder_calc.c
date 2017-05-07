@@ -5,11 +5,11 @@ u16 get_speed(u8 bank);
 u8 percent_chance(u8 percent);
 u8 hp_condition(u8 bank, u8 percent);
 u8 get_item_effect(u8 bank, u8 check_negating_effects);
-u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro);
+u8 has_ability_effect(u8 bank, u8 mold_breaker);
 
-u8 check_ability(u8 bank, u8 ability)
+bool check_ability(u8 bank, u8 ability)
 {
-    if (has_ability_effect(bank, 0, 1) && battle_participants[bank].ability_id == ability)
+    if (has_ability_effect(bank, 0) && battle_participants[bank].ability_id == ability)
         return 1;
     return 0;
 }
@@ -21,6 +21,12 @@ s8 get_priority(u16 move, u8 bank)
         priority++;
     else if (check_ability(bank, ABILITY_PRANKSTER) && move_table[move].split == 2)
         priority++;
+    else if (check_ability(bank, ABILITY_TRIAGE))
+    {
+        u8 scriptID = move_table[move].script_id;
+        if (scriptID == 24 || scriptID == 25 || scriptID == 26 || scriptID == 29 || scriptID == 89 || scriptID == 124 || scriptID == 21) //damage drain, heal user, heal target, roost, dream eater, wish, lunar dance
+            priority += 3;
+    }
     return priority;
 }
 
@@ -29,7 +35,7 @@ s8 get_bracket_alteration_factor(u8 bank, u8 item_effect) // will be used for qu
     switch(item_effect)
     {
     case ITEM_EFFECT_QUICKCLAW:
-        if(__umodsi3(battle_turn_random_no,100)<get_item_quality(battle_participants[bank].held_item))
+        if(percent_chance(get_item_quality(battle_participants[bank].held_item)))
             return 1;
         break;
     case ITEM_EFFECT_CUSTAPBERRY:

@@ -25,22 +25,22 @@ bool affected_by_substitute(u8 substitute_bank)
 void final_damagecalc_cmd7(void)
 {
     if (battle_execution_buffer) {return;}
-    if(new_battlestruct->various.berry_damage_redux)
+    battlescripts_curr_instruction++;
+
+    if (new_battlestruct->various.berry_damage_redux)
     {
-        u8 item = battle_participants[bank_target].held_item;
-        new_battlestruct->various.berry_damage_redux=0;
-        if(MOVE_WORKED && DAMAGING_MOVE(current_move) && item)
+        u16 item = battle_participants[bank_target].held_item;
+        new_battlestruct->various.berry_damage_redux = 0;
+        if (MOVE_WORKED && DAMAGING_MOVE(current_move) && item)
         {
             battle_scripting.active_bank = bank_target;
             last_used_item = item;
             battlescript_push();
-            battlescripts_curr_instruction = &berry_redux_bs;
+            battlescripts_curr_instruction = BS_BERRY_DMG_REDUCE;
             setup_berry_consume_buffers(bank_target);
         }
     }
-    battlescripts_curr_instruction++;
-    if (damage_loc == 0)
-        damage_loc = 1;
+    damage_loc = ATLEAST_ONE(damage_loc);
     if (!affected_by_substitute(bank_target))
     {
         u16 target_hp = battle_participants[bank_target].current_hp;
@@ -70,7 +70,7 @@ void final_damagecalc_cmd7(void)
                     last_used_item = battle_participants[bank_target].held_item;
                     battle_participants[bank_target].held_item = 0;
                     active_bank = bank_target;
-                    prepare_setattributes_in_battle(0, 2, 0, 2, &battle_participants[bank_target].held_item);
+                    bb2_setattributes_in_battle(0, 2, 0, 2, &battle_participants[bank_target].held_item);
                     mark_buffer_bank_for_execution(bank_target);
                 }
                 break;

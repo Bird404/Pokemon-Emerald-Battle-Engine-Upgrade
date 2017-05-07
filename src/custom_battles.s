@@ -26,10 +26,14 @@ special_EF_custom_tag_battle:
 	bl custom_stevenliketag_battle
 	b special_EF_hook_end
 	
-bbp07_correct_sprite: @hook at 0x0805B5B4, via r0
+bbp07_correct_sprite: @hook at 0805B4F8, via r0
+	ldr r5, =(battle_flags)
+	ldr r0, [r5]
+	mov r1, #BATTLE_LINK
+	tst r1, r0
+	bne bbp07_linkbattle
 	bl get_player_backspriteID
 	mov r4, r0
-	ldr r5, =(battle_flags)
 	ldr r1, [r5]
 	mov r2, #BATTLE_PARTER
 	tst r1, r2
@@ -48,6 +52,9 @@ bbp07_no_partner:
 	bx r0
 bbp07_load_animated:
 	ldr r0, =(0x0805B618 | 1)
+	bx r0
+bbp07_linkbattle:
+	ldr r0, =(0x0805B504 | 1)
 	bx r0
 
 bbp07_correct_sprite2: @hook at 0x0805B664, via r0
@@ -107,6 +114,7 @@ prepare_intro_slide: @hook at 0x081181E8, via r0
 	ldr r1, =(0x08118258 | 1)
 	bx r1
 prepare_intro_slide_normal:
+	ldr r2, =(battle_flags)
 	ldr r0, =(0x08118208 | 1)
 	bx r0
 	
@@ -155,12 +163,12 @@ get_normal_spriteID:
 tag_wild_prepare_buffer_hook: @hook at 0x0803AEC0 via r0
 	ldr r0, =(active_bank)
 	ldrb r0, [r0]
-	bl is_bank_controlled_by_trainer
+	bl is_controlled_by_trainer_in_multi
 	cmp r0, #0
 	beq tag_wild_no_throw
-	ldr r0, =(0x0803AEEA | 1)
+	ldr r0, =(0x0803AF14 | 1)
 	bx r0
 tag_wild_no_throw:
-	ldr r0, =(0x0803AEF6 | 1)
+	ldr r0, =(0x0803AF20 | 1)
 	bx r0
 	

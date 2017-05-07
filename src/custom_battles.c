@@ -1,7 +1,5 @@
 #include "defines.h"
 #include "static_references.h"
-#include <string.h>
-#include <stdlib.h>
 
 extern const struct img_size trainerthrow_pals[];
 
@@ -17,26 +15,28 @@ bool is_in_tag_battle(void)
     return 0;
 }
 
-bool is_bank_controlled_by_trainer(u8 bank)
+bool is_controlled_by_trainer_in_multi(u8 bank)
 {
-    switch (get_bank_identity(bank))
+    if (battle_flags.player_partner || battle_flags.multibattle)
     {
-    case 0: //always player
-        return 1;
-    case 1: //ai
-        if (battle_flags.trainer)
+        switch (get_bank_identity(bank))
+        {
+        case 0: //always player
             return 1;
-        return 0;
-    case 2: //partner
-        if (battle_flags.double_battle && (battle_flags.player_ingame_partner || battle_flags.player_partner))
-            return 1;
-        return 0;
-    case 3: //ai partner
-        if (battle_flags.double_battle && battle_flags.multibattle)
-            return 1;
-    default:
-        return 0;
+        case 1: //ai
+            if (battle_flags.trainer)
+                return 1;
+            return 0;
+        case 2: //partner
+            if (battle_flags.double_battle && (battle_flags.player_ingame_partner || battle_flags.player_partner))
+                return 1;
+            return 0;
+        case 3: //ai partner
+            if (battle_flags.double_battle && battle_flags.multibattle)
+                return 1;
+        }
     }
+    return 0;
 }
 
 void handle_outcome_trainerbattle(void)

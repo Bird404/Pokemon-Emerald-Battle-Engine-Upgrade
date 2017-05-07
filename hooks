@@ -57,7 +57,7 @@ b_load_chosen_bg_element 080363C4 1
 battle_turn_passed 0803B9BC 0
 no_item_if_embargo 081B14C6 0
 special_EF_hook 08163ACC 3
-bbp07_correct_sprite 0805B5B4 0
+bbp07_correct_sprite 0805B4F8 0
 bbp07_correct_sprite2 0805B664 0
 bbpp07_correct_sprite 081BD384 0
 window_control_multibattle 0803682C 1
