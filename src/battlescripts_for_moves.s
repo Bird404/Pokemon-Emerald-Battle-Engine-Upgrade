@@ -44,7 +44,7 @@ battlescripts_table:
 .word RECOIL_ATTACK		@19 arg1 is status(poison, burn, etc.) flag that can be applied; arg2 is recoil value to dividie, 1 would be 100% recoil, 2 would be 50 %, 3 would be 33 %, etc
 .word CRASH_ATTACK		@20 Jump Kick and such
 .word FAINT_HEAL		@21 user faints, replacement is healed
-.word FAINTSTATCHANGE	@22 user faints, but lowers target's stats; arg1 is bitfield for stats, arg2 is value for raising/lowering
+.word FAINTSTATCHANGE	@22 memento  user faints, but lowers target's stats; arg1 is bitfield for stats, arg2 is value for raising/lowering
 .word EXPLODE			@23 Selfdestruct and explosion
 .word 0x082D8AEA		@24 moves that drain damage, arg1 is percent of the damage to be applied to HP(note: don't try values higher than 100), if arg2 isn't 0 we round up, else round down
 .word HPHEAL_user		@25 heals user by 50% of its HP; arg1 is weather that gets 2/3 of HP, arg2 is weather that gets 1/4 of HP
@@ -1971,7 +1971,12 @@ FAINTSTATCHANGE:
 	waitanimation
 	datahpupdate bank_attacker
 	graphicalhpupdate bank_attacker
-	doublestatchange
+	callasm_cmd 28 @checks if can change stats and gets how many
+	.byte bank_target
+	.word FAINTSTATCHANGE_CHANGESTATS
+FAINTSTATCHANGE_CHANGESTATS:
+	callasm_cmd 29 @do all stat changes that are possible
+	.word BS_CHANGE_DEF_STAT
 	faintpokemon bank_attacker 0x0 0x0
 	goto_cmd ENDTURN
 
