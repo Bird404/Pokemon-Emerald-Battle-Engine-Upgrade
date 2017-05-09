@@ -668,7 +668,7 @@ bool move_effect2_setter(void)
             }
             break;
         case 48: //recoil
-            if (battle_participants[bank_attacker].current_hp && calc_recoil_dmg(bank_attacker, current_move))
+            if (battle_participants[bank_attacker].current_hp && TARGET_TURN_DAMAGED && calc_recoil_dmg(bank_attacker, current_move))
             {
                 battlescript_push();
                 battlescripts_curr_instruction = (void*) 0x082DB3F4; //recoil battlescript
