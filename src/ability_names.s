@@ -200,7 +200,7 @@ ability_names_table:
 .byte S_, t_, a_, m_, i_, n_, a_, Termin, Space, Space, Space, Space, Space
 .byte W_, i_, m_, p_, Space, O_, u_, t_, Termin, Space, Space, Space, Space 
 .byte C_, r_, i_, s_, i_, s_, Space, E_, x_, i_, t_ ,Termin, Space
-.byte W_, a_, t_, e_, r_, Space, S_, q_, a_, s_, h_, Termin, Space
+.byte W_, a_, t_, e_, r_, Space, S_, q_, u_, a_, s_, h_, Termin
 .byte M_, e_, r_, c_, i_, l_, e_, s_, s_, Termin, Space, Space, Space
 .byte S_, h_, i_, e_, l_, d_, s_, Space, D_, o_, w_, n_, Termin
 .byte S_, t_, a_, k_, e_, o_, u_, t_, Termin, Space, Space, Space, Space
