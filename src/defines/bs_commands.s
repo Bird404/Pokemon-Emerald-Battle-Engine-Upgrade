@@ -10,6 +10,7 @@
 .equ bank_attacker, 0x1
 .equ bank_partner_def, 0x2
 .equ bank_scripting_active, 10
+.equ bank_newstruct, 15
 
 @script locations
 .equ MOVE_FAILED, 0x082D9F1A
@@ -24,6 +25,7 @@
 .equ OutcomeNotaffected, 8
 .equ OutcomeFailed, 0x20
 .equ OutcomeSturdied, 0x100
+.equ BankScriptingActive, 0x0202448B
 
 .equ STAT_SELF_INFLICTED, 0x40
 
@@ -33,17 +35,6 @@
 .byte 0x83
 .hword 26
 .word \jumpifsubstituteaffects_address
-.endm
-
-.macro jumpifcantchangetwostats jumpifcantchangetwostats_address
-.byte 0x83
-.hword 28
-.word \jumpifcantchangetwostats_address
-.endm
-
-.macro doublestatchange
-.byte 0x83
-.hword 29
 .endm
 
 .macro jumpifcantconfuseandchangestats jumpifcantconfuseandchangestats_address
@@ -588,7 +579,7 @@ jumpifbyte 0x4 0x202427C 0x29 \jumpiftypenotaffected_address
 .byte 0x57
 .endm
 
-.macro cmd58 cmd58_bank
+.macro return_to_ball cmd58_bank
 .byte 0x58
 .byte \cmd58_bank
 .endm
@@ -1261,11 +1252,11 @@ jumpifbyte 0x4 0x202427C 0x29 \jumpiftypenotaffected_address
 .byte 0xE5
 .endm
 
-.macro actualcastformswitch
+.macro castformchangeanim
 .byte 0xE6
 .endm
 
-.macro castformswitch
+.macro checkcastform
 .byte 0xE7
 .endm
 

@@ -183,10 +183,10 @@ battlescripts_table:
 .word SHIFTGEAR			@158 Shift Gear; changes two stats arg1 stat1, arg2 stat2
 .word QUASHH			@159 Quash
 .word FAKEOUT			@160 Fake Out
-.word 0x082D99B7		@161 Sandstorm
-.word 0x082D9B3D		@162 Rain Dance
-.word 0x082D9B55		@163 Sunny Day
-.word 0x082D9FD2		@164 Hail
+.word SANDSTORM_BS		@161 Sandstorm
+.word RAINDANCE_BS		@162 Rain Dance
+.word SUNNYDAY_BS		@163 Sunny Day
+.word HAIL_BS		@164 Hail
 .word MAGNETICFLUX		@165 Magnetic Flux @arg1 bitfield for stats to raise; arg 2 by how much
 .word VENOMDRENCH		@166 Venom Drench
 .word GRASSTYPESSTATRAISE		@167 Flower Shield, Rototiler @arg1 bitfield for stats to raise; arg 2 by how much
@@ -209,6 +209,36 @@ battlescripts_table:
 .word STRENGTHSAP_EFFECT	@184 Strength Sap; arg1 is stat value
 .word LOSETYPE_EFFECT		@185 Burn Up; arg1 is type the user has to be and the type the user loses
 .word CONFUSE_STATCHANGE	@186 Swagger, Flatter; arg1 is stat value
+
+SUNNYDAY_BS:
+	attackcanceler
+	setsunny
+	goto_cmd BS_WEATHER_SETTER
+
+SANDSTORM_BS:
+	attackcanceler
+	setsandstorm
+	goto_cmd BS_WEATHER_SETTER
+	
+RAINDANCE_BS:
+	attackcanceler
+	setrain
+	goto_cmd BS_WEATHER_SETTER
+	
+HAIL_BS:
+	attackcanceler
+	sethail
+	goto_cmd BS_WEATHER_SETTER
+	
+BS_WEATHER_SETTER:
+	attackstring
+	ppreduce
+	attackanimation
+	waitanimation
+	printfromtable 0x085CC848
+	waitmessage 0x40
+	call BS_CHECKCASTFORMCHERRIM
+	goto_cmd ENDTURN
 
 CONFUSE_STATCHANGE:
 	attackcanceler
@@ -508,8 +538,8 @@ ACUPRESSURE:
 	ppreduce
 	callasm_cmd 105
 	.word MOVE_FAILED + 2
-	statbuffchange 0x1 0x82D8D60
-	goto_cmd 0x82D8D4E
+	call ONE_STAT_USER_CHANGE_PRINT
+	goto_cmd ENDTURN
 
 PARTYHEAL:
 	attackcanceler
@@ -1679,6 +1709,7 @@ GASTROACID:
 	waitanimation
 	printstring 0x1DD
 	waitmessage 0x38
+	call BS_CHECKCASTFORMCHERRIM
 	goto_cmd ENDTURN
 
 COUNTER:
@@ -1710,6 +1741,7 @@ ABILITY_CHANGE:
 	waitanimation
 	printfromtable abilitychange_strings
 	waitmessage 0x40
+	call BS_CHECKCASTFORMCHERRIM
 	goto_cmd ENDTURN
 
 ADD_THIRD_TYPE:
@@ -1793,12 +1825,12 @@ MOVE_TRY_SWITCHING:
 	swithchoutabilities bank_attacker
 	waitstate
 	switch_handle_order bank_attacker 0x2
-	cmd58 0x1
-	switch1 0x1
-	switch2 0x1
-	cmd73 0x1
+	return_to_ball bank_attacker
+	switch1 bank_attacker
+	switch2 bank_attacker
+	cmd73 bank_attacker
 	printstring 0x3
-	switch3 0x1 0x1
+	switch3 bank_attacker 0x1
 	waitstate
 	switchineffects bank_attacker
 	end_cmd

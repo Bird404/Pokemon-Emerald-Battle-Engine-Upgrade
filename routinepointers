@@ -19,6 +19,7 @@ atk16_setmoveeffectprimary 0831BD68
 atk17_setmoveeffectsecondary 0831BD6C
 atk23_exp_evs_lvlup 0831BD9C
 atk42_jump_if_type 0831BE18
+atk45_playanimation 0831BE24
 atk47_set_statchange_values 0831BE2C
 atk49_move_end_turn 0831BE34
 atk56_prepare_fainting_cry 0831BE68
@@ -59,6 +60,7 @@ atkDE_assistmovechoose 0831C088
 atkE1_intimidate_loop 0831C094
 atkE2_switchout_abilities 0831C098
 atkE4_secretpowereffect 0831C0A0
+atkE7_check_castform_cherrim 0831C0AC
 atkE8_settypebasedhalvers 0831C0B0
 atkEB_set_type_to_terrain 0831C0BC
 atkEF_ballthrow 0831C0CC

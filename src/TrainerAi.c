@@ -53,7 +53,7 @@ u16 ai_get_species(u8 bank)
     if (new_battlestruct->bank_affecting[bank].illusion_on && !is_bank_ai(bank) && was_impossible_used(bank))
         return get_transform_species(bank);
     else
-        return battle_participants[bank].poke_species;
+        return battle_participants[bank].species;
 }
 
 u16 ai_get_move(u8 bank, u8 slot)
@@ -142,7 +142,7 @@ void save_bank_stuff(u8 bank)
     new_battlestruct->trainer_AI.saved_ability[bank] = *ability;
     if (!ai_get_ability(bank, 0)) //ai doesn't know an ability the target has
         *ability = 0;
-    u16* species = &battle_participants[bank].poke_species;
+    u16* species = &battle_participants[bank].species;
     new_battlestruct->trainer_AI.saved_species[bank] = *species;
     *species = ai_get_species(bank); //make illusion trick AI
 }
@@ -151,10 +151,10 @@ void restore_bank_stuff(u8 bank)
 {
     battle_participants[bank].held_item = new_battlestruct->trainer_AI.saved_item[bank];
     battle_participants[bank].ability_id = new_battlestruct->trainer_AI.saved_ability[bank];
-    battle_participants[bank].poke_species = new_battlestruct->trainer_AI.saved_species[bank];
+    battle_participants[bank].species = new_battlestruct->trainer_AI.saved_species[bank];
 }
 
-u8 tai_get_move_effectiveness()
+u8 tai_get_move_effectiveness(void)
 {
     save_bank_stuff(bank_target);
     u16 move = AI_STATE->curr_move;
@@ -272,7 +272,7 @@ u8 tai_find_best_to_switch(void)
     return to_ret;
 }
 
-void tai24_ismostpowerful() //no args, returns 1 if it's the most powerful move, otherwise 0
+void tai24_ismostpowerful(void) //no args, returns 1 if it's the most powerful move, otherwise 0
 {
     u32 most_damage = 0;
     u8 most_powerful_id = 4;

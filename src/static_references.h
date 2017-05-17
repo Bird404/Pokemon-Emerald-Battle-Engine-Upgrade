@@ -8,7 +8,6 @@
 extern const struct move_info move_table[1024];
 
 //move tables
-extern const u16 forewarn_moves[];
 extern const u16 sound_moves[];
 extern const u16 powder_moves[];
 extern const u16 ball_bomb_moves[];
@@ -27,18 +26,6 @@ extern const u16 always_crit_hits[];
 
 extern const u8 type_effectiveness_table[TYPE_FAIRY-0x4][TYPE_FAIRY-0x4];
 
-extern void* cherrimswitch_bs;
-extern void* cherrimswitch2_bs;
-extern void* healer_bs;
-extern void* absorb_ability_boost_bs;
-extern void* absorb_ability_immune_bs;
-extern void* ejectbutton_bs;
-extern void* can_switch_bs;
-extern void* disable_end_bs;
-extern void* encore_end_bs;
-extern void* wrapped_bs;
-extern void* grassyterrain_hpheal;
-extern void* grassyheal;
 extern void* fogcontinues_bs;
 extern void* fogends_bs;
 extern void* fog_animation;
@@ -48,7 +35,6 @@ extern void* bad_dreams_bs();
 extern void* CANCELER_FAIL();
 extern void* defogblows_bs;
 
-extern void* illusion_wore_off_bs;
 extern void* aegislash_change_bs;
 extern void* zen_change_bs;
 extern void* combined_move_bs;
@@ -103,6 +89,7 @@ extern u8 BS_PSYCHIC_SURGE[];
 extern u8 BS_CANTUSE_PRIORITY[];
 extern u8 BS_GOT_STATUS[];
 extern u8 CANT_CONFUSE_DUETOABILITY_PRINT[];
+extern u8 CANT_CONFUSE_DUETOABILITY_PRINT_END2[];
 
 extern u8 BS_MOODY[];
 extern u8 BS_CURSEDBODY[];
@@ -137,7 +124,11 @@ extern u8 BS_UNNERVE[];
 extern u8 BS_TELEPATHY[];
 extern u8 BS_SYMBIOSIS[];
 extern u8 BS_IMPOSTER[];
+extern u8 BS_ILLUSION_OFF[];
 extern u8 BS_SLOWSTART_MSG1[];
+extern u8 BS_IMMUNESTATRAISE_ABILITY[];
+extern u8 BS_IMMUNE_ABILITY[];
+extern u8 BS_HEALER[];
 
 extern u8 BS_HEALBLOCK_PREVENTS[];
 extern u8 BS_GRAVITY_PREVENTS[];
@@ -182,6 +173,8 @@ extern u8 BS_HEALCONFUSE_BERRY_REMOVEITEM[];
 extern u8 BS_HEALCONFUSE_BERRY_REMOVEITEM_END2[];
 extern u8 BS_GEM_MSG[];
 extern u8 BS_BERRY_DMG_REDUCE[];
+extern u8 BS_REDCARD_SWITCH[];
+extern u8 BS_EJECTBUTTON_SWITCH[];
 
 extern u8 BS_POWDER[];
 
@@ -206,9 +199,12 @@ extern u8 BS_EMBARGOEND[];
 extern u8 BS_TAUNTEND[];
 extern u8 BS_TAUNTEND_END2[];
 extern u8 BS_TORMENTEND[];
+extern u8 BS_DISABLEEND[];
+extern u8 BS_ENCOREEND[];
 extern u8 BS_TERRAINEND[];
 
 extern u8 BS_AQUARING[];
+extern u8 BS_BINDEFFECT[];
 extern u8 BS_SMACKDOWN[];
 extern u8 BS_FLAMEBURST[];
 extern u8 BS_DAMAGETRAP[];
@@ -217,10 +213,22 @@ extern u8 BS_CLEARSMOG[];
 extern u8 BS_INCINERATEBERRY[];
 extern u8 BS_MAGICIAN[];
 extern u8 BS_MAGICBOUNCE[];
+extern u8 BS_SYNCHRONIZE[];
 
 extern u8 BS_CANTSELECT_GRAVITY[];
 extern u8 BS_CANTSELECT_HEALBLOCK[];
 extern u8 BS_CANTSELECT_ASSAULTVEST[];
+
+extern u8 BS_GRASSYTERRAIN_HEAL[];
+
+extern u8 BS_CASTFORMSWITCH_END3[];
+extern u8 BS_CHERRIMSWITCH_END3[];
+extern u8 BS_CHERRIMSWITCH[];
+extern u8 BS_CASTFORMSWITCH[];
+extern u8 BS_DROUGHT[];
+extern u8 BS_DRIZZLE[];
+extern u8 BS_SANDSTREAM[];
+extern u8 BS_AIRLOCK[];
 
 //locations in asm files
 extern const u8 ability_names_table[250][13];

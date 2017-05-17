@@ -45,7 +45,7 @@ u32 get_item_extra_param(u16 item)
 
 u16 get_mega_species(u8 bank, u8 chosen_method)
 {
-    u16 species = battle_participants[bank].poke_species;
+    u16 species = battle_participants[bank].species;
     u16 target_species=0;
     const struct evolution_sub* evo = GET_EVO_TABLE(species);
     for (u8 i = 0; i < NUM_OF_EVOS; i++)

@@ -61,7 +61,7 @@ struct iv_set
 };
 
 struct battle_participant {
-    u16 poke_species;
+    u16 species;
     u16 atk;
     u16 def;
     u16 spd;
@@ -216,13 +216,13 @@ struct battle_stuff{
     u8 end_turn_checked_bank; //0x1
     u8 field_2; //0x2
     u8 end_turn_statetracker2; //0x3
-    u16 trapped_move[4]; //0x4 - 0xB
+    u16 binding_move[4]; //0x4 - 0xB
     u8 move_target[4]; //0xC - 0xF
     u8 expgetter_id; //0x10
     u8 field_11; //0x11
     u8 wildvictorysong; //0x12
     u8 dynamic_move_type; //0x13
-    u8 trapper[4];//0x14-0x17
+    u8 binded_by[4];//0x14-0x17
     u8 field_18[48]; //0x18-0x47
     u8 pre_attacks_bank_counter; //0x48
     u8 field_49; //0x49
@@ -257,13 +257,23 @@ struct battle_stuff{
     u8 field_8B; //0x8B
     u8 field_8C; //0x8C
     u8 field_8D; //0x8D
-    u8 field_8E; //0x8E
+    u8 str_movetype; //0x8E
     u8 expgetter_bank; //0x8F
     u8 field_90; //0x90
     u8 absent_bank_flags_prev_turn; //0x91
     u8 field_92[6]; //0x92-0x97
     u16 mirror_moves_pbs[4]; //0x98-0x9F
-    u8 field_A0[18]; //0xA0-0xB1
+    u8 field_A0; //0xA0
+    u8 field_A1; //0xA1
+    u8 field_A2; //0xA2
+    u8 field_A3; //0xA3
+    u8 field_A4; //0xA4
+    u8 field_A5; //0xA5
+    u8 field_A6; //0xA6
+    u8 field_A7; //0xA7
+    u16 hp_on_switchout[4]; //0xA8 - 0xAF
+    u8 field_B0; //0xB0
+    u8 curr_hp_bad_scale; //0xB1
     u8 synchronize_effect_chooser; //0xB2
     u8 field_B3[5];
     u16 used_held_items[4]; //0xB8-0xBF

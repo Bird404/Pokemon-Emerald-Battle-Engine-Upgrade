@@ -31,7 +31,7 @@ void AnimTask_megaevo_swap_sprite(u8 taskID)
         break;
     default: //restore position, update altitude
         poke_obj->pos1.x = curr_task->private[11];
-        poke_update_altitude(animation_bank_attacker, battle_participants[animation_bank_attacker].poke_species);
+        poke_update_altitude(animation_bank_attacker, battle_participants[animation_bank_attacker].species);
         move_anim_task_del(taskID);
         break;
     }
@@ -46,7 +46,7 @@ void AnimTask_animate_pokemon(u8 taskID) //argument is bank
     if (*first_call == 0)
     {
         task_set_priv_u32(taskID, 2, (u32) poke_obj->callback);
-        u16 species = battle_participants[bank].poke_species;
+        u16 species = battle_participants[bank].species;
         if (is_bank_from_opponent_side(bank))
             b_animate_opponent_poke(poke_obj, species, 0, 1);
         else

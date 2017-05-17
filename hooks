@@ -1,4 +1,3 @@
-display_custom_text	0814E6C0	1
 battlestringhook	0814F6B6	0
 item_battle_effects	080444DC	3
 alloc_new_struct_hook 08056F3E 2
@@ -40,7 +39,8 @@ update_battle_record 08184FBC 2
 return_0_nop 080475E4 0
 return_0_nop 080472A8 0
 explosion_like_switch_fix 08041922 0
-battle_string_decoder 0814E764 2
+b_strcpy_decode 0814E764 2
+b_buffer_string 0814E0C4 1
 wild_grass_hook 080B5424 1
 pokeball_chosen 080FE394 1
 ignore_action_for_second 0803BFD0 0
@@ -68,3 +68,4 @@ get_partner_frontier_spriteID 08162AA0 1
 is_in_tag_battle 081B1250 0
 tag_wild_prepare_buffer_hook 0803AEC0 0
 bbp2F_trainer_throw 0805CB28 0
+get_battle_bank 0803F3CC 1

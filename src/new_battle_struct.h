@@ -16,8 +16,7 @@ struct bank_affecting{
     u8 just_switched_in : 1;
     u8 miracle_eyed : 1;
     u8 eaten_berry : 1;
-    u8 sunshine_form : 1;
-    u8 cherrim_transformed : 1;
+    u8 cherrim_form : 1;
     u8 gastro_acided : 1;
     u8 spiky_shield : 1;
     u8 kings_shield : 1;
@@ -36,7 +35,6 @@ struct bank_affecting{
     u8 aegislash_form : 2; //0 = not aegi, 1 = defensive, 2 = attacking
     u8 killer_bank : 2;
     u8 same_move_used : 3;
-    u8 wrap_bank : 2;
     u8 move_failed : 1;
     u8 type3 : 5;
     u8 stat_lowered : 1;
@@ -182,6 +180,7 @@ struct tai_related{
 
 struct move_effects{
     u16 effect1;
+    u16 synchro_effect[4];
 };
 
 struct new_battle_struct{

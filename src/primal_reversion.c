@@ -8,7 +8,7 @@ u16 get_mega_species(u8 bank, u8 chosen_method);
 
 u8 get_reversion_type(u8 bank, u16 target_species)
 {
-    u16 species = battle_participants[bank].poke_species;
+    u16 species = battle_participants[bank].species;
     u8 reversion_type = 0;
     const struct evolution_sub* evos = GET_EVO_TABLE(species);
     for(u8 i=0; i<NUM_OF_EVOS; i++)
@@ -65,7 +65,7 @@ bool handle_primal_reversion(u8 bank)
             bank_struct->spd = get_attributes(poke_address, ATTR_SPEED, 0);
             bank_struct->sp_atk = get_attributes(poke_address, ATTR_SPECIAL_ATTACK, 0);
             bank_struct->sp_def = get_attributes(poke_address, ATTR_SPECIAL_DEFENCE, 0);
-            bank_struct->poke_species = primal_species;
+            bank_struct->species = primal_species;
             const struct poke_basestats* PokeStats = &((*basestat_table)[primal_species]);
             bank_struct->type1 = PokeStats->type1;
             bank_struct->type2 = PokeStats->type2;

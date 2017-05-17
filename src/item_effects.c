@@ -17,6 +17,8 @@ void copy_status_condition_text(u8 bank, u8 confusion);
 u8 get_attacking_move_type(void);
 void move_to_buff1(u16 move);
 struct pokemon* get_bank_poke_ptr(u8 bank);
+bool can_poke_be_switched_into(u8 index, u8 bank);
+u8 check_field_for_ability(enum poke_abilities ability, u8 side_to_ignore, u8 mold);
 
 enum COMMON_ITEM_EFFECT
 {
@@ -26,6 +28,26 @@ enum COMMON_ITEM_EFFECT
     PP_RESTORE_ITEM,
     HP_RESTORE_ITEM,
 };
+
+u8 get_item_effect(u8 bank, bool check_negating_effects)
+{
+    u16 held_item = battle_participants[bank].held_item;
+    if (check_negating_effects)
+    {
+        if (check_ability(bank, ABILITY_KLUTZ) || new_battlestruct->field_affecting.magic_room || new_battlestruct->bank_affecting[bank].embargo)
+            return ITEM_EFFECT_NOEFFECT;
+        if (get_item_pocket_id(held_item)==4 && check_field_for_ability(ABILITY_UNNERVE, is_bank_from_opponent_side(bank), 0))
+            return ITEM_EFFECT_NOEFFECT;
+    }
+    if (held_item == ITEM_ENIGMABERRY)
+    {
+        return enigma_berry_battle[bank].battle_effect_x12;
+    }
+    else
+    {
+        return get_item_battle_function(held_item);
+    }
+}
 
 bool hp_condition(u8 bank, u8 percent) //1 = 50 %, 2 = 25 %
 {
@@ -254,6 +276,40 @@ enum COMMON_ITEM_EFFECT berry_handle_lansat(u8 bank, bool checkHP, enum call_mod
     return NO_ITEM_EFFECT;
 }
 
+u8 get_random_to_switch(u8 bank)
+{
+    u32 to_switch = 0;
+    for (u8 i = 0; i < 6; i++)
+    {
+        if (can_poke_be_switched_into(i, bank))
+            to_switch |= bits_table[i];
+    }
+    if (!to_switch) {return 6;} //cant find anyone available to switch
+    u8 to_ret;
+    do
+    {
+        to_ret = __umodsi3(rng(), 6);
+    } while (!(bits_table[to_ret] & to_switch));
+    return to_ret;
+}
+
+u8 item_force_switching(u8 bank, void* BS_ptr)
+{
+    if (MOVE_WORKED && TARGET_TURN_DAMAGED && is_bank_present(bank) && multihit_counter <= 1)
+    {
+        u8 ID_toswitch = get_random_to_switch(bank);
+        if (ID_toswitch != 6)
+        {
+            new_battlestruct->various.var1 = ID_toswitch;
+            new_battlestruct->various.active_bank = bank;
+            battlescript_push();
+            battlescripts_curr_instruction = BS_ptr;
+            return NO_COMMON_ITEM_EFFECT;
+        }
+    }
+    return 0;
+}
+
 u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
 {
     u8 item_effect = get_item_effect(bank, 1);
@@ -404,25 +460,6 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 effect = NO_COMMON_ITEM_EFFECT;
                 battlescript_push();
                 battlescripts_curr_instruction = BS_WEAKNESSPOLICY;
-            }
-            break;
-        case ITEM_EFFECT_REDCARD:
-            battle_scripting.active_bank = bank_attacker;
-        case ITEM_EFFECT_EJECTBUTTON:
-            if ((MOVE_WORKED && TARGET_TURN_DAMAGED) && battle_participants[bank].current_hp && multihit_counter <= 1)
-            {
-                void* current_instruction = battlescripts_curr_instruction;
-                battlescripts_curr_instruction = &can_switch_bs;
-                jump_if_cannot_switch_atk4F();
-                if ((u32)battlescripts_curr_instruction != 1)
-                {
-                    effect = NO_COMMON_ITEM_EFFECT;
-                    battlescripts_curr_instruction = current_instruction;
-                    battlescript_push();
-                    battlescripts_curr_instruction = &ejectbutton_bs;
-                }
-                else
-                     battlescripts_curr_instruction = current_instruction;
             }
             break;
         case ITEM_EFFECT_ROCKYHELMET:
@@ -636,6 +673,18 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 call_bc_move_exec(BS_TOXICORB);
                 record_usage_of_item(bank, ITEM_EFFECT_TOXICORB);
             }
+            break;
+        }
+        break;
+    case 6: //red card and eject button
+        battle_scripting.active_bank = bank;
+        switch (item_effect)
+        {
+        case ITEM_EFFECT_REDCARD:
+            effect = item_force_switching(bank_attacker, BS_REDCARD_SWITCH);
+            break;
+        case ITEM_EFFECT_EJECTBUTTON:
+            effect = item_force_switching(bank_target, BS_EJECTBUTTON_SWITCH);
             break;
         }
         break;

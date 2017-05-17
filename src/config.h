@@ -9,7 +9,7 @@
 #define KEYSTONE        4     //mega item that the player has to posses in order to mega evolve
 
 #define BUILD_LEARNSETS true        //set to false if you modified the learnsets and dont want them to get changed
-#define GEN4_LEARNSETS  false         //set to true if you want to have learnsets for pokemon up to genIV
+#define GEN4_LEARNSETS  false //set to true if you want to have learnsets for pokemon up to genIV
 #define GEN5_LEARNSETS  false         //set to true if you want to have learnsets for pokemon up to genV
 #define GEN6_LEARNSETS  false          //set to true if you want to have learnsets for pokemon up to genVI
 
@@ -31,6 +31,7 @@
 #define FISHING_FLAG        0x0   //if that flag is set, it's a battle against a hooked up pokemon
 #define CANT_CATCH_FLAG     0x0   //if that flag is set, you can't catch any pokemon, if flag is 0 you always can catch any pokemon
 #define ALLOW_LOSE_FLAG     0x0   //if that flag is set, you can lose a battle and the script will continue
+#define FORCE_SET_FLAG      0x0   //if that flag is set, the player cannot switch a pokemon when opponent faints
 #define NO_OF_SLIDING_MSG_TRAINERS 10 //number of trainers that say things in the middle of a battle
 
 //form indexes

@@ -105,7 +105,7 @@ bool is_poke_ultrabeast(/*u16 species*/)
 u32 calc_ball_formula(enum ball_index ball_no, struct battle_participant* catching)
 {
     u8 multiplier = 10;
-    u8 catchrate = (*basestat_table)[catching->poke_species].catch_rate;
+    u8 catchrate = (*basestat_table)[catching->species].catch_rate;
     switch (ball_no)
     {
     //case BALL_PREMIER: case BALL_LUXURY: case BALL_POKE: case BALL_MASTER:
@@ -139,7 +139,7 @@ u32 calc_ball_formula(enum ball_index ball_no, struct battle_participant* catchi
         }
         break;
     case BALL_REPEAT:
-        if (is_poke_caught(catching->poke_species))
+        if (is_poke_caught(catching->species))
             multiplier = 35;
         break;
     case BALL_TIMER:
@@ -373,7 +373,7 @@ void atkF2_display_dex_info(void)
         {
             rboxes_free();
             struct battle_participant* target = &battle_participants[bank_target];
-            tracker[1] = prepare_poke_dex_display(species_to_national_dex(target->poke_species), target->otid, target->pid);
+            tracker[1] = prepare_poke_dex_display(species_to_national_dex(target->species), target->otid, target->pid);
             (*tracker)++;
         }
         break;

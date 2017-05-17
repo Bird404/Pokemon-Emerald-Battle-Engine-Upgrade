@@ -58,7 +58,7 @@ extern u32 taken_damage[4];
 extern u8 hurt_by[4];
 extern u8 slot_in_learnset_table;
 extern u16 move_to_learn;
-extern void* tai_current_instruction;
+extern u8* tai_current_instruction;
 extern u8 tai_bank;
 extern u32 battle_execution_buffer;
 extern const u16 some_strings_table[4];
@@ -80,6 +80,7 @@ extern u8 move_selection_cursor_pbs[4];
 extern const u32 bits_table[32];
 extern u32 PiD_pbs[4];
 extern u8 decompression_buffer[0xF80];
+
 extern const u8 nick_male_sign[5];
 extern const u8 nick_female_sign[5];
 extern const u8 nick_genderless_sign[4];
@@ -91,6 +92,9 @@ extern const u8 text_Ally_[6];
 extern const u8 text_ENIGMA_BERRY[13];
 extern const u8 text__BERRY[7];
 extern const u8 text_BOX_IS_FULL[19];
+extern const u8 text_empty_string_00[1];
+extern const u8 text_poke_used_move[11];
+extern const u8 text_exclamation_mark_00[2];
 
 extern const u8 text_lower[];
 extern const u8 text_sharply_[];
@@ -98,7 +102,67 @@ extern const u8 text_rose[];
 extern const u8 text_harshly_[];
 extern const u8 text_fell[];
 
-extern u8 castform_form[4];
+extern const u8 text_wally_b_start[];
+extern const u8 text_legendary_b_start[];
+extern const u8 text_wild_double_b_start[];
+extern const u8 text_wild_b_start[];
+extern const u8 text_trainer_multi_b_start[];
+extern const u8 text_trainer_b_start[];
+extern const u8 text_fcx10_got_away_safely[];
+extern const u8 text_fcx10_one_fled[];
+extern const u8 text_fcx10_two_fled[];
+
+extern const u8 text_player_defeated_fdx20[];
+extern const u8 text_player_beat_fdx20_and_fdx21[];
+extern const u8 text_player_lost_to_fdx20[];
+extern const u8 text_player_lost_to_fdx20_and_fdx21[];
+extern const u8 text_player_battled_to_draw_against_fdx20[];
+extern const u8 text_player_battled_to_draw_against_fdx20_and_fdx21[];
+
+extern const u8 text_opponent_sendout_multi[];
+extern const u8 text_opponent_sendout_playerpartner[];
+extern const u8 text_opponent_sendout_link[];
+extern const u8 text_opponent_sendouts_two[];
+extern const u8 text_opponent_single_sendout_link[];
+extern const u8 text_opponent_sendout_single[];
+
+extern const u8 text_thatsenough_come_back[];
+extern const u8 text_xfd0_come_back[];
+extern const u8 text_ok_come_back[];
+extern const u8 text_good_come_back[];
+extern const u8 text_fdx20_withdrew[];
+extern const u8 text_fdx22_withdrew[];
+extern const u8 text_trainerA_withdrew[];
+
+extern const u8 text_go_fdx0[];
+extern const u8 text_do_it_fdx0[];
+extern const u8 text_your_foe_is_weak_getem_fdx0[];
+extern const u8 text_go_for_it_fdx0[];
+extern const u8 text_fdx22_sent_out[];
+extern const u8 text_fdx20_sent_out[];
+extern const u8 text_trainerB_sent_out[];
+extern const u8 text_trainerA_sent_out[];
+
+extern const u8 text_GO_xfd5[];
+extern const u8 text_player_sendout_ingame_partner[];
+extern const u8 text_player_sendout_partner[];
+extern const u8 text_GO_xfd5_and_xfd7[];
+
+enum CastformForm{
+    CastformNormal, //0
+    CastformFire, //1
+    CastformWater, //2
+    CastformIce, //3
+    CastformNoChange = 0xFF,
+};
+
+enum CherrimForm{
+    CherrimNormal, //0
+    CherrimSunny, //1
+    CherrimNoChange = 0xFF,
+};
+
+extern enum CastformForm castform_form[4];
 extern u8 viewing_recorded_battle;
 extern u16 no_of_recorded_bytes[4];
 extern u16 var_800D_lastresult;
@@ -212,6 +276,7 @@ extern const u8 paralysis_status_flag[];
 extern const u8 burn_status_flag[];
 extern const u8 freeze_status_flag[];
 extern const u8 trainerclass_names[60][13];
+extern const u8 *battle_strings_table[369];
 
 extern u8 bs_return[1];
 extern u8 bs_printmove_failed[];

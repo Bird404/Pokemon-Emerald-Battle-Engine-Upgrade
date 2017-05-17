@@ -38,249 +38,8 @@ u32 percent_boost(u32 number, u16 percent);
 bool move_effect_setter(bool primary, bool certain);
 u8 cant_become_confused(u8 bank);
 void bugbite_get_berry_effect(void);
-
-/*0x17C*/const u8 empty_text1[] = {0xFF};
-/*0x17D*/const u8 empty_text4[] = {0xFF};
-/*0x17E*/const u8 extreme_sun_activation_text[] = {0xCE, 0xDC, 0xD9, 0x00, 0xE7, 0xE9, 0xE2, 0xE0, 0xDD, 0xDB, 0xDC, 0xE8, 0x00, 0xE8, 0xE9, 0xE6, 0xE2, 0xD9, 0xD8, 0xFE, 0xD9, 0xEC, 0xE8, 0xE6, 0xD9, 0xE1, 0xD9, 0xE0, 0xED, 0x00, 0xDC, 0xD5, 0xE6, 0xE7, 0xDC, 0xAB, 0xFF};
-/*0x17F*/const u8 heavyrain_activation_text[] = {0xBB, 0x00, 0xDC, 0xD9, 0xD5, 0xEA, 0xED, 0x00, 0xE6, 0xD5, 0xDD, 0xE2, 0x00, 0xD6, 0xD9, 0xDB, 0xD5, 0xE2, 0x00, 0xE8, 0xE3, 0x00, 0xDA, 0xD5, 0xE0, 0xE0, 0xAB, 0xFF};
-/*0x180*/const u8 mysticalaircurrent_activation_text[] = {0xBB, 0x00, 0xE1, 0xED, 0xE7, 0xE8, 0xD9, 0xE6, 0xDD, 0xE3, 0xE9, 0xE7, 0x00, 0xD5, 0xDD, 0xE6, 0x00, 0xD7, 0xE9, 0xE6, 0xE6, 0xD9, 0xE2, 0xE8, 0xFE, 0xDD, 0xE7, 0x00, 0xE4, 0xE6, 0xE3, 0xE8, 0xD9, 0xD7, 0xE8, 0xDD, 0xE2, 0xDB, 0x00, 0xC0, 0xE0, 0xED, 0xDD, 0xE2, 0xDB, 0xAE, 0xE8, 0xED, 0xE4, 0xD9, 0x00, 0xCA, 0xE3, 0xDF, 0x1B, 0xE1, 0xE3, 0xE2, 0xAB, 0xFF};
-/*0x181*/const u8 forewarn_text[] = {I_, t_, Space, w_, a_, s_, Space, a_, l_, e_, r_, t_, e_, d_, Space, t_, o_, JumpLine, 0xFD, 17, Apos, s_, Space, 0xFD, 0, Exclam, 0xFF};
-/*0x182*/const u8 slowstart_text[] = {0xFD, 0x13, 0x0, 0xD7, 0xD5, 0xE2, 0xB4, 0xE8, 0x00, 0xDB, 0xD9, 0xE8, 0x00, 0xDD, 0xE8, 0x00, 0xDB, 0xE3, 0xDD, 0xE2, 0xDB, 0xAB, 0xFF};
-/*0x183*/const u8 anticipation_text[] = {0xFD, 19, Space, s_, h_, u_, d_, d_, e_, r_, e_, d_, Exclam, 0xFF};
-/*0x184*/const u8 empty_text3[] = {0xFF};
-/*0x185*/const u8 empty_text2[] = {0xFF};
-/*0x186*/const u8 harvest_text[] = {0xFD, 15, Space, h_, a_, r_, v_, e_, s_, t_, e_, d_, JumpLine, o_, n_, e_, Space, 0xFD, 22, Exclam, 0xFF};
-/*0x187*/const u8 healer_text[] = {0xFD, 15, 0, 0xB4, 0xE7, 0, 0xFD, 24, 0, 0xD7, 0xE9, 0xE6, 0xD9, 0xD8, 0x00, 0xDD, 0xE8, 0xE7, 0x00, 0xE4, 0xD5, 0xE6, 0xE8, 0xE2, 0xD9, 0xE6, 0xB4, 0xE7, 0xFE, 0xFD, 0x0, 0xAB, 0xFF};
-/*0x188*/const u8 empty_text5[] = {0xFF};
-/*0x189*/const u8 moldbreaker_text[] = {0xFD, 0x13, 0, 0xD6, 0xE6, 0xD9, 0xD5, 0xDF, 0xE7, 0x00, 0xE8, 0xDC, 0xD9, 0x00, 0xE1, 0xE3, 0xE0, 0xD8, 0xAB, 0xFF};
-/*0x18A*/const u8 turboblaze_text[] = {0xFD, 0x13, 0, 0xDD, 0xE7, 0x00, 0xE6, 0xD5, 0xD8, 0xDD, 0xD5, 0xE8, 0xDD, 0xE2, 0xDB, 0x00, 0xD5, 0x00, 0xD6, 0xE0, 0xD5, 0xEE, 0xDD, 0xE2, 0xDB, 0x00, 0xD5, 0xE9, 0xE6, 0xD5, 0xAB, 0xFF};
-/*0x18B*/const u8 terravolt_text[] = {0xFD, 0x13, 0, 0xDD, 0xE7, 0x00, 0xE6, 0xD5, 0xD8, 0xDD, 0xD5, 0xE8, 0xDD, 0xE2, 0xDB, 0x00, 0xD5, 0x00, 0xD6, 0xE9, 0xE6, 0xE7, 0xE8, 0xDD, 0xE2, 0xDB, 0x00, 0xD5, 0xE9, 0xE6, 0xD5, 0xAB, 0xFF};
-/*0x18C*/const u8 empty_text9[] = {0xFF};
-/*0x18D*/const u8 empty_text10[] = {0xFF};
-/*0x18E*/const u8 absorbabilityboost_text[] = {0xFD, 0x10, 0xB4, 0xE7, 0, 0xFD, 0x19, 0, 0xE6, 0xD5, 0xDD, 0xE7, 0xD9, 0xD8, 0x00, 0xDD, 0xE8, 0xE7, 0xFE, 0xFD, 0x0, 0xAB ,0xFF};
-/*0x18F*/const u8 absorbabilityimmune_text[] = {0xFD, 0x10, 0xB4, 0xE7, 0, 0xFD, 0x19, 0, 0xE1, 0xD5, 0xDF, 0xD9, 0xE7, 0x00, 0xDD, 0xE8, 0xFE, 0xDD, 0xE1, 0xE1, 0xE9, 0xE2, 0xD9, 0x00, 0xE8, 0xE3, 0x00, 0xFD, 0x00, 0xAE, 0xE8, 0xED, 0xE4, 0xD9, 0x00, 0xE1, 0xE3, 0xEA, 0xD9, 0xE7, 0xAB, 0xFF};
-/*0x190*/const u8 userteam_text[] = {y_, o_, u_, r_, Space, t_, e_, a_, m_, Termin};
-/*0x191*/const u8 foeteam_text[] = {t_, h_, e_, Space, f_, o_, e_, Apos, s_, Space, t_, e_, a_, m_, Termin};
-/*0x192*/const u8 aftermath_text[] = {0xFD, 15, Space, i_, s_, Space, h_, u_, r_, t_, Exclam, 0xFF};
-/*0x193*/const u8 pickpocket_text[] = {I_, t_, Space, s_, t_, o_, l_, e_, Space, 0xFD, 15, Apos, s_, JumpLine, 0xFD, 22, Exclam, 0xFF};
-/*0x194*/ const u8 mummy_text[] = {0xFD, 15, Apos, s_, Space, A_, b_, i_, l_, i_, t_, y_, JumpLine, b_, e_, c_, a_, m_, e_, Space, 0xFD, 24, Exclam, 0xFF};
-/*0x195*/ const u8 target_ability[] = {0xFD, 16, 0xB4, 0xE7, 0, 0xFD, 25, 0xAB, 0xFF};
-/*0x196*/ const u8 cursedbody_text[] = {0xFD, 15, Apos, s_, Space, 0xFD, 54, JumpLine, w_, a_, s_, Space, d_, i_, s_, a_, b_, l_, e_, d_, Exclam, 0xFF};
-/*0x197*/ const u8 statchange_text[] = {0xFD, 19, Apos, s_, Space, 0xFD, 0, JumpLine, 0xFD, 58, 0xFD, 59, 0xFF};
-/*0x198*/ const u8 pressure_text[] = {BuffCharac, 0x13, Space, i_, s_, Space, e_, x_, e_, r_, t_, i_, n_, g_, JumpLine, i_, t_, s_, Space, p_, r_, e_, s_, s_, u_, r_, e_, Exclam, Termin};
-/*0x199*/ const u8 unnerve_text[] = {0xFD, 64, 0, i_, s_, 0, t_, o_, o_, 0, n_, e_, r_, v_, o_, u_, s_, 0xFE, t_, o_, 0, e_, a_, t_, 0, B_, e_, r_, r_, i_, e_, s_, Exclam, Termin};
-/*0x19A*/ const u8 aurabreak_text[] = {0xFD, 0x13, 0, r_, e_, v_, e_, r_, s_, e_, d_, 0, a_, l_, l_, 0, o_, t_, h_, e_, r_, 0xFE, P_, o_, k_, Poke_e, m_, o_, n_, Apos, s_, 0, a_, u_, r_, a_, s_, Exclam, 0xFF};
-/*0x19B*/ const u8 fairyaura_text[] = {BuffCharac, 0x13, Space, i_, s_, Space, r_, a_, d_, i_, a_, t_, i_, n_, g_, JumpLine, a_, Space, F_, a_, i_, r_, y_, Space, A_, u_, r_, a_, Exclam, Termin};
-/*0x19C*/ const u8 darkaura_text[] = {BuffCharac, 0x13, Space, i_, s_, Space, r_, a_, d_, i_, a_, t_, i_, n_, g_, JumpLine, a_, Space, D_, a_, r_, k_, Space, A_, u_, r_, a_, Exclam, Termin};
-/*0x19D*/ const u8 frisk_text[] = {BuffCharac, 0x13, Space, f_, r_, i_, s_, k_, e_, d_, Space, BuffCharac, 0x10, JumpLine, a_, n_, d_, Space,
-                   f_, o_, u_, n_, d_, Space, i_, t_, s_, Space, BuffCharac, 0x16, Exclam, Termin};
-/*0x19E*/ const u8 hurtbyitem_text[] = {BuffCharac, 15, Space, i_,s_, Space, h_, u_, r_, t_, Space, b_, y_, Space, BuffCharac, 22, Exclam,0xFF};
-/*0x19F*/ const u8 flameorb_text[] = {BuffCharac, 15, Space, w_, a_, s_, Space, b_, u_, r_, n_, e_, d_, JumpLine, b_, y_, Space, t_, h_, e_, Space, 0xFD, 22, Exclam, 0xFF};
-/*0x1A0*/ const u8 toxicorb_text[] = {BuffCharac, 15, Space, w_, a_, s_, Space, b_, a_, d_, l_, y_, JumpLine, p_, o_, i_, s_, o_, n_, e_, d_, Space, b_, y_, Space, t_, h_, e_, Space, 0xFD, 22, Exclam, 0xFF};
-/*0x1A1*/ const u8 airballoon_text[] = {BuffCharac, 62, Space, f_, l_, o_, a_, t_, s_, Space, i_, n_, Space, t_, h_, e_, Space, a_, i_, r_, JumpLine, w_, i_, t_, h_, Space, i_, t_, s_, Space, 0xFD, 22, Exclam, 0xFF};
-/*0x1A2*/ const u8 bad_dreams_text[] = {BuffCharac, 0x10, Space, i_, s_, Space, t_, o_, r_, m_, e_, n_, t_, e_, d_, Space, b_, y_, JumpLine, b_, a_, d_, Space, d_, r_, e_, a_, m_, s_, Exclam, Termin};
-/*0x1A3*/ const u8 stickybarb_text[] = {BuffCharac, 15, Space, i_, s_, Space, h_, u_, r_, t_, JumpLine, b_, y_, Space, i_, t_, s_, Space, BuffCharac, 22, Exclam, 0xFF};
-/*0x1A4*/ const u8 rockyhelmet_text[] = {BuffCharac, 15, Space, w_, a_, s_, Space, h_, u_, r_, t_, JumpLine, b_, y_, Space, t_, h_, e_, Space, BuffCharac, 22, Exclam, 0xFF};
-/*0x1A5*/ const u8 popped_text[] = {BuffCharac, 16, Apos, s_, Space, BuffCharac, 22, JumpLine, p_, o_, p_, p_, e_, d_, Exclam, 0xFF};
-/*0x1A6*/ const u8 destinyknot_text[] = {BuffCharac, 15, Space, f_,e_,l_,l_, Space, i_, n_, Space, l_, o_, v_, e_, JumpLine, f_, r_, o_, m_, Space, t_, h_, e_, Space, BuffCharac, 22, Exclam, 0xFF};
-/*0x1A7*/ const u8 healblockend_text[] = {BuffCharac, 18, Apos, s_, Space, H_, e_, a_, l_, Space, B_, l_, o_, c_, k_, JumpLine, w_, o_, r_, e_, Space, o_, f_, f_, Exclam, 0xFF};
-/*0x1A8*/ const u8 empty_text8[] = {0xFF};
-/*0x1A9*/ const u8 angerpoint_text[] = {0xFD, 16, Space ,m_, a_, x_, e_, d_, JumpLine, i_, t_, s_, Space, A_, t_, t_, a_, c_, k_, Exclam, 0xFF};
-/*0x1AA*/ const u8 stealhrock_text[] = {P_, o_, i_, n_, t_, e_, d_, Space, s_, t_, o_, n_, e_, s_, Space, d_, u_, g_, JumpLine, i_, n_, t_, o_, Space, BuffCharac, 16, Exclam, 0xFF};
-/*0x1AB*/ const u8 stickyweb_text[] = {BuffCharac, 16, Space, w_, a_, s_, Space, c_, a_, u_, g_, h_, t_, Space, i_, n_, Space, a_, Space, S_, t_, i_, c_, k_, y_, Space, W_, e_, b_, Exclam, 0xFF};
-/*0x1AC*/ const u8 empty_text6[] = {0xFF};
-/*0x1AD*/ const u8 absorbed_spikes_text[] = {T_, o_, x_, i_, c_, Space, S_, p_, i_, k_, e_, s_, Space, h_, a_, v_, e_, Space, b_, e_, e_, n_, JumpLine, a_, b_, s_, o_, r_, b_, e_, d_, Space, b_, y_, Space, BuffCharac, 16, Exclam, 0xFF};
-/*0x1AE*/ const u8 lost_some_hp_text[] = {BuffCharac, 15, Space, l_, o_, s_, t_, Space, s_, o_, m_, e_, Space, o_, f_, Space, i_, t_, s_, Space, H_, P_, Exclam, 0xFF};
-/*0x1AF*/ const u8 tauntended_text[] = {BuffCharac, 18, Apos, s_, Space, t_, a_, u_, n_, t_, JumpLine, w_, o_, r_, e_, Space, o_, f_, f_, Exclam, 0xFF};
-/*0x1B0*/ const u8 tormentended_text[] = {BuffCharac, 18, Space, i_, s_, Space, n_, o_, Space, l_, o_, n_, g_, e_, r_, Space, T_, o_, r_, m_, e_, n_, e_, d_, Exclam, 0xFF};
-/*0x1B1*/ const u8 healblockprevents_text[] = {H_, e_, a_, l_, Space, B_, l_, o_, c_, k_, Space, p_, r_, e_, v_, e_, n_, t_, s_, JumpLine, u_, s_, a_, g_, e_, Space, o_, f_, Space, BuffCharac, 54, Exclam, 0xFF};
-/*0x1B2*/ const u8 gravityprevents_text[] = {G_, r_, a_, v_, i_, t_, y_, Space, p_, r_, e_, v_, e_, n_, t_, s_, JumpLine, u_, s_, a_, g_, e_, Space, o_, f_, Space, BuffCharac, 54, Exclam, 0xFF};
-/*0x1B3*/ const u8 embargoprevents_text[] = {C_, a_, n_, Apos, t_, Space, u_, s_, e_, Space, BuffCharac, 54, Space, u_, n_, d_, e_, r_, JumpLine, t_, h_, e_, Space, e_, f_, f_, e_, c_, t_, s_, Space, o_, f_, Space, E_, m_, b_, a_, r_, g_, o_, Exclam, 0xFF};
-/*0x1B4*/ const u8 aromaveilprevents_text[] = {BuffCharac, 16, Space, i_, s_, Space, p_, r_, o_, t_, e_, c_, t_ , e_, d_, JumpLine, b_, y_, Space, BuffCharac, 23, Exclam, 0xFF};
-/*0x1B5*/ const u8 empty_text7[] = {0xFF};
-/*0x1B6*/ const u8 symbiosispassing_text[] = {BuffCharac, 17, Space, p_, a_, s_, s_, e_, d_, Space, i_, t_, s_, JumpLine, i_, t_, e_, m_, Space, t_, o_, Space, BuffCharac, 19, Exclam, 0xFF};
-/*0x1B7*/ const u8 restored_hp_text[] = {BuffCharac, 16, Space, r_, e_, s_, t_, o_, r_, e_, d_, Space, i_, t_, s_, Space, H_, P_, Exclam, 0xFF};
-/*0x1B8*/ const u8 replacement_healed_text[] = {T_, h_, e_, Space, r_, e_, p_, l_, a_, c_, e_, m_, e_, n_, t_, Space, w_, a_, s_, Space, f_, u_, l_, l_, y_, Space, h_, e_, a_, l_, e_, d_, Exclam, 0xFF};
-/*0x1B9*/ const u8 telekinesis_end_text[] = {BuffCharac, 15, Space, w_, a_, s_, Space, f_, r_, e_, e_, d_, Space, f_, r_, o_, m_, JumpLine, t_, h_, e_, Space, T_, e_, l_, e_, k_, i_, n_, e_, s_, i_, s_, Exclam, 0xFF};
-/*0x1BA*/ const u8 embargoend_text[] = {BuffCharac, 15, Space, c_, a_, n_, Space, u_, s_, e_, JumpLine, i_, t_, e_, m_, s_, Space, a_, g_, a_, i_, n_, Exclam, 0xFF};
-/*0x1BB*/ const u8 magnetriseend_text[] = {BuffCharac, 15, Apos, s_, Space, e_, l_, e_, c_, t_, r_, o_, m_, a_, g_, n_, e_, t_, i_, s_, m_, JumpLine, w_, o_, r_, e_, Space, o_, f_, f_, Exclam, 0xFF};
-/*0x1BC*/ const u8 wrapped_text[] = {BuffCharac, 16, Space, w_, a_, s_, Space, t_, r_, a_, p_, p_, e_, d_, JumpLine, b_, y_, Space, 0xFD, 0, Exclam, 0xFF};
-/*0x1BD*/ const u8 nofiremoves_text[] = {T_, h_, e_, Space, F_, i_, r_, e_, Dash, t_, y_,p_,e_, Space, a_,t_,t_,a_,c_,k_,JumpLine, f_,i_,z_,z_,l_,e_,d_,Space, o_,u_,t_,Space, i_,n_, Space,t_,h_,e_, Space, h_,e_,a_,v_,y_,Space, r_,a_,i_,n_,Exclam,0xFF};
-/*0x1BE*/ const u8 nowatermoves_text[] = {T_, h_, e_, Space, W_, a_, t_, e_, r_, Dash, t_, y_,p_,e_, Space, a_,t_,t_,a_,c_,k_,JumpLine, e_,v_,a_,p_,o_,r_,a_,t_,e_,d_, Space, i_,n_, Space, t_,h_,e_, Space, h_,a_,r_,s_,h_, Space, s_,u_,n_,l_,i_,g_,h_,t_, Exclam, 0xFF};
-/*0x1BF*/ const u8 trickroom_ends[] = {T_, h_, e_, Space, d_, i_, m_, e_, n_, s_, i_, o_, n_, s_, Space, r_, e_, t_, u_, r_, n_, e_, d_, Space, t_, o_, Space, n_, o_, r_, m_, a_, l_, Exclam, 0xFF};
-/*0x1C0*/ const u8 magicroom_ends[] = {M_, a_, g_, i_, c_, Space, R_, o_, o_, m_, Space, w_, o_, r_, e_, Space, o_, f_, f_, Space, a_, n_, d_, Space, h_, e_, l_, d_, JumpLine, i_, t_, e_, m_, s_, Apos, Space, e_, f_, f_, e_, c_, t_, s_, Space, r_, e_, t_, u_, r_, n_, e_, d_, Space, t_, o_, Space, n_, o_, r_, m_, a_, l_, Exclam, 0xFF};
-/*0x1C1*/ const u8 wonderoom_ends[] = {W_, o_, n_, d_, e_, r_, Space, R_, o_, o_, m_, Space, w_, o_, r_, e_, Space, o_, f_, f_, Space, a_, n_, d_, Space, D_, e_, f_, e_, n_, s_, e_, Space, a_, n_, d_, JumpLine,S_, p_, Dot, Space, D_, e_, f_, Space, s_, t_, a_, t_, s_, Space, r_, e_, t_, u_, r_, n_, e_, d_, Space, t_, o_, Space, n_, o_, r_, m_, a_, l_, Exclam, 0xFF};
-/*0x1C2*/ const u8 gravity_ends_text[] = {G_, r_, a_, v_, i_, t_, y_, Space, r_, e_, t_, u_, r_, n_, e_, d_, Space, t_, o_, Space, n_, o_, r_, m_, a_, l_, Exclam, 0xFF};
-/*0x1C3*/ const u8 grassyterainends_text[] = {T_, h_, e_, Space, g_, r_, a_, s_, s_, Space, d_, i_, s_, a_, p_, p_, e_, a_, r_, e_, d_, Space, f_, r_, o_, m_, JumpLine,t_, h_, e_, Space, b_, a_, t_, t_, l_, e_, f_, i_, e_, l_, d_, Exclam, 0xFF};
-/*0x1C4*/ const u8 mistyterrainends_text[] = {T_, h_, e_, Space, m_, i_, s_, t_,  Space, d_, i_, s_, a_, p_, p_, e_, a_, r_, e_, d_, Space, f_, r_, o_, m_, JumpLine,t_, h_, e_, Space, b_, a_, t_, t_, l_, e_, f_, i_, e_, l_, d_, Exclam, 0xFF};
-/*0x1C5*/ const u8 electrerrainends_text[] = {T_, h_, e_, Space, e_, l_, e_, c_, t_, r_, i_, c_, i_, t_, y_, Space, d_, i_, s_, a_, p_, p_, e_, a_, r_, e_, d_, Space, f_, r_, o_, m_, JumpLine,t_, h_, e_, Space, b_, a_, t_, t_, l_, e_, f_, i_, e_, l_, d_, Dot, 0xFF};
-/*0x1C6*/ const u8 grassyterrain_heal[] = {BuffCharac, 19, Space, r_, e_, s_, t_, o_, r_, e_, d_, Space, s_, o_, m_, e_, Space, o_, f_, JumpLine, i_, t_, s_, Space, H_, P_, Space, u_, s_, i_, n_, g_, Space, G_, r_, a_, s_, s_, y_, Space, T_, e_, r_, r_, a_, i_, n_, Exclam, 0xFF};
-/*0x1C7*/ const u8 fogcontinues_text[] = {T_, h_, e_, Space, f_, o_, g_, Space, i_, s_, Space, d_, e_, e_, p_, Dot, Dot, Dot, 0xFF};
-/*0x1C8*/ const u8 fogends_text[] = {T_, h_, e_, Space, f_, o_, g_, Space, l_, i_, f_, t_, e_, d_, Exclam, 0xFF};
-/*0x1C9*/ const u8 obtaineditem[] = {BuffCharac, 15, Space, o_, b_, t_, a_, i_, n_, e_, d_, Space, BuffCharac, 22, Exclam, 0xFF};
-/*0x1CA*/ const u8 tailwind_begins_text[] = {T_, h_, e_, 0, T_, a_, i_, l_, w_, i_, n_, d_, 0, b_, l_, e_, w_, 0, f_, r_, o_, m_, 0xFE, b_, e_, h_, i_, n_, d_, 0, 0xFD, 0xF, Apos, s_, 0, t_, e_, a_, m_, Exclam, 0xFF};
-/*0x1CB*/ const u8 luckychant_begins_text[] = {T_, h_, e_, 0, l_, u_, c_, k_, y_, 0, c_, h_, a_, n_, t_, 0, s_, h_, i_, e_, l_, d_, e_, d_, JumpLine, 0xFD, 0xF, Apos, s_, Space, t_, e_, a_, m_, 0, f_, r_, o_, m_, 0xFA, c_, r_, i_, t_, i_, c_, a_, l_, 0, h_, i_, t_, s_, Exclam, 0xFF};
-/*0x1CC*/ const u8 magnetrise_begins_text[] = {0xFD, 0xF, 0, l_, e_, v_, i_, t_, a_, t_, e_, d_, 0xFE, w_, i_, t_, h_, 0, e_, l_, e_, c_, t_, r_, o_, m_, a_, g_, n_, e_, t_, i_, s_, m_, Exclam, 0xFF};
-/*0x1CD*/ const u8 magicroom_start_text[] = {I_, t_, 0, c_, r_, e_, a_, t_, e_, d_, 0, a_, 0, b_, i_, z_, a_, r_, r_, e_, 0, a_, r_, e_, a_, 0, i_, n_, 0, w_, h_, i_, c_, h_, 0xFE, P_, o_, k_, Poke_e, m_, o_, n_, Apos, s_, 0, h_, e_, l_, d_, 0, i_, t_, e_, m_, s_, 0, l_, o_, s_, e_, 0, t_, h_, e_, i_, r_, 0xFA, e_, f_, f_, e_, c_, t_, s_, Exclam, 0xFF};
-/*0x1CE*/ const u8 trickroom_start_text[] = {0xFD, 0xF, 0, t_, w_, i_, s_, t_, e_, d_, 0xFE, t_, h_, e_, 0, d_, i_, m_, e_, n_, s_, i_, o_, n_, s_, Exclam, 0xFF};
-/*0x1CF*/ const u8 wonderroom_start_text[] = {I_, t_, 0, c_, r_, e_, a_, t_, e_, d_, 0, a_, 0, b_, i_, z_, a_, r_, r_, e_, 0, a_, r_, e_, a_, 0, i_, n_, 0, w_, h_, i_, c_, h_, 0xFE, D_, e_, f_, e_, n_, s_, e_, 0, a_, n_, d_, 0, S_, p_, Dot, 0, D_, e_, f_, 0, s_, t_, a_, t_, s_, 0, a_, r_, e_, 0, s_, w_, a_, p_, p_, e_, d_, Exclam, 0xFF};
-/*0x1D0*/ const u8 gravitystarts_text[] = {G_, r_, a_, v_, i_, t_, y_, Space, i_, n_, t_, e_, n_, s_, i_, f_, i_, e_, d_, Exclam, 0xFF};
-/*0x1D1*/ const u8 telekinesis_start_text[] = {0xFD, 16, Space, w_, a_, s_, Space, h_, u_, r_, l_, e_, d_, JumpLine, i_, n_, t_, o_, Space, t_, h_, e_, Space, a_, i_, r_, Exclam, 0xFF};
-/*0x1D2*/ const u8 abilitychange_text[] = {0xFD, 16, Apos, Space, a_, b_, i_, l_, i_, t_, y_, JumpLine, b_, e_, c_, a_, m_, e_, Space, 0xFD, 0x19, Exclam, 0xFF};
-/*0x1D3*/ const u8 statswap_text[] = {0xFD, 15, Space, s_, w_, i_, t_, c_, h_, e_, d_, Space, a_, l_, l_, Space, s_, t_, a_, t_, JumpLine, c_, h_, a_, n_, g_, e_, s_, Space, t_, o_, Space, i_, t_, s_, Space, 0xFD, 0, Space, a_, n_, d_, Space, 0xFD, 1, 0xFA, w_, i_, t_, h_, Space, t_, h_, e_, Space, t_, a_, r_, g_, e_, t_, Exclam, 0xFF};
-/*0x1D4*/ const u8 heartswap_text[] = {0xFD, 15, Space, s_, w_, i_, t_, c_, h_, e_, d_, Space, s_, t_, a_, t_, JumpLine, c_, h_, a_, n_, g_, e_, s_, Space, w_, i_, t_, h_, Space, t_, h_, e_, Space, t_, a_, r_, g_, e_, t_, Exclam, 0xFF};
-/*0x1D5*/ const u8 bugbite_text[] = {0xFD, 15, Space, s_, t_, o_, l_, e_, Space, a_, n_, d_, Space, a_, t_, e_, JumpLine, 0xFD, 16, Apos, Space, 0xFD, 22, Exclam, 0xFF};
-/*0x1D6*/ const u8 incinerate_text[] = {0xFD, 16, Apos, s_, Space, 0xFD, 22, Space, w_, a_, s_, JumpLine, b_, u_, r_, n_, t_, Space, u_, p_, Exclam, 0xFF};
-/*0x1D7*/ const u8 gravitybringsdown_text[] = {0xFD, 15, Space, c_, o_, u_, l_, d_, Space, n_, o_, t_, Space, s_, t_, a_, y_, JumpLine, a_, i_, r_, b_, o_, r_, n_, e_, Space, b_, e_, c_, a_, u_, s_, e_, Space, o_, f_, Space, G_, r_, a_, v_, i_, t_, y_, Exclam, 0xFF};
-/*0x1D8*/ const u8 fellforfeint[] = {0xFD, 16, Space, f_, e_, l_, l_, Space, f_, o_, r_, Space, t_, h_, e_, Space, f_, e_, i_, n_, t_, Exclam, 0xFF};
-/*0x1D9*/ const u8 protection_broken[] = {0xFD, 15, Space, b_, r_, o_, k_, e_, Space, t_, h_, r_, o_, u_, g_, h_, JumpLine, 0xFD, 16, Space, p_, r_, o_, t_, e_, c_, t_, i_, o_, n_, Exclam, 0xFF};
-/*0x1DA*/ const u8 teamprotection[] = {0xFD, 0, Space, p_, r_, o_, t_, e_, c_, t_, s_, JumpLine, 0xFD, 15, Apos, Space, t_, e_, a_, m_, Exclam, 0xFF};
-/*0x1DB*/ const u8 becameatype[] = {0xFD, 0, Space, t_, y_, p_, e_, Space, w_, a_, s_, Space, a_, d_, d_, e_, d_, Space, t_, o_, JumpLine, 0xFD, 16, Exclam, 0xFF};
-/*0x1DC*/ const u8 targetsabilitybecameattacker[] = {0xFD, 16, Space, a_, c_, q_, u_, i_, r_, e_, d_, Space, 0xFD, 25, Exclam, 0xFF};
-/*0x1DD*/ const u8 gastro_text[] = {0xFD, 16, Apos, s_, Space, A_, b_, i_, l_, i_, t_, y_, Space, w_, a_, s_, Space, s_, u_, p_, p_, r_, e_, s_, s_, e_, d_, Exclam, 0xFF};
-/*0x1DE*/ const u8 embargostart_text[] = {BuffCharac, 16, Space, c_, a_, n_, Apos, t_,Space, u_, s_, e_, JumpLine, i_, t_, e_, m_, s_, Space, a_, n_, y_, m_, o_, r_, e_, Exclam, 0xFF};
-/*0x1DF*/ const u8 afteryout_text[] = {BuffCharac, 16, Space, t_, o_, o_, k_, Space, t_, h_, e_, Space, k_, i_, n_, d_, Space, o_, f_, f_, e_, r_, Exclam, 0xFF};
-/*0x1E0*/ const u8 powder_text[] = {BuffCharac, 16, Space, i_, s_, JumpLine, c_, o_, v_, e_, r_, e_, d_, Space, i_, n_, Space, p_, o_, w_, d_, e_, r_, Exclam, 0xFF};
-/*0x1E1*/ const u8 powderdamage_text[] = {W_, h_, e_, n_, Space, t_, h_, e_, Space, f_, l_, a_, m_, e_, Space, t_, o_, u_, c_, h_, e_, d_, Space, t_, h_, e_, Space, p_, o_, w_, d_, e_, r_, JumpLine, o_, n_, Space, t_, h_, e_, Space, 0xFD, 15, Comma, Space, i_, t_, Space, e_, x_, p_, l_, o_, d_, e_, d_, Exclam, 0xFF};
-/*0x1E2*/ const u8 statchangesremoved_text[] = {0xFD, 17, Apos, s_, Space, s_, t_, a_, t_, Space, c_,h_,a_,n_,g_,e_,s_, JumpLine, w_, e_, r_, e_, Space, r_, e_, m_, o_, v_, e_, d_, Exclam, 0xFF};
-/*0x1E3*/ const u8 electify_text[] = {0xFD, 16, Apos, s_, Space, m_, o_, v_, e_, s_, Space, h_, a_, v_, e_, Space, b_, e_, e_, n_, JumpLine, e_, l_, e_, c_, t_, r_, i_, f_, i_, e_, d_, Exclam, 0xFF};
-/*0x1E4*/ const u8 stealthrock2_text[] = {P_, o_, i_, n_, t_, e_, d_, Space, s_, t_, o_, n_, e_, s_, Space, f_, l_, o_, a_, t_, Space, i_, n_, Space, t_, h_, e_, Space, a_, i_, r_, JumpLine, a_, r_, o_, u_, n_, d_, Space, 0xFD, 63, Exclam, 0xFF};
-/*0x1E5*/ const u8 toxicspikes2_text[] = {P_, o_, i_, s_, o_, n_, Space, s_, p_, i_, k_, e_, s_, Space, w_, e_, r_, e_, Space, s_, c_, a_, t_, t_, e_, r_, e_, d_, JumpLine, a_, l_, l_, Space, a_, r_, o_, u_, n_, d_, Space, 0xFD, 63, Apos, s_, Space, f_, e_, e_, t_, Exclam, 0xFF};
-/*0x1E6*/ const u8 stickyweb2_text[] = {A_, Space, s_, t_, i_, c_, k_, y_, Space, w_, e_, b_, Space, s_, p_, r_, e_, a_, d_, s_, Space, o_, u_, t_, Space, b_, e_, n_, e_, a_, t_, h_, JumpLine, 0xFD, 63, Apos, s_, Space, f_, e_, e_, t_, Exclam, 0xFF};
-/*0x1E7*/ const u8 nimble_text[] = {0xFD, 15, Space, b_, e_, c_, a_, m_, e_, Space, n_, i_, m_, b_, l_, e_, Exclam, 0xFF};
-/*0x1E8*/ const u8 iondelugeset_text[] = {A_, Space, d_, e_, l_, u_, g_, e_, Space, o_, f_, Space, i_, o_, n_, s_, Space, s_, h_, o_, w_, e_, r_, s_, JumpLine, t_, h_, e_, Space, b_, a_, t_, t_, l_, e_, f_, i_, e_, l_, d_, Exclam, 0xFF};
-/*0x1E9*/ const u8 reflecttype_text[] = {0xFD, 15, Apos, s_, Space, t_, y_, p_, e_, Space, b_, e_, c_, a_, m_, e_, Space, t_, h_, e_, JumpLine, s_, a_, m_, e_, Space, a_, s_, Space, 0xFD, 16, Apos, s_, Space, t_, y_, p_, e_, Exclam, Termin};
-/*0x1EA*/ const u8 healblock_start_text[] = {0xFD, 16, Space, w_, a_, s_, Space, p_, r_, e_, v_, e_, n_, t_, e_, d_, JumpLine, f_, r_, o_, m_, Space, h_, e_, a_, l_, i_, n_, g_, Exclam, 0xFF};
-/*0x1EB*/ const u8 smackdown_text[] = {0xFD, 16, Space, f_, e_, l_, l_, Space, s_, t_, r_, a_, i_, g_, h_, t_, Space, d_, o_, w_, n_, Exclam, 0xFF};
-/*0x1EC*/ const u8 rapidspinontoxicspikes_text[] = {T_, h_, e_, Space, p_, o_, i_, s_, o_, n_, Space, s_, p_, i_, k_, e_, s_, Space, d_, i_, s_, a_, p_, p_, e_, a_, r_, e_, d_, JumpLine, f_, r_, o_, m_, Space, a_, r_, o_, u_, n_, d_, Space, 0xFD, 15, Apos, s_, Space, s_, i_, d_, e_, Exclam, 0xFF};
-/*0x1ED*/ const u8 rapidspinonstealthrock_text[] = {T_, h_, e_, Space, p_, o_, i_, n_, t_, e_, d_, Space, s_, t_, o_, n_, e_, s_, Space, d_, i_, s_, a_, p_, p_, e_, a_, r_, e_, d_, JumpLine, f_, r_, o_, m_, Space, a_, r_, o_, u_, n_, d_, Space, 0xFD, 15, Apos, s_, Space, s_, i_, d_, e_, Exclam, 0xFF};
-/*0x1EE*/ const u8 rapidspinonstickyweb_text[] = {T_, h_, e_, Space, s_, t_, i_, c_, k_, y_, Space, w_, e_, b_, Space, d_, i_, s_, a_, p_, p_, e_, a_, r_, e_, d_, JumpLine, f_, r_, o_, m_, Space, b_, e_, n_, e_, a_, t_, h_, Space, 0xFD, 15, Apos, s_, Space, s_, i_, d_, e_, Exclam, 0xFF};
-/*0x1EF*/ const u8 powertrick_text[] = {0xFD, 15, Space, s_, w_, i_, t_, c_, h_, e_, d_, JumpLine, i_, t_, s_, Space, A_, t_, t_, a_, c_, k_, Space, a_, n_, d_, Space, D_, e_, f_, e_, n_, s_, e_, Exclam, 0xFF};
-/*0x1F0*/ const u8 soak_text[] = {0xFD, 16, Space, t_, r_, a_, s_, f_, o_, r_, m_, e_, d_, JumpLine, i_, n_, t_, o_, Space, t_, h_, e_, Space, 0xFD, 0, Space, t_, y_, p_, e_, Exclam, 0xFF};
-/*0x1F1*/ const u8 defogspikes_text[] = {T_, h_, e_, Space, s_, p_, i_, k_, e_, s_, Space, d_, i_, s_, a_, p_, p_, e_, a_, r_, e_, d_, JumpLine, f_, r_, o_, m_, Space, a_, r_, o_, u_, n_, d_, Space, 0xFD, 15, Apos, s_, Space, s_, i_, d_, e_, Exclam, 0xFF};
-/*0x1F2*/ const u8 power_text[] = {p_, o_, w_, e_, r_, 0xFF};
-/*0x1F3*/ const u8 guard_text[] = {g_, u_, a_, r_, d_, 0xFF};
-/*0x1F4*/ const u8 psychosplit_text[] = {0xFD, 15, Space, s_, h_, a_, r_, e_, d_, Space, i_, t_, s_, JumpLine, 0xFD, 0, Space, w_, i_, t_, h_, Space, t_, h_, e_, Space, t_, a_, r_, g_, e_, t_, Exclam, 0xFF};
-/*0x1F5*/ const u8 stockpileend_text[] = {0xFD, 15, Apos, s_, Space, S_, t_, o_, c_, k_, p_, i_, l_, e_, JumpLine, e_, f_, f_, e_, c_, t_, Space, w_, o_, r_, e_, Space, o_, f_, f_, Exclam, 0xFF};
-/*0x1F6*/ const u8 geomancy_text[] = {0xFD, 15, Space, i_, s_, Space, a_, b_, o_, r_, b_, i_, n_,g_, Space, p_, o_, w_, e_, r_, Exclam, 0xFF};
-/*0x1F7*/ const u8 powerherb_text[] = {0xFD, 15, Space, b_, e_, c_, a_, m_, e_, Space, f_, u_, l_, l_, y_, Space, c_, h_, a_, r_, g_, e_, d_, JumpLine, d_, u_, e_, Space, t_, o_, Space, i_, t_, s_, Space, 0xFD, 22, Exclam, 0xFF};
-/*0x1F8*/ const u8 iceburn_text[] = {0xFD, 15, Space, b_, e_, c_, a_, m_, e_, Space, c_, l_, o_, a_, k_, e_, d_, JumpLine, i_, n_, Space ,f_, r_, e_, e_, z_, i_, n_, g_, Space, a_, i_, r_, Exclam, 0xFF};
-/*0x1F9*/ const u8 freezeshock_text[] = {0xFD, 15, Space, b_, e_, c_, a_, m_, e_, Space, c_, l_, o_, a_, k_, e_, d_, JumpLine, i_, n_, Space ,f_, r_, e_, e_, z_, i_, n_, g_, Space, l_, i_, g_, h_, t_, Exclam, 0xFF};\
-/*0x1FA*/ const u8 shadowforce_text[] = {0xFD, 15, Space, v_, a_, n_, i_, s_, h_, e_, d_, Space, i_, n_, s_, t_, a_, n_, t_, l_, y_, Exclam, 0xFF};
-/*0x1FB*/ const u8 mistyterrain_text[] = {M_, i_, s_, t_, Space, s_, w_, i_, r_, l_, e_, d_, Space, a_, b_, o_, u_, t_, Space, t_, h_, e_, Space, b_, a_, t_, t_, l_, e_, f_, i_, e_, l_, d_, Exclam, 0xFF};
-/*0x1FC*/ const u8 grassyterrain_text[] = {G_, r_, a_, s_, s_, Space, g_, r_, e_, w_, Space, t_, o_, Space, c_, o_, v_, e_, r_, Space, t_, h_, e_, Space, b_, a_, t_, t_, l_, e_, f_, i_, e_, l_, d_, Exclam, 0xFF};
-/*0x1FD*/ const u8 electricterrain_text[] = {A_, n_, Space, e_, l_, e_, c_, t_, r_, i_, c_, Space, c_, u_, r_, r_, e_, n_, t_, JumpLine, r_, u_, n_, s_, Space, a_, c_, r_, o_, s_, s_, Space, t_, h_, e_, Space, b_, a_, t_, t_, l_, e_, f_, i_, e_, l_, d_, Exclam, 0xFF};
-/*0x1FE*/ const u8 aquaring_text[] = {0xFD, 15, Space, s_, u_, r_, r_, o_, u_, n_, d_, e_, d_, Space, i_, t_, s_, e_, l_, f_, JumpLine, w_, i_, t_, h_, Space, a_, Space, v_, e_, i_, l_, Space, o_, f_, Space, w_, a_, t_, e_, r_,Exclam, 0xFF};
-/*0x1FF*/ const u8 aquaringheal_text[] = {A_, q_, u_, a_, Space, R_, i_, n_,g_, Space, r_, e_, s_, t_, o_, r_, e_, d_, JumpLine, 0xFD, 15, Apos, s_, Space, H_, P_, Exclam, 0xFF};
-/*0x200*/ const u8 assaultvest_text[] = {T_, h_, e_, Space, e_, f_, f_, e_, c_, t_, s_, Space, o_, f_, Space, 0xFD, 22, JumpLine, p_, r_, e_, v_, e_, n_, t_, Space, u_, s_, i_, n_, g_, Space, s_, t_, a_, t_, u_, s_, Space, m_, o_, v_, e_, s_, Exclam, 0xFB, 0xFF};
-/*0x201*/ const u8 gravityprevents2_text[] = {0xFD, 18, Space, c_, a_, n_, Apos, t_, Space, u_, s_, e_, JumpLine, 0xFD, 20, Space, b_, e_, c_, a_, u_, s_, e_, Space, o_, f_, Space, g_, r_, a_, v_, i_, t_, y_, Exclam, 0xFB, 0xFF};
-/*0x202*/ const u8 healblockprevents2_text[] = {0xFD, 18, Space, c_, a_, n_, Apos, t_, Space, u_, s_, e_, JumpLine, 0xFD, 20, Space, b_, e_, c_, a_, u_, s_, e_, Space, o_, f_, Space, H_, e_, a_, l_, Space, B_, l_, o_, c_, k_, Exclam, 0xFB, 0xFF};
-/*0x203*/ const u8 let_it_move_first_text[] = {0xFD, 15, Apos, s_, Space, 0xFD, 22, Space, l_, e_, t_, JumpLine, i_, t_, Space, m_, o_, v_, e_, Space, f_, i_, r_, s_, t_, Exclam, Termin};
-/*0x204*/ const u8 mega_evolved_text[] = {0xFD, 15, Space, h_, a_, s_, Space, M_, e_, g_, a_, Space, E_, v_, o_, l_, v_, e_, d_, JumpLine, i_, n_, t_, o_, Space, M_, e_, g_, a_, Space, 0xFD, 0, Exclam, 0xFB, 0xFF};
-/*0x205*/ const u8 mega_trigger_text[] = {0xFD, 15, Apos, s_, Space, 0xFD, 22, Space, i_, s_, Space, r_, e_, a_, c_, t_, i_, n_, g_, JumpLine, t_, o_, Space , 0xFD, 52, Apos, s_, Space, 0xFD, 1, Exclam, 0xFB, 0xFF};
-/*0x206*/ const u8 fervent_trigger_text[] = {BuffCharac, 52, Apos, s_, Space, f_, e_, r_, v_, e_, n_, t_, Space, w_, i_, s_, h_, JumpLine, r_, e_, a_, c_, h_, e_, d_, Space, BuffCharac, 0xF, Exclam, Termin};
-/*0x207*/ const u8 quash_text[] = {0xFD, 16, Apos, s_, Space, m_, o_, v_, e_, JumpLine, w_, a_, s_, Space, p_, o_, s_, t_, p_, o_, n_, e_, d_, Exclam, 0xFF};
-/*0x208*/ const u8 allyswitch_text[] = {0xFD, 19, Space, a_, n_, d_, Space, 0xFD, 15, JumpLine, s_, w_, i_, t_, c_, h_, e_, d_, Space, p_, l_, a_, c_, e_, s_, Exclam, 0xFF};
-/*0x209*/ const u8 topsyturvy_text[] = {0xFD, 16, Apos, s_, Space, s_, t_, a_, t_, Space, c_, h_, a_, n_, g_, e_, s_, JumpLine, w_, e_, r_, e_, Space, a_, l_, l_, Space, r_, e_, v_, e_, r_, s_, e_, d_, Exclam, 0xFF};
-/*0x20A*/ const u8 bestow_text[] = {0xFD, 16, Space, r_, e_, c_, e_, v_, i_, e_, d_, Space, o_, n_, e_, JumpLine, 0xFD, 22, Space, f_, r_, o_, m_, Space, 0xFD, 15, Exclam, 0xFF};
-/*0x20B*/ const u8 statushealpoison_text[] = {0xFD, 0, Space, w_, a_, s_, Space, c_, u_, r_, e_, d_, Space, o_, f_, JumpLine, i_, t_, s_, Space, p_, o_, i_, s_, o_, n_, i_, n_, g_, Exclam, 0xFF};
-/*0x20C*/ const u8 statushealburn_text[] = {0xFD, 0, Space, h_, e_, a_, l_, e_, d_, JumpLine, i_, t_, s_, Space, b_, u_,r_, n_, Exclam, 0xFF};
-/*0x20D*/ const u8 statushealpar_text[] = {0xFD, 0, Space, w_, a_, s_, Space, c_, u_, r_, e_, d_, Space, o_, f_, JumpLine, p_, a_, r_, a_, l_, y_, s_, i_, s_, Exclam, 0xFF};
-/*0x20E*/ const u8 statushealslp_text[] = {0xFD, 0, Space, w_, o_, k_, e_, Space, u_, p_, Exclam, 0xFF};
-/*0x20F*/ const u8 statushealfrz_text[] = {0xFD, 0, Space, t_, h_, a_, w_, e_, d_, Space, o_, u_, t_, Exclam, 0xFF};
-/*0x210*/ const u8 primal_reversion_text[] = {BuffCharac, 15, Apos, s_, Space, P_, r_, i_, m_, a_, l_, Space, R_, e_, v_, e_, r_, s_, i_, o_, n_, Exclam, JumpLine, I_, t_,
-                                Space, r_, e_, v_, e_, r_, t_, e_, d_, Space, t_, o_, Space, i_, t_, s_, Space, p_, r_, i_, m_, a_, l_, Space, f_, o_, r_, m_, Exclam, Termin};
-/*0x211*/ const u8 congrats_player_text[] = {C_, o_, n_, g_, r_, a_, t_, u_, l_, a_, t_, i_, o_, n_, s_, Space, 0xFD, 35, Exclam, 0xFF};
-/*0x212*/ const u8 happyhour_text[] = {E_, v_, e_, r_, y_, o_, n_, e_, Space, i_, s_, Space, c_, a_, u_, g_, h_, t_, Space, u_, p_, JumpLine, i_, n_, Space, t_, h_, e_, Space, h_, a_, p_, p_, y_, Space, a_, t_, m_, o_, s_, p_, h_, e_, r_, e_, Exclam, 0xFF};
-/*0x213*/ const u8 skydrop1_text[] = {0xFD, 15, Space, t_, o_, o_,k_, Space, 0xFD, 16, JumpLine, i_, n_, t_, o_, Space, t_, h_, e_, Space, s_, k_, y_, Exclam, 0xFF};
-/*0x214*/ const u8 skydrop2_text[] = {0xFD, 16, Space, w_, a_, s_, Space, f_, r_, e_, e_, d_, JumpLine, f_,r_, o_,m_, Space, t_, h_, e_, Space, s_, k_, y_, Space, d_, r_, o_, p_, Exclam, 0xFF};
-/*0x215*/ const u8 skydroptooheavy_text[] = {0xFD, 16, Space, i_, s_, Space, t_, o_, o_, Space, h_, e_, a_, v_, y_, JumpLine, t_, o_, Space, b_, e_, Space, l_, i_, f_, t_, e_, d_, Exclam, 0xFF};
-/*0x216*/ const u8 fairylock_text[] = {N_, o_, Space, o_, n_, e_, Space, w_,i_,l_,l_, Space, b_, e_, Space, a_, b_, l_, e_, Space, t_, o_, JumpLine, r_, u_, n_, Space, a_, w_, a_, y_, Space, d_, u_, r_, i_, n_, g_, Space, t_, h_, e_, Space, n_, e_, x_, t_, Space, t_, u_, r_, n_, Exclam, 0xFF};
-/*0x217*/ const u8 illusion_off_text[] = {0xFD, 16, Apos, s_, Space, i_, l_, l_, u_, s_, i_, o_, n_, JumpLine, w_, o_, r_, e_, Space, o_, f_, f_, Exclam, 0xFF};
-/*0x218*/ const u8 protean_text[] = {0xFD, 15, Space, t_, r_, a_, n_, s_, f_, o_, r_, m_, e_, d_, Space, i_, n_, t_, o_, JumpLine, t_, h_, e_, Space, 0xFD, 0x0, Space, t_, y_, p_, e_, Exclam, 0xFF};
-/*0x219*/ const u8 gem_text[] = {T_, h_, e_, Space, 0xFD, 22, Space, s_, t_, r_, e_, n_, g_, t_, h_, e_, n_, e_, d_, JumpLine, 0xFD, 0x0, Apos, s_, Space, p_, o_, w_, e_, r_, Exclam, 0xFF};
-
-/*0x21A*/ const u8 telepathy_text[] = {0xFD, 16, Space, a_, v_, o_, i_, d_, s_, Space, a_, t_, t_, a_, c_, k_, s_, JumpLine, b_, y_, Space, i_, t_, s_, Space, a_, l_, l_, y_, Space, P_, o_, k_, Poke_e, m_, o_, n_, Exclam, Termin};
-/*0x21B*/ const u8 flame_burst_text[] = {T_, h_, e_, Space, b_, u_, r_, s_, t_, i_, n_, g_, Space, f_, l_, a_, m_, e_, s_, JumpLine, h_, i_, t_, Space, 0xFD, 17, Exclam, 0xFF};
-/*0x21C*/ const u8 zen_mode_text[] = {Z_, e_, n_, Space, M_, o_, d_, e_, Space, t_, r_, i_, g_, g_, e_, r_, e_, d_, Exclam, 0xFF};
-/*0x21D*/ const u8 zen_end_text[] = {Z_, e_, n_, Space, M_, o_, d_, e_, Space, e_, n_, d_, e_, d_, Exclam, 0xFF};
-/*0x21E*/ const u8 form_change_text[] = {0xFD, 0xF, Space, t_, r_, a_, n_, s_, f_, o_, r_, m_, e_, d_, Exclam, 0xFF};
-
-/*0x21F*/ const u8 partner_wait_text[] = {0xFD, 0xF, Space, i_, s_, Space, w_, a_, i_, t_, i_, n_, g_, JumpLine, f_, o_, r_, Space, 0xFD, 0x13, Apos, s_, Space, m_, o_, v_, e_, Dot, Dot, Dot, Termin};
-/*0x220*/ const u8 combined_move_text[] = {T_, h_, e_, Space, t_, w_, o_, Space, m_, o_, v_, e_, s_, Space, h_, a_, v_, e_, Space, b_ ,e_, c_, o_, m_, e_, Space, o_, n_, e_, Exclam, JumpLine,
-                                    I_, t_, Apos, s_, Space, a_, Space, c_, o_, m_, b_, i_, n_, e_, d_, Space, m_, o_, v_, e_, Exclam, Termin};
-/*0x221*/const u8 userteam_uc_text[] = {Y_, o_, u_, r_, 0, t_, e_, a_, m_, Termin};
-/*0x222*/const u8 foeteam_uc_text[] = {T_, h_, e_, 0, f_, o_, e_, Apos, s_, 0, t_, e_, a_, m_, Termin};
-/*0x223*/const u8 fire_sea_text[] = {A_, Space, s_, e_, a_, Space, o_, f_, Space, f_, i_, r_, e_, Space, e_, n_, v_, e_, l_, o_, p_, e_, d_, JumpLine, Space, 0xFD, 0x0, Exclam, Termin};
-/*0x224*/const u8 fire_sea_hurt_text[] = {0xFD, 0xF, Space, i_, s_, Space, h_, u_, r_, t_, JumpLine, b_, y_, Space, t_, h_, e_, Space, s_, e_, a_, Space, o_, f_, Space, f_, i_, r_, e_, Exclam, Termin};
-/*0x225*/const u8 swamp_text[] = {A_, Space, s_, w_, a_, m_, p_, Space, e_, n_, v_, e_, l_, o_, p_, e_, d_, JumpLine, Space, 0xFD, 0x0, Exclam, Termin};
-/*0x226*/const u8 rainbow_text[] = {A_, Space, r_, a_, i_, n_, b_, o_, w_, Space, a_, p_, p_, e_, a_, r_, e_, d_, Space, i_, n_, Space, t_, h_, e_, Space, s_, k_, y_, JumpLine,
-o_, n_, Space, 0xFD, 0x0, Apos, s_, Space, s_, i_, d_, e_, Exclam, Termin};
-/*0x227*/const u8 swamp_end_text[] = {T_, h_, e_, Space, s_, w_, a_, m_, p_, Space, a_, r_, o_, u_, n_, d_, JumpLine,
-                                0xFD, 0x0, Space, d_, i_, s_,  a_, p_, p_, e_, a_, r_, e_, d_, Exclam, Termin};
-/*0x228*/const u8 fire_sea_end_text[] = {T_, h_, e_, Space, s_, e_, a_, Space, o_, f_, Space, f_, i_, r_, e_, Space, a_, r_, o_, u_, n_, d_, JumpLine,
-                                0xFD, 0x0, Space, d_, i_, s_,  a_, p_, p_, e_, a_, r_, e_, d_, Exclam, Termin};
-/*0x229*/const u8 rainbow_end_text[] = {T_, h_, e_, Space, r_, a_, i_, n_, b_, o_, w_, Space, o_, v_, e_, r_, JumpLine,
-                                0xFD, 0x0, Space, d_, i_, s_,  a_, p_, p_, e_, a_, r_, e_, d_, Exclam, Termin};
-/*0x22A*/const u8 berry_redux_text[] = {0xFD, 0x10, Apos, s_, Space, 0xFD, 0x16, JumpLine, r_, e_, d_, u_, c_, e_, d_, Space, 0xFD, 0x14, Apos, s_, Space, p_, o_, w_, e_, r_, Exclam, Termin};
-/*0x22B*/const u8 pokeballblock_text[] = {0xFD, 53, Space, b_, l_, o_, c_, k_, e_, d_, Space, t_, h_, e_, Space, B_, a_, l_, l_, Exclam, 0xFF};
-/*0x22C*/const u8 player_wonlost_text[] = {0xFD, 35, Space, 0xFD, 55, JumpLine, 0xFD, 28, Space, 0xFD, 29, Exclam, 0xFF};
-/*0x22D*/const u8 trainerwon_text[] = {0xFD, 37, 0xFF};
-/*0x22E*/const u8 skydrop_cantchooseaction_text[] = {S_, k_, y_, Space, D_, r_, o_, p_, Space, w_, o_, n_, Apos, t_, Space, l_, e_, t_, JumpLine, 0xFD, 11, g_, o_, Exclam, 0xFF};
-/*0x22F*/const u8 trainer_sliding_text[] = {0xFD, 56, 0xFF};
-/*0x230*/const u8 sweetveilactivation_text[] = {0xFD, 16, Space, s_, u_, r_, r_, o_, u_, n_, d_, e_, d_, Space, i_, t_, s_, e_, l_, f_, JumpLine, w_, i_, t_, h_, Space, a_, Space, v_, e_, i_, l_, Space, o_, f_, Space, s_, w_, e_, e_, t_, n_, e_, s_, s_, Exclam, 0xFF};
-/*0x231*/const u8 sportend_text[] = {T_, h_, e_, Space, e_, f_, f_, e_, c_, t_, s_, Space, o_, f_, Space, 0xFD, 0, JumpLine, h_, a_, v_, e_, Space, f_, a_, d_, e_, d_, Exclam, 0xFF};
-/*0x232*/const u8 scr_active_ability_text[] = {0xFD, 19, 0xB4, 0xE7, 0, 0xFD, 26, 0xAB, 0xFF};
-/*0x233*/const u8 psychicterrain_text[] = {T_, h_, e_, Space, b_, a_, t_, t_, l_, e_, f_, i_, e_, l_, d_, Space, g_, o_, t_, Space, w_, e_, i_, r_, d_, Exclam, 0xFF};
-/*0x234*/const u8 laserfocus_text[] = {0xFD, 15, Space, c_, o_, n_, c_, e_, n_, t_, r_, a_, t_, e_, d_, JumpLine, i_, n_, t_, e_, n_, s_, l_, y_, Exclam, 0xFF};
-/*0x235*/const u8 auroraveil_text[] = {0xFD, 54, Space, m_, a_, d_, e_, Space, 0xFD, 57, JumpLine, s_, t_, r_, o_, n_, g_, e_, r_, Space, a_, g_, a_, i_, s_, t_, Space, p_, h_, y_, s_, i_, c_, a_, l_, Space, a_, n_, d_, Space, s_, p_, e_, c_, i_, a_, l_, 0xFA, m_, o_, v_, e_, s_, Exclam, 0xFF};
-/*0x236*/const u8 attacker_item_activates_text[] = {0xFD, 15, Apos, s_, Space, 0xFD, 22, JumpLine, a_, c_, t_, i_, v_, a_, t_, e_, d_, Exclam, 0xFF};
-/*0x237*/const u8 atk_ability_text[] = {0xFD, 15, Apos, s_, Space, 0xFD, 24, Exclam, 0xFF};
-/*0x238*/const u8 cantuse_text[] = {0xFD, 15, Space, c_, a_, n_, n_, o_, t_, JumpLine, u_, s_, e_, Space, 0xFD, 54, Exclam, 0xFF};
-/*0x239*/const u8 atkhpfull_text[] = {0xFD, 15, Apos, s_, JumpLine, H_, P_, Space, i_, s_, Space, f_, u_, l_, l_, Exclam, 0xFF};
-/*0x23A*/const u8 statfail_text[] = {0xFD, 19, Apos, s_, Space, 0xFD, 0, JumpLine, w_, o_, n_, Apos, t_, Space, g_, o_, Space, a_, n_, y_, Space, 0xFD, 60, Exclam, 0xFF};
-/*0x23B*/const u8 attackerhurt_text[] = {0xFD, 15, Space, w_, a_, s_, Space, h_, u_, r_, t_, Exclam, 0xFF};
-/*0x23C*/const u8 attackerfellinlove_text[] = {0xFD, 15, Space, f_, e_, l_, l_, JumpLine, i_, n_, Space, l_, o_, v_, e_, Exclam, 0xFF};
-/*0x23D*/const u8 itemstatraise_text[] = {T_, h_, e_, Space, 0xFD, 22, Space, 0xFD, 58, 0xFD, 61, JumpLine, 0xFD, 19, Apos, s_, Space, 0xFD, 0, Exclam, 0xFF};
-/*0x23E*/const u8 targetnoconfusion_text[] = {0xFD, 16, Space, d_, o_, e_, s_, n_, Apos, t_, JumpLine, b_, e_, c_, o_, m_, e_, Space, c_, o_, n_, f_, u_, s_, e_, d_, Exclam, 0xFF};
-/*0x23F*/const u8 burnuptext[] = {0xFD, 15, Space, b_, u_, r_, n_, e_, d_, JumpLine, i_, t_, s_, e_, l_, f_, Space, o_, u_, t_, Exclam, 0xFF};
-/*0x240*/const u8 attackeracquired[] = {0xFD, 15, Space, a_, c_, q_, u_, i_, r_, e_, d_, Space, 0xFD, 25, Exclam, 0xFF};
-/*0x241*/const u8 scractiveHPrestored[] = {0xFD, 19, Apos, s_, Space, H_, P_, JumpLine, w_, a_, s_, Space, r_, e_, s_, t_, o_, r_, e_, d_, Exclam, 0xFF};
-
-const u8* const new_strings_table[] = {empty_text1, empty_text4, extreme_sun_activation_text, heavyrain_activation_text, mysticalaircurrent_activation_text, forewarn_text, slowstart_text, anticipation_text, empty_text3, empty_text2, harvest_text,
-healer_text, empty_text5, moldbreaker_text, turboblaze_text, terravolt_text, empty_text9,
-empty_text10, absorbabilityboost_text , absorbabilityimmune_text, userteam_text, foeteam_text,
-aftermath_text, pickpocket_text, mummy_text, target_ability, cursedbody_text, statchange_text, pressure_text, unnerve_text, aurabreak_text, fairyaura_text, darkaura_text, frisk_text, //0x19D
-hurtbyitem_text, flameorb_text, toxicorb_text, airballoon_text, bad_dreams_text, stickybarb_text, rockyhelmet_text, popped_text, destinyknot_text, healblockend_text, empty_text8,
-angerpoint_text, stealhrock_text, stickyweb_text, empty_text6, absorbed_spikes_text, lost_some_hp_text, tauntended_text, tormentended_text,
-healblockprevents_text, gravityprevents_text, embargoprevents_text, aromaveilprevents_text, empty_text7, symbiosispassing_text,
-restored_hp_text, replacement_healed_text, telekinesis_end_text, embargoend_text, magnetriseend_text, wrapped_text,
-nofiremoves_text, nowatermoves_text, trickroom_ends, magicroom_ends, wonderoom_ends, gravity_ends_text, grassyterainends_text,
-mistyterrainends_text, electrerrainends_text, grassyterrain_heal, fogcontinues_text, fogends_text, obtaineditem,
-tailwind_begins_text, luckychant_begins_text, magnetrise_begins_text, magicroom_start_text, trickroom_start_text, wonderroom_start_text,
-gravitystarts_text, telekinesis_start_text, abilitychange_text, statswap_text, heartswap_text, bugbite_text, incinerate_text,
-gravitybringsdown_text, fellforfeint, protection_broken, teamprotection, becameatype, targetsabilitybecameattacker,
-gastro_text, embargostart_text, afteryout_text, powder_text, powderdamage_text, statchangesremoved_text, electify_text,
-stealthrock2_text, toxicspikes2_text, stickyweb2_text, nimble_text, iondelugeset_text, reflecttype_text, healblock_start_text, smackdown_text,
-rapidspinontoxicspikes_text, rapidspinonstealthrock_text, rapidspinonstickyweb_text, powertrick_text, soak_text, defogspikes_text,
-power_text, guard_text, psychosplit_text, stockpileend_text, geomancy_text, powerherb_text, iceburn_text, freezeshock_text,
-shadowforce_text, mistyterrain_text, grassyterrain_text, electricterrain_text, aquaring_text, aquaringheal_text, assaultvest_text,
-gravityprevents2_text, healblockprevents2_text , let_it_move_first_text, mega_evolved_text, mega_trigger_text, fervent_trigger_text,
-quash_text, allyswitch_text, topsyturvy_text, bestow_text, statushealpoison_text, statushealburn_text, statushealpar_text,
-statushealslp_text, statushealfrz_text, primal_reversion_text, congrats_player_text, happyhour_text, skydrop1_text, skydrop2_text,
-skydroptooheavy_text, fairylock_text, illusion_off_text, protean_text, gem_text, telepathy_text, flame_burst_text, zen_mode_text,
-zen_end_text, form_change_text, partner_wait_text, combined_move_text, userteam_uc_text, foeteam_uc_text, fire_sea_text, fire_sea_hurt_text,
-swamp_text, rainbow_text, swamp_end_text, fire_sea_end_text, rainbow_end_text, berry_redux_text, pokeballblock_text, player_wonlost_text, trainerwon_text,
-skydrop_cantchooseaction_text, trainer_sliding_text, sweetveilactivation_text, sportend_text, scr_active_ability_text, psychicterrain_text,
-laserfocus_text, auroraveil_text, attacker_item_activates_text, atk_ability_text, cantuse_text, atkhpfull_text, statfail_text,
-attackerhurt_text, attackerfellinlove_text, itemstatraise_text, targetnoconfusion_text, burnuptext, attackeracquired,
-scractiveHPrestored};
-
-
-void battle_string_loader(u16 string_id)
-{
-    display_string_in_battle(new_strings_table[string_id - 0x17C]);
-}
+bool is_in_tag_battle(void);
+u8 get_battle_bank(u8 to_get);
 
 u8 is_poke_valid(struct pokemon* poke)
 {
@@ -359,15 +118,6 @@ void frisk_target_item(void)
         battle_communication_struct.is_message_displayed=0;
 }
 
-void set_stat_msg_buffer()
-{
-    u8 stat=battle_scripting.stat_changer&0xF;
-    battle_text_buff1[0] = 0xFD;
-    battle_text_buff1[1] = 5;
-    battle_text_buff1[2] = stat;
-    battle_text_buff1[3] = 0xFF;
-}
-
 void set_type_msg_buffer()
 {
     u8 move_type=battle_stuff_ptr->dynamic_move_type&0x3F;
@@ -392,13 +142,13 @@ void mentalherb(void)
     {
         disable_structs[bank].disable_timer = 0;
         disable_structs[bank].disabled_move = 0;
-        toPush = &disable_end_bs;
+        toPush = BS_DISABLEEND;
     }
     else if (disable_structs[bank].encore_timer)
     {
         disable_structs[bank].encore_timer = 0;
         disable_structs[bank].encored_move = 0;
-        toPush = &encore_end_bs;
+        toPush = BS_ENCOREEND;
     }
     else if (disable_structs[bank].taunt_timer)
     {
@@ -499,21 +249,21 @@ void moxie_stat_raise(void)
 
 void grassyterrainn_heal(void)
 {
+    void* BS_instr = (void*)(read_word(battlescripts_curr_instruction));
     for (u8 i = 0; i < no_of_all_banks; i++)
     {
-        if (!new_battlestruct->bank_affecting[i].grassyterrain_heal && get_airborne_state(i, 0, 1) <= 2 && battle_participants[i].current_hp < battle_participants[i].max_hp && !SEMI_INVULNERABLE(i))
+        if (!new_battlestruct->bank_affecting[i].grassyterrain_heal && GROUNDED(i) && !FULL_HP(i) && !SEMI_INVULNERABLE(i))
         {
             new_battlestruct->bank_affecting[i].grassyterrain_heal = 1;
             battlescripts_curr_instruction -= 3;
             battlescript_push();
-            battlescripts_curr_instruction = &grassyheal;
+            battlescripts_curr_instruction = BS_instr;
             battle_scripting.active_bank = i;
             damage_loc = get_1_16_of_max_hp(i) * -1;
-            break;
+            return;
         }
-        if (i == no_of_all_banks)
-            break;
     }
+    battlescripts_curr_instruction += 4;
 }
 
 void callitemeffects(void)
@@ -1079,7 +829,7 @@ void breakprotection()
     return;
 }
 
-void suckerpunchchecker()
+void suckerpunchchecker(void)
 {
     if (move_table[battle_participants[bank_target].moves[battle_stuff_ptr->chosen_move_position[bank_target]]].split == 2 ||
         get_bank_turn_order(bank_attacker) > get_bank_turn_order(bank_target))
@@ -1088,19 +838,19 @@ void suckerpunchchecker()
         battlescripts_curr_instruction += 4;
 }
 
-void oppositegenderscheck()
+void oppositegenderscheck(void)
 {
     struct battle_participant* target_struct = &battle_participants[bank_target];
     struct battle_participant* attacker_struct = &battle_participants[bank_attacker];
-    u8 gender_atk = gender_from_pid(attacker_struct->poke_species, attacker_struct->pid);
-    u8 gender_def = gender_from_pid(target_struct->poke_species, target_struct->pid);
+    u8 gender_atk = gender_from_pid(attacker_struct->species, attacker_struct->pid);
+    u8 gender_def = gender_from_pid(target_struct->species, target_struct->pid);
     if (gender_atk != 0xFF && gender_def != 0xFF && gender_atk != gender_def)
         battlescripts_curr_instruction += 4;
     else
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
 }
 
-void setthirdtype()
+void setthirdtype(void)
 {
     u8 type = move_table[current_move].arg1;
     if (is_of_type(bank_target, type))
@@ -1543,6 +1293,7 @@ void sethealblock()
 void traptarget(void)
 {
     battle_participants[bank_target].status2.cant_escape = 1;
+    disable_structs[bank_target].bank_preventing_escape = bank_attacker;
 }
 
 void mefirst_check(void)
@@ -2433,7 +2184,7 @@ void bestow_effect()
     }
 }
 
-void conversion_effect()
+void conversion_effect(void)
 {
     u8 effect = 0;
     u8 type = 0;
@@ -2580,7 +2331,7 @@ void party_heal()
     return;
 }
 
-void accupressure_effect()
+void accupressure_effect(void)
 {
     u32 checked_stats_bitfield = 0;
     u8 checked_stats_int = 0;
@@ -2602,15 +2353,14 @@ void accupressure_effect()
         }
     }
     battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
-    return;
 }
 
-void mega_primal_cry()
+void mega_primal_cry(void)
 {
-    play_cry(battle_participants[new_battlestruct->various.active_bank].poke_species,-0x19,0x5);
+    play_cry(battle_participants[new_battlestruct->various.active_bank].species,-0x19,0x5);
 }
 
-void canusefling()
+void canusefling(void)
 {
     u16 item = battle_participants[bank_attacker].held_item;
     if (item == 0 || item == ITEM_REDORB || item == ITEM_BLUEORB || get_item_pocket_id(item) == 2 || get_item_pocket_id(item) == 3 || !can_lose_item(bank_attacker, 0, 0) || check_ability(bank_attacker, ABILITY_KLUTZ || new_battlestruct->bank_affecting[bank_attacker].embargo || new_battlestruct->field_affecting.magic_room))
@@ -2659,13 +2409,12 @@ void healthbox_target_update()
     update_hpbar(bank_target);
 }
 
-void return_hitmarker_animation(void)
+void target_transformed_species_to_0(void)
 {
-    hitmarker |= new_battlestruct->various.var1;
     (*battle_graphics.graphics_data->species_info)[bank_target].transformed_species = 0;
 }
 
-void transformed_species_to_0(void)
+void scr_active_transformed_species_to_0(void)
 {
     (*battle_graphics.graphics_data->species_info)[battle_scripting.active_bank].transformed_species = 0;
 }
@@ -2679,14 +2428,14 @@ void attacker_bank_exchange(void)
 
 void setup_form_change_buffers(u8 bank, u16 target_species)
 {
-    u16* species =  &battle_participants[bank].poke_species;
+    u16* species =  &battle_participants[bank].species;
     *species=target_species;
     active_bank = bank;
     bb2_setattributes_in_battle(0, REQUEST_SPECIES_BATTLE, 0, 2, species);
     mark_buffer_bank_for_execution(active_bank);
 }
 
-void setup_zen_buffers()
+void setup_zen_buffers(void)
 {
     setup_form_change_buffers(battle_scripting.active_bank,new_battlestruct->various.var1);
 }
@@ -2699,7 +2448,7 @@ void in_battle_form_change(u8 bank, bool change_hp, bool change_type)
     struct battle_participant* aegi = &battle_participants[bank];
     if(change_type)
     {
-        const struct poke_basestats* PokeStats = &((*basestat_table)[aegi->poke_species]);
+        const struct poke_basestats* PokeStats = &((*basestat_table)[aegi->species]);
         aegi->type1 = PokeStats->type1;
         aegi->type2 = PokeStats->type2;
     }
@@ -3147,8 +2896,35 @@ void set_stats_to_play(void)
     new_battlestruct->various.dont_play_stat_anim = 0;
 }
 
-const void* callasm_table[] = {&ability_switchin_effect /*0*/, &callasm_nop /*1*/, &change_attacker_item /*2*/, &callasm_nop /*3*/, &callasm_nop /*4*/,
-&changestatvar1_atk /*5*/, &changestatvar2_atk /*6*/, &frisk_target_item /*7*/, &set_stat_msg_buffer /*8*/, &set_type_msg_buffer /*9*/, &callasm_nop /*10*/, &bad_dreams_damage_calc /*11*/,
+void prepare_switchbank_data(void)
+{
+    u8 bank = get_battle_bank(read_byte(battlescripts_curr_instruction));
+    battlescripts_curr_instruction++;
+
+    u8 pokeID = new_battlestruct->various.var1;
+    battle_stuff_ptr->field_5C[bank] = pokeID;
+    battle_stuff_ptr->field_58[bank] = battle_team_id_by_side[bank];
+    if (!is_in_tag_battle())
+        change_order_in_battle(bank);
+    if ((battle_flags.link && battle_flags.frontier_general) || (battle_flags.link && battle_flags.player_partner) || (battle_flags.frontier_general && battle_flags.flag_x2000000))
+    {
+        sub_81B8E80(bank, pokeID, 0);
+        sub_81B8E80(bank ^ 2, pokeID, 1);
+    }
+    if (battle_flags.player_partner)
+        sub_80571DC(bank, pokeID);
+}
+
+void jump_if_forcesetflag_set(void)
+{
+    if (GET_CUSTOMFLAG(FORCE_SET_FLAG))
+        battlescripts_curr_instruction = (void*)read_word(battlescripts_curr_instruction);
+    else
+        battlescripts_curr_instruction += 4;
+}
+
+const void* callasm_table[] = {&ability_switchin_effect /*0*/, &jump_if_forcesetflag_set /*1*/, &change_attacker_item /*2*/, &callasm_nop /*3*/, &callasm_nop /*4*/,
+&changestatvar1_atk /*5*/, &changestatvar2_atk /*6*/, &frisk_target_item /*7*/, &callasm_nop /*8*/, &set_type_msg_buffer /*9*/, &callasm_nop /*10*/, &bad_dreams_damage_calc /*11*/,
 &callasm_nop /*12*/, &mentalherb /*13*/, &callasm_nop /*14*/, &hazards_bank_switcher /*15*/, &hazards_bank_return /*16*/, &leechseed_update /*17*/,
 &callasm_nop /*18*/, &callasm_nop /*19*/, &moxie_stat_raise /*20*/, &grassyterrainn_heal /*21*/, &callitemeffects /*22*/,
 &set_var1_to_0 /*23*/, &damagecalc2 /*24*/, &set_statchanger_to_arg1 /*25*/, &checksubstitute /*26*/, &callasm_nop /*27*/,
@@ -3168,7 +2944,7 @@ const void* callasm_table[] = {&ability_switchin_effect /*0*/, &callasm_nop /*1*
 &can_magneticflux_work /*96*/, &magnetic_flux_effect /*97*/, &canuse_flowershield /*98*/, &flowershield_effect /*99*/, &canuselastresort /*100*/,
 &topsyturvy_effect /*101*/, &bestow_effect /*102*/, &conversion_effect /*103*/, &party_heal /*104*/, &accupressure_effect /*105*/, &mega_primal_cry /*106*/,
 &canusefling /*107*/, &happyhour_effect /*108*/, &canuseskydrop /*109*/, &skydropup /*110*/, &canusefairylock /*111*/, &healthbox_target_update /*112*/,
-&return_hitmarker_animation /*113*/, &transformed_species_to_0 /*114*/, &aegi_change /*115*/, &set_transfrom_palchange /*116*/, &bug_bite_set_berry_eaten /*117*/,
+&target_transformed_species_to_0 /*113*/, &scr_active_transformed_species_to_0 /*114*/, &aegi_change /*115*/, &set_transfrom_palchange /*116*/, &bug_bite_set_berry_eaten /*117*/,
 &type_stat_form_change/*118*/, &setup_zen_buffers/*119*/, &belch_canceler/*120*/, &attacker_bank_exchange/*121*/, &print_from_nbsvar2/*122*/,
 &attackerhp_to_zero /*123*/, &reset_bg2x /*124*/, &check_and_set_pledge/*125*/, &print_combined_attack_message/*126*/, &print_attack_message/*127*/,
 &set_message_bank_buffer_to_ally /*128*/, &set_fire_sea /*129*/, &set_swamp /*130*/, &set_rainbow/*131*/, &callasm_nop/*132*/,
@@ -3177,7 +2953,7 @@ const void* callasm_table[] = {&ability_switchin_effect /*0*/, &callasm_nop /*1*
 &check_soulheart /*142*/, &canuse_strengthsap /*143*/, &jumpifattackerfullhp /*144*/, &set_effect1_formove /*145*/, &set_statchanger_to_arg2 /*146*/,
 &shiftgear_checkifworks /*147*/, &shiftgear_orr_if_multiple /*148*/, &dont_stat_if_multiple /*149*/, &jumpifalloppositepokemonbehindsubstitute /*150*/,
 &triattackrand /*151*/, &statustoeffect2 /*152*/, &multiplestats_prepare_custom /*153*/, &do_multiple_stats_custom /*154*/, &jumpifnotarg1type /*155*/,
-&set_stats_to_play /*156*/, &receiver_effect /*157*/, &bugbite_get_berry_effect /*158*/};
+&set_stats_to_play /*156*/, &receiver_effect /*157*/, &bugbite_get_berry_effect /*158*/, &prepare_switchbank_data /*159*/};
 
 void callasm_cmd(void)
 {

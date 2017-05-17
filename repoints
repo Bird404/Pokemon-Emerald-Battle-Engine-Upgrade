@@ -291,3 +291,5 @@ trainerhrow_positions 08169F78
 trainerhrow_positions 0816A044
 trainerhrow_positions 0818BEB8
 trainerhrow_positions 081BD3A4
+## hook into bs that asks you if you want to switch poke
+BS_ASK_FOR_SWITCHING 082DA82E

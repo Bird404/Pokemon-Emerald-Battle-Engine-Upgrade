@@ -92,7 +92,7 @@ u16 apply_statboost(u16 stat, u8 boost)
 
 u16 get_poke_weight(u8 bank)
 {
-    u16 poke_weight = get_height_or_weight(species_to_national_dex(battle_participants[bank].poke_species), 1);
+    u16 poke_weight = get_height_or_weight(species_to_national_dex(battle_participants[bank].species), 1);
     if (has_ability_effect(bank, 1))
     {
         switch (battle_participants[bank].ability_id)
@@ -145,7 +145,7 @@ u16 get_speed(u8 bank)
         speed = percent_boost(speed, 50);
         break;
      case ITEM_EFFECT_QUICKPOWDER:
-        if (battle_participants[bank].poke_species == POKE_DITTO && !battle_participants[bank].status2.transformed)
+        if (battle_participants[bank].species == POKE_DITTO && !battle_participants[bank].status2.transformed)
             speed <<= 1;
         break;
     }
@@ -567,8 +567,8 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
             break;
         case ABILITY_RIVALRY:
             {
-                u8 attacker_gender = gender_from_pid(battle_participants[atk_bank].poke_species, battle_participants[atk_bank].pid);
-                u8 target_gender = gender_from_pid(battle_participants[def_bank].poke_species, battle_participants[def_bank].pid);
+                u8 attacker_gender = gender_from_pid(battle_participants[atk_bank].species, battle_participants[atk_bank].pid);
+                u8 target_gender = gender_from_pid(battle_participants[def_bank].species, battle_participants[def_bank].pid);
                 if (attacker_gender != 0xFF && target_gender != 0xFF)
                 {
                     if (attacker_gender == target_gender)
@@ -689,19 +689,19 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
         }
         break;
     case ITEM_EFFECT_LUSTROUSORB:
-        if ((move_type == TYPE_WATER || move_type == TYPE_DRAGON) && battle_participants[atk_bank].poke_species == POKE_PALKIA)
+        if ((move_type == TYPE_WATER || move_type == TYPE_DRAGON) && battle_participants[atk_bank].species == POKE_PALKIA)
         {
             modifier = chain_modifier(modifier, 0x1333);
         }
         break;
     case ITEM_EFFECT_ADAMANTORB:
-        if ((move_type == TYPE_STEEL || move_type == TYPE_DRAGON) && battle_participants[atk_bank].poke_species == POKE_DIALGA)
+        if ((move_type == TYPE_STEEL || move_type == TYPE_DRAGON) && battle_participants[atk_bank].species == POKE_DIALGA)
         {
             modifier = chain_modifier(modifier, 0x1333);
         }
         break;
     case ITEM_EFFECT_GRISEOUSORB:
-        if ((move_type == TYPE_GHOST || move_type == TYPE_DRAGON) && (battle_participants[atk_bank].poke_species == POKE_GIRATINA))
+        if ((move_type == TYPE_GHOST || move_type == TYPE_DRAGON) && (battle_participants[atk_bank].species == POKE_GIRATINA))
         {
             modifier = chain_modifier(modifier, 0x1333);
         }
@@ -1034,7 +1034,7 @@ u16 get_attack_stat(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
         if (flower_gift_bank && move_split == MOVE_PHYSICAL)
         {
             flower_gift_bank--;
-            if (new_battlestruct->bank_affecting[flower_gift_bank].sunshine_form)
+            if (new_battlestruct->bank_affecting[flower_gift_bank].cherrim_form)
             {
                 modifier = chain_modifier(modifier, 0x1800);
             }
@@ -1044,25 +1044,25 @@ u16 get_attack_stat(u16 move, u8 move_type, u8 atk_bank, u8 def_bank)
     switch (get_item_effect(atk_bank, 1))
     {
     case ITEM_EFFECT_THICKCLUB:
-        if (move_split == MOVE_PHYSICAL && (battle_participants[atk_bank].poke_species == POKE_MAROWAK || battle_participants[atk_bank].poke_species == POKE_CUBONE))
+        if (move_split == MOVE_PHYSICAL && (battle_participants[atk_bank].species == POKE_MAROWAK || battle_participants[atk_bank].species == POKE_CUBONE))
         {
             modifier = chain_modifier(modifier, 0x2000);
         }
         break;
     case ITEM_EFFECT_DEEPSEATOOTH:
-        if (move_split == MOVE_SPECIAL && (battle_participants[atk_bank].poke_species == POKE_CLAMPERL))
+        if (move_split == MOVE_SPECIAL && (battle_participants[atk_bank].species == POKE_CLAMPERL))
         {
             modifier = chain_modifier(modifier, 0x2000);
         }
         break;
     case ITEM_EFFECT_LIGHTBALL:
-        if (battle_participants[atk_bank].poke_species == POKE_PIKACHU)
+        if (battle_participants[atk_bank].species == POKE_PIKACHU)
         {
             modifier = chain_modifier(modifier, 0x2000);
         }
         break;
     case ITEM_EFFECT_SOULDEW:
-        if (move_split == MOVE_SPECIAL && (battle_participants[atk_bank].poke_species == POKE_LATIAS || battle_participants[atk_bank].poke_species == POKE_LATIOS))
+        if (move_split == MOVE_SPECIAL && (battle_participants[atk_bank].species == POKE_LATIAS || battle_participants[atk_bank].species == POKE_LATIOS))
         {
             modifier = chain_modifier(modifier, 0x1800);
         }
@@ -1150,13 +1150,13 @@ u16 get_def_stat(u16 move, u8 atk_bank, u8 def_bank)
     switch (get_item_effect(def_bank, 1))
     {
     case ITEM_EFFECT_DEEPSEASCALE:
-        if (move_split == MOVE_SPECIAL && battle_participants[def_bank].poke_species == POKE_CLAMPERL)
+        if (move_split == MOVE_SPECIAL && battle_participants[def_bank].species == POKE_CLAMPERL)
         {
             modifier = chain_modifier(modifier, 0x1800);
         }
         break;
     case ITEM_EFFECT_SOULDEW:
-        if (move_split == MOVE_SPECIAL && (battle_participants[def_bank].poke_species == POKE_LATIAS || battle_participants[def_bank].poke_species == POKE_LATIOS))
+        if (move_split == MOVE_SPECIAL && (battle_participants[def_bank].species == POKE_LATIAS || battle_participants[def_bank].species == POKE_LATIOS))
         {
             modifier = chain_modifier(modifier, 0x1800);
         }
@@ -1168,13 +1168,13 @@ u16 get_def_stat(u16 move, u8 atk_bank, u8 def_bank)
         }
         break;
     case ITEM_EFFECT_EVIOLITE:
-        if (can_evolve(battle_participants[def_bank].poke_species))
+        if (can_evolve(battle_participants[def_bank].species))
         {
             modifier = chain_modifier(modifier, 0x1800);
         }
         break;
     case ITEM_EFFECT_METALPOWDER:
-        if (battle_participants[def_bank].poke_species == POKE_DITTO && move_split == MOVE_PHYSICAL && !(battle_participants[def_bank].status2.transformed))
+        if (battle_participants[def_bank].species == POKE_DITTO && move_split == MOVE_PHYSICAL && !(battle_participants[def_bank].status2.transformed))
         {
             modifier = chain_modifier(modifier, 0x2000);
         }
@@ -1186,13 +1186,13 @@ u16 get_def_stat(u16 move, u8 atk_bank, u8 def_bank)
 
 u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8 effects_handling_and_recording);
 u8 does_move_target_multiple(void);
-u8 count_alive_on_target_side(void);
+u8 count_alive_on_side(u8 bank);
 
-u16 calc_reflect_modifier(u8 atk_bank, u16 final_modifier)
+u16 calc_reflect_modifier(u8 atk_bank, u8 def_bank, u16 final_modifier)
 {
     if (crit_loc != 2 && !((check_ability(atk_bank, ABILITY_INFILTRATOR))))
     {
-        if (count_alive_on_target_side() == 2 && battle_flags.double_battle)
+        if (count_alive_on_side(def_bank) == 2 && battle_flags.double_battle)
             final_modifier = chain_modifier(final_modifier, 0xA8F);
         else
             final_modifier = chain_modifier(final_modifier, 0x800);
@@ -1264,11 +1264,11 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u16 chained_e
     //check reflect/light screen
     u8 def_side = is_bank_from_opponent_side(def_bank);
     if ((side_affecting_halfword[def_side].reflect_on && move_split == MOVE_PHYSICAL) ||(side_affecting_halfword[def_side].light_screen_on && move_split == MOVE_SPECIAL))
-        final_modifier = calc_reflect_modifier(atk_bank, final_modifier);
+        final_modifier = calc_reflect_modifier(atk_bank, def_bank, final_modifier);
 
     //check aurora veil
     if (new_battlestruct->side_affecting[def_side].aurora_veil)
-        final_modifier = calc_reflect_modifier(atk_bank, final_modifier);
+        final_modifier = calc_reflect_modifier(atk_bank, def_bank, final_modifier);
 
     u8 atk_ability = battle_participants[atk_bank].ability_id;
     u8 def_ability = battle_participants[def_bank].ability_id;

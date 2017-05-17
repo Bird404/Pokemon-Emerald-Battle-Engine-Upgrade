@@ -7,42 +7,56 @@
 
 .align 2
 NewPlayAnimationTable:
-.word CASTFORM_CHANGE_ANIM
-.word StatChangeAnimation
-.word SUBSTITUTE_DESTROYED_ANIM
-.word CREATE_SUBSTITUTE_ANIM
-.word anim_table4
-.word ITEM_KNOCKEDOFF_ANIM
-.word TURN_TRAP_ANIM
-.word ITEM_EFFECT_ANIM
-.word SMOKEBALL_ESCAPE_ANIM
-.word HANGED_ON_FOCUSBAND_ANIM
-.word RAIN_CONTINUES_ANIM
-.word SUN_CONTINUES_ANIM
-.word SANDSTORM_CONTINUES_ANIM
-.word HAIL_CONTINUES_ANIM
-.word LEECH_SEED_HEAL_ANIM
-.word POKE_HIT_ANIM
-.word ITEM_STOLEN_ANIM
-.word SNATCHED_MOVE_ANIM
-.word FUTURE_SIGHT_ATTACK_ANIM
-.word anim_table_x13
-.word anim_table_x14
-.word INGRAIN_HEAL_ANIM
-.word WISH_HEAL_ANIM
-.word anim_table_x17
-.word RETURN_TO_BALL_ANIM
-.word RETURN_TO_BALL2_ANIM
-.word anim_table_x1a
-.word anim_table_x1b
-.word anim_table_x1c
-.word anim_table_x1d
-.word MegaEvoAnimation		@0x1e
-.word AlphaPrimalAnimation	@0x1f
-.word OmegaPrimalAnimation	@0x20
-.word SpriteChangeAnimation	@0x21
-.word TargetStealsAttackersItemAnimation	@0x22
-.word PartnerAtkStealsPartnerDefItemAnimation	@0x23
+.word CASTFORM_CHANGE_ANIM							@0x0
+.word StatChangeAnimation									@0x1
+.word SUBSTITUTE_DESTROYED_ANIM					@0x2
+.word CREATE_SUBSTITUTE_ANIM							@0x3
+.word anim_table4													@0x4
+.word ITEM_KNOCKEDOFF_ANIM								@0x5
+.word TURN_TRAP_ANIM											@0x6
+.word ITEM_EFFECT_ANIM										@0x7
+.word SMOKEBALL_ESCAPE_ANIM							@0x8
+.word HANGED_ON_FOCUSBAND_ANIM					@0x9
+.word RAIN_CONTINUES_ANIM								@0xA
+.word SUN_CONTINUES_ANIM									@0xB
+.word SANDSTORM_CONTINUES_ANIM					@0xC
+.word HAIL_CONTINUES_ANIM								@0xD
+.word LEECH_SEED_HEAL_ANIM								@0xE
+.word POKE_HIT_ANIM											@0xF
+.word ITEM_STOLEN_ANIM										@0x10
+.word SNATCHED_MOVE_ANIM								@0x11
+.word FUTURE_SIGHT_ATTACK_ANIM						@0x12
+.word anim_table_x13											@0x13
+.word anim_table_x14											@0x14
+.word INGRAIN_HEAL_ANIM									@0x15
+.word WISH_HEAL_ANIM											@0x16
+.word anim_table_x17											@0x17
+.word RETURN_TO_BALL_ANIM								@0x18
+.word RETURN_TO_BALL2_ANIM								@0x19
+.word anim_table_x1a											@0x1A
+.word anim_table_x1b											@0x1B
+.word anim_table_x1c											@0x1C
+.word anim_table_x1d											@0x1D
+.word MegaEvoAnimation										@0x1E
+.word AlphaPrimalAnimation									@0x1F
+.word OmegaPrimalAnimation									@0x20
+.word SpriteChangeAnimation									@0x21
+.word TargetStealsAttackersItemAnimation				@0x22
+.word PartnerAtkStealsPartnerDefItemAnimation		@0x23
+.word PokeGetsRemovedAnimation							@0x24
+
+PokeGetsRemovedAnimation:
+	pokespritetoBG bank_attacker 
+	leftbankBG_over_partnerBG bank_attacker  
+	setblends 0x808 
+	launchtask 0x80d5db1 0x5 0x2 0x1 0x2  
+	waitanimation 
+	pokespritefromBG bank_attacker 
+	resetblends 
+	waitanimation 
+	launchtask 0x8159079 0x5 0x0  
+	waitanimation 
+	endanimation 
 
 PartnerAtkStealsPartnerDefItemAnimation:
 	loadparticle 0x27f0 

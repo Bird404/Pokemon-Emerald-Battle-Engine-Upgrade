@@ -758,7 +758,58 @@ BS_SNOWWARNING:
 	printstring 0xF3
 	playanimation bank_scripting_active 13 0x0
 	waitanimation
-	call 0x082DB48D @script that checks castform and stuff
+	call BS_CHECKCASTFORMCHERRIM
+	end3
+	
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@ BS Drought
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+.global BS_DROUGHT
+BS_DROUGHT:
+	pause_cmd 0x10
+	call BS_PRINT_SCR_ACTIVE_ABILITY
+	printstring 0xF0
+	playanimation bank_scripting_active 11 0x0
+	waitanimation
+	call BS_CHECKCASTFORMCHERRIM
+	end3
+	
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@ BS Drizzle
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+.global BS_DRIZZLE
+BS_DRIZZLE:
+	pause_cmd 0x10
+	call BS_PRINT_SCR_ACTIVE_ABILITY
+	printstring 0xE8
+	playanimation bank_scripting_active 10 0x0
+	waitanimation
+	call BS_CHECKCASTFORMCHERRIM
+	end3
+	
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@ BS Sandstream
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+.global BS_SANDSTREAM
+BS_SANDSTREAM:
+	pause_cmd 0x10
+	call BS_PRINT_SCR_ACTIVE_ABILITY
+	printstring 0xED
+	playanimation bank_scripting_active 12 0x0
+	waitanimation
+	call BS_CHECKCASTFORMCHERRIM
+	end3
+	
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@ BS Air Lock
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+.global BS_AIRLOCK
+BS_AIRLOCK:
+	pause_cmd 0x10
+	call BS_PRINT_ATK_ABILITY
+	printstring 0x185
+	waitmessage 0x40
+	call BS_CHECKCASTFORMCHERRIM
 	end3
 	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -771,7 +822,7 @@ BS_DESOLATELAND:
 	printstring 0x17E
 	playanimation bank_scripting_active 11 0x0
 	waitanimation
-	call 0x082DB48D @script that checks castform and stuff
+	call BS_CHECKCASTFORMCHERRIM
 	end3
 	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -784,7 +835,7 @@ BS_PRIMORDIALSEA:
 	printstring 0x17F
 	playanimation bank_scripting_active 10 0x0
 	waitanimation
-	call 0x082DB48D @script that checks castform and stuff
+	call BS_CHECKCASTFORMCHERRIM
 	end3
 	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -796,7 +847,44 @@ BS_DELTASTREAM:
 	call BS_PRINT_SCR_ACTIVE_ABILITY
 	printstring 0x180
 	waitmessage 0x40
-	call 0x082DB48D @script that checks castform and stuff
+	call BS_CHECKCASTFORMCHERRIM
+	end3
+	
+.global BS_CHECKCASTFORMCHERRIM
+BS_CHECKCASTFORMCHERRIM:
+	setbyte BankScriptingActive 0x0
+BS_CASTFORMCHECK_LOOP:
+	checkcastform
+	addbyte BankScriptingActive 0x1
+	jumpifarraynotequal BankScriptingActive no_of_all_banks 1 BS_CASTFORMCHECK_LOOP
+	return_cmd
+	
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@ BS Castform Switch
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+.global BS_CASTFORMSWITCH
+BS_CASTFORMSWITCH:
+	castformchangeanim
+BS_CASTSWITCHWAITPRINT:
+	waitanimation
+	printstring 0x13A
+	waitmessage 0x40
+	return_cmd
+	
+.global BS_CASTFORMSWITCH_END3
+BS_CASTFORMSWITCH_END3:
+	call BS_CASTFORMSWITCH
+	end3
+	
+.global BS_CHERRIMSWITCH
+BS_CHERRIMSWITCH:
+	callasm_cmd 114 @sets transformed species to 0
+	playanimation bank_scripting_active 0x21 0x0
+	goto_cmd BS_CASTSWITCHWAITPRINT
+	
+.global BS_CHERRIMSWITCH_END3
+BS_CHERRIMSWITCH_END3:
+	call BS_CHERRIMSWITCH
 	end3
 	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -814,6 +902,19 @@ BS_IMPOSTER:
 	waitmessage 0x40
 	callasm_cmd 0	@calls switch-in abilities
 	end3
+	
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@ BS Illusion
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+.global BS_ILLUSION_OFF
+BS_ILLUSION_OFF:
+	playanimation bank_target 0x21 0x0
+	waitanimation
+	callasm_cmd 112	@updates the hp box
+	callasm_cmd 113	@sets the graphical transformed species to 0
+	printstring 0x217
+	waitmessage 0x40
+	return_cmd
 	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @ BS Slow Start
@@ -984,6 +1085,48 @@ BS_SYMBIOSIS:
 	return_cmd
 	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@ BS Healer
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+.global BS_HEALER
+BS_HEALER:
+	pause_cmd 0x10
+	call BS_PRINT_ATK_ABILITY
+	printstring 0x187
+	waitmessage 0x40
+	statusiconeupdate bank_scripting_active
+	end3
+	
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@ BS Synchronize
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+.global BS_SYNCHRONIZE
+BS_SYNCHRONIZE:
+	call BS_PRINT_SCR_ACTIVE_ABILITY
+	seteffectprimary
+	return_cmd
+	
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@ Stat Raise Immune ability
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+.global BS_IMMUNESTATRAISE_ABILITY
+BS_IMMUNESTATRAISE_ABILITY:
+	ppreduce
+	attackstring
+	pause_cmd 0x10
+	call BS_DEF_ABILITY_CHANGES_DEF_STAT
+	goto_cmd ENDTURN
+	
+.global BS_IMMUNE_ABILITY
+BS_IMMUNE_ABILITY:
+	ppreduce
+	attackstring
+	pause_cmd 0x10
+	callasm_cmd 9 @buffer type
+	printstring 0x18F
+	waitmessage 0x40
+	goto_cmd ENDTURN
+	
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @ BS Burn Up effect
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 .global BS_BURNUP
@@ -1109,6 +1252,44 @@ BS_BERRY_DMG_REDUCE:
 	waitmessage 0x40
 	removeitem bank_target
 	return_cmd
+	
+BS_ITEMSWITCH_REMOVEPLAY:
+	waitmessage 0x40
+	removeitem bank_scripting_active
+	playanimation bank_newstruct 0x24 0x0
+	waitanimation
+	return_cmd
+	
+.global BS_REDCARD_SWITCH
+BS_REDCARD_SWITCH:
+	jumpifcannotswitch bank_newstruct | 0x80 BS_ITEM_SWITCH_RET @this should be checked beforehand
+	printstring 0x1A8
+	call BS_ITEMSWITCH_REMOVEPLAY
+	callasm_cmd 159 @prepare switchin data
+	.byte bank_newstruct
+	swithchoutabilities bank_newstruct
+BS_ITEMSWITCH_ACTUALSWITCH:
+	return_to_ball bank_newstruct
+	waitstate
+	switch1 bank_newstruct
+	switch2 bank_newstruct
+	switch3 bank_newstruct 0x0
+	waitstate
+	printstring 0x154
+	switchineffects bank_newstruct
+BS_ITEM_SWITCH_RET:
+	return_cmd
+	
+.global BS_EJECTBUTTON_SWITCH
+BS_EJECTBUTTON_SWITCH:
+	jumpifcannotswitch bank_newstruct | 0x80 BS_ITEM_SWITCH_RET @this should be checked beforehand
+	printstring 0x1AC
+	call BS_ITEMSWITCH_REMOVEPLAY
+	openpartyscreen bank_newstruct BS_ITEM_SWITCH_RET
+	swithchoutabilities bank_newstruct
+	waitstate
+	switch_handle_order bank_newstruct 0x2
+	goto_cmd BS_ITEMSWITCH_ACTUALSWITCH
 	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @ Usage Prevention
@@ -1284,6 +1465,18 @@ BS_TAUNTEND_END2:
 	call BS_TAUNTEND
 	end2
 	
+.global BS_DISABLEEND
+BS_DISABLEEND:
+	printstring 0x86
+	waitmessage 0x40
+	return_cmd
+	
+.global BS_ENCOREEND
+BS_ENCOREEND:
+	printstring 0x88
+	waitmessage 0x40
+	return_cmd
+	
 .global BS_TORMENTEND
 BS_TORMENTEND:
 	printstring 0x1B0
@@ -1391,6 +1584,17 @@ BS_LEECHSEED:
 	manipulatedamage 0x0 @change sign
 	goto_cmd 0x82DAD3C @continue leech seed
 	
+.global BS_BINDEFFECT
+BS_BINDEFFECT:
+	printfromtable bind_strings
+	waitmessage 0x40
+	return_cmd
+	
+.global CANT_CONFUSE_DUETOABILITY_PRINT_END2
+CANT_CONFUSE_DUETOABILITY_PRINT_END2:
+	call CANT_CONFUSE_DUETOABILITY_PRINT
+	end2
+	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @ Cant select a move from menu
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -1408,4 +1612,30 @@ BS_CANTSELECT_HEALBLOCK:
 BS_CANTSELECT_ASSAULTVEST:
 	printstring2 0x200
 	cmd44
+	
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@ BS Grassy Terrain Heal
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+.global BS_GRASSYTERRAIN_HEAL
+BS_GRASSYTERRAIN_HEAL:
+	callasm_cmd 21
+	.word BS_GRASSY_HEAL
+	end2
+	
+BS_GRASSY_HEAL:
+	playanimation bank_scripting_active 0x15 0x0
+	graphicalhpupdate bank_scripting_active
+	datahpupdate bank_scripting_active
+	printstring 0x1C6
+	waitmessage 0x40
+	return_cmd
+	
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@ 'hook' into part of the bs that asks if you want to switch out after opponent's poke faints
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+BS_ASK_FOR_SWITCHING:
+	jumpifword Has_One_Bit_Common battle_flags BATTLE_DOUBLE | BATTLE_LINK | BATTLE_FRONTIER_GENERAL | BATTLE_DOME | BATTLE_PALACE | BATTLE_ARENA | BATTLE_FACTORY | BATTLE_FLAG_x100000 | BATTLE_FLAG_x2000000 0x82DA8D0
+	callasm_cmd 1
+	.word 0x82DA8D0
+	goto_cmd 0x82DA865
 	

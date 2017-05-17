@@ -266,6 +266,9 @@ enum trainer_class{
 #define NEG_AND(value, to_neg)(value & (to_neg * (-1)))
 #define BANK_PSN(bank)((battle_participants[bank].status.flags.poison || battle_participants[bank].status.flags.toxic_poison))
 #define FULL_HP(bank)((battle_participants[bank].current_hp == battle_participants[bank].max_hp))
+#define RAIN_WEATHER ((battle_weather.flags.rain || battle_weather.flags.downpour || battle_weather.flags.permament_rain || battle_weather.flags.heavy_rain))
+#define SUN_WEATHER ((battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun))
+#define HAIL_WEATHER ((battle_weather.flags.hail || battle_weather.flags.permament_hail))
 
 #define TRAINER_STEVEN 0xC03
 #define PARTNER_ANIMATES 0x8000
@@ -278,6 +281,7 @@ enum trainer_class{
 #define REQUEST_PPMOVE3_BATTLE  0xB
 #define REQUEST_PPMOVE4_BATTLE  0xC
 #define REQUEST_STATUS_BATTLE   0x28
+#define REQUEST_HP_BATTLE       0x2A
 
 #define GROUNDED(bank) (get_airborne_state(bank, 0, 1) <= 2)
 

@@ -373,7 +373,7 @@ u8 check_mega_evo(u8 bank)
         attacker_struct->spd = get_attributes(poke_address, ATTR_SPEED, 0);
         attacker_struct->sp_atk = get_attributes(poke_address, ATTR_SPECIAL_ATTACK, 0);
         attacker_struct->sp_def = get_attributes(poke_address, ATTR_SPECIAL_DEFENCE, 0);
-        attacker_struct->poke_species = mega_species;
+        attacker_struct->species = mega_species;
         const struct poke_basestats* PokeStats = &((*basestat_table)[mega_species]);
         attacker_struct->type1 = PokeStats->type1;
         attacker_struct->type2 = PokeStats->type2;
@@ -562,7 +562,7 @@ void bs_start_attack()
             hitmarker |= HITMARKER_IGNORE_UNDERWATER;
         if (battle_participants[bank_attacker].ability_id == ABILITY_STANCE_CHANGE && !battle_participants[bank_attacker].status2.transformed)
         {
-            u16* species = &battle_participants[bank_attacker].poke_species;
+            u16* species = &battle_participants[bank_attacker].species;
             u8 change = 0;
             if (*species == POKE_AEGISLASH_BLADE && current_move == MOVE_KINGS_SHIELD)
             {
