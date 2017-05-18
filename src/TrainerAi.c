@@ -843,7 +843,7 @@ void tai6A_discouragehazards()
     u8 side = is_bank_from_opponent_side(bank_target);
     switch (AI_STATE->curr_move)
     {
-    case MOVE_SPIDER_WEB:
+    case MOVE_STICKY_WEB:
         if (new_battlestruct->side_affecting[side].sticky_web)
             to_sub = 10;
         break;
