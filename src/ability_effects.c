@@ -611,6 +611,27 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 script_ptr = BS_PSYCHIC_SURGE;
             }
             break;
+        case ABILITY_SHIELDS_DOWN:
+            if(battle_participants[bank].species==POKE_MINIOR_CORE && (battle_participants[bank].current_hp >= (battle_participants[bank].max_hp >> 1)) && !battle_participants[bank].status2.transformed)
+            {
+                common_effect = 1;
+                new_battlestruct->various.var1 = POKE_MINIOR_METEOR;
+                new_battlestruct->various.var2 = 0x242;
+                battle_scripting.active_bank=bank;
+                script_ptr = BS_STAT_ONLY_FORMCHANGE;
+            }
+            break;
+        case ABILITY_SCHOOLING:
+            if(battle_participants[bank].species==POKE_WISHIWASHI && battle_participants[bank].level >= SCHOOLING_LEVEL
+               && (battle_participants[bank].current_hp >= (battle_participants[bank].max_hp >> 2)) && !battle_participants[bank].status2.transformed)
+            {
+                 common_effect = 1;
+                new_battlestruct->various.var1 = POKE_WISHIWASHI_SCHOOL;
+                new_battlestruct->various.var2 = 0x244;
+                battle_scripting.active_bank=bank;
+                script_ptr = BS_STAT_ONLY_FORMCHANGE;
+            }
+            break;
         }
         if (common_effect)
         {

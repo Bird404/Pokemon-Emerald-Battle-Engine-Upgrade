@@ -576,6 +576,7 @@ void bs_start_attack()
             }
             if (change)
             {
+                battle_scripting.active_bank = bank_attacker;
                 active_bank = bank_attacker;
                 bb2_setattributes_in_battle(0, REQUEST_SPECIES_BATTLE, 0, 2, species);
                 mark_buffer_bank_for_execution(active_bank);

@@ -67,9 +67,9 @@ void setup_berry_consume_buffers(u8 bank)
     new_battlestruct->bank_affecting[bank].eaten_berry = 1;
     u8 bit = bits_table[battle_team_id_by_side[bank]];
     if(!is_bank_from_opponent_side(bank))
-        new_battlestruct->various.eaten_berry_player |= bit;
+        new_battlestruct->party_bit.eaten_berry_player |= bit;
     else
-        new_battlestruct->various.eaten_berry_opponent |= bit;
+        new_battlestruct->party_bit.eaten_berry_opponent |= bit;
 }
 
 void call_based_on_mode(enum call_mode calling_mode, void* BS_ptr)

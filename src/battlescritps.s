@@ -502,6 +502,7 @@ BS_DEF_FAINTED:
 	callasm_cmd 20 @check Fell Stinger and Moxie
 	callasm_cmd 23 @reset var
 	callasm_cmd 142 @check soul heart on the whole field
+	callasm_cmd 160
 	return_cmd
 	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -1638,4 +1639,47 @@ BS_ASK_FOR_SWITCHING:
 	callasm_cmd 1
 	.word 0x82DA8D0
 	goto_cmd 0x82DA865
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@ In battle form(e) changes
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+.global BS_FORMCHANGE_WITH_TYPE_CHANGE
+BS_FORMCHANGE_WITH_TYPE_CHANGE:
+	call BS_FORMCHANGE_GENERAL
+	callasm_cmd 118
+	end2
+
+.global BS_STAT_ONLY_FORMCHANGE
+BS_STAT_ONLY_FORMCHANGE:
+	call BS_FORMCHANGE_GENERAL
+	callasm_cmd 115
+	end2
+	
+.global BS_ZYGARDE_FORM_CHANGE
+BS_ZYGARDE_FORM_CHANGE:
+	callasm_cmd 161
+	waitmessage 0x40
+BS_FORMCHANGE_WITH_HP_CHANGE:	
+	call BS_FORMCHANGE_GENERAL
+	callasm_cmd 162  @@new_index
+	end2
+		
+BS_FORMCHANGE_GENERAL:
+	printstring 0x130
+	callasm_cmd 119
+	playanimation 0xA 0x21 0x0
+	waitstate
+	callasm_cmd 122
+	waitmessage 0x40
+	return_cmd
+
+.global BS_BATTLE_BOND
+BS_BATTLE_BOND:
+	printstring 0x246
+	waitmessage 0x40
+	call BS_FORMCHANGE_GENERAL
+	callasm_cmd 115
+	return_cmd
+
+
 	

@@ -2563,6 +2563,19 @@ void atk13_printfromtable(void)
     }
 }
 
+struct revert_form_struct
+{
+    u16 current_species;
+    u16 base_form;
+};
+
+struct revert_form_struct revert_mapping[] = {{POKE_CHERRIM_SUNSHINE, POKE_CHERRIM}, {POKE_AEGISLASH_BLADE, POKE_AEGISLASH_SHIELD},
+                                            {POKE_ZEN_MODE, POKE_DARMANITAN}, {POKE_MELOETTA_PIROUETTE, POKE_MELOETTA_ARIA},
+                                            {POKE_MINIOR_METEOR, POKE_MINIOR_CORE}, {POKE_WISHIWASHI_SCHOOL, POKE_WISHIWASHI},
+                                            {POKE_ASH_GRENJA,POKE_SPECIAL_GRENJA}, {POKE_MIMIKKYU_BUSTED, POKE_MIMIKKYU},
+                                            {0xFFFF, 0x0}};
+
+
 void revert_form_change(u8 mega_revert, u8 teamID, u8 side, struct pokemon* poke)
 {
     u16 species = get_attributes(poke, ATTR_SPECIES, 0);
@@ -2570,29 +2583,31 @@ void revert_form_change(u8 mega_revert, u8 teamID, u8 side, struct pokemon* poke
     {
         revert_mega_to_normalform(teamID, side);
     }
-    else if (species == POKE_CHERRIM_SUNSHINE)
+    else
     {
-        u16 Cherrim = POKE_CHERRIM;
-        set_attributes(poke, ATTR_SPECIES, &Cherrim);
-        calculate_stats_pokekmon(poke);
-    }
-    else if (species == POKE_AEGISLASH_BLADE)
-    {
-        u16 Aegi = POKE_AEGISLASH_SHIELD;
-        set_attributes(poke, ATTR_SPECIES, &Aegi);
-        calculate_stats_pokekmon(poke);
-    }
-    else if (species == POKE_ZEN_MODE)
-    {
-        u16 Darm = POKE_DARMANITAN;
-        set_attributes(poke, ATTR_SPECIES, &Darm);
-        calculate_stats_pokekmon(poke);
-    }
-    else if (species == POKE_MELOETTA_PIROUETTE)
-    {
-        u16 Aria = POKE_MELOETTA_ARIA;
-        set_attributes(poke, ATTR_SPECIES, &Aria);
-        calculate_stats_pokekmon(poke);
+        if(species == POKE_ZYGARDE_100)
+        {
+            u16 base_species = POKE_ZYGARDE_10;
+            if((side && (new_battlestruct->party_bit.is_base_z50_ai & bits_table[teamID])) ||
+                (!side && (new_battlestruct->party_bit.is_base_z50_user & bits_table[teamID])))
+            {
+                base_species = POKE_ZYGARDE_50;
+            }
+            set_attributes(poke, ATTR_SPECIES, &base_species);
+            calculate_stats_pokekmon(poke);
+        }
+        else
+        {
+            for(u8 i=0;revert_mapping[i].current_species!=0xFFFF;i++)
+            {
+                if(species == revert_mapping[i].current_species)
+                {
+                    set_attributes(poke,ATTR_SPECIES,&(revert_mapping[i].base_form));
+                    calculate_stats_pokekmon(poke);
+                    break;
+                }
+            }
+        }
     }
     return;
 }

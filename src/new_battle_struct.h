@@ -100,8 +100,6 @@ struct field_affecting{
 };
 
 struct various{
-    u8 eaten_berry_player : 6;
-    u8 eaten_berry_opponent : 6;
     u8 active_bank : 2;
     u8 cmd49_safeattacker_bank: 2;
     u8 inverse_battle : 1;
@@ -163,6 +161,14 @@ struct tai_related{
     u16 var2;
 };
 
+struct party_bits{
+    u8 battle_bond_user: 6;
+    u8 battle_bond_ai: 6;
+    u8 is_base_z50_user: 6;
+    u8 is_base_z50_ai: 6;
+    u8 eaten_berry_player : 6;
+    u8 eaten_berry_opponent : 6;
+};
 #define MOVEEFFECT_SLP      0x7
 #define MOVEEFFECT_PSN      0x8
 #define MOVEEFFECT_BRN      0x10
@@ -191,6 +197,7 @@ struct new_battle_struct{
     struct various various;
     struct mega_related mega_related;
     struct tai_related trainer_AI;
+    struct party_bits party_bit;
 };
 
 extern struct new_battle_struct* new_battlestruct;

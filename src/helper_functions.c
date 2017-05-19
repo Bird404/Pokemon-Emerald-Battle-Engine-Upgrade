@@ -118,7 +118,20 @@ void frisk_target_item(void)
         battle_communication_struct.is_message_displayed=0;
 }
 
-void set_type_msg_buffer()
+void zygarde_message_based_on_side(void)
+{
+    if(is_bank_from_opponent_side(battle_scripting.active_bank))
+    {
+        b_std_message(0x249,battle_scripting.active_bank);
+    }
+    else
+    {
+        b_std_message(0x248,battle_scripting.active_bank);
+    }
+    battle_communication_struct.is_message_displayed=1;
+}
+
+void set_type_msg_buffer(void)
 {
     u8 move_type=battle_stuff_ptr->dynamic_move_type&0x3F;
     if (!move_type)
@@ -2435,7 +2448,7 @@ void setup_form_change_buffers(u8 bank, u16 target_species)
     mark_buffer_bank_for_execution(active_bank);
 }
 
-void setup_zen_buffers(void)
+void setup_form_change_buffers_outer(void)
 {
     setup_form_change_buffers(battle_scripting.active_bank,new_battlestruct->various.var1);
 }
@@ -2445,37 +2458,67 @@ void in_battle_form_change(u8 bank, bool change_hp, bool change_type)
     (*battle_graphics.graphics_data->species_info)[bank].transformed_species = 0;
     struct pokemon* poke = get_bank_poke_ptr(bank);
     calculate_stats_pokekmon(poke);
-    struct battle_participant* aegi = &battle_participants[bank];
+    struct battle_participant* battle_poke = &battle_participants[bank];
     if(change_type)
     {
-        const struct poke_basestats* PokeStats = &((*basestat_table)[aegi->species]);
-        aegi->type1 = PokeStats->type1;
-        aegi->type2 = PokeStats->type2;
+        const struct poke_basestats* PokeStats = &((*basestat_table)[battle_poke->species]);
+        battle_poke->type1 = PokeStats->type1;
+        battle_poke->type2 = PokeStats->type2;
     }
     if(change_hp)
     {
-        aegi->max_hp = get_attributes(poke, ATTR_TOTAL_HP, 0);
-        aegi->current_hp = get_attributes(poke, ATTR_CURRENT_HP, 0);
+        u16 hp_diff=battle_poke->max_hp - battle_poke->current_hp;
+        battle_poke->max_hp = get_attributes(poke, ATTR_TOTAL_HP, 0);
+        battle_poke->current_hp = battle_poke->max_hp - hp_diff;
+        set_attributes(poke, ATTR_CURRENT_HP, &(battle_poke->current_hp));
         update_hpbar(bank);
     }
 
-    aegi->atk = get_attributes(poke, ATTR_ATTACK, 0);
-    aegi->def = get_attributes(poke, ATTR_DEFENCE, 0);
-    aegi->spd = get_attributes(poke, ATTR_SPEED, 0);
-    aegi->sp_atk = get_attributes(poke, ATTR_SPECIAL_ATTACK, 0);
-    aegi->sp_def = get_attributes(poke, ATTR_SPECIAL_DEFENCE, 0);
+    battle_poke->atk = get_attributes(poke, ATTR_ATTACK, 0);
+    battle_poke->def = get_attributes(poke, ATTR_DEFENCE, 0);
+    battle_poke->spd = get_attributes(poke, ATTR_SPEED, 0);
+    battle_poke->sp_atk = get_attributes(poke, ATTR_SPECIAL_ATTACK, 0);
+    battle_poke->sp_def = get_attributes(poke, ATTR_SPECIAL_DEFENCE, 0);
 }
 
-void aegi_change()
+void stat_only_form_change(void)
 {
-    in_battle_form_change(bank_attacker,false,false);
+    in_battle_form_change(battle_scripting.active_bank,false,false);
 }
 
 void type_stat_form_change(void)
 {
-    //in_battle_form_change(new_battlestruct->various.active_bank,false,true);
     in_battle_form_change(battle_scripting.active_bank,false,true);
 }
+
+void hp_stat_form_change(void)
+{
+    in_battle_form_change(battle_scripting.active_bank,true,false);
+}
+
+void ash_greninja_check(void)
+{
+    bool side = is_bank_from_opponent_side(bank_attacker);
+    if(battle_participants[bank_attacker].species==POKE_SPECIAL_GRENJA && check_ability(bank_attacker,ABILITY_BATTLE_BOND) &&
+       (!((side && new_battlestruct->party_bit.battle_bond_ai & bits_table[battle_team_id_by_side[bank_attacker]])
+       || (!side && new_battlestruct->party_bit.battle_bond_user & bits_table[battle_team_id_by_side[bank_attacker]]))))
+    {
+        if(side)
+        {
+            new_battlestruct->party_bit.battle_bond_ai |= bits_table[battle_team_id_by_side[bank_attacker]];
+        }
+        else
+        {
+            new_battlestruct->party_bit.battle_bond_user |= bits_table[battle_team_id_by_side[bank_attacker]];
+        }
+        new_battlestruct->various.var1 = POKE_ASH_GRENJA;
+        battle_scripting.active_bank=bank_attacker;
+        new_battlestruct->various.var2 = 0x247;
+        battlescript_push();
+        battlescripts_curr_instruction = BS_BATTLE_BOND;
+    }
+}
+
 
 void set_transfrom_palchange(void)
 {
@@ -2490,8 +2533,8 @@ void bug_bite_set_berry_eaten(void)
 
 void belch_canceler(void)
 {
-    if(!((is_bank_from_opponent_side(bank_attacker) && new_battlestruct->various.eaten_berry_opponent&bits_table[battle_team_id_by_side[bank_attacker]])
-       || (!is_bank_from_opponent_side(bank_attacker) && new_battlestruct->various.eaten_berry_player&bits_table[battle_team_id_by_side[bank_attacker]])))
+    if(!((is_bank_from_opponent_side(bank_attacker) && new_battlestruct->party_bit.eaten_berry_opponent&bits_table[battle_team_id_by_side[bank_attacker]])
+       || (!is_bank_from_opponent_side(bank_attacker) && new_battlestruct->party_bit.eaten_berry_player&bits_table[battle_team_id_by_side[bank_attacker]])))
     {
         battlescripts_curr_instruction = (void *) 0x082D9F1A;
         move_outcome.failed = 1;
@@ -2944,16 +2987,17 @@ const void* callasm_table[] = {&ability_switchin_effect /*0*/, &jump_if_forceset
 &can_magneticflux_work /*96*/, &magnetic_flux_effect /*97*/, &canuse_flowershield /*98*/, &flowershield_effect /*99*/, &canuselastresort /*100*/,
 &topsyturvy_effect /*101*/, &bestow_effect /*102*/, &conversion_effect /*103*/, &party_heal /*104*/, &accupressure_effect /*105*/, &mega_primal_cry /*106*/,
 &canusefling /*107*/, &happyhour_effect /*108*/, &canuseskydrop /*109*/, &skydropup /*110*/, &canusefairylock /*111*/, &healthbox_target_update /*112*/,
-&target_transformed_species_to_0 /*113*/, &scr_active_transformed_species_to_0 /*114*/, &aegi_change /*115*/, &set_transfrom_palchange /*116*/, &bug_bite_set_berry_eaten /*117*/,
-&type_stat_form_change/*118*/, &setup_zen_buffers/*119*/, &belch_canceler/*120*/, &attacker_bank_exchange/*121*/, &print_from_nbsvar2/*122*/,
-&attackerhp_to_zero /*123*/, &reset_bg2x /*124*/, &check_and_set_pledge/*125*/, &print_combined_attack_message/*126*/, &print_attack_message/*127*/,
-&set_message_bank_buffer_to_ally /*128*/, &set_fire_sea /*129*/, &set_swamp /*130*/, &set_rainbow/*131*/, &callasm_nop/*132*/,
-&save_trainerslide_pokeobj /*133*/, &restore_trainerslide_pokeobj /*134*/, &conider_trainermsg_firstfaint /*135*/, &can_purify_work /*136*/,
-&dont_play_move_anim /*137*/, &jump_if_can_poison /*138*/, &set_laser_focus /*139*/, &set_aurora_veil /*140*/, &check_terrain_seeds /*141*/,
+&target_transformed_species_to_0 /*113*/, &scr_active_transformed_species_to_0 /*114*/, &stat_only_form_change /*115*/, &set_transfrom_palchange /*116*/,
+&bug_bite_set_berry_eaten /*117*/, &type_stat_form_change/*118*/, &setup_form_change_buffers_outer/*119*/, &belch_canceler/*120*/,
+&attacker_bank_exchange/*121*/, &print_from_nbsvar2/*122*/, &attackerhp_to_zero /*123*/, &reset_bg2x /*124*/, &check_and_set_pledge/*125*/,
+&print_combined_attack_message/*126*/, &print_attack_message/*127*/, &set_message_bank_buffer_to_ally /*128*/, &set_fire_sea /*129*/, &set_swamp/*130*/,
+&set_rainbow/*131*/, &callasm_nop/*132*/, &save_trainerslide_pokeobj /*133*/, &restore_trainerslide_pokeobj /*134*/, &conider_trainermsg_firstfaint /*135*/,
+&can_purify_work /*136*/, &dont_play_move_anim /*137*/, &jump_if_can_poison /*138*/, &set_laser_focus /*139*/, &set_aurora_veil /*140*/, &check_terrain_seeds /*141*/,
 &check_soulheart /*142*/, &canuse_strengthsap /*143*/, &jumpifattackerfullhp /*144*/, &set_effect1_formove /*145*/, &set_statchanger_to_arg2 /*146*/,
 &shiftgear_checkifworks /*147*/, &shiftgear_orr_if_multiple /*148*/, &dont_stat_if_multiple /*149*/, &jumpifalloppositepokemonbehindsubstitute /*150*/,
 &triattackrand /*151*/, &statustoeffect2 /*152*/, &multiplestats_prepare_custom /*153*/, &do_multiple_stats_custom /*154*/, &jumpifnotarg1type /*155*/,
-&set_stats_to_play /*156*/, &receiver_effect /*157*/, &bugbite_get_berry_effect /*158*/, &prepare_switchbank_data /*159*/};
+&set_stats_to_play /*156*/, &receiver_effect /*157*/, &bugbite_get_berry_effect /*158*/, &prepare_switchbank_data /*159*/, &ash_greninja_check /*160*/,
+&zygarde_message_based_on_side/*161*/, &hp_stat_form_change /*162*/};
 
 void callasm_cmd(void)
 {

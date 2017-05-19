@@ -967,11 +967,100 @@ bool battle_turn_move_effects(void)
                         break;
                     }
                     break;
-
+               case 30: //forms changes based on HP
+                    {
+                        u16 species =  battle_participants[active_bank].species;
+                        u8 bank = active_bank;
+                        switch(species)
+                        {
+                        case POKE_DARMANITAN:
+                            if((battle_participants[bank].current_hp < (battle_participants[bank].max_hp >> 1)) && check_ability(bank,ABILITY_ZEN_MODE))
+                            {
+                                effect = 1;
+                                new_battlestruct->various.var1 = POKE_ZEN_MODE;
+                                new_battlestruct->various.var2 = 0x21C;
+                                battle_scripting.active_bank = bank;
+                                call_bc_move_exec(BS_FORMCHANGE_WITH_TYPE_CHANGE);
+                            }
+                        break;
+                        case POKE_ZEN_MODE:
+                            if((battle_participants[bank].current_hp >= (battle_participants[bank].max_hp >> 1)) || !check_ability(bank,ABILITY_ZEN_MODE))
+                            {
+                                effect = 1;
+                                new_battlestruct->various.var1 = POKE_DARMANITAN;
+                                battle_scripting.active_bank = bank;
+                                new_battlestruct->various.var2 = 0x21D;
+                                call_bc_move_exec(BS_FORMCHANGE_WITH_TYPE_CHANGE);
+                            }
+                            break;
+                        case POKE_WISHIWASHI:
+                            if((battle_participants[bank].current_hp >= (battle_participants[bank].max_hp >> 2)) && check_ability(bank,ABILITY_SCHOOLING) && battle_participants[bank].level >=SCHOOLING_LEVEL)
+                            {
+                                effect = 1;
+                                new_battlestruct->various.var1 = POKE_WISHIWASHI_SCHOOL;
+                                new_battlestruct->various.var2 = 0x244;
+                                battle_scripting.active_bank=bank;
+                                call_bc_move_exec(BS_STAT_ONLY_FORMCHANGE);
+                            }
+                            break;
+                        case POKE_WISHIWASHI_SCHOOL:
+                            if((battle_participants[bank].current_hp < (battle_participants[bank].max_hp >> 2)) || !check_ability(bank,ABILITY_SCHOOLING))
+                            {
+                                effect = 1;
+                                new_battlestruct->various.var1 = POKE_WISHIWASHI;
+                                battle_scripting.active_bank=bank;
+                                new_battlestruct->various.var2 = 0x245;
+                                call_bc_move_exec(BS_STAT_ONLY_FORMCHANGE);
+                            }
+                            break;
+                        case POKE_MINIOR_CORE:
+                            if((battle_participants[bank].current_hp >= (battle_participants[bank].max_hp >> 1)) && check_ability(bank,ABILITY_SHIELDS_DOWN))
+                            {
+                                effect = 1;
+                                new_battlestruct->various.var1 = POKE_MINIOR_METEOR;
+                                new_battlestruct->various.var2 = 0x242;
+                                battle_scripting.active_bank=bank;
+                                call_bc_move_exec(BS_STAT_ONLY_FORMCHANGE);
+                            }
+                            break;
+                        case POKE_MINIOR_METEOR:
+                            if((battle_participants[bank].current_hp < (battle_participants[bank].max_hp >> 1)) || !check_ability(bank,ABILITY_SHIELDS_DOWN))
+                            {
+                                effect = 1;
+                                new_battlestruct->various.var1 = POKE_MINIOR_CORE;
+                                battle_scripting.active_bank=bank;
+                                new_battlestruct->various.var2 = 0x243;
+                                call_bc_move_exec(BS_STAT_ONLY_FORMCHANGE);
+                            }
+                            break;
+                        case POKE_ZYGARDE_10:
+                        case POKE_ZYGARDE_50:
+                            if((battle_participants[bank].current_hp < (battle_participants[bank].max_hp >> 1)) && check_ability(bank,ABILITY_POWER_CONSTRUCT))
+                            {
+                                effect = 1;
+                                new_battlestruct->various.var1 = POKE_ZYGARDE_100;
+                                if(species==POKE_ZYGARDE_50)
+                                {
+                                    if(is_bank_from_opponent_side(bank))
+                                    {
+                                        new_battlestruct->party_bit.is_base_z50_ai |= bits_table[battle_team_id_by_side[bank]];
+                                    }
+                                    else
+                                    {
+                                        new_battlestruct->party_bit.is_base_z50_user |= bits_table[battle_team_id_by_side[bank]];
+                                    }
+                                }
+                                battle_scripting.active_bank=bank;
+                                new_battlestruct->various.var2 = 0x24A;
+                                call_bc_move_exec(BS_ZYGARDE_FORM_CHANGE);
+                            }
+                            break;
+                        }
+                    }
             }
             if (effect != 5) //check for uproar
                  *tracker += 1;
-            #define TRACKER_MAX 30
+            #define TRACKER_MAX 31
             if (*tracker >= TRACKER_MAX)
             {
                 *tracker = 0;
