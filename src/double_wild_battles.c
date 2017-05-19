@@ -163,14 +163,14 @@ u32 calc_ball_formula(enum ball_index ball_no, struct battle_participant* catchi
         }
         break;
     case BALL_FAST:
-        if ((*basestat_table)[catching->poke_species].base_spd >= 100)
+        if ((*basestat_table)[catching->species].base_spd >= 100)
             multiplier = 40;
         break;
     case BALL_LOVE:
         {
             struct battle_participant* catcher = &battle_participants[bank_attacker];
-            u16 species = catcher->poke_species;
-            if (species == catching->poke_species)
+            u16 species = catcher->species;
+            if (species == catching->species)
             {
                 u8 gender1 = gender_from_pid(species, catcher->pid);
                 u8 gender2 = gender_from_pid(species, catching->pid);
@@ -185,7 +185,7 @@ u32 calc_ball_formula(enum ball_index ball_no, struct battle_participant* catchi
         break;
     case BALL_HEAVY:
         {
-            u16 weight = get_height_or_weight(species_to_national_dex(catching->poke_species), 1);
+            u16 weight = get_height_or_weight(species_to_national_dex(catching->species), 1);
             s16 changed_rate = catchrate;
             if (weight < 1024) {changed_rate -= 20;}
             else if (weight < 2048) {}
@@ -205,7 +205,7 @@ u32 calc_ball_formula(enum ball_index ball_no, struct battle_participant* catchi
         break;
     case BALL_MOON:
         {
-            const struct evolution_sub* evo = GET_EVO_TABLE(catching->poke_species);
+            const struct evolution_sub* evo = GET_EVO_TABLE(catching->species);
             for (u8 i = 0; i < NUM_OF_EVOS; i++)
             {
                 if (evo[i].method == 7 && evo[i].paramter == ITEM_MOONSTONE)
@@ -217,7 +217,7 @@ u32 calc_ball_formula(enum ball_index ball_no, struct battle_participant* catchi
         }
         break;
     case BALL_BEAST:
-        if (is_poke_ultrabeast(catching->poke_species))
+        if (is_poke_ultrabeast(catching->species))
             multiplier = 50;
         break;
     #endif // EXPANDED_POKEBALLS
