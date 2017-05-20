@@ -220,7 +220,9 @@ o_, n_, Space, 0xFD, 0x0, Apos, s_, Space, s_, i_, d_, e_, Exclam, Termin};
 /*0x248*/const u8 zygarde_user_sense_text[] = {Y_, o_, u_, Space, s_, e_, n_, s_, e_, Space, t_, h_, e_, Space, p_, r_, e_, s_, e_, n_, c_, e_, Space, o_, f_, Space, m_, a_, n_, y_, Exclam, Termin};
 /*0x249*/const u8 zygarde_ai_sense_text[] = {T_, h_, e_, Space, o_, p_, p_, o_, n_, e_, n_, t_, Space, s_, e_, n_, s_, e_, s_, Space, t_, h_, e_, Space, p_, r_, e_, s_, e_, n_, c_, e_,
                                                 Space, o_, f_, Space, m_, a_, n_, y_, Exclam, Termin};
-/*0x24A*/const u8 zygarde_transform_text[] = {0xFD, 19, Space, t_, r_, a_, n_, s_, f_, o_, r_, m_, e_, d_, Space, i_, n_, t_, o_, Space, i_, t_, s_, Space, C_, o_, m_, p_, l_, e_, t_, e_, Space, F_, o_, r_, m_, Exclam, Termin};
+/*0x24A*/const u8 zygarde_transform_text[] = {0xFD, 19, Space, t_, r_, a_, n_, s_, f_, o_, r_, m_, e_, d_, Space, i_, n_, t_, o_, JumpLine, i_, t_, s_, Space, C_, o_, m_, p_, l_, e_, t_, e_, Space, F_, o_, r_, m_, Exclam, Termin};
+/*0x24B*/const u8 mimikyu_busted_text[] = {0xFD, 0x13, Apos, s_, Space, d_, i_, s_, g_, u_, i_, s_, e_, Space, w_, a_, s_, Space, b_, u_, s_, t_, e_, d_, Exclam, Termin};
+/*0x24C*/const u8 disguise_server_as_decoy_text[] = {I_, t_, s_, Space, d_, i_, s_, g_, u_, i_, s_, e_, Space, s_, e_, r_, v_, e_, d_, Space, i_, t_, Space, a_, s_, Space, a_, Space, d_, e_, c_, o_, y_, Exclam, Termin};
 
 const u8* const new_strings_table[] = {firespintrap_text, magmastormtrap_text, extreme_sun_activation_text, heavyrain_activation_text, mysticalaircurrent_activation_text, forewarn_text, slowstart_text, anticipation_text,
 infestationtrap_text, airlock_text, harvest_text, healer_text, empty_text5, moldbreaker_text, turboblaze_text, terravolt_text, empty_text9,
@@ -250,7 +252,7 @@ skydrop_cantchooseaction_text, trainer_sliding_text, sweetveilactivation_text, s
 laserfocus_text, auroraveil_text, attacker_item_activates_text, atk_ability_text, cantuse_text, atkhpfull_text, statfail_text,
 attackerhurt_text, attackerfellinlove_text, itemstatraise_text, targetnoconfusion_text, burnuptext, attackeracquired,
 scractiveHPrestored, shieldsdown_drop_text, shieldsdown_activate_text, schooling_text, schoolstop_text, battlebond_text, ashgrenja_text,
-zygarde_user_sense_text, zygarde_ai_sense_text, zygarde_transform_text};
+zygarde_user_sense_text, zygarde_ai_sense_text, zygarde_transform_text, mimikyu_busted_text, disguise_server_as_decoy_text};
 
 u8* get_poke_nick2(struct pokemon* poke, u8 bank, u8* dst)
 {

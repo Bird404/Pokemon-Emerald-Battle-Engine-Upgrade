@@ -1661,7 +1661,7 @@ BS_ZYGARDE_FORM_CHANGE:
 	waitmessage 0x40
 BS_FORMCHANGE_WITH_HP_CHANGE:	
 	call BS_FORMCHANGE_GENERAL
-	callasm_cmd 162  @@new_index
+	callasm_cmd 162
 	end2
 		
 BS_FORMCHANGE_GENERAL:
@@ -1681,5 +1681,11 @@ BS_BATTLE_BOND:
 	callasm_cmd 115
 	return_cmd
 
-
+.global BS_MIMIKYU_BUST
+BS_MIMIKYU_BUST:
+	printstring 0x24C
+	waitmessage 0x40
+	call BS_FORMCHANGE_GENERAL
+	callasm_cmd 118
+	return_cmd
 	

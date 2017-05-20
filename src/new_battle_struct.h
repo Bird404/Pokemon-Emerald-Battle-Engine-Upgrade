@@ -136,6 +136,7 @@ struct various{
     u8 trainer_msg_after_first_poke_done : 1;
     u8 dont_play_move_anim : 1;
     u8 dont_play_stat_anim : 1;
+    u8 bust_mimikyu : 1;
 };
 
 #define PBOND_PARENT 2

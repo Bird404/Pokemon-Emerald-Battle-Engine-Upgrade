@@ -996,6 +996,17 @@ void atk49_move_end_turn(void)
             }
             INC_END_EVENTS
         case 18: //clear turn bits
+            if(new_battlestruct->various.bust_mimikyu)
+            {
+                new_battlestruct->various.bust_mimikyu = 0;
+                special_statuses[bank_attacker].moveturn_losthp = 0;
+                special_statuses[bank_attacker].moveturn_losthp_physical = 0;
+                special_statuses[bank_attacker].moveturn_losthp_special = 0;
+                if(get_item_effect(bank_attacker,1)==ITEM_EFFECT_LIFEORB)
+                {
+                    new_battlestruct->various.life_orbed=1;
+                }
+            }
             bank_attacker = new_battlestruct->various.cmd49_safeattacker_bank;
             new_battlestruct->various.magicbounce = 0; //avoids endless loops if magic bounce meets magic bounce or magic coat
             new_battlestruct->various.protean_msg = 0; //protean message
@@ -2144,6 +2155,23 @@ void atk0C_datahpupdate(void)
                 battlescript_push();
                 battlescripts_curr_instruction = (void*) 0x082DB6FB;
             }
+        }
+        else if(new_battlestruct->various.bust_mimikyu && bank==bank_target && damage_loc==0)
+        {
+            special_statuses[bank].moveturn_losthp = 1;
+            if(split == 0)
+            {
+                special_statuses[bank].moveturn_losthp_physical = 1;
+            }
+            else
+            {
+                special_statuses[bank].moveturn_losthp_special = 1;
+            }
+            battle_scripting.active_bank = bank;
+            battlescript_push();
+            battlescripts_curr_instruction = BS_MIMIKYU_BUST;
+            new_battlestruct->various.var1 = POKE_MIMIKKYU_BUSTED;
+            new_battlestruct->various.var2 = 0x24B;
         }
         else
         {
