@@ -4,6 +4,7 @@
 struct pokemon* get_party_ptr(u8 bank);
 struct pokemon* get_bank_poke_ptr(u8 bank);
 struct pokemon* get_poke_to_illusion_into(struct pokemon* poke, u8 bank);
+u8 get_bank_side(u8 bank);
 
 /*0x17C*/const u8 firespintrap_text[] = {0xFD, 16, Space, b_, e_, c_, a_, m_, e_, Space, t_, r_, a_, p_, p_, e_, d_, JumpLine, i_, n_, Space, t_, h_, e_, Space, f_, i_, e_, r_, y_, Space, v_, o_, r_, t_, e_, x_, Exclam, 0xFF};
 /*0x17D*/const u8 magmastormtrap_text[] = {0xFD, 16, Space, b_, e_, c_, a_, m_, e_, Space, t_, r_, a_, p_, p_, e_, d_, JumpLine, b_, y_, Space, s_, w_, i_, r_, l_, i_, n_, g_, Space, m_, a_, g_, m_, a_, Exclam, 0xFF};
@@ -268,8 +269,12 @@ u8* get_poke_nick2(struct pokemon* poke, u8 bank, u8* dst)
 
 u8* get_poke_nick(u8 bank, u8* dst)
 {
-    struct pokemon* poke = get_bank_poke_ptr(bank);
-    return get_poke_nick2(poke, bank, dst);
+    return get_poke_nick2(get_bank_poke_ptr(bank), bank, dst);
+}
+
+u8* get_chosen_poke_nick(u8 bank, u8 ID, u8* dst)
+{
+    return get_poke_nick2(&get_party_ptr(bank)[ID], bank, dst);
 }
 
 u8* get_poke_nick_link(u8 linkID, u8 to_xor, u8* dst)
@@ -283,10 +288,10 @@ u8* get_poke_nick_link(u8 linkID, u8 to_xor, u8* dst)
     return get_poke_nick2(&poke[battle_team_id_by_side[bank]], bank, dst);
 }
 
-void* get_poke_nick_prefix(u8 bank, u8* dst)
+u8* get_poke_nick_prefix(u8 bank, u8* dst)
 {
     u8 i = 0;
-    if (is_bank_from_opponent_side(bank))
+    if (get_bank_side(bank))
     {
         u8* prefix;
         if (battle_flags.trainer)
@@ -302,9 +307,14 @@ void* get_poke_nick_prefix(u8 bank, u8* dst)
     return &dst[i];
 }
 
-void* get_poke_nick_with_prefix(u8 bank, void* dst)
+u8* get_poke_nick_with_prefix(u8 bank, u8* dst)
 {
     return get_poke_nick(bank, get_poke_nick_prefix(bank, dst));
+}
+
+u8* get_chosen_poke_nick_with_prefix(u8 bank, u8 ID, u8*dst)
+{
+    return get_chosen_poke_nick(bank, ID, get_poke_nick_prefix(bank, dst));
 }
 
 const u8* get_ability_name_ptr(enum poke_abilities ability)
@@ -346,6 +356,95 @@ const u8* get_partner_name(void)
     return string_ptr;
 }
 
+const u8* get_battlestring(u16 strID)
+{
+    if (strID >= 0x17C)
+        return new_strings_table[strID - 0x17C];
+    return battle_strings_table[strID - 0xC];
+}
+
+static void b_fdecode_case(const u8* const src, u8* dst)
+{
+    *dst = 0xFF;
+    u32 srcID = 1; //first char is always 0xFD
+    while(src[srcID] != Termin)
+    {
+        const u8* String = NULL;
+        u8 curr_char = src[srcID];
+        srcID++;
+        switch (curr_char)
+        {
+        case 0: //get battlescript
+            String = get_battlestring(read_hword(&src[srcID]));
+            srcID += 2;
+            break;
+        case 1: //get a number
+            {
+                u32 number = 0;
+                u8 bytes = src[srcID];
+                srcID++;
+                u8 digits = src[srcID];
+                srcID++;
+                switch (bytes)
+                {
+                case 1: //byte
+                    number = read_byte(&src[srcID]);
+                    break;
+                case 2: //halfword
+                    number = read_hword(&src[srcID]);
+                    break;
+                case 4: //word
+                    number = read_word(&src[srcID]);
+                    break;
+                }
+                srcID += bytes;
+                dst = int_to_str(dst, number, 0, digits);
+            }
+            break;
+        case 2: //move name
+            String = move_names_table[read_hword(&src[srcID])];
+            srcID += 2;
+            break;
+        case 3: //type name
+            String = type_names[read_byte(&src[srcID])];
+            srcID++;
+            break;
+        case 4: //poke nick with prefix
+            dst = get_chosen_poke_nick_with_prefix(read_byte(&src[srcID]), read_byte(&src[srcID + 1]), dst);
+            srcID += 2;
+            break;
+        case 5: //stat names
+            String = stat_names_table[read_byte(&src[srcID])];
+            srcID++;
+            break;
+        case 6: //poke species
+            buffer_pokemon_species(dst, read_hword(&src[srcID]));
+            srcID +=2;
+            break;
+        case 7: //poke nick with no prefix
+            dst = get_chosen_poke_nick(read_byte(&src[srcID]), read_byte(&src[srcID + 1]), dst);
+            srcID += 2;
+            break;
+        case 8: //todo
+            String = negative_flavour_table[read_byte(&src[srcID])];
+            srcID++;
+            break;
+        case 9: //ability name
+            String = get_ability_name_ptr(read_byte(&src[srcID]));
+            srcID++;
+            break;
+        case 10: //item name
+            buffer_item(read_hword(&src[srcID]), dst);
+            srcID +=2;
+            break;
+        default:
+            return;
+        }
+        if (String != NULL)
+            str_append(dst, String);
+    }
+}
+
 u16 b_strcpy_decode(const u8* const src, u8* const dst)
 {
     u8 link_id = link_get_multiplayer_id();
@@ -368,7 +467,7 @@ u16 b_strcpy_decode(const u8* const src, u8* const dst)
             case 0:
                 if (battle_text_buff1[0] == 0xFD)
                 {
-                    fdecoder_for_battle_strings(battle_text_buff1, text);
+                    b_fdecode_case(battle_text_buff1, text);
                     string = text;
                 }
                 else
@@ -381,7 +480,7 @@ u16 b_strcpy_decode(const u8* const src, u8* const dst)
             case 1:
                 if (battle_text_buff2[0] == 0xFD)
                 {
-                    fdecoder_for_battle_strings(battle_text_buff2, text);
+                    b_fdecode_case(battle_text_buff2, text);
                     string = text;
                 }
                 else
@@ -390,7 +489,7 @@ u16 b_strcpy_decode(const u8* const src, u8* const dst)
             case 52:
                 if (battle_text_buff3[0] == 0xFD)
                 {
-                    fdecoder_for_battle_strings(battle_text_buff3, text);
+                    b_fdecode_case(battle_text_buff3, text);
                     string = text;
                 }
                 else
@@ -618,24 +717,24 @@ u16 b_strcpy_decode(const u8* const src, u8* const dst)
                 break;
             case 40: //attacker foe/ally
                 string = text_Ally;
-                if (is_bank_from_opponent_side(bank_attacker))
+                if (get_bank_side(bank_attacker))
                     string = text_Foe;
                 break;
             case 41: //target foe/ally
                 string = text_Ally;
-                if (is_bank_from_opponent_side(bank_target))
+                if (get_bank_side(bank_target))
                     string = text_Foe;
                 break;
             case 42: //attacker foe_/ally_
             case 44:
                 string = text_Ally_;
-                if (is_bank_from_opponent_side(bank_attacker))
+                if (get_bank_side(bank_attacker))
                     string = text_Foe_;
                 break;
             case 43: //target foe_/ally_
             case 45:
                 string = text_Ally_;
-                if (is_bank_from_opponent_side(bank_target))
+                if (get_bank_side(bank_target))
                     string = text_Foe_;
                 break;
             case 46: //trainer B class
@@ -719,19 +818,19 @@ u16 b_strcpy_decode(const u8* const src, u8* const dst)
                 string = new_battlestruct->various.trainer_slide_msg;
                 break;
             case 57: //bank attacker, your team or foe's team - lowercase first letter
-                if (is_bank_from_opponent_side(bank_attacker))
+                if (get_bank_side(bank_attacker))
                     string = foeteam_text;
                 else
                     string = userteam_text;
                 break;
             case 63: //bank target, your team or foe's team - lowercase first letter
-                if (is_bank_from_opponent_side(bank_target))
+                if (get_bank_side(bank_target))
                     string = foeteam_text;
                 else
                     string = userteam_text;
                 break;
             case 64: //bank target, your team or foe's team - uppercase first letter
-                if (is_bank_from_opponent_side(bank_target))
+                if (get_bank_side(bank_target))
                     string = foeteam_uc_text;
                 else
                     string = userteam_uc_text;
@@ -852,7 +951,7 @@ void b_buffer_string(u16 strID)
     }
 
     const u8* StrPtr = text_empty_string_00;
-    u8 side = is_bank_from_opponent_side(bank);
+    u8 side = get_bank_side(bank);
 
     switch(strID)
     {
@@ -1034,12 +1133,15 @@ void b_buffer_string(u16 strID)
         }
         break;
     default: //load from move table
-        if (strID >= 0x17C)
-            StrPtr = new_strings_table[strID - 0x17C];
-        else
-            StrPtr = battle_strings_table[strID - 0xC];
+        StrPtr = get_battlestring(strID);
         break;
     }
 
     b_strcpy_decode(StrPtr, displayed_string_in_battle);
+}
+
+void prep_string(u16 strID, u8 bank)
+{
+    active_bank = bank;
+    bb10_printstring(0, strID), mark_buffer_bank_for_execution(bank);
 }

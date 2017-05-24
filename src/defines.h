@@ -245,8 +245,8 @@ enum trainer_class{
 #define AEGISLASH_ID(species) (species == POKE_AEGISLASH_BLADE || species == POKE_AEGISLASH_SHIELD)
 #define SEMI_INVULNERABLE(bank) (status3[bank].underground || status3[bank].underwater || status3[bank].on_air || status3[bank].phantomforce || new_battlestruct->bank_affecting[bank].sky_drop_attacker || new_battlestruct->bank_affecting[bank].sky_drop_target)
 #define MUST_HIT(bank_atk, bank_def) (status3[bank_def].always_hits && disable_structs[bank_def].always_hits_bank == bank_atk)
-#define CHECK_KNOCKED_OFF(bank) (battle_effects_duration.knocked_off_pokes[is_bank_from_opponent_side(bank)] & bits_table[battle_team_id_by_side[bank]])
-#define SET_KNOCKED_OFF(bank) (battle_effects_duration.knocked_off_pokes[is_bank_from_opponent_side(bank)] |= bits_table[battle_team_id_by_side[bank]])
+#define CHECK_KNOCKED_OFF(bank) (battle_effects_duration.knocked_off_pokes[get_bank_side(bank)] & bits_table[battle_team_id_by_side[bank]])
+#define SET_KNOCKED_OFF(bank) (battle_effects_duration.knocked_off_pokes[get_bank_side(bank)] |= bits_table[battle_team_id_by_side[bank]])
 #define WILD_DOUBLE_BATTLE (battle_flags.double_battle && !battle_flags.trainer && !battle_flags.link)
 #define WILD_ATTACKER (!battle_flags.trainer && !battle_flags.link && (bank_attacker & 1) && !(bank_target & 1))
 #define read_byte(ptr) (*((u8*)(ptr)))
@@ -269,6 +269,7 @@ enum trainer_class{
 #define RAIN_WEATHER ((battle_weather.flags.rain || battle_weather.flags.downpour || battle_weather.flags.permament_rain || battle_weather.flags.heavy_rain))
 #define SUN_WEATHER ((battle_weather.flags.sun || battle_weather.flags.permament_sun || battle_weather.flags.harsh_sun))
 #define HAIL_WEATHER ((battle_weather.flags.hail || battle_weather.flags.permament_hail))
+#define BIT_GET(bit)(((1 << bit)))
 
 #define TRAINER_STEVEN 0xC03
 #define PARTNER_ANIMATES 0x8000

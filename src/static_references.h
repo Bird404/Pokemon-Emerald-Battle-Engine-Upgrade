@@ -229,9 +229,11 @@ extern u8 BS_DROUGHT[];
 extern u8 BS_DRIZZLE[];
 extern u8 BS_SANDSTREAM[];
 extern u8 BS_AIRLOCK[];
+extern u8 BS_WIMPOUT[];
 
 extern u8 BS_FORMCHANGE_WITH_TYPE_CHANGE[];
-extern u8 BS_STAT_ONLY_FORMCHANGE[];
+extern u8 BS_STAT_ONLY_FORMCHANGE_END2[];
+extern u8 BS_STAT_ONLY_FORMCHANGE_END3[];
 extern u8 BS_ZYGARDE_FORM_CHANGE[];
 extern u8 BS_BATTLE_BOND[];
 extern u8 BS_MIMIKYU_BUST[];
@@ -239,6 +241,7 @@ extern u8 BS_MIMIKYU_BUST[];
 //locations in asm files
 extern const u8 ability_names_table[250][13];
 extern const u8 move_names_table[1025][13];
+extern const u8 type_names[TYPE_FAIRY][7];
 extern u8* battlescripts_table[183];
 
 #endif /* static_references */

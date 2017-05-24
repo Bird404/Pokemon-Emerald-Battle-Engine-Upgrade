@@ -7,6 +7,7 @@ void setup_berry_consume_buffers(u8 bank);
 u8 get_item_effect(u8 bank, u8 check_negating_effects);
 u8 has_ability_effect(u8 bank, u8 mold_breaker, u8 gastro);
 bool check_ability(u8 bank, u8 ability);
+void bs_push_current(void* now);
 
 bool affected_by_substitute(u8 substitute_bank)
 {
@@ -22,7 +23,7 @@ bool affected_by_substitute(u8 substitute_bank)
     return false;
 }
 
-void final_damagecalc_cmd7(void)
+void atk07_final_dmg_calc(void)
 {
     if (battle_execution_buffer) {return;}
     battlescripts_curr_instruction++;
@@ -46,8 +47,7 @@ void final_damagecalc_cmd7(void)
             {
                 battle_scripting.active_bank = bank_target;
                 last_used_item = item;
-                battlescript_push();
-                battlescripts_curr_instruction = BS_BERRY_DMG_REDUCE;
+                bs_push_current(BS_BERRY_DMG_REDUCE);
                 setup_berry_consume_buffers(bank_target);
             }
         }

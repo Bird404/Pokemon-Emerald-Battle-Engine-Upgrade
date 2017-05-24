@@ -170,6 +170,7 @@ struct party_bits{
     u8 eaten_berry_player : 6;
     u8 eaten_berry_opponent : 6;
 };
+
 #define MOVEEFFECT_SLP      0x7
 #define MOVEEFFECT_PSN      0x8
 #define MOVEEFFECT_BRN      0x10

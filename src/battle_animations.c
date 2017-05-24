@@ -1,5 +1,7 @@
 #include "defines.h"
 
+u8 get_bank_side(u8 bank);
+
 void AnimTask_megaevo_swap_sprite(u8 taskID)
 {
     struct task* curr_task = &tasks[taskID];
@@ -47,7 +49,7 @@ void AnimTask_animate_pokemon(u8 taskID) //argument is bank
     {
         task_set_priv_u32(taskID, 2, (u32) poke_obj->callback);
         u16 species = battle_participants[bank].species;
-        if (is_bank_from_opponent_side(bank))
+        if (get_bank_side(bank))
             b_animate_opponent_poke(poke_obj, species, 0, 1);
         else
             b_animate_player_poke(poke_obj, species);

@@ -4,7 +4,7 @@ void revert_form_change(u8 mega_revert, u8 teamID, u8 side, struct pokemon* poke
 u16 try_illusion_change(u8 bank, struct pokemon* poke);
 struct pokemon* get_party_ptr(u8 bank);
 
-void alloc_new_struct()
+void alloc_new_struct(void)
 {
     battle_stuff_ptr = (struct battle_stuff*) malloc_and_clear(sizeof(struct battle_stuff));
     new_battlestruct = (struct new_battle_struct*) malloc_and_clear(sizeof(struct new_battle_struct));
@@ -53,10 +53,9 @@ void try_burmy_change(u8 id, struct pokemon* poke)
             }
         }
     }
-    return;
 }
 
-void free_new_struct()
+void free_new_struct(void)
 {
     //revert forms to default ones
     for (u8 i = 0; i < 6; i++)

@@ -23,7 +23,7 @@ u8 affected_by_substitute(u8 bank);
 u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8 effects_handling_and_recording);
 void set_attacking_move_type();
 void revert_mega_to_normalform(u8 teamID, u8 opponent_side);
-u8 is_bank_present(u8 bank);
+bool is_bank_present(u8 bank);
 u8 calculate_effect_chance(u8 bank, u16 move);
 struct pokemon* get_bank_poke_ptr(u8 bank);
 u16 get_item_extra_param(u16 item);
@@ -52,6 +52,11 @@ enum poke_abilities get_ally_ability(u8 bank, u8 mold);
 u8 findability_in_table(u8 ability, const u8* table);
 u8 get_battle_bank(u8 to_get);
 u8 check_if_move_failed(u8 bank);
+void prep_string(u16 strID, u8 bank);
+u8 get_bank_side(u8 bank);
+void bs_push(void* to_return, void* now);
+void bs_push_current(void* now);
+void reset_multiple_turn_effects(u8 bank);
 
 void set_unburden(u8 bank)
 {
@@ -164,7 +169,7 @@ u8 count_alive_on_side(u8 bank)
 void atk7E_set_reflect(void)
 {
     battlescripts_curr_instruction++;
-    u8 side = is_bank_from_opponent_side(bank_attacker);
+    u8 side = get_bank_side(bank_attacker);
     if (side_affecting_halfword[side].reflect_on)
     {
         move_outcome.missed = 1;
@@ -188,7 +193,7 @@ void atk7E_set_reflect(void)
 void atk92_set_lightscreen(void)
 {
     battlescripts_curr_instruction++;
-    u8 side = is_bank_from_opponent_side(bank_attacker);
+    u8 side = get_bank_side(bank_attacker);
     if (side_affecting_halfword[side].light_screen_on)
     {
         move_outcome.missed = 1;
@@ -277,7 +282,6 @@ void atkE2_switchout_abilities(void)
         }
     }
     battlescripts_curr_instruction += 2;
-    return;
 }
 
 void atk8D_multihit_move_loop_counter(void)
@@ -336,7 +340,7 @@ bool not_magicguard(u8 bank)
     return 1;
 }
 
-void hazard_type_dmg(enum poke_types type, void* BS_ptr)
+static void hazard_type_dmg(enum poke_types type, void* BS_ptr)
 {
     u32 damage = 0;
     u16 max_hp = battle_participants[active_bank].max_hp;
@@ -359,14 +363,13 @@ void hazard_type_dmg(enum poke_types type, void* BS_ptr)
         break;
     }
     damage_loc = ATLEAST_ONE(damage);
-    battlescript_push();
-    battlescripts_curr_instruction = BS_ptr;
+    bs_push_current(BS_ptr);
 }
 
-u8 entry_hazards_hook(void)
+bool entry_hazards_hook(void)
 {
-    u8 effect = 0;
-    u8 banks_side = is_bank_from_opponent_side(active_bank);
+    bool effect = 0;
+    u8 banks_side = get_bank_side(active_bank);
     struct side_affecting* ptr_to_struct = &new_battlestruct->side_affecting[banks_side];
     if (ptr_to_struct->lunardance)
     {
@@ -376,8 +379,7 @@ u8 entry_hazards_hook(void)
         bb2_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &battle_participants[active_bank].status);
         mark_buffer_bank_for_execution(active_bank);
         //heal pp
-        battlescript_push();
-        battlescripts_curr_instruction = BS_LUNARDANCE;
+        bs_push_current(BS_LUNARDANCE);
         effect = 1;
     }
     else if (side_affecting_halfword[banks_side].spikes_on && !(side_affecting_halfword[banks_side].spikes_damage_done)
@@ -385,8 +387,7 @@ u8 entry_hazards_hook(void)
     {
         side_affecting_halfword[banks_side].spikes_damage_done = 1;
         damage_loc = ATLEAST_ONE(battle_participants[active_bank].max_hp / ((5 - side_timers[banks_side].spikes_amount) * 2));
-        battlescript_push();
-        battlescripts_curr_instruction = BS_SPIKES;
+        bs_push_current(BS_SPIKES);
         effect = 1;
     }
     else if (ptr_to_struct->stealthrock && !ptr_to_struct->stealthrock_done && not_magicguard(active_bank))
@@ -398,8 +399,7 @@ u8 entry_hazards_hook(void)
     else if (ptr_to_struct->sticky_web && !ptr_to_struct->sticky_web_done && GROUNDED(active_bank))
     {
         ptr_to_struct->sticky_web_done = 1;
-        battlescript_push();
-        battlescripts_curr_instruction = BS_STICKYWEB;
+        bs_push_current(BS_STICKYWEB);
         battle_scripting.stat_changer = 0x93;
         effect = 1;
     }
@@ -411,8 +411,7 @@ u8 entry_hazards_hook(void)
             effect = 1;
             ptr_to_struct->toxic_spikes_psn = 0;
             ptr_to_struct->toxic_spikes_badpsn = 0;
-            battlescript_push();
-            battlescripts_curr_instruction = BS_TOXICSPIKESABSORBED;
+            bs_push_current(BS_TOXICSPIKESABSORBED);
         }
         else if (!cant_poison(active_bank, active_bank, 0))
         {
@@ -426,8 +425,7 @@ u8 entry_hazards_hook(void)
                 battle_participants[active_bank].status.flags.poison = 1;
                 battle_communication_struct.multistring_chooser = 0;
             }
-            battlescript_push();
-            battlescripts_curr_instruction = BS_TOXICSPIKES;
+            bs_push_current(BS_TOXICSPIKES);
             effect = 1;
             bb2_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &battle_participants[active_bank].status.flags);
             mark_buffer_bank_for_execution(active_bank);
@@ -466,7 +464,7 @@ void switchin_newstruct_update(void)
             *def = placeholder;
         }
     }
-    struct side_affecting* side_ptr = &new_battlestruct->side_affecting[is_bank_from_opponent_side(active_bank)];
+    struct side_affecting* side_ptr = &new_battlestruct->side_affecting[get_bank_side(active_bank)];
     side_ptr->stealthrock_done = 0;
     side_ptr->sticky_web_done = 0;
     side_ptr->toxic_spikes_done = 0;
@@ -545,8 +543,7 @@ bool move_effect2_setter(void)
                     active_bank = bank;
                     bb2_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, status);
                     mark_buffer_bank_for_execution(active_bank);
-                    battlescript_push();
-                    battlescripts_curr_instruction = (void*) 0x82DB361;
+                    bs_push_current((void*) 0x82DB361);
                 }
             }
             break;
@@ -559,8 +556,7 @@ bool move_effect2_setter(void)
                     applier_bank->status2.trapped_in_wrap = 4 + (rng() & 1);
                 battle_stuff_ptr->binding_move[bank] = current_move;
                 battle_stuff_ptr->binded_by[bank] = bank_attacker;
-                battlescript_push();
-                battlescripts_curr_instruction = BS_BINDEFFECT;
+                bs_push_current(BS_BINDEFFECT);
                 static const u16 trapping_moves[8] = {MOVE_BIND, MOVE_WHIRLPOOL, MOVE_WRAP, MOVE_CLAMP, MOVE_SAND_TOMB, MOVE_FIRE_SPIN, MOVE_MAGMA_STORM, MOVE_INFESTATION};
                 for (u8 i = 0; i < 8; i++)
                 {
@@ -586,10 +582,7 @@ bool move_effect2_setter(void)
                     }
                 }
                 if (effect)
-                {
-                    battlescript_push();
-                    battlescripts_curr_instruction = BS_CLEARSMOG;
-                }
+                    bs_push_current(BS_CLEARSMOG);
             }
             break;
          case 13: //steal item
@@ -600,16 +593,15 @@ bool move_effect2_setter(void)
                 u16* attackers_item = &battle_participants[bank_attacker].held_item;
                 if (*targets_item && !CHECK_KNOCKED_OFF(bank_target) && *attackers_item == 0 && can_lose_item(bank_target, 1, 1))
                 {
-                    if (!ITEM_STEAL && !is_bank_from_opponent_side(bank_attacker) && battle_flags.trainer)
+                    if (!ITEM_STEAL && !get_bank_side(bank_attacker) && battle_flags.trainer)
                     {
                         new_battlestruct->various.returns_item |= bits_table[battle_team_id_by_side[bank_attacker]];
                     }
-                    battlescript_push();
-                    battlescripts_curr_instruction = (void*) 0x82DB422;
+                    bs_push_current((void*) 0x82DB422);
                     last_used_item = *targets_item;
                     *attackers_item = *targets_item;
                     *targets_item = 0;
-                    if (is_bank_from_opponent_side(bank_attacker)) //save player's item
+                    if (get_bank_side(bank_attacker)) //save player's item
                     {
                          SET_KNOCKED_OFF(bank_target);
                     }
@@ -635,15 +627,13 @@ bool move_effect2_setter(void)
                  new_battlestruct->bank_affecting[bank].magnet_rise = 0;
                  new_battlestruct->bank_affecting[bank].telekinesis = 0;
                  status3[bank].on_air = 0;
-                 battlescript_push();
-                 battlescripts_curr_instruction = BS_SMACKDOWN;
+                 bs_push_current(BS_SMACKDOWN);
              }
             break;
         case 15: //rapid spin
             if (battle_participants[bank_attacker].current_hp)
             {
-                battlescript_push();
-                battlescripts_curr_instruction = (void*) 0x82DAFC3;
+                bs_push_current((void*) 0x82DAFC3);
             }
             break;
         case 16: //knock off
@@ -651,9 +641,8 @@ bool move_effect2_setter(void)
             {
                 last_used_item = applier_bank->held_item;
                 applier_bank->held_item = 0;
-                battle_effects_duration.knocked_off_pokes[is_bank_from_opponent_side(bank)] |= bits_table[battle_team_id_by_side[bank]];
-                battlescript_push();
-                battlescripts_curr_instruction = (void*) 0x082DB168;
+                battle_effects_duration.knocked_off_pokes[get_bank_side(bank)] |= bits_table[battle_team_id_by_side[bank]];
+                bs_push_current((void*) 0x082DB168);
                 battle_stuff_ptr->choiced_move[bank] = 0;
                 set_unburden(bank_target);
             }
@@ -668,15 +657,13 @@ bool move_effect2_setter(void)
                     applier_bank->type2 = TYPE_EGG;
                 if (new_battlestruct->bank_affecting[bank].type3 == type)
                     new_battlestruct->bank_affecting[bank].type3 = TYPE_EGG;
-                battlescript_push();
-                battlescripts_curr_instruction = BS_BURNUP;
+                bs_push_current(BS_BURNUP);
             }
             break;
         case 48: //recoil
             if (battle_participants[bank_attacker].current_hp && TARGET_TURN_DAMAGED && calc_recoil_dmg(bank_attacker, current_move))
             {
-                battlescript_push();
-                battlescripts_curr_instruction = (void*) 0x082DB3F4; //recoil battlescript
+                bs_push_current((void*) 0x082DB3F4);
             }
             break;
         case 49: //recharge needed
@@ -692,7 +679,7 @@ bool move_effect2_setter(void)
                 applier_bank->status2.raged = 1;
             break;
         case 51: //payday
-            if (!is_bank_from_opponent_side(bank))
+            if (!get_bank_side(bank))
             {
                 u16 to_give = 5 * applier_bank->level;
                 if (payday_money + to_give > 0xFFFF)
@@ -700,8 +687,7 @@ bool move_effect2_setter(void)
                 else
                 {
                     payday_money += to_give;
-                    battlescript_push();
-                    battlescripts_curr_instruction = (void*) 0x082DB3D6;
+                    bs_push_current((void*) 0x082DB3D6);
                 }
             }
             break;
@@ -711,8 +697,7 @@ bool move_effect2_setter(void)
                 applier_bank->status2.uproar = 3;
                 applier_bank->status2.multiple_turn_move = 1;
                 locked_move[bank] = current_move;
-                battlescript_push();
-                battlescripts_curr_instruction = (void*) 0x82DB3C2;
+                bs_push_current((void*) 0x82DB3C2);
             }
             break;
         case 53: //set thrash
@@ -736,11 +721,11 @@ bool move_effect2_setter(void)
                     bb2_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, berry);
                     mark_buffer_bank_for_execution(bank);
 
-                    battlescript_push();
+
                     if (!arg) //incinerate; berry destroy, no effect
-                        battlescripts_curr_instruction = BS_INCINERATEBERRY;
+                        bs_push_current(BS_INCINERATEBERRY);
                     else //pluck, bug bite; get berry's effect
-                        battlescripts_curr_instruction = BS_BUGBITE;
+                        bs_push_current(BS_BUGBITE);
                 }
             }
             break;
@@ -756,16 +741,14 @@ bool move_effect2_setter(void)
                 {
                     damage_loc = get_1_16_of_max_hp(target_ally);
                     bank_partner_def = target_ally;
-                    battlescript_push();
-                    battlescripts_curr_instruction = BS_FLAMEBURST;
+                    bs_push_current(BS_FLAMEBURST);
                 }
             }
             break;
         case 57: // thousand waves
             if(!substitute && current_hp && !battle_participants[bank_target].status2.cant_escape)
             {
-                battlescript_push();
-                battlescripts_curr_instruction = BS_DAMAGETRAP;
+                bs_push_current(BS_DAMAGETRAP);
             }
             break;
         }
@@ -815,8 +798,7 @@ void atk49_move_end_turn(void)
             {
                 effect = 1;
                 damage_loc = get_1_8_of_max_hp(bank_attacker);
-                battlescript_push();
-                battlescripts_curr_instruction = BS_SPIKYSHIELD;
+                bs_push_current(BS_SPIKYSHIELD);
                 new_battlestruct->bank_affecting[bank_attacker].spikyshield_damage = 0;
                 move_outcome.missed = 0;
             }  // king shield recoil
@@ -825,8 +807,7 @@ void atk49_move_end_turn(void)
                 new_battlestruct->bank_affecting[bank_attacker].kingsshield_damage = 0;
                 battle_scripting.stat_changer = 0xA1;
                 move_outcome.missed = 0;
-                battlescript_push();
-                battlescripts_curr_instruction = BS_CHANGE_ATK_STAT;
+                bs_push_current(BS_CHANGE_ATK_STAT);
                 effect = 1;
             }
             else if (new_battlestruct->bank_affecting[bank_attacker].banefulbunker_damage && !attacker_struct->status.int_status)
@@ -836,8 +817,7 @@ void atk49_move_end_turn(void)
                 active_bank = bank_attacker;
                 bb2_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &attacker_struct->status.flags);
                 mark_buffer_bank_for_execution(active_bank);
-                battlescript_push();
-                battlescripts_curr_instruction = (void*)(0x082DB386);
+                bs_push_current((void*)(0x082DB386));
                 battle_communication_struct.multistring_chooser = 0;
                 bank_partner_def = bank_attacker;
                 effect = 1;
@@ -846,12 +826,11 @@ void atk49_move_end_turn(void)
             break;
         case 2: //rage checker
             if (target_struct->current_hp && target_struct->status2.raged && bank_target != bank_attacker &&
-                is_bank_from_opponent_side(bank_target) != is_bank_from_opponent_side(bank_attacker) && MOVE_WORKED && TARGET_TURN_DAMAGED &&
+                get_bank_side(bank_target) != get_bank_side(bank_attacker) && MOVE_WORKED && TARGET_TURN_DAMAGED &&
                 DAMAGING_MOVE(current_move) && target_struct->atk_buff != 0xC)
             {
                 target_struct->atk_buff++;
-                battlescript_push();
-                battlescripts_curr_instruction = (void*) 0x082DAE0D; //rage is building
+                bs_push_current((void*) 0x082DAE0D); //rage is building
                 effect = 1;
             }
             INC_END_EVENTS
@@ -862,8 +841,7 @@ void atk49_move_end_turn(void)
             {
                 target_struct->status.flags.freeze = 0;
                 active_bank = bank_target;
-                battlescript_push();
-                battlescripts_curr_instruction = (void*) 0x082DB282; //defrosting
+                bs_push_current((void*) 0x082DB282);
                 effect = 1;
                 bb2_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &target_struct->status);
                 mark_buffer_bank_for_execution(active_bank);
@@ -1070,8 +1048,7 @@ void atk49_move_end_turn(void)
                     attack_iteration_cleanup();
                     battle_scripting.cmd49_state_tracker=0;
                     battlescripts_curr_instruction = get_move_battlescript_ptr(current_move);
-                    battlescript_push();
-                    battlescripts_curr_instruction=(void *)(0x82DB87D);
+                    bs_push_current((void *)(0x82DB87D));
                     effect=1;
                 }
                 else
@@ -1101,8 +1078,7 @@ void atk49_move_end_turn(void)
                 attack_iteration_cleanup();
                 battle_scripting.cmd49_state_tracker=0;
                 battlescripts_curr_instruction = get_move_battlescript_ptr(current_move);
-                battlescript_push();
-                battlescripts_curr_instruction=(void *)(0x82DB87D);
+                bs_push_current((void*)0x82DB87D);
                 effect=1;
                 break;
             }
@@ -1128,8 +1104,7 @@ void atk49_move_end_turn(void)
                     attack_iteration_cleanup();
                     battle_scripting.cmd49_state_tracker=0;
                     battlescripts_curr_instruction = get_move_battlescript_ptr(current_move);
-                    battlescript_push();
-                    battlescripts_curr_instruction=(void *)(0x82DB87D);
+                    bs_push_current((void*)(0x82DB87D));
                     effect=1;
                     break;
                 }
@@ -1142,22 +1117,17 @@ void atk49_move_end_turn(void)
                 if (new_battlestruct->various.life_orbed && not_magicguard(bank_attacker))
                 {
                     damage_loc = ATLEAST_ONE(attacker_struct->max_hp / 10);
-                    battlescript_push();
-                    battlescripts_curr_instruction = BS_LIFEORB;
+                    bs_push_current(BS_LIFEORB);
                     record_usage_of_item(bank_attacker, ITEM_EFFECT_LIFEORB);
                     effect = 1;
                 }
                 else if (new_battlestruct->various.accumulated_damage && attacker_struct->current_hp < attacker_struct->max_hp)
                 {
-                    u32 damage = new_battlestruct->various.accumulated_damage>>3;
-                    if (damage == 0)
-                        damage = 1;
-                    damage_loc = damage*-1;
+                    damage_loc = ATLEAST_ONE(new_battlestruct->various.accumulated_damage / 8);
                     another_active_bank = bank_attacker;
                     battle_scripting.active_bank = bank_attacker;
                     last_used_item = attacker_struct->held_item;
-                    battlescript_push();
-                    battlescripts_curr_instruction = (void*)0x82DB7F7;
+                    bs_push_current((void*)0x82DB7F7);
                     record_usage_of_item(bank_attacker, ITEM_EFFECT_SHELLBELL);
                     effect = 1;
                 }
@@ -1214,8 +1184,8 @@ void atk49_move_end_turn(void)
                 effect = 1;
             INC_END_EVENTS
             break;
-        case 32: //red card/eject button
-            if (item_battle_effects(6, bank_target, 0))
+        case 32: //red card/eject button and emergency exit
+            if (item_battle_effects(6, bank_target, 0) || ability_battle_effects(23, bank_target, 0, 0, 0))
                 effect = 1;
             INC_END_EVENTS
             break;
@@ -1228,7 +1198,6 @@ void atk49_move_end_turn(void)
                 {
                     effect=1;
                     new_battlestruct->various.var1 = POKE_MELOETTA_PIROUETTE;
-
                 }
                 else if(*species == POKE_MELOETTA_PIROUETTE)
                 {
@@ -1239,8 +1208,7 @@ void atk49_move_end_turn(void)
                 {
                     new_battlestruct->various.var2 = 0x21E;
                     battle_scripting.active_bank=bank_attacker;
-                    battlescript_push();
-                    battlescripts_curr_instruction = &zen_change_bs;
+                    bs_push_current(&zen_change_bs);
                 }
             }
             INC_END_EVENTS
@@ -1261,9 +1229,7 @@ void atk49_move_end_turn(void)
                             new_battlestruct->various.var1 = POKE_ZEN_MODE;
                             new_battlestruct->various.var2 = 0x21C;
                             battle_scripting.active_bank=i;
-                            battlescript_push();
-                            battlescripts_curr_instruction = &zen_change_bs;
-
+                            bs_push_current(&zen_change_bs);
                         }
                         break;
                     case POKE_ZEN_MODE:
@@ -1273,8 +1239,7 @@ void atk49_move_end_turn(void)
                             new_battlestruct->various.var1 = POKE_DARMANITAN;
                             battle_scripting.active_bank=i;
                             new_battlestruct->various.var2 = 0x21D;
-                            battlescript_push();
-                            battlescripts_curr_instruction = &zen_change_bs;
+                            bs_push_current(&zen_change_bs);
                         }
                         break;
                     }
@@ -1365,8 +1330,7 @@ u8 check_if_cannot_attack(void)
                     attacker_struct->status.flags.sleep = 0;
                     attacker_struct->status2.nightmare = 0;
                     battle_communication_struct.multistring_chooser = 1;
-                    battlescript_push();
-                    battlescripts_curr_instruction = (void*) 0x82DB220;
+                    bs_push_current((void*) 0x82DB220);
                 }
                 else
                 {
@@ -1376,8 +1340,7 @@ u8 check_if_cannot_attack(void)
                         effect = 2;
                         attacker_struct->status2.nightmare = 0;
                         battle_communication_struct.multistring_chooser = 0;
-                        battlescript_push();
-                        battlescripts_curr_instruction = (void*) 0x82DB220;
+                        bs_push_current((void*) 0x82DB220);
                     }
                     else if (current_move != MOVE_SLEEP_TALK && current_move != MOVE_SNORE)
                     {
@@ -1396,8 +1359,7 @@ u8 check_if_cannot_attack(void)
                     attacker_struct->status.flags.freeze = 0;
                     effect = 2;
                     battle_communication_struct.multistring_chooser = 0;
-                    battlescript_push();
-                    battlescripts_curr_instruction = (void*) 0x82DB277;
+                    bs_push_current((void*) 0x82DB277);
                 }
                 else if (!find_move_in_table(current_move, user_thawing_moves))
                 {
@@ -1486,13 +1448,11 @@ u8 check_if_cannot_attack(void)
                 attacker_struct->status2.confusion--;
                 if (attacker_struct->status2.confusion == 0)
                 {
-                    battlescript_push();
-                    battlescripts_curr_instruction = (void*) 0x82DB300; //snapped out of confusion
+                    bs_push_current((void*) 0x82DB300); //snapped out of confusion
                 }
                else if (percent_chance(50)) //manages to hit the target
                 {
-                    battlescript_push();
-                    battlescripts_curr_instruction = (void*) 0x82DB2BD;
+                    bs_push_current((void*) 0x82DB2BD);
                     battle_communication_struct.multistring_chooser = 0;
                 }
                 else //hits itself
@@ -1522,15 +1482,13 @@ u8 check_if_cannot_attack(void)
                 battle_scripting.active_bank = get_bank_in_love(attacker_struct->status2.in_love);
                 if (percent_chance(50)) //in love cannot attack
                 {
-                    battlescript_custom_push((void*)0x82DB334);
-                    battlescripts_curr_instruction = (void*) 0x82DB327;
+                    bs_push((void*)0x82DB334, (void*) 0x82DB327);
                     protect_structs[bank_attacker].flag1_love_immobility = 1;
                     effect = 3;
                 }
                 else
                 {
-                    battlescript_push();
-                    battlescripts_curr_instruction = (void*) 0x82DB327;
+                    bs_push_current((void*) 0x82DB327);
                     effect = 1;
                 }
             }
@@ -1561,7 +1519,7 @@ u8 check_if_cannot_attack(void)
         case 16: //aroma veil protection
             if (aromaveil_affected_move(current_move))
             {
-                u8 aroma = check_field_for_ability(ABILITY_AROMA_VEIL, is_bank_from_opponent_side(bank_attacker), 1);
+                u8 aroma = check_field_for_ability(ABILITY_AROMA_VEIL, get_bank_side(bank_attacker), 1);
                 if (aroma)
                 {
                     effect = 4;
@@ -1575,8 +1533,7 @@ u8 check_if_cannot_attack(void)
             if (attacker_struct->status.flags.freeze && find_move_in_table(current_move, user_thawing_moves))
             {
                 attacker_struct->status.flags.freeze = 0;
-                battlescript_push();
-                battlescripts_curr_instruction = (void*) 0x82DB277;
+                bs_push_current((void*) 0x82DB277);
                 battle_communication_struct.multistring_chooser = 1;
             }
             break;
@@ -1611,7 +1568,7 @@ u8 check_if_cannot_attack(void)
         else if (effect >= 3)
         {
             hitmarker |= 0x80000;
-            reset_several_turns_stuff(bank_attacker);
+            reset_multiple_turn_effects(bank_attacker);
         }
         *state_tracker += 1;
         if (*state_tracker >= 21 && effect == 0)
@@ -1677,7 +1634,7 @@ void check_and_set_parental_bond(void)
     }
 }
 
-u8 check_if_twoturns_move(u16 move)
+bool check_if_twoturns_move(u16 move)
 {
     u8 script_id = move_table[move].script_id;
     if (script_id == 71 /*all two turns moves' effect */ || script_id == 157 /*Sky Drop's effect*/)
@@ -1751,16 +1708,14 @@ void atk00_move_canceller(void)
         last_used_moves[bank_attacker] = current_move;
         pressure_pp_lose(bank_attacker, bank_target, MOVE_MAGIC_COAT);
         new_battlestruct->various.magicbounce = 1;
-        battlescript_push();
-        battlescripts_curr_instruction = (void*) 0x082DB194;
+        bs_push_current((void*) 0x082DB194);
         return;
     }
     else if ((battle_participants[bank_target].ability_id == ABILITY_MAGIC_BOUNCE && has_ability_effect(bank_target, 1)) && move_table[current_move].move_flags.flags.affected_by_magic_coat && new_battlestruct->various.magicbounce == 0 && !protect_affects(current_move, 0) && !SEMI_INVULNERABLE(bank_target))
     {
         new_battlestruct->various.magicbounce = 1;
         last_used_moves[bank_attacker] = current_move;
-        battlescript_push();
-        battlescripts_curr_instruction = BS_MAGICBOUNCE;
+        bs_push_current(BS_MAGICBOUNCE);
         return;
     }
     for (u8 i = 0; i < no_of_all_banks; i++)
@@ -1770,8 +1725,7 @@ void atk00_move_canceller(void)
             pressure_pp_lose(bank_attacker, bank_target, MOVE_SNATCH);
             protect_structs[turn_order[i]].flag0_stealmove = 0;
             battle_scripting.active_bank = turn_order[i];
-            battlescript_push();
-            battlescripts_curr_instruction = (void*) 0x82DB1AC;
+            bs_push_current((void*) 0x82DB1AC);
             return;
         }
     }
@@ -1785,8 +1739,7 @@ void atk00_move_canceller(void)
         }
         else
             last_used_ability = ABILITY_LIGHTNING_ROD;
-        battlescript_push();
-        battlescripts_curr_instruction = (void*) 0x082DB53E;
+        bs_push_current((void*) 0x082DB53E);
         record_usage_of_ability(bank_target, last_used_ability);
         return;
     }
@@ -1801,11 +1754,10 @@ void atk00_move_canceller(void)
             move_hit_with_pbs[bank_target] = 0;
             move_type_hit_with_pbs[bank_target] = 0;
             if (!twoturn)
-                reset_several_turns_stuff(bank_attacker);
+                reset_multiple_turn_effects(bank_attacker);
         }
     }
     battlescripts_curr_instruction++;
-    return;
 }
 
 void atk88_drain_damage(void)
@@ -1833,8 +1785,7 @@ bool symbiosis_effect(u8 bank)
         u8 ally_bank = bank ^ 2;
         if (get_ally_ability(bank, 0) == ABILITY_SYMBIOSIS && try_stealing_bank_item(bank, ally_bank))
         {
-            battlescript_push();
-            battlescripts_curr_instruction = BS_SYMBIOSIS;
+            bs_push_current(BS_SYMBIOSIS);
             record_usage_of_ability(ally_bank, ABILITY_SYMBIOSIS);
             bank_partner_atk = battle_scripting.active_bank = bank, bank_partner_def = ally_bank; //for animation and strings
             return 1;
@@ -1984,8 +1935,7 @@ void atk0F_resultmessage(void)
         {
             move_outcome.hanged_on_using_item = 0;
             move_outcome.sturdied = 0;
-            battlescript_push();
-            battlescripts_curr_instruction = (void*) 0x82DB1C7;
+            bs_push_current((void*) 0x82DB1C7);
         }
         else if (move_outcome.hanged_on_using_item && MOVE_WORKED)
         {
@@ -1993,22 +1943,19 @@ void atk0F_resultmessage(void)
             move_outcome.sturdied = 0;
             if (!last_used_item)
                 last_used_item = battle_participants[bank_target].held_item;
-            battlescript_push();
-            battlescripts_curr_instruction = (void*) 0x82DB816;
+            bs_push_current((void*) 0x82DB816);
         }
         else if (move_outcome.sturdied && MOVE_WORKED)
         {
             move_outcome.sturdied = 0;
-            battlescript_push();
-            battlescripts_curr_instruction = BS_STURDYENDURES;
+            bs_push_current(BS_STURDYENDURES);
         }
         if (string_id)
         {
             battle_communication_struct.is_message_displayed = 1;
-            b_std_message(string_id, bank_attacker);
+            prep_string(string_id, bank_attacker);
         }
     }
-    return;
 }
 
 void atk70_record_ability_of_bank(void)
@@ -2041,7 +1988,7 @@ void atk77_set_protect_stuff(void)
             fail = 1;
         else
         {
-            u8 atk_side = is_bank_from_opponent_side(bank_attacker);
+            u8 atk_side = get_bank_side(bank_attacker);
             switch (pr_case)
             {
             case PR_protect:
@@ -2104,11 +2051,7 @@ void atk77_set_protect_stuff(void)
         if (pr_flags & PR_affects_allies)
         {
             battle_communication_struct.multistring_chooser = 2;
-            battle_text_buff1[0] = 0xFD;
-            battle_text_buff1[1] = 2;
-            battle_text_buff1[2] = current_move;
-            battle_text_buff1[3] = current_move >> 8;
-            battle_text_buff1[4] = 0xFF;
+            move_to_buff1(current_move);
         }
         else if (pr_case == PR_endure)
             battle_communication_struct.multistring_chooser = 0;
@@ -2152,8 +2095,7 @@ void atk0C_datahpupdate(void)
             }
             if (*substitute_hp == 0)
             {
-                battlescript_push();
-                battlescripts_curr_instruction = (void*) 0x082DB6FB;
+                bs_push_current((void*) 0x082DB6FB);
             }
         }
         else if(new_battlestruct->various.bust_mimikyu && bank==bank_target && damage_loc==0)
@@ -2168,8 +2110,7 @@ void atk0C_datahpupdate(void)
                 special_statuses[bank].moveturn_losthp_special = 1;
             }
             battle_scripting.active_bank = bank;
-            battlescript_push();
-            battlescripts_curr_instruction = BS_MIMIKYU_BUST;
+            bs_push_current(BS_MIMIKYU_BUST);
             new_battlestruct->various.var1 = POKE_MIMIKKYU_BUSTED;
             new_battlestruct->various.var2 = 0x24B;
         }
@@ -2282,7 +2223,7 @@ void atkD4_wish_effect(void)
     return;
 }
 
-void atk93_ko_move()
+void atk93_ko_move(void)
 {
     u8 atk_lvl = battle_participants[bank_attacker].level;
     u8 def_lvl = battle_participants[bank_target].level;
@@ -2323,50 +2264,44 @@ void atk93_ko_move()
 
 void atkBE_rapidspin_away(void)
 {
-    u8 banks_side = is_bank_from_opponent_side(bank_attacker);
+    u8 banks_side = get_bank_side(bank_attacker);
     if (battle_participants[bank_attacker].status2.trapped_in_wrap)
     {
         battle_participants[bank_attacker].status2.trapped_in_wrap = 0;
         battle_scripting.active_bank = bank_target;
         move_to_buff1(battle_stuff_ptr->binding_move[bank_attacker]);
-        battlescript_push();
-        battlescripts_curr_instruction = (void*) 0x82DAFC5;
+        bs_push_current((void*) 0x82DAFC5);
     }
     else if (status3[bank_attacker].leech_seed)
     {
         status3[bank_attacker].leech_seed = 0;
         status3[bank_attacker].leech_seed_hp_receiver = 0;
-        battlescript_push();
-        battlescripts_curr_instruction = (void*) 0x82DAFD6;
+        bs_push_current((void*) 0x82DAFD6);
     }
     else if (side_affecting_halfword[banks_side].spikes_on)
     {
         side_affecting_halfword[banks_side].spikes_on = 0;
         side_timers[banks_side].spikes_amount = 0;
-        battlescript_push();
-        battlescripts_curr_instruction = (void*) 0x82DAFDD;
+        bs_push_current((void*) 0x82DAFDD);
     }
     else if (new_battlestruct->side_affecting[banks_side].toxic_spikes_psn)
     {
         new_battlestruct->side_affecting[banks_side].toxic_spikes_psn = 0;
         new_battlestruct->side_affecting[banks_side].toxic_spikes_badpsn = 0;
         battle_communication_struct.multistring_chooser = 2;
-        battlescript_push();
-        battlescripts_curr_instruction = BS_RAPIDSPIN_SPINS;
+        bs_push_current(BS_RAPIDSPIN_SPINS);
     }
     else if (new_battlestruct->side_affecting[banks_side].stealthrock)
     {
         new_battlestruct->side_affecting[banks_side].stealthrock = 0;
         battle_communication_struct.multistring_chooser = 0;
-        battlescript_push();
-        battlescripts_curr_instruction = BS_RAPIDSPIN_SPINS;
+        bs_push_current(BS_RAPIDSPIN_SPINS);
     }
     else if (new_battlestruct->side_affecting[banks_side].sticky_web)
     {
         new_battlestruct->side_affecting[banks_side].sticky_web = 0;
         battle_communication_struct.multistring_chooser = 1;
-        battlescript_push();
-        battlescripts_curr_instruction = BS_RAPIDSPIN_SPINS;
+        bs_push_current(BS_RAPIDSPIN_SPINS);
     }
     else
         battlescripts_curr_instruction++;
@@ -2407,7 +2342,7 @@ void atkDE_assistmovechoose(void)
     for (u8 i = 0; i < 6; i++)
     {
         if (i != battle_team_id_by_side[bank_attacker] && get_attributes(&poke[i], ATTR_CURRENT_HP, 0) && is_poke_valid(&poke[i]))
-            viable_pokes |= bits_table[i];
+            viable_pokes |= BIT_GET(i);
     }
     while (viable_pokes)
     {
@@ -2419,7 +2354,7 @@ void atkDE_assistmovechoose(void)
         {
             move[i] = get_attributes(&poke[chosen_poke], ATTR_ATTACK_1 + i, 0);
             if (move[i] && can_select_this_random_move(move[i]))
-                viable_moves |= bits_table[i];
+                viable_moves |= BIT_GET(i);
         }
         if (viable_moves) //move can be found
         {
@@ -2444,7 +2379,7 @@ void atkA9_sleeptalkmovechoose(void) //void* success_ptr
     {
         if (can_select_this_random_move(battle_participants[bank_attacker].moves[i]))
         {
-            usable_bitfield |= (bits_table[i]);
+            usable_bitfield |= (BIT_GET(i));
         }
     }
     usable_bitfield = check_move_limitations(bank_attacker, usable_bitfield, 0xFF);
@@ -2466,7 +2401,7 @@ void atkA9_sleeptalkmovechoose(void) //void* success_ptr
         battlescripts_curr_instruction += 5;
 }
 
-void atk9E_metronome_chooser()
+void atk9E_metronome_chooser(void)
 {
     #define MOVE_MAX 621
     static const u16 metronome_forbidden_moves[] = {MOVE_AFTER_YOU, MOVE_ASSIST, MOVE_BELCH, MOVE_BESTOW, MOVE_CELEBRATE, MOVE_CHATTER, MOVE_COPYCAT, MOVE_COUNTER, MOVE_COVET, MOVE_CRAFTY_SHIELD, MOVE_DESTINY_BOND, MOVE_DETECT, MOVE_DIAMOND_STORM, MOVE_ENDURE, MOVE_FEINT, MOVE_FOCUS_PUNCH, MOVE_FOLLOW_ME, MOVE_FREEZE_SHOCK, MOVE_HAPPY_HOUR, MOVE_HELPING_HAND, MOVE_HOLD_HANDS, MOVE_HYPERSPACE_HOLE, MOVE_ICE_BURN, MOVE_KINGS_SHIELD, MOVE_LIGHT_OF_RUIN, MOVE_MAT_BLOCK, MOVE_ME_FIRST, MOVE_METRONOME, MOVE_MIMIC, MOVE_MIRROR_COAT, MOVE_MIRROR_MOVE, MOVE_NATURE_POWER, MOVE_PROTECT, MOVE_QUASH, MOVE_QUICK_GUARD, MOVE_RAGE_POWDER, MOVE_RELIC_SONG, MOVE_SECRET_SWORD, MOVE_SKETCH, MOVE_SLEEP_TALK, MOVE_SNARL, MOVE_SNATCH, MOVE_SNORE, MOVE_SPIKY_SHIELD, MOVE_STEAM_ERUPTION, MOVE_STRUGGLE, MOVE_SWITCHEROO, MOVE_TECHNO_BLAST, MOVE_THIEF, MOVE_THOUSAND_ARROWS, MOVE_THOUSAND_WAVES, MOVE_TRANSFORM, MOVE_TRICK, MOVE_VCREATE, MOVE_WIDE_GUARD, 0xFFFF};
@@ -2529,8 +2464,7 @@ void atkCC_nature_power(void)
     }
     bank_target = get_target_of_move(current_move, 0, 0);
     set_attacking_move_type();
-    battlescript_custom_push(get_move_battlescript_ptr(current_move));
-    battlescripts_curr_instruction++;
+    bs_push(get_move_battlescript_ptr(current_move), battlescripts_curr_instruction + 1);
 }
 
 void atkB7_present_calc(void)
@@ -2568,25 +2502,23 @@ void atk13_printfromtable(void)
     u8 lower = battle_scripting.stat_changer & 0x80;
     u16 string_to_read = *string_id;
     battle_communication_struct.is_message_displayed = 1;
-    b_std_message(string_to_read, bank_attacker);
+    prep_string(string_to_read, bank_attacker);
     battlescripts_curr_instruction += 5;
     u8 bank = battle_scripting.active_bank;
     if ((string_to_read == 0x23D || string_to_read == 0x197) && lower && bank == bank_target
-         && is_bank_from_opponent_side(bank) != is_bank_from_opponent_side(bank_attacker) && new_battlestruct->bank_affecting[bank].stat_lowered)
+         && get_bank_side(bank) != get_bank_side(bank_attacker) && new_battlestruct->bank_affecting[bank].stat_lowered)
     {
         new_battlestruct->bank_affecting[bank].stat_lowered = 0;
         if (check_ability(bank, ABILITY_DEFIANT) && battle_participants[bank].atk_buff != 0xC)
         {
             record_usage_of_ability(bank, ABILITY_DEFIANT);
-            battlescript_push();
-            battlescripts_curr_instruction = BS_DEFIANT;
+            bs_push_current(BS_DEFIANT);
 
         }
         else if (check_ability(bank, ABILITY_COMPETITIVE) && battle_participants[bank].sp_atk_buff != 0xC)
         {
             record_usage_of_ability(bank, ABILITY_COMPETITIVE);
-            battlescript_push();
-            battlescripts_curr_instruction = BS_COMPETITIVE;
+            bs_push_current(BS_COMPETITIVE);
         }
     }
 }
@@ -2597,22 +2529,12 @@ struct revert_form_struct
     u16 base_form;
 };
 
-struct revert_form_struct revert_mapping[] = {{POKE_CHERRIM_SUNSHINE, POKE_CHERRIM}, {POKE_AEGISLASH_BLADE, POKE_AEGISLASH_SHIELD},
-                                            {POKE_ZEN_MODE, POKE_DARMANITAN}, {POKE_MELOETTA_PIROUETTE, POKE_MELOETTA_ARIA},
-                                            {POKE_MINIOR_METEOR, POKE_MINIOR_CORE}, {POKE_WISHIWASHI_SCHOOL, POKE_WISHIWASHI},
-                                            {POKE_ASH_GRENJA,POKE_SPECIAL_GRENJA}, {POKE_MIMIKKYU_BUSTED, POKE_MIMIKKYU},
-                                            {0xFFFF, 0x0}};
-
-
-void revert_form_change(u8 mega_revert, u8 teamID, u8 side, struct pokemon* poke)
+void revert_form_change(bool mega_revert, u8 teamID, u8 side, struct pokemon* poke)
 {
-    u16 species = get_attributes(poke, ATTR_SPECIES, 0);
-    if (mega_revert)
-    {
-        revert_mega_to_normalform(teamID, side);
-    }
+    if (mega_revert) {revert_mega_to_normalform(teamID, side);}
     else
     {
+        u16 species = get_attributes(poke, ATTR_SPECIES, 0);
         if(species == POKE_ZYGARDE_100)
         {
             u16 base_species = POKE_ZYGARDE_10;
@@ -2626,18 +2548,26 @@ void revert_form_change(u8 mega_revert, u8 teamID, u8 side, struct pokemon* poke
         }
         else
         {
-            for(u8 i=0;revert_mapping[i].current_species!=0xFFFF;i++)
+            //change mmikkyu only when it faints and at the end of battle, not on switchout
+            if (species == POKE_MIMIKKYU_BUSTED && get_attributes(poke, ATTR_CURRENT_HP, 0) && !battle_outcome) {return;}
+            static const struct revert_form_struct revert_mapping[] =
+                            {{POKE_CHERRIM_SUNSHINE, POKE_CHERRIM}, {POKE_AEGISLASH_BLADE, POKE_AEGISLASH_SHIELD},
+                            {POKE_ZEN_MODE, POKE_DARMANITAN}, {POKE_MELOETTA_PIROUETTE, POKE_MELOETTA_ARIA},
+                            {POKE_MINIOR_METEOR, POKE_MINIOR_CORE}, {POKE_WISHIWASHI_SCHOOL, POKE_WISHIWASHI},
+                            {POKE_ASH_GRENJA,POKE_GRENJA}, {POKE_MIMIKKYU_BUSTED, POKE_MIMIKKYU},
+                            {0xFFFF, 0}};
+
+            for (u32 i = 0; revert_mapping[i].current_species != 0xFFFF; i++)
             {
-                if(species == revert_mapping[i].current_species)
+                if (species == revert_mapping[i].current_species)
                 {
-                    set_attributes(poke,ATTR_SPECIES,&(revert_mapping[i].base_form));
+                    set_attributes(poke, ATTR_SPECIES, (void*) &(revert_mapping[i].base_form));
                     calculate_stats_pokekmon(poke);
                     break;
                 }
             }
         }
     }
-    return;
 }
 
 void atk56_prepare_fainting_cry(void)
@@ -2647,9 +2577,7 @@ void atk56_prepare_fainting_cry(void)
     active_bank = bank;
     prepare_fainting_cry(0);
     mark_buffer_bank_for_execution(bank);
-    u8 side = is_bank_from_opponent_side(bank);
-    revert_form_change(1, battle_team_id_by_side[bank], side, get_bank_poke_ptr(bank));
-    new_battlestruct->side_affecting[side].ally_fainted_last_turn = 2;
+    new_battlestruct->side_affecting[get_bank_side(bank)].ally_fainted_last_turn = 2;
     new_battlestruct->various.switch_in_cos_switch = 0;
 }
 
@@ -2657,14 +2585,14 @@ void atkE1_intimidate_loop(void)
 {
     u8 bank = battle_stuff_ptr->intimidate_user;
     battle_scripting.active_bank = bank;
-    u8 side = is_bank_from_opponent_side(bank);
+    u8 side = get_bank_side(bank);
     battle_text_buff1[0] = 0xFD;
     battle_text_buff1[1] = 9;
     battle_text_buff1[2] = battle_participants[bank].ability_id;
     battle_text_buff1[3] = 0xFF;
     while (bank_target < no_of_all_banks)
     {
-        if (side != is_bank_from_opponent_side(bank_target) && is_bank_present(bank_target))
+        if (side != get_bank_side(bank_target) && is_bank_present(bank_target))
         {
             battlescripts_curr_instruction += 5;
             return;
@@ -2751,8 +2679,7 @@ void moveeffect_set_status(u8 bank, u32 flag, u8 stringID)
     active_bank = bank;
     bb2_setattributes_in_battle(0, REQUEST_STATUS_BATTLE, 0, 4, &battle_participants[bank].status);
     mark_buffer_bank_for_execution(active_bank);
-    battlescript_push();
-    battlescripts_curr_instruction = BS_GOT_STATUS;
+    bs_push_current(BS_GOT_STATUS);
     battle_communication_struct.multistring_chooser = stringID;
     //set synchronize
     if (bank_target != bank_attacker && flag != STATUS_FREEZE && flag != STATUS_SLEEP)
@@ -2782,7 +2709,7 @@ u8 cant_become_confused(u8 bank)
         return 1;
     if (check_ability(bank, ABILITY_OWN_TEMPO))
         return 4;
-    if (side_affecting_halfword[is_bank_from_opponent_side(bank)].safeguard_on && !(hitmarker & HITMAKRER_IGNORE_SAFEGUARD))
+    if (side_affecting_halfword[get_bank_side(bank)].safeguard_on && !(hitmarker & HITMAKRER_IGNORE_SAFEGUARD))
         return 5;
     return 0;
 }
@@ -2817,19 +2744,17 @@ bool move_effect_setter(bool primary, bool certain)
             {
                 //stat was changed
                 effect = 1;
-                battlescript_push();
                 if (bank == bank_attacker)
-                    battlescripts_curr_instruction = ONE_STAT_USER_STATANIM;
+                    bs_push_current(ONE_STAT_USER_STATANIM);
                 else
-                    battlescripts_curr_instruction = ONE_STAT_TARGET_STATANIM;
+                    bs_push_current(ONE_STAT_TARGET_STATANIM);
             }
             else if (ret == STAT_CANT_GO_DOWN || ret == STAT_CANT_GO_UP)
             {
                 if (primary || certain)
                 {
                     effect = 1;
-                    battlescript_push();
-                    battlescripts_curr_instruction = ONE_STAT_PRINT;
+                    bs_push_current(ONE_STAT_PRINT);
                 }
             }
         }
@@ -2837,11 +2762,10 @@ bool move_effect_setter(bool primary, bool certain)
         {
             *move_effect = BIC(*move_effect, MOVEEFFECT_MULTIPLESTATS);
             effect = 1;
-            battlescript_push();
             if (certain || primary)
-                battlescripts_curr_instruction = BS_MULTIPLESTATCHANCE_ATK_CERTAIN;
+                bs_push_current(BS_MULTIPLESTATCHANCE_ATK_CERTAIN);
             else
-                battlescripts_curr_instruction = BS_MULTIPLESTATCHANCE_ATK;
+                bs_push_current(BS_MULTIPLESTATCHANCE_ATK);
         }
         else if ((*move_effect & MOVEEFFECT_TOXIC))
         {
@@ -2900,8 +2824,7 @@ bool move_effect_setter(bool primary, bool certain)
                 {
                     record_usage_of_ability(bank, battle_participants[bank].ability_id);
                     effect = 1;
-                    battlescript_push();
-                    battlescripts_curr_instruction = (void*)(0x082DB5DD);
+                    bs_push_current((void*)(0x082DB5DD));
                 }
                 break;
             }
@@ -2914,15 +2837,13 @@ bool move_effect_setter(bool primary, bool certain)
             case 0: //can confuse
                 effect = 1;
                 battle_participants[bank].status2.confusion = 2 + __umodsi3(rng(), 4);
-                battlescript_push();
-                battlescripts_curr_instruction = (void*)(0x082DB3E6); //poke became confused
+                bs_push_current((void*)(0x082DB3E6)); //poke became confused
                 break;
             case 4: //ability doesnt allow it
                 if (certain || primary)
                 {
                     effect = 1;
-                    battlescript_push();
-                    battlescripts_curr_instruction = CANT_CONFUSE_DUETOABILITY_PRINT;
+                    bs_push_current(CANT_CONFUSE_DUETOABILITY_PRINT);
                 }
                 break;
             }
@@ -2936,8 +2857,7 @@ bool move_effect_setter(bool primary, bool certain)
                 {
                     effect = 1;
                     record_usage_of_ability(bank, ABILITY_INNER_FOCUS);
-                    battlescript_push();
-                    battlescripts_curr_instruction = (void*)(0x82DB603);
+                    bs_push_current((void*)(0x82DB603));
                 }
             }
             else
@@ -2964,8 +2884,7 @@ void atk15_setmoveeffectchance(void)
             {
                 battlescripts_curr_instruction++;
                 new_battlestruct->side_affecting[bank_target&1].swamp_spd_reduce=5;
-                battlescript_push();
-                battlescripts_curr_instruction = &swamp_bs;
+                bs_push_current(&swamp_bs);
                 effect_of_pledge=true;
             }
             break;
@@ -2974,8 +2893,7 @@ void atk15_setmoveeffectchance(void)
             {
                 battlescripts_curr_instruction++;
                 new_battlestruct->side_affecting[bank_target&1].sea_of_fire=5;
-                battlescript_push();
-                battlescripts_curr_instruction = &fire_sea_bs;
+                bs_push_current(&fire_sea_bs);
                 effect_of_pledge=true;
             }
             break;
@@ -2984,8 +2902,7 @@ void atk15_setmoveeffectchance(void)
             {
                 battlescripts_curr_instruction++;
                 new_battlestruct->side_affecting[bank_attacker&1].rainbow=5;
-                battlescript_push();
-                battlescripts_curr_instruction = &rainbow_bs;
+                bs_push_current(&rainbow_bs);
                 effect_of_pledge=true;
             }
             break;
@@ -3067,12 +2984,11 @@ void atk5C_hitanimation(void)
         active_bank = bank;
         bb29_hit_animation(0);
         mark_buffer_bank_for_execution(bank);
-        if (battle_participants[bank].ability_id == ABILITY_ILLUSION && new_battlestruct->bank_affecting[bank].illusion_on && damage_loc && DAMAGING_MOVE(current_move) && TARGET_TURN_DAMAGED)
+        if (battle_participants[bank].ability_id == ABILITY_ILLUSION && new_battlestruct->bank_affecting[bank].illusion_on && damage_loc > 0 && DAMAGING_MOVE(current_move) && bank != bank_attacker && bank == bank_target)
         {
             new_battlestruct->bank_affecting[bank].illusion_on = 0;
             new_battlestruct->bank_affecting[bank].illusion_hit = 1;
-            battlescript_push();
-            battlescripts_curr_instruction = BS_ILLUSION_OFF;
+            bs_push_current(BS_ILLUSION_OFF);
             battle_participants[bank].status2.transformed = 0;
         }
     }
@@ -3095,8 +3011,7 @@ void atk02_attackstring(void)
                 battle_text_buff1[1] = 0x3;
                 battle_text_buff1[2] = type;
                 battle_text_buff1[3] = 0xFF;
-                battlescript_push();
-                battlescripts_curr_instruction = BS_PROTEAN;
+                bs_push_current(BS_PROTEAN);
             }
         }
         else
@@ -3106,12 +3021,11 @@ void atk02_attackstring(void)
             {
                 if(new_battlestruct->side_affecting[bank_attacker&1].pledge_effect)
                 {
-                    battlescript_push();
-                    battlescripts_curr_instruction = &combined_move_bs;
+                    bs_push_current(&combined_move_bs);
                 }
                 else
                 {
-                    b_std_message(4, bank_attacker);
+                    prep_string(4, bank_attacker);
                     battle_communication_struct.is_message_displayed = 0;
                 }
                 hitmarker |= HITMARKER_ATTACKSTRING_PRINTED;
@@ -3188,7 +3102,7 @@ void atk78_explodeifnotdamp(void)
     battlescripts_curr_instruction++;
 }
 
-void atkD2_itemswap()
+void atkD2_itemswap(void)
 {
     if (!battle_flags.flag_x4000000 && !WILD_ATTACKER)
     {
@@ -3226,7 +3140,7 @@ void atkD2_itemswap()
             if (!ITEM_SWAP && battle_flags.trainer)//set items to return later
             {
                 u8 bank = bank_attacker;
-                if (is_bank_from_opponent_side(bank_attacker))
+                if (get_bank_side(bank_attacker))
                     bank = bank_target;
                 new_battlestruct->various.returns_swap |= bits_table[battle_team_id_by_side[bank]];
             }
@@ -3235,7 +3149,7 @@ void atkD2_itemswap()
     battlescripts_curr_instruction = (void*) (read_word(battlescripts_curr_instruction + 1));
 }
 
-void give_one_ev(struct pokemon* poke, u8 attr)
+static void give_one_ev(struct pokemon* poke, u8 attr)
 {
     u16 stat = get_attributes(poke, attr, 0);
     if (stat < 252)
@@ -3337,7 +3251,7 @@ void atk23_exp_evs_lvlup(void)
     switch (*tracker)
     {
     case 0: //check if poke should get exp
-        if (!is_bank_from_opponent_side(bank) || BATTLE_FRONTIER_BATTLE || battle_flags.safari || battle_flags.flagx800 || battle_flags.link || battle_flags.flag_x2000000 || battle_flags.flag_x4000000)
+        if (!get_bank_side(bank) || BATTLE_FRONTIER_BATTLE || battle_flags.safari || battle_flags.flagx800 || battle_flags.link || battle_flags.flag_x2000000 || battle_flags.flag_x4000000)
         {
             *tracker = 6; //set last case
             break;
@@ -3354,13 +3268,13 @@ void atk23_exp_evs_lvlup(void)
                 struct pokemon* poke = &party_player[i];
                 if (is_poke_usable(poke))
                 {
-                    if (sent_in & bits_table[i])
+                    if (sent_in & BIT_GET(i))
                         via_sentin++;
                     if (GETS_VIA_EXPSHARE(get_item_battle_function(get_attributes(poke, ATTR_HELD_ITEM, 0))))
                         via_expshare++;
                 }
                 else
-                    sent_in &= ~(bits_table[i]); //no exp for that poke
+                    sent_in &= ~(BIT_GET(i)); //no exp for that poke
             }
             struct battle_participant* oppponent = &battle_participants[bank];
             u16 exp = (*basestat_table)[oppponent->species].exp_yield * oppponent->level / 7;
@@ -3452,7 +3366,7 @@ void atk23_exp_evs_lvlup(void)
                     battle_text_buff3[5] = exp_for_poke >> 8;
                     battle_text_buff3[6] = 0xFF;
 
-                    b_std_message(0xD, battle_stuff_ptr->expgetter_bank);
+                    prep_string(0xD, battle_stuff_ptr->expgetter_bank);
 
                     (*tracker)++;
                 }
@@ -3504,8 +3418,7 @@ void atk23_exp_evs_lvlup(void)
 
                 happiness_algorithm(poke, 0); //add happiness because of level up
 
-                battlescript_push();
-                battlescripts_curr_instruction = (void*)(0x082DABBD); //push level up battlescript
+                bs_push_current((void*)(0x082DABBD)); //level up battlescript
 
                 exp_for_poke = read_hword(&bufferB[2]); //exp for another lvl
 
@@ -3661,4 +3574,279 @@ void atkE7_check_castform_cherrim(void)
     battlescripts_curr_instruction++;
     if (exec_castform_script(battle_scripting.active_bank, 1)) {return;};
     if (exec_cherrim_script(battle_scripting.active_bank, 1)) {return;};
+}
+
+void atk41_call(void)
+{
+    bs_push(battlescripts_curr_instruction + 5, (void*) read_word(battlescripts_curr_instruction + 1));
+}
+
+//extern BS commands in other files
+void atk01_accuracy_calc(void);
+void atk04_critcalc(void);
+void atk05_dmg_calc(void);
+void atk07_final_dmg_calc(void);
+void atk83_callasm(void);
+void atkEF_ballthrow(void);
+void atkF0_copy_caught_poke(void);
+void atkF1_setpoke_as_caught(void);
+void atkF2_display_dex_info(void);
+void atkF3_nickname_caught_poke(void);
+
+const command bs_commands[] = {
+    atk00_move_canceller,	//	0
+    atk01_accuracy_calc,	//	1
+    atk02_attackstring,	//	2
+    (void*) 0x8046A3D,	//	3
+    atk04_critcalc,	//	4
+    atk05_dmg_calc,	//	5
+    (void*) 0x8047039,	//	6
+    atk07_final_dmg_calc,	//	7
+    (void*) 0x8047AA5,	//	8
+    atk09_attackanimation,	//	9
+    (void*) 0x8047DC9,	//	 0xA
+    (void*) 0x8047DE9,	//	 0xB
+    atk0C_datahpupdate,	//	 0xC
+    (void*) 0x80482BD,	//	 0xD
+    (void*) 0x8048311,	//	 0xE
+    atk0F_resultmessage,	//	 0xF
+    (void*) 0x8048591,	//	 0x10
+    (void*) 0x80485D1,	//	 0x11
+    (void*) 0x8048615,	//	 0x12
+    atk13_printfromtable,	//	 0x13
+    (void*) 0x80486C5,	//	 0x14
+    atk15_setmoveeffectchance,	//	 0x15
+    atk16_setmoveeffectprimary,	//	 0x16
+    atk17_setmoveeffectsecondary,	//	 0x17
+    (void*) 0x8049AE1,	//	 0x18
+    (void*) 0x8049B5D,	//	 0x19
+    (void*) 0x8049E41,	//	 0x1A
+    (void*) 0x8049E7D,	//	 0x1B
+    (void*) 0x8049F05,	//	 0x1C
+    (void*) 0x8049F7D,	//	 0x1D
+    (void*) 0x8049FF5,	//	 0x1E
+    (void*) 0x804A0DD,	//	 0x1F
+    (void*) 0x804A155,	//	 0x20
+    (void*) 0x804A24D,	//	 0x21
+    (void*) 0x804A2D1,	//	 0x22
+    atk23_exp_evs_lvlup,	//	 0x23
+    (void*) 0x804ACD1,	//	 0x24
+    (void*) 0x804AF71,	//	 0x25
+    (void*) 0x804AF89,	//	 0x26
+    (void*) 0x804AFA1,	//	 0x27
+    (void*) 0x804AFE9,	//	 0x28
+    (void*) 0x804B009,	//	 0x29
+    (void*) 0x804B0A9,	//	 0x2A
+    (void*) 0x804B151,	//	 0x2B
+    (void*) 0x804B205,	//	 0x2C
+    (void*) 0x804B28D,	//	 0x2D
+    (void*) 0x804B311,	//	 0x2E
+    (void*) 0x804B339,	//	 0x2F
+    (void*) 0x804B365,	//	 0x30
+    (void*) 0x804B391,	//	 0x31
+    (void*) 0x804B3E5,	//	 0x32
+    (void*) 0x804B451,	//	 0x33
+    (void*) 0x804B47D,	//	 0x34
+    (void*) 0x804B4B5,	//	 0x35
+    (void*) 0x804B4F9,	//	 0x36
+    (void*) 0x804B525,	//	 0x37
+    (void*) 0x804B55D,	//	 0x38
+    (void*) 0x804B5A1,	//	 0x39
+    (void*) 0x804B5E1,	//	 0x3A
+    (void*) 0x804B601,	//	 0x3B
+    (void*) 0x804B659,	//	 0x3C
+    (void*) 0x804B665,	//	 0x3D
+    (void*) 0x804B6A5,	//	 0x3E
+    (void*) 0x804B6BD,	//	 0x3F
+    (void*) 0x804643D,	//	 0x40
+    atk41_call,	//	 0x41
+    atk42_jump_if_type,	//	 0x42
+    (void*) 0x804B785,	//	 0x43
+    (void*) 0x804B7D1,	//	 0x44
+    atk45_playanimation,	//	 0x45
+    (void*) 0x804B8B1,	//	 0x46
+    atk47_set_statchange_values,	//	 0x47
+    (void*) 0x804B9D9,	//	 0x48
+    atk49_move_end_turn,	//	 0x49
+    (void*) 0x804C5F5,	//	 0x4A
+    (void*) 0x804C845,	//	 0x4B
+    (void*) 0x804C895,	//	 0x4C
+    (void*) 0x804C905,	//	 0x4D
+    (void*) 0x804CAE9,	//	 0x4E
+    (void*) 0x804CBB1,	//	 0x4F
+    (void*) 0x804CF89,	//	 0x50
+    (void*) 0x804D821,	//	 0x51
+    (void*) 0x804DAAD,	//	 0x52
+    (void*) 0x804DDA9,	//	 0x53
+    (void*) 0x804DDD9,	//	 0x54
+    (void*) 0x804DE15,	//	 0x55
+    atk56_prepare_fainting_cry,	//	 0x56
+    (void*) 0x804DE81,	//	 0x57
+    (void*) 0x804DEB9,	//	 0x58
+    (void*) 0x804DEED,	//	 0x59
+    (void*) 0x804E039,	//	 0x5A
+    (void*) 0x804E3C9,	//	 0x5B
+    atk5C_hitanimation,	//	 0x5C
+    atk5D_moneyreward,	//	 0x5D
+    (void*) 0x804E765,	//	 0x5E
+    (void*) 0x804E819,	//	 0x5F
+    (void*) 0x804E869,	//	 0x60
+    (void*) 0x804E899,	//	 0x61
+    (void*) 0x804E961,	//	 0x62
+    (void*) 0x804E991,	//	 0x63
+    (void*) 0x804E9F5,	//	 0x64
+    (void*) 0x804EA85,	//	 0x65
+    (void*) 0x804EB2D,	//	 0x66
+    (void*) 0x804EBC1,	//	 0x67
+    (void*) 0x804ECA5,	//	 0x68
+    (void*) 0x804ECDD,	//	 0x69
+    atk6A_remove_item,	//	 0x6A
+    (void*) 0x804EEC9,	//	 0x6B
+    (void*) 0x804EF05,	//	 0x6C
+    (void*) 0x804F4D5,	//	 0x6D
+    (void*) 0x804F4ED,	//	 0x6E
+    (void*) 0x804F50D,	//	 0x6F
+    atk70_record_ability_of_bank,	//	 0x70
+    (void*) 0x804F59D,	//	 0x71
+    (void*) 0x804F5B5,	//	 0x72
+    (void*) 0x804F5F9,	//	 0x73
+    (void*) 0x804F6A5,	//	 0x74
+    (void*) 0x804F755,	//	 0x75
+    (void*) 0x804F7AD,	//	 0x76
+    atk77_set_protect_stuff,	//	 0x77
+    atk78_explodeifnotdamp,	//	 0x78
+    (void*) 0x804FFE5,	//	 0x79
+    (void*) 0x8050045,	//	 0x7A
+    (void*) 0x80500E9,	//	 0x7B
+    (void*) 0x8050165,	//	 0x7C
+    atk7D_set_rain,	//	 0x7D
+    atk7E_set_reflect,	//	 0x7E
+    atk7F_set_leech_seed,	//	 0x7F
+    (void*) 0x80504A9,	//	 0x80
+    (void*) 0x8050529,	//	 0x81
+    (void*) 0x80505F9,	//	 0x82
+    atk83_callasm,	//	 0x83
+    atk84_jumpifcannotsleep,	//	 0x84
+    (void*) 0x8050769,	//	 0x85
+    (void*) 0x80507E5,	//	 0x86
+    (void*) 0x8050905,	//	 0x87
+    atk88_drain_damage,	//	 0x88
+    atk89_changestats,	//	 0x89
+    (void*) 0x8050EED,	//	 0x8A
+    (void*) 0x8050F41,	//	 0x8B
+    (void*) 0x8050FB1,	//	 0x8C
+    atk8D_multihit_move_loop_counter,	//	 0x8D
+    (void*) 0x805103D,	//	 0x8E
+    (void*) 0x805112D,	//	 0x8F
+    (void*) 0x8051425,	//	 0x90
+    (void*) 0x80515C9,	//	 0x91
+    atk92_set_lightscreen,	//	 0x92
+    atk93_ko_move,	//	 0x93
+    (void*) 0x8051A85,	//	 0x94
+    atk95_set_sandstorm,	//	 0x95
+    atk96_weather_damage,	//	 0x96
+    (void*) 0x8051C91,	//	 0x97
+    (void*) 0x8051E49,	//	 0x98
+    (void*) 0x8051F59,	//	 0x99
+    (void*) 0x8052001,	//	 0x9A
+    (void*) 0x805205D,	//	 0x9B
+    (void*) 0x80521FD,	//	 0x9C
+    (void*) 0x8052301,	//	 0x9D
+    atk9E_metronome_chooser,	//	 0x9E
+    (void*) 0x8052585,	//	 0x9F
+    (void*) 0x80525B5,	//	 0xA0
+    (void*) 0x8052609,	//	 0xA1
+    (void*) 0x8052701,	//	 0xA2
+    atkA3_disable_move,	//	 0xA3
+    atkA4_encore_move,	//	 0xA4
+    (void*) 0x8052A71,	//	 0xA5
+    (void*) 0x8052B35,	//	 0xA6
+    atkA7_KO_handler,	//	 0xA7
+    (void*) 0x8052D8D,	//	 0xA8
+    atkA9_sleeptalkmovechoose,	//	 0xA9
+    (void*) 0x8053151,	//	 0xAA
+    (void*) 0x80531E1,	//	 0xAB
+    (void*) 0x80531F9,	//	 0xAC
+    (void*) 0x8053261,	//	 0xAD
+    (void*) 0x8053439,	//	 0xAE
+    (void*) 0x805371D,	//	 0xAF
+    (void*) 0x80537A1,	//	 0xB0
+    (void*) 0x805382D,	//	 0xB1
+    (void*) 0x805385D,	//	 0xB2
+    (void*) 0x8053915,	//	 0xB3
+    (void*) 0x8053A91,	//	 0xB4
+    atkB5_furycutter_calc,	//	 0xB5
+    (void*) 0x8053BAD,	//	 0xB6
+    atkB7_present_calc,	//	 0xB7
+    (void*) 0x8053CFD,	//	 0xB8
+    (void*) 0x8053DA5,	//	 0xB9
+    (void*) 0x8053EC9,	//	 0xBA
+    atkBB_set_sunny,	//	 0xBB
+    (void*) 0x80540B5,	//	 0xBC
+    (void*) 0x8054135,	//	 0xBD
+    atkBE_rapidspin_away,	//	 0xBE
+    (void*) 0x80542C9,	//	 0xBF
+    (void*) 0x80542F9,	//	 0xC0
+    (void*) 0x8054401,	//	 0xC1
+    (void*) 0x8054525,	//	 0xC2
+    (void*) 0x8054599,	//	 0xC3
+    (void*) 0x80546E5,	//	 0xC4
+    atkC5_hide_pre_attack,	//	 0xC5
+    atkC6_unhide_post_attack,	//	 0xC6
+    (void*) 0x8054A09,	//	 0xC7
+    atkC8_set_hail,	//	 0xC8
+    (void*) 0x8054AA1,	//	 0xC9
+    (void*) 0x8054B3D,	//	 0xCA
+    (void*) 0x8054B89,	//	 0xCB
+    atkCC_nature_power,	//	 0xCC
+    (void*) 0x8054C61,	//	 0xCD
+    (void*) 0x8054CE5,	//	 0xCE
+    (void*) 0x8054D3D,	//	 0xCF
+    atkD0_set_taunt,	//	 0xD0
+    (void*) 0x8054E0D,	//	 0xD1
+    atkD2_itemswap,	//	 0xD2
+    (void*) 0x8055149,	//	 0xD3
+    atkD4_wish_effect,	//	 0xD4
+    (void*) 0x8055295,	//	 0xD5
+    (void*) 0x80552ED,	//	 0xD6
+    (void*) 0x805534D,	//	 0xD7
+    (void*) 0x80553BD,	//	 0xD8
+    (void*) 0x8055429,	//	 0xD9
+    (void*) 0x805548D,	//	 0xDA
+    (void*) 0x8055525,	//	 0xDB
+    (void*) 0x805562D,	//	 0xDC
+    (void*) 0x8055685,	//	 0xDD
+    atkDE_assistmovechoose,	//	 0xDE
+    (void*) 0x805589D,	//	 0xDF
+    (void*) 0x8055921,	//	 0xE0
+    atkE1_intimidate_loop,	//	 0xE1
+    atkE2_switchout_abilities,	//	 0xE2
+    (void*) 0x8055AF5,	//	 0xE3
+    atkE4_secretpowereffect,	//	 0xE4
+    (void*) 0x8055C01,	//	 0xE5
+    (void*) 0x8055DFD,	//	 0xE6
+    atkE7_check_castform_cherrim,	//	 0xE7
+    atkE8_settypebasedhalvers,	//	 0xE8
+    (void*) 0x8055F5D,	//	 0xE9
+    (void*) 0x8056015,	//	 0xEA
+    (void*) 0x80560BD,	//	 0xEB
+    (void*) 0x805616D,	//	 0xEC
+    (void*) 0x8056231,	//	 0xED
+    (void*) 0x8056285,	//	 0xEE
+    atkEF_ballthrow,	//	 0xEF
+    atkF0_copy_caught_poke,	//	 0xF0
+    atkF1_setpoke_as_caught,	//	 0xF1
+    atkF2_display_dex_info,	//	 0xF2
+    atkF3_nickname_caught_poke,	//	 0xF3
+    (void*) 0x8056E79,	//	 0xF4
+    (void*) 0x8056EA9,	//	 0xF5
+    (void*) 0x8056ED1,	//	 0xF6
+    (void*) 0x8056EDD,	//	 0xF7
+    (void*) 0x8056EF9,	//	 0xF8
+};
+
+void execute_bs_command(void)
+{
+    if (battle_execution_buffer) {return;}
+    bs_commands[read_byte(battlescripts_curr_instruction)]();
 }

@@ -19,10 +19,15 @@ u8 check_ability(u8 bank, u8 ability);
 u16 get_speed(u8 bank);
 u8 has_ability_effect(u8 bank, u8 mold_breaker);
 u8 get_item_effect(u8 bank, u8 check_negating_effects);
+u8 get_bank_side(u8 bank);
+void bs_push_current(void* now);
+void bs_execute(void* bs);
+void call_bc_move_exec(void* bs_ptr);
+void reset_multiple_turn_effects(u8 bank);
 
 bool is_bank_present(u8 bank)
 {
-    if((absent_bank_flags & bits_table[bank]) || battle_participants[bank].current_hp == 0 || bank >= no_of_all_banks)
+    if((absent_bank_flags & BIT_GET(bank)) || battle_participants[bank].current_hp == 0 || bank >= no_of_all_banks)
         return 0;
     return 1;
 }
@@ -32,7 +37,7 @@ u8 get_target_of_move(u16 move, u8 target_given, u8 adjust)
     u8 target_case;
     u8 old_target = battle_stuff_ptr->move_target[bank_attacker];
     u8 result_target = old_target;
-    u8 attacker_side = is_bank_from_opponent_side(bank_attacker);
+    u8 attacker_side = get_bank_side(bank_attacker);
     u8 target_side = attacker_side ^ 1;
     if (target_given)
         target_case = target_given;
@@ -313,7 +318,7 @@ u8 check_mega_evo(u8 bank)
             ai_mega_mode = 2;
         }
     }
-    u8 banks_side = is_bank_from_opponent_side(bank);
+    u8 banks_side = get_bank_side(bank);
     u8 bank_mega_mode=0;
     if(mega_species)
     {
@@ -344,12 +349,12 @@ u8 check_mega_evo(u8 bank)
                 objects[new_battlestruct->mega_related.trigger_id].private[ANIM_STATE]=DISABLE;
             }
         }
-        else if(!(new_battlestruct->mega_related.evo_happened_pbs & (bits_table[bank] | bits_table[bank ^ 2])))
+        else if(!(new_battlestruct->mega_related.evo_happened_pbs & (BIT_GET(bank) | BIT_GET(bank ^ 2))))
         {
             bank_mega_mode=ai_mega_mode;
             if(bank_mega_mode)
             {
-                new_battlestruct->mega_related.evo_happened_pbs |= bits_table[bank];
+                new_battlestruct->mega_related.evo_happened_pbs |= BIT_GET(bank);
             }
         }
     }
@@ -359,12 +364,12 @@ u8 check_mega_evo(u8 bank)
         if (banks_side == 1)
         {
             poke_address = &party_opponent[battle_team_id_by_side[bank]];
-            new_battlestruct->mega_related.ai_party_mega_check|=bits_table[battle_team_id_by_side[bank]];
+            new_battlestruct->mega_related.ai_party_mega_check|=BIT_GET(battle_team_id_by_side[bank]);
         }
         else
         {
             poke_address = &party_player[battle_team_id_by_side[bank]];
-            new_battlestruct->mega_related.party_mega_check|=bits_table[battle_team_id_by_side[bank]];
+            new_battlestruct->mega_related.party_mega_check|=BIT_GET(battle_team_id_by_side[bank]);
         }
         set_attributes(poke_address, ATTR_SPECIES, &mega_species);
         calculate_stats_pokekmon(poke_address);
@@ -395,7 +400,7 @@ u8 check_mega_evo(u8 bank)
 
         if(bank_mega_mode==2)
         {
-            execute_battle_script(BS_FERVENT_EVO);
+            bs_execute(BS_FERVENT_EVO);
         }
         else
         {
@@ -407,7 +412,7 @@ u8 check_mega_evo(u8 bank)
             battle_text_buff2[2] = MEGA_RING;
             battle_text_buff2[3] = MEGA_RING >> 8;
             battle_text_buff2[4] = 0xFF;
-            execute_battle_script(BS_MEGA_EVO);
+            bs_execute(BS_MEGA_EVO);
         }
 
         new_battlestruct->various.active_bank = bank;
@@ -424,14 +429,14 @@ bool check_focus(u8 bank)
     {
         is_bank_focusing = true;
         status3[bank].focus_punch_charge = 0;
-        execute_battle_script((void *)0x82DB1FF);
+        bs_execute((void *)0x82DB1FF);
     }
     return is_bank_focusing;
 }
 
 u16 get_move_from_pledge(u8 bank);
 
-void bs_start_attack()
+void bs_start_attack(void)
 {
     u8 mode=0;  //mode 0 - get type with adjusting chosen target
                 //mode 1 - get type with calculating target from scratch
@@ -449,7 +454,7 @@ void bs_start_attack()
     bank_attacker=turn_order[current_move_turn];
     if (new_battlestruct->bank_affecting[bank_attacker].sky_drop_target && is_bank_present(bank_attacker))
     {
-        reset_several_turns_stuff(bank_attacker);
+        reset_multiple_turn_effects(bank_attacker);
         battle_state_mode = 0xB;
     }
     else if(!(bits_table[bank_attacker]&battle_stuff_ptr->absent_bank_flags_prev_turn))
@@ -532,7 +537,7 @@ void bs_start_attack()
             }
             bank_target=get_target_of_move(current_move,0,0);
         }
-        if(!is_bank_from_opponent_side(bank_attacker))
+        if(!get_bank_side(bank_attacker))
         {
             battle_trace.user_team_move = current_move;
         }
@@ -576,12 +581,10 @@ void bs_start_attack()
             }
             if (change)
             {
-                battle_scripting.active_bank = bank_attacker;
-                active_bank = bank_attacker;
+                battle_scripting.active_bank = active_bank = bank_attacker;
                 bb2_setattributes_in_battle(0, REQUEST_SPECIES_BATTLE, 0, 2, species);
                 mark_buffer_bank_for_execution(active_bank);
-                battlescript_push();
-                battlescripts_curr_instruction = &aegislash_change_bs;
+                bs_push_current(&aegislash_change_bs);
             }
         }
     }
@@ -591,7 +594,7 @@ void bs_start_attack()
 
 s8 get_bracket_alteration_factor(u8 bank, u8 item_effect);
 
-void set_focus_charge()
+void set_focus_charge(void)
 {
     for(u8 i=0; i<4; i++)
     {

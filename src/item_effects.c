@@ -6,10 +6,10 @@ u8 cant_become_burned(u8 bank, u8 self_inflicted);
 u8 cant_become_freezed(u8 bank, u8 self_inflicted);
 u8 cant_become_paralyzed(u8 bank, u8 self_inflicted);
 u8 cant_poison(u8 atk_bank, u8 def_bank, u8 self_inflicted);
-u8 check_ability(u8 bank, u8 ability);
+bool check_ability(u8 bank, u8 ability);
 u8 get_item_effect(u8 bank, bool check_negating_effects);
-u8 has_ability_effect(u8 bank, u8 mold_breaker);
-u8 is_bank_present(u8 bank);
+bool has_ability_effect(u8 bank, u8 mold_breaker);
+bool is_bank_present(u8 bank);
 bool percent_chance(u8 percent);
 bool does_move_make_contact(u16 move, u8 atk_bank);
 bool is_of_type(u8 bank, u8 type);
@@ -19,6 +19,10 @@ void move_to_buff1(u16 move);
 struct pokemon* get_bank_poke_ptr(u8 bank);
 bool can_poke_be_switched_into(u8 index, u8 bank);
 u8 check_field_for_ability(enum poke_abilities ability, u8 side_to_ignore, u8 mold);
+u8 get_bank_side(u8 bank);
+void bs_push(void* to_return, void* now);
+void bs_push_current(void* now);
+void call_bc_move_exec(void* bs_ptr);
 
 enum COMMON_ITEM_EFFECT
 {
@@ -36,7 +40,7 @@ u8 get_item_effect(u8 bank, bool check_negating_effects)
     {
         if (check_ability(bank, ABILITY_KLUTZ) || new_battlestruct->field_affecting.magic_room || new_battlestruct->bank_affecting[bank].embargo)
             return ITEM_EFFECT_NOEFFECT;
-        if (get_item_pocket_id(held_item)==4 && check_field_for_ability(ABILITY_UNNERVE, is_bank_from_opponent_side(bank), 0))
+        if (get_item_pocket_id(held_item)==4 && check_field_for_ability(ABILITY_UNNERVE, get_bank_side(bank), 0))
             return ITEM_EFFECT_NOEFFECT;
     }
     if (held_item == ITEM_ENIGMABERRY)
@@ -65,8 +69,8 @@ bool hp_condition(u8 bank, u8 percent) //1 = 50 %, 2 = 25 %
 void setup_berry_consume_buffers(u8 bank)
 {
     new_battlestruct->bank_affecting[bank].eaten_berry = 1;
-    u8 bit = bits_table[battle_team_id_by_side[bank]];
-    if(!is_bank_from_opponent_side(bank))
+    u8 bit = BIT_GET(battle_team_id_by_side[bank]);
+    if(!get_bank_side(bank))
         new_battlestruct->party_bit.eaten_berry_player |= bit;
     else
         new_battlestruct->party_bit.eaten_berry_opponent |= bit;
@@ -77,10 +81,7 @@ void call_based_on_mode(enum call_mode calling_mode, void* BS_ptr)
     if (calling_mode == BATTLE_TURN)
         call_bc_move_exec(BS_ptr);
     else if (calling_mode == MOVE_TURN)
-    {
-        battlescript_push();
-        battlescripts_curr_instruction = BS_ptr;
-    }
+        bs_push_current(BS_ptr);
 }
 
 void call_based_on_mode2(enum call_mode calling_mode, void* BS_END2, void* BS_RET)
@@ -88,10 +89,7 @@ void call_based_on_mode2(enum call_mode calling_mode, void* BS_END2, void* BS_RE
     if (calling_mode == BATTLE_TURN)
         call_bc_move_exec(BS_END2);
     else if (calling_mode == MOVE_TURN)
-    {
-        battlescript_push();
-        battlescripts_curr_instruction = BS_RET;
-    }
+        bs_push_current(BS_RET);
 }
 
 bool handle_leppa(u8 bank, u8 PP_to_restore, enum call_mode calling_mode, void* BS_END2, void* BS_RET)
@@ -180,12 +178,12 @@ bool stat_raise_berry(u8 bank, bool checkHP, u8 item_effect, enum call_mode call
             for (u8 i = 0; i < 5; i++)
             {
                 if (can_change_stat(bank, 1, 0x21 + i))
-                    doable |= bits_table[i];
+                    doable |= BIT_GET(i);
             }
             while (doable)
             {
                 u8 rand = __umodsi3(rng(), 5);
-                if (doable & bits_table[rand])
+                if (doable & BIT_GET(rand))
                 {
                     battle_scripting.stat_changer = 0x21 + rand;
                     effect = 1;
@@ -215,8 +213,7 @@ bool item_try_stat_raise(u8 statchanger)
     battle_scripting.stat_changer = statchanger;
     if (is_bank_present(bank) && MOVE_WORKED && TARGET_TURN_DAMAGED && change_stats(bank, stat_get_bits_arg(1, 0, 0), battlescripts_curr_instruction) == STAT_CHANGED)
     {
-        battlescript_push();
-        battlescripts_curr_instruction = BS_ITEMSTATRAISE;
+        bs_push_current(BS_ITEMSTATRAISE);
         return 1;
     }
     return 0;
@@ -282,14 +279,14 @@ u8 get_random_to_switch(u8 bank)
     for (u8 i = 0; i < 6; i++)
     {
         if (can_poke_be_switched_into(i, bank))
-            to_switch |= bits_table[i];
+            to_switch |= BIT_GET(i);
     }
     if (!to_switch) {return 6;} //cant find anyone available to switch
     u8 to_ret;
     do
     {
         to_ret = __umodsi3(rng(), 6);
-    } while (!(bits_table[to_ret] & to_switch));
+    } while (!(BIT_GET(to_ret) & to_switch));
     return to_ret;
 }
 
@@ -302,8 +299,7 @@ u8 item_force_switching(u8 bank, void* BS_ptr)
         {
             new_battlestruct->various.var1 = ID_toswitch;
             new_battlestruct->various.active_bank = bank;
-            battlescript_push();
-            battlescripts_curr_instruction = BS_ptr;
+            bs_push_current(BS_ptr);
             return NO_COMMON_ITEM_EFFECT;
         }
     }
@@ -324,7 +320,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
         case ITEM_EFFECT_AMULETCOIN:
             {
                 u8* money_multiplier = &battle_stuff_ptr->money_multiplier;
-                if (!is_bank_from_opponent_side(bank) && *money_multiplier != 2)
+                if (!get_bank_side(bank) && *money_multiplier != 2)
                 {
                     *money_multiplier = 2;
                     effect = NO_COMMON_ITEM_EFFECT;
@@ -458,8 +454,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 && (can_change_stat(bank, 1, 0x21) || can_change_stat(bank, 1, 0x24)))
             {
                 effect = NO_COMMON_ITEM_EFFECT;
-                battlescript_push();
-                battlescripts_curr_instruction = BS_WEAKNESSPOLICY;
+                bs_push_current(BS_WEAKNESSPOLICY);
             }
             break;
         case ITEM_EFFECT_ROCKYHELMET:
@@ -468,8 +463,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             {
                 damage_loc = ATLEAST_ONE(battle_participants[bank_attacker].max_hp / 6);
                 effect = NO_COMMON_ITEM_EFFECT;
-                battlescript_push();
-                battlescripts_curr_instruction = BS_ROCKYHELMET;
+                bs_push_current(BS_ROCKYHELMET);
                 record_usage_of_item(bank, ITEM_EFFECT_ROCKYHELMET);
             }
             break;
@@ -487,8 +481,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 active_bank = bank_attacker;
                 bb2_setattributes_in_battle(0, REQUEST_HELDITEM_BATTLE, 0, 2, attacker_item);
                 mark_buffer_bank_for_execution(active_bank);
-                battlescript_push();
-                battlescripts_curr_instruction = &stickybarbswap;
+                bs_push_current(&stickybarbswap);
                 bank = bank_attacker;
             }
             break;
@@ -496,19 +489,17 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
             if (MOVE_WORKED && TARGET_TURN_DAMAGED)
             {
                 effect = NO_COMMON_ITEM_EFFECT;
-                battlescript_push();
-                battlescripts_curr_instruction = BS_AIRBALLOON_POPS;
+                bs_push_current(BS_AIRBALLOON_POPS);
             }
             break;
         case ITEM_EFFECT_DESTINYKNOT:
-            if ((battle_participants[bank].status2.in_love & bits_table[bank_attacker]) && battle_participants[bank].current_hp && !check_ability(bank_attacker, ABILITY_OBLIVIOUS))
+            if ((battle_participants[bank].status2.in_love & BIT_GET(bank_attacker)) && battle_participants[bank].current_hp && !check_ability(bank_attacker, ABILITY_OBLIVIOUS))
             {
-                if (!(battle_participants[bank_attacker].status2.in_love & bits_table[bank]))
+                if (!(battle_participants[bank_attacker].status2.in_love & BIT_GET(bank)))
                 {
-                    battle_participants[bank_attacker].status2.in_love |= bits_table[bank];
+                    battle_participants[bank_attacker].status2.in_love |= BIT_GET(bank);
                     effect = NO_COMMON_ITEM_EFFECT;
-                    battlescript_push();
-                    battlescripts_curr_instruction = BS_DESTINYKNOT;
+                    bs_push_current(BS_DESTINYKNOT);
                 }
             }
             break;
@@ -567,8 +558,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                 {
                     battle_participants[bank].status2.confusion = 0;
                     effect = NO_COMMON_ITEM_EFFECT;
-                    battlescript_push();
-                    battlescripts_curr_instruction = (void*) 0x82DB784;
+                    bs_push_current((void*) 0x82DB784);
                 }
                 break;
             case ITEM_EFFECT_LUMBERRY:
@@ -578,8 +568,7 @@ u8 item_battle_effects(u8 switchid, u8 bank, u8 move_turn)
                     battle_participants[bank].status2.confusion = 0;
                     battle_participants[bank].status.int_status = 0;
                     effect = ALTER_NON_VOLATILE_STATUS;
-                    battlescript_push();
-                    battlescripts_curr_instruction = (void*) 0x82DB79A;
+                    bs_push_current((void*) 0x82DB79A);
                 }
                 break;
             case ITEM_EFFECT_LEPPABERRY:
@@ -711,8 +700,7 @@ u8 stat_raise_berry_bug_bite(u8 bank, u8 item_effect)
 {
     if (stat_raise_berry(bank, 0, item_effect, 0xFF))
     {
-        battlescript_push();
-        battlescripts_curr_instruction = BS_BUGBITE_STATRAISE;
+        bs_push_current(BS_BUGBITE_STATRAISE);
         return 2;
     }
     return 0;
@@ -756,8 +744,7 @@ void bugbite_get_berry_effect(void)
         {
             battle_participants[bank].status2.confusion = 0;
             effect = NO_COMMON_ITEM_EFFECT;
-            battlescript_push();
-            battlescripts_curr_instruction = BS_BUGBITE_PERSIMBERRY;
+            bs_push_current(BS_BUGBITE_PERSIMBERRY);
         }
         break;
     case ITEM_EFFECT_LUMBERRY:
@@ -766,8 +753,7 @@ void bugbite_get_berry_effect(void)
             battle_participants[bank].status2.confusion = 0;
             battle_participants[bank].status.int_status = 0;
             effect = ALTER_NON_VOLATILE_STATUS;
-            battlescript_push();
-            battlescripts_curr_instruction = BS_BUGBITE_HEALCONDITION;
+            bs_push_current(BS_BUGBITE_HEALCONDITION);
         }
         break;
     case ITEM_EFFECT_LEPPABERRY:
@@ -817,8 +803,7 @@ bool berry_eaten(u8 bank, bool from_remove_item)
             {
                 battlescripts_curr_instruction -=2;
             }
-            battlescript_push();
-            battlescripts_curr_instruction = BS_CHEEKPOUCH;
+            bs_push_current(BS_CHEEKPOUCH);
             battle_scripting.active_bank = bank;
 
             record_usage_of_ability(bank, ABILITY_CHEEK_POUCH);

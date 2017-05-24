@@ -490,6 +490,8 @@ BS_ATK_FAINTED:
 	printstring 0x1c
 	callasm_cmd 23 @reset var
 	callasm_cmd 142 @check soul heart on the whole field
+	callasm_cmd 163 @reverts mega
+	.byte bank_attacker
 	return_cmd
 	
 .global BS_DEF_FAINTED
@@ -502,7 +504,9 @@ BS_DEF_FAINTED:
 	callasm_cmd 20 @check Fell Stinger and Moxie
 	callasm_cmd 23 @reset var
 	callasm_cmd 142 @check soul heart on the whole field
-	callasm_cmd 160
+	callasm_cmd 160 @ash_greninja_check
+	callasm_cmd 163 @reverts mega
+	.byte bank_target
 	return_cmd
 	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -1286,11 +1290,22 @@ BS_EJECTBUTTON_SWITCH:
 	jumpifcannotswitch bank_newstruct | 0x80 BS_ITEM_SWITCH_RET @this should be checked beforehand
 	printstring 0x1AC
 	call BS_ITEMSWITCH_REMOVEPLAY
+BS_EJECTBUTTONLIKE_SWITCHING_PART:
 	openpartyscreen bank_newstruct BS_ITEM_SWITCH_RET
 	swithchoutabilities bank_newstruct
 	waitstate
 	switch_handle_order bank_newstruct 0x2
 	goto_cmd BS_ITEMSWITCH_ACTUALSWITCH
+	
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@ Emergency Exit
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+.global BS_WIMPOUT
+BS_WIMPOUT:
+	call BS_PRINT_DEF_ABILITY
+	playanimation bank_newstruct 0x24 0x0
+	waitanimation
+	goto_cmd BS_EJECTBUTTONLIKE_SWITCHING_PART
 	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @ Usage Prevention
@@ -1639,37 +1654,46 @@ BS_ASK_FOR_SWITCHING:
 	callasm_cmd 1
 	.word 0x82DA8D0
 	goto_cmd 0x82DA865
-
+	
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @ In battle form(e) changes
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 .global BS_FORMCHANGE_WITH_TYPE_CHANGE
 BS_FORMCHANGE_WITH_TYPE_CHANGE:
 	call BS_FORMCHANGE_GENERAL
-	callasm_cmd 118
+	callasm_cmd 118 @type_stat_form_change
 	end2
-
-.global BS_STAT_ONLY_FORMCHANGE
-BS_STAT_ONLY_FORMCHANGE:
+	
+BS_STAT_ONLY_FORMCHANGE_RET:
 	call BS_FORMCHANGE_GENERAL
-	callasm_cmd 115
+	callasm_cmd 115 @setup_form_change_buffers_outer
+	return_cmd
+
+.global BS_STAT_ONLY_FORMCHANGE_END2
+BS_STAT_ONLY_FORMCHANGE_END2:
+	call BS_STAT_ONLY_FORMCHANGE_RET
 	end2
+	
+.global BS_STAT_ONLY_FORMCHANGE_END3
+BS_STAT_ONLY_FORMCHANGE_END3:
+	call BS_STAT_ONLY_FORMCHANGE_RET
+	end3
 	
 .global BS_ZYGARDE_FORM_CHANGE
 BS_ZYGARDE_FORM_CHANGE:
-	callasm_cmd 161
+	callasm_cmd 161 @zygarde_message_based_on_side
 	waitmessage 0x40
 BS_FORMCHANGE_WITH_HP_CHANGE:	
 	call BS_FORMCHANGE_GENERAL
-	callasm_cmd 162
+	callasm_cmd 162  @hp_stat_form_change
 	end2
 		
 BS_FORMCHANGE_GENERAL:
 	printstring 0x130
-	callasm_cmd 119
+	callasm_cmd 119 @change species
 	playanimation 0xA 0x21 0x0
 	waitstate
-	callasm_cmd 122
+	callasm_cmd 122 @prints string in var2
 	waitmessage 0x40
 	return_cmd
 
@@ -1678,14 +1702,14 @@ BS_BATTLE_BOND:
 	printstring 0x246
 	waitmessage 0x40
 	call BS_FORMCHANGE_GENERAL
-	callasm_cmd 115
+	callasm_cmd 115 @stat_only_form_change
 	return_cmd
-
+	
 .global BS_MIMIKYU_BUST
 BS_MIMIKYU_BUST:
 	printstring 0x24C
 	waitmessage 0x40
 	call BS_FORMCHANGE_GENERAL
-	callasm_cmd 118
+	callasm_cmd 118 @type_stat_form_change
 	return_cmd
 	

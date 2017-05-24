@@ -33,7 +33,7 @@
 #define ALLOW_LOSE_FLAG     0x0   //if that flag is set, you can lose a battle and the script will continue
 #define FORCE_SET_FLAG      0x0   //if that flag is set, the player cannot switch a pokemon when opponent faints
 #define NO_OF_SLIDING_MSG_TRAINERS 10 //number of trainers that say things in the middle of a battle
-#define SCHOOLING_LEVEL     20
+#define SCHOOLING_LEVEL 20
 
 //form indexes
 #define POKE_CHERRIM                1000
@@ -47,7 +47,7 @@
 #define POKE_BURMY_PLANT            1008
 #define POKE_BURMY_SAND             1009
 #define POKE_BURMY_TRASH            1010
-#define POKE_SPECIAL_GRENJA         1011
+#define POKE_GRENJA                 1011
 #define POKE_ASH_GRENJA             1012
 #define POKE_WISHIWASHI             1013
 #define POKE_WISHIWASHI_SCHOOL      1014

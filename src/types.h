@@ -13,4 +13,6 @@ typedef signed long s32;
 
 #define NULL 0
 
+typedef void (*command)(void);
+
 #endif /* ENGINE_TYPES_H */

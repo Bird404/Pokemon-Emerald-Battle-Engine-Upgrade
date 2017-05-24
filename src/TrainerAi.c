@@ -3,13 +3,13 @@
 
 u16 get_transform_species(u8 bank);
 u16 get_airborne_state(u8 bank, u8 mode, u8 check_levitate);
-u8 is_of_type(u8 bank, u8 type);
+bool is_of_type(u8 bank, u8 type);
 u8 check_ability(u8 bank, u8 ability);
-u8 is_bank_present(u8 bank);
+bool is_bank_present(u8 bank);
 u8 learnsanydamagingmove(u16 poke);
 u16 type_effectiveness_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u8 effects_handling_and_recording);
 u8 calculate_move_type(u8 bank, u16 move, u8 set_bonus);
-void critcalc_cmd4();
+void atk04_critcalc(void);
 void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u16 chained_effectiveness);
 void damagecalc2();
 u8 affected_by_substitute(u8 substitute_bank);
@@ -23,18 +23,34 @@ void belch_canceler();
 void can_magneticflux_work();
 bool is_poke_usable(struct pokemon* poke);
 struct pokemon* get_bank_poke_ptr(u8 bank);
+u8 get_bank_side(u8 bank);
 
 #define AI_STATE battle_resources->tai_state
 
-u8 is_bank_ai(u8 bank)
+static u8 get_ai_bank(u8 bank)
+{
+    switch (bank)
+    {
+    case 0: //target
+        return bank_target;
+    case 1: //ai
+        return tai_bank;
+    case 2: //target partner
+        return bank_target ^ 2;
+    case 3: //tai partner
+    default:
+        return tai_bank ^ 2;
+    }
+}
+
+static bool is_bank_ai(u8 bank)
 {
     if ((tai_bank & 1) == (bank & 1))
         return 1;
-    else
-        return 0;
+    return 0;
 }
 
-u8 tai_getmovetype(u8 atk_bank, u16 move)
+static u8 tai_getmovetype(u8 atk_bank, u16 move)
 {
     u8 dynamic_type = calculate_move_type(atk_bank, move, 0);
     if (dynamic_type != TYPE_EGG)
@@ -43,7 +59,7 @@ u8 tai_getmovetype(u8 atk_bank, u16 move)
         return move_table[move].type;
 }
 
-u8 was_impossible_used(/*u8 bank*/)
+bool was_impossible_used(/*u8 bank*/)
 {
     return 0;
 }
@@ -64,12 +80,12 @@ u16 ai_get_move(u8 bank, u8 slot)
         return battle_resources->battle_history->used_moves[bank].moves[slot];
 }
 
-u8 has_poke_hidden_ability(/*u16 species*/)
+bool has_poke_hidden_ability(/*u16 species*/)
 {
     return 0;
 }
 
-u8 is_ability_preventing_switching(u8 preventing_bank, u8 prevented_bank)
+bool is_ability_preventing_switching(u8 preventing_bank, u8 prevented_bank)
 {
     if (is_bank_present(prevented_bank) && get_item_effect(prevented_bank, 1) != ITEM_EFFECT_SHEDSHELL)
     {
@@ -180,7 +196,7 @@ u32 ai_calculate_damage(u8 atk_bank, u8 def_bank, u16 move)
     current_move = move;
     bank_attacker = atk_bank;
     bank_target = def_bank;
-    critcalc_cmd4();
+    atk04_critcalc();
     u8 move_type = tai_getmovetype(atk_bank, move);
     u8 script_ID = move_table[move].script_id;
     if (move_type != TYPE_EGG)
@@ -224,12 +240,11 @@ u32 ai_calculate_damage(u8 atk_bank, u8 def_bank, u16 move)
     return damage;
 }
 
-u8 ai_is_fatal(u8 atk_bank, u8 def_bank, u16 move)
+static bool ai_is_fatal(u8 atk_bank, u8 def_bank, u16 move)
 {
     if (ai_calculate_damage(atk_bank, def_bank, move) >= battle_participants[def_bank].max_hp)
         return 1;
-    else
-        return 0;
+    return 0;
 }
 
 //switch functions
@@ -241,14 +256,14 @@ u8 tai_find_best_to_switch(void)
     u8 from = 0, to = 5, partner = bank;
     if (battle_flags.double_battle && is_bank_present(bank ^ 2))
         partner = bank ^ 2;
-    if (battle_flags.multibattle && is_bank_from_opponent_side(bank))
+    if (battle_flags.multibattle && get_bank_side(bank))
     {
         if (bank == 1)
             to = 2;
         else if (bank == 3)
             from = 3;
     }
-    else if ((battle_flags.player_ingame_partner || battle_flags.player_partner) && !is_bank_from_opponent_side(bank))
+    else if ((battle_flags.player_ingame_partner || battle_flags.player_partner) && !get_bank_side(bank))
     {
         if (bank == 0)
             to = 2;
@@ -297,13 +312,13 @@ void tai24_ismostpowerful(void) //no args, returns 1 if it's the most powerful m
     tai_current_instruction++;
 }
 
-void tai2F_getability() //u8 bank, u8 gastro
+void tai2F_getability(void) //u8 bank, u8 gastro
 {
     AI_STATE->var = ai_get_ability(get_ai_bank(read_byte(tai_current_instruction + 1)), read_byte(tai_current_instruction + 2));
     tai_current_instruction += 3;
 }
 
-void tai31_jumpifeffectiveness_EQ() //u8 effectiveness, void* ptr
+void tai31_jumpifeffectiveness_EQ(void) //u8 effectiveness, void* ptr
 {
     if (tai_get_move_effectiveness() == (read_byte(tai_current_instruction + 1)))
         tai_current_instruction = (void*) read_word(tai_current_instruction + 2);
@@ -610,7 +625,7 @@ u8 ai_strikesfirst(u8 bank1, u8 bank2)
     return strikes_first;
 }
 
-void tai28_jumpifstrikesfirst() //u8 bank1, u8 bank2, void* ptr
+void tai28_jumpifstrikesfirst(void) //u8 bank1, u8 bank2, void* ptr
 {
     u8 bank1 = get_ai_bank(read_byte(tai_current_instruction + 1));
     u8 bank2 = get_ai_bank(read_byte(tai_current_instruction + 2));
@@ -620,7 +635,7 @@ void tai28_jumpifstrikesfirst() //u8 bank1, u8 bank2, void* ptr
         tai_current_instruction += 7;
 }
 
-void tai29_jumpifstrikessecond()
+void tai29_jumpifstrikessecond(void)
 {
     u8 bank1 = get_ai_bank(read_byte(tai_current_instruction + 1));
     u8 bank2 = get_ai_bank(read_byte(tai_current_instruction + 2));
@@ -630,7 +645,7 @@ void tai29_jumpifstrikessecond()
         tai_current_instruction += 7;
 }
 
-void tai51_getprotectuses() //u8 bank
+void tai51_getprotectuses(void) //u8 bank
 {
     u8 bank = get_ai_bank(read_byte(tai_current_instruction + 1));
     u32* var = &AI_STATE->var;
@@ -641,7 +656,7 @@ void tai51_getprotectuses() //u8 bank
     tai_current_instruction += 2;
 }
 
-void tai52_movehitssemiinvulnerable() //u8 bank, u16 move
+void tai52_movehitssemiinvulnerable(void) //u8 bank, u16 move
 {
     u8 hits = 0;
     u8 bank = get_ai_bank(read_byte(tai_current_instruction + 1));
@@ -658,19 +673,19 @@ void tai52_movehitssemiinvulnerable() //u8 bank, u16 move
     tai_current_instruction += 4;
 }
 
-void tai53_getmovetarget()
+void tai53_getmovetarget(void)
 {
     AI_STATE->var = move_table[AI_STATE->curr_move].target;
     tai_current_instruction++;
 }
 
-void tai54_getvarmovetarget()
+void tai54_getvarmovetarget(void)
 {
     AI_STATE->var = move_table[AI_STATE->var].target;
     tai_current_instruction++;
 }
 
-void tai55_isstatchangepositive()
+void tai55_isstatchangepositive(void)
 {
     u16 move = AI_STATE->curr_move;
     u8 positive;
@@ -793,7 +808,7 @@ void tai66_jumpifvarsEQ(void) //void* ptr
         tai_current_instruction += 5;
 }
 
-void tai67_jumpifcantaddthirdtype() //u8 bank, void* ptr
+void tai67_jumpifcantaddthirdtype(void) //u8 bank, void* ptr
 {
     u8 bank = get_ai_bank(read_byte(tai_current_instruction + 1));
     if (is_of_type(bank, move_table[AI_STATE->curr_move].arg1))
@@ -802,7 +817,7 @@ void tai67_jumpifcantaddthirdtype() //u8 bank, void* ptr
         tai_current_instruction = (void*) (read_word(tai_current_instruction + 2));
 }
 
-void tai68_canchangeability() //u8 bank1, u8 bank2
+void tai68_canchangeability(void) //u8 bank1, u8 bank2
 {
     u8 bank1 = get_ai_bank(read_byte(tai_current_instruction + 1));
     u8 bank2 = get_ai_bank(read_byte(tai_current_instruction + 2));
@@ -827,7 +842,7 @@ void tai68_canchangeability() //u8 bank1, u8 bank2
     tai_current_instruction += 3;
 }
 
-void tai69_getitempocket() //u8 bank
+void tai69_getitempocket(void) //u8 bank
 {
     u16 item = 0;
     u8 bank = get_ai_bank(read_byte(tai_current_instruction + 1));
@@ -837,10 +852,10 @@ void tai69_getitempocket() //u8 bank
     tai_current_instruction += 2;
 }
 
-void tai6A_discouragehazards()
+void tai6A_discouragehazards(void)
 {
     u8 to_sub = 0;
-    u8 side = is_bank_from_opponent_side(bank_target);
+    u8 side = get_bank_side(bank_target);
     switch (AI_STATE->curr_move)
     {
     case MOVE_STICKY_WEB:
@@ -941,7 +956,7 @@ void tai6F_discouragesports()
 
 void tai70_jumpifnewsideaffecting(void) //u8 bank, u8 case, void* ptr
 {
-    u8 side = is_bank_from_opponent_side(get_ai_bank(read_byte(tai_current_instruction + 1)));
+    u8 side = get_bank_side(get_ai_bank(read_byte(tai_current_instruction + 1)));
     u8 value = 0;
     struct side_affecting* SideAff = &new_battlestruct->side_affecting[side];
     switch (read_byte(tai_current_instruction + 2))
@@ -1262,7 +1277,7 @@ void tai78_setbytevar() //u8 value
 void tai79_arehazardson() //u8 bank
 {
     u32* var = &AI_STATE->var;
-    u8 side = is_bank_from_opponent_side(get_ai_bank(read_byte(tai_current_instruction + 1)));
+    u8 side = get_bank_side(get_ai_bank(read_byte(tai_current_instruction + 1)));
     if (new_battlestruct->side_affecting[side].sticky_web ||
         (side_timers[side].spikes_amount && side_affecting_halfword[side].spikes_on) ||
         new_battlestruct->side_affecting[side].stealthrock ||

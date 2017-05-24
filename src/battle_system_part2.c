@@ -11,6 +11,8 @@ u8 check_ability(u8 bank, u8 ability);
 void copy_status_condition_text(u8 bank, u8 confusion);
 void b_load_sprite_player(struct pokemon* poke, u8 bank);
 u8* get_poke_nick2(struct pokemon* poke, u8 bank, u8* dst);
+u8 get_bank_identity(u8 bank);
+void bs_execute(void* now);
 
 bool load_weather_from_overworld(void)
 {
@@ -51,7 +53,7 @@ bool load_weather_from_overworld(void)
         {
             battle_scripting.active_bank = 0;
             battle_communication_struct.multistring_chooser = ow_weather;
-            execute_battle_script((void *)0x82DACE7);
+            bs_execute((void *)0x82DACE7);
         }
     }
     return is_weather_loaded;

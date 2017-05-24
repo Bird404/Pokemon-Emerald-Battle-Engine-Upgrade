@@ -14,6 +14,7 @@ u8 weather_abilities_effect();
 bool does_move_make_contact(u16 move, u8 atk_bank);
 u8 find_move_in_table(u16 move, const u16* table_ptr);
 u8 check_ability(u8 bank, u8 ability);
+u8 get_bank_side(u8 bank);
 
 u8 protect_affects(u16 move, u8 set)
 {
@@ -22,7 +23,7 @@ u8 protect_affects(u16 move, u8 set)
     u8 split = move_table[move].split;
     u8 contact = does_move_make_contact(move, bank_attacker);
     u8 target = move_table[move].target;
-    u8 targets_side = is_bank_from_opponent_side(bank_target);
+    u8 targets_side = get_bank_side(bank_target);
     if (protect_structs[bank_target].flag0_protect && protect_flag)
         effect = 1;
     else if (new_battlestruct->bank_affecting[bank_target].kings_shield && protect_flag && split != 2)
@@ -189,7 +190,7 @@ u32 accuracy_percent(u16 move, u8 bankatk, u8 bankdef)
     return accuracy;
 }
 
-void accuracy_calc(void)
+void atk01_accuracy_calc(void)
 {
     u32 jump_loc = read_word(battlescripts_curr_instruction + 1);
     u16 arg = read_hword(battlescripts_curr_instruction + 5);

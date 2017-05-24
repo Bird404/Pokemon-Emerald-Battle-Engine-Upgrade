@@ -1,6 +1,8 @@
 #include "defines.h"
 #include "static_references.h"
 
+u8 get_bank_identity(u8 bank);
+
 extern const struct img_size trainerthrow_pals[];
 
 bool is_in_tag_battle(void)

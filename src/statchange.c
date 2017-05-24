@@ -6,12 +6,13 @@ u8 protect_affecting_moves(u16 move);
 u8 weather_abilities_effect(void);
 u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special_cases_argument, u16 move);
 u8 has_ability_effect(u8 bank, u8 mold_breaker);
+u8 get_bank_side(u8 bank);
+void bs_push(void* to_return, void* now);
+void bs_push_current(void* now);
 
-u8 unable_to_change(u8 bank, void* bs_ret, void* bs_string, u8 ability)
+static u8 unable_to_change(u8 bank, void* bs_ret, void* bs_string, u8 ability)
 {
-    battlescripts_curr_instruction = bs_ret;
-    battlescript_push();
-    battlescripts_curr_instruction = bs_string;
+    bs_push(bs_ret, bs_string);
     if (ability)
     {
         last_used_ability = ability;
@@ -52,7 +53,7 @@ u8 change_stats(u8 bank, u8 bits, void* bs_unable) //returns 1 if unable to chan
 
     if (lower && !(bits & STAT_SELFINFLICTED))
     {
-        if (side_affecting_halfword[is_bank_from_opponent_side(bank)].mist_on)
+        if (side_affecting_halfword[get_bank_side(bank)].mist_on)
         {
             if (bits & STAT_PRINTABILITY)
                 return unable_to_change(bank, bs_unable, (void*)(0x082DAE03), 0);

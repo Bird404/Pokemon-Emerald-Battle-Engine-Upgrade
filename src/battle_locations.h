@@ -6,6 +6,7 @@
 extern u16 battle_turn_random_no;
 extern u8 last_used_ability;
 extern u16 last_used_item;
+extern u8 banks_by_side[4];
 extern u8 bank_attacker;
 extern u8 bank_target;
 extern u8 bank_partner_atk;
@@ -46,8 +47,6 @@ extern u16 move_hit_with_pbs[4];
 extern u16 move_type_hit_with_pbs[4];
 extern u16 locked_move[4];
 extern u16 payday_money;
-extern u32 status_flags_for_move_effects[0x3F];
-extern void* battlescripts_for_moveeffects[0x3F];
 extern s32 hp_dealt;
 extern u8 battle_state_mode;
 extern u8 battle_state_mode_first_assigned;
@@ -277,6 +276,8 @@ extern const u8 burn_status_flag[];
 extern const u8 freeze_status_flag[];
 extern const u8 trainerclass_names[60][13];
 extern const u8 *battle_strings_table[369];
+extern const u8* const stat_names_table[8];
+extern const u8* const negative_flavour_table[5];
 
 extern u8 bs_return[1];
 extern u8 bs_printmove_failed[];

@@ -7,23 +7,12 @@ void* __attribute__((long_call)) int_to_str(void* buffer, s32 num, u8 format, u8
 void* __attribute__((long_call)) u_int_to_str(void* buffer, u32 num, u8 format, u8 max_digits);
 u8 __attribute__((long_call)) get_item_battle_function(u16 item_id);
 u8 __attribute__((long_call)) get_item_quality(u16 item_id);
-void __attribute__((long_call)) execute_battle_script(void* ptr_to_battlescript);
 void __attribute__((long_call)) record_usage_of_ability(u8 bank, u8 ability);
-u8 __attribute__((long_call)) is_bank_from_opponent_side(u8 bank);
-u32 __attribute__((long_call)) read_word(void*);
-u16 __attribute__((long_call)) rng();
 u8 __attribute__((long_call)) calc_total_move_pp(u16 move_id, u8 pp_bonus, u8 moveset_slot);
-void __attribute__((long_call)) damage_modulate_by_type_effectivity(u8 effect);
 void __attribute__((long_call)) mark_buffer_bank_for_execution(u8 bank);
 u8 __attribute__((long_call)) get_item_pocket_id(u16 itemID);
 u8* __attribute__((long_call)) strcpy_xFF_terminated_0(u8* destination, const u8* text_to_copy);
-void __attribute__((long_call)) battlescript_push();
-void __attribute__((long_call)) battlescript_pop();
-void __attribute__((long_call)) battlescript_custom_push(void* ptr_to_push);
-void __attribute__((long_call)) call_bc_move_exec(void* bs_ptr);
-void __attribute__((long_call)) b_std_message(u16 stringID, u8 bank);
 u8 __attribute__((long_call)) gender_from_pid(u16 species, u32 PID);
-u8 __attribute__((long_call)) get_battle_side(u8 bank);
 s8 __attribute__((long_call)) itemid_to_berryid(u16 itemID);
 u16 __attribute__((long_call)) species_to_national_dex(u16 species);
 u16 __attribute__((long_call)) get_height_or_weight(u16 national_dex_index, u8 which_one);
@@ -34,7 +23,6 @@ void __attribute__((long_call)) record_usage_of_item(u8 bank, u8 item_effect);
 void __attribute__((long_call)) pressure_pp_lose(u8 bank_atk, u8 bank_def, u16 move);
 u8 __attribute__((long_call)) is_poke_disobedient();
 u8 __attribute__((long_call)) uproar_wakeup_check(u8 bank);
-void __attribute__((long_call)) reset_several_turns_stuff(u8 bank);
 u8 __attribute__((long_call)) check_if_imprisioned(u8 bank, u16 move);
 u8 __attribute__((long_call)) get_bank_in_love(u8 arg);
 void __attribute__((long_call)) attack_iteration_cleanup();
@@ -47,7 +35,6 @@ u8 __attribute__((long_call)) item_is_mail(u8 itemID);
 u8 __attribute__((long_call)) get_lvl_from_exp(struct pokemon*);
 u16 __attribute__((long_call)) teach_move_in_available_slot(struct pokemon* , u16 move);
 void __attribute__((long_call)) new_move_for_the_first(struct pokemon*, u16 move);
-u8 __attribute__((long_call)) get_ai_bank(u8 arg);
 void __attribute__((long_call)) clear_atk_up_if_hit_flag_unless_enraged();
 void __attribute__((long_call)) bc_bs_executer();
 void __attribute__((long_call)) calculate_stats_pokekmon(struct pokemon* poke);
@@ -69,7 +56,7 @@ s16 __attribute__((long_call)) get_pingpong(s16 phase, s16 scale);
 u8 __attribute__((long_call)) gpu_pal_tags_index_of(u16 tag);
 void __attribute__((long_call)) set_callback2(void* ptr);
 void __attribute__((long_call)) set_obj_pos(u8 ID, u16 x, u16 y);
-void __attribute__((long_call)) c2_80777E8();
+void __attribute__((long_call)) c2_80777E8(void);
 void __attribute__((long_call)) obj_delete(struct object*);
 void __attribute__((long_call)) update_bank_sprite(u8 bank);
 void __attribute__((long_call)) bank_sprite_sth(u8 bank);
@@ -110,7 +97,6 @@ void __attribute__((long_call)) battle_callback1();
 void __attribute__((long_call)) CpuSet(void* src, void* dst, u32 mode);
 void __attribute__((long_call)) poke_update_altitude(u8 bank, u16 species);
 u8 __attribute__((long_call)) b_get_sprite_y(u8 bank);
-u8 __attribute__((long_call)) get_bank_identity(u8 bank);
 void __attribute__((long_call)) pal_fade_control_reset_maybe();
 u8 __attribute__((long_call)) fadescreen_related(u32 arg0, u8 arg1, u8 arg2, u8 arg3, u16 arg4);
 void __attribute__((long_call)) quit_recorded_battle();
@@ -118,13 +104,12 @@ u8 __attribute__((long_call)) prepare_party_mail_to_give(struct pokemon* poke, u
 u8 __attribute__((long_call)) specific_pokerus_check(struct pokemon* poke, u8 caseid);
 u8 __attribute__((long_call)) link_get_multiplayer_id();
 void* __attribute__((long_call)) get_status_text(void* dst);
-void __attribute__((long_call)) fdecoder_for_battle_strings(void* src, void* dst);
 u8 __attribute__((long_call)) get_bank_by_player_ai(u8 id);
 void __attribute__((long_call)) buffer_item(u16 itemID, void* dst);
 bool __attribute__((long_call)) getflag(u16 flagID);
 void __attribute__((long_call)) clearflag(u16 flagID);
-void* __attribute__((long_call)) copy_opponent_a_lose_text();
-void* __attribute__((long_call)) copy_opponent_b_lose_text();
+void* __attribute__((long_call)) copy_opponent_a_lose_text(void);
+void* __attribute__((long_call)) copy_opponent_b_lose_text(void);
 void __attribute__((long_call)) get_frontier_opponent_battleend_text(u16 trainerID, u8 textID);
 void __attribute__((long_call)) x4000000_get_battle_text(u16 trainerID, u8 textID);
 void __attribute__((long_call)) get_frontier_trainer_name(void* dst, u16 trainerID);
@@ -132,14 +117,14 @@ u8 __attribute__((long_call)) get_secretbase_trainerclass();
 u8 __attribute__((long_call)) get_frontier_opponent_class(u16 trainerID);
 u8 __attribute__((long_call)) get_x4000000_trainerclass(u16 trainerID);
 void __attribute__((long_call)) get_x4000000_trainername(void* dst, u16 trainerID);
-u8 __attribute__((long_call)) get_trainerxC00_trainerclass();
-u8 __attribute__((long_call)) get_x800_trainerclass();
+u8 __attribute__((long_call)) get_trainerxC00_trainerclass(void);
+u8 __attribute__((long_call)) get_x800_trainerclass(void);
 void __attribute__((long_call)) get_x800_trainername(void* dst);
 u8 __attribute__((long_call)) get_linkpbs_id(u8 bank);
 bool __attribute__((long_call)) is_poke_traded(struct pokemon* poke);
 void __attribute__((long_call)) happiness_algorithm(struct pokemon* poke, u8 caseid);
 bool __attribute__((long_call)) consider_creating_wild_poke(void* poke_data, u8 encounter_type, u8 repel_intimidate_check);
-u8 __attribute__((long_call)) not_enough_for_doubles(void);
+bool __attribute__((long_call)) not_enough_for_doubles(void);
 bool __attribute__((long_call)) is_in_battle_pyramid(void);
 bool __attribute__((long_call)) is_team_and_pc_full(void);
 void __attribute__((long_call)) item_used_exit_bag(u8 taskID);
@@ -232,31 +217,29 @@ void __attribute__((long_call)) task_statchange_preparestruct(u8 taskID);
 void __attribute__((long_call)) change_order_in_battle(u8 bank);
 void __attribute__((long_call)) sub_81B8E80(u8 bank, u8 pokeID, u8 sth);
 void __attribute__((long_call)) sub_80571DC(u8 bank, u8 pokeID);
+void __attribute__((long_call)) buffer_pokemon_species(u8* dst, u16 species);
 
 u32 __attribute__((long_call)) __udivsi3(u32 numerator, u32 denumerator);
 
 u32 __attribute__((long_call)) __umodsi3(u32 numerator, u32 denumerator);
 
-//string.h
-/*
-void* __attribute__((long_call)) memset (void*, int, u32 size_);
-void* __attribute__((long_call)) memcpy (void*, const void*, u32 size_);
-*/
+////memset and memcpy
 #include <string.h>
 
-//stdlib.h
-/*
-void* __attribute__((long_call)) malloc(u32 size_);
-void __attribute__((long_call)) free(void* address);
-*/
+//malloc and free
 #include <stdlib.h>
 
 //buffer preparers
 void __attribute__((long_call)) bb2_setattributes_in_battle(u8 buffer, u8 data_request, u8 unkown, u8 data_to_add, void* ptr_to_attribute);
 void __attribute__((long_call)) bbF_move_animation(u8 buffID, u16 moveID, u8 turn, u16 power, s32 dmg, u8 happiness, struct disable_struct*, u8 multihit);
+void __attribute__((long_call)) bb10_printstring(u8 buffID, u16 stringID);
 void __attribute__((long_call)) bb19_receive_exp(u8 bufferID, u8 pokeID, u16 exp);
 void __attribute__((long_call)) bb1B_status_animation(u8 buffer, bool status2, u32 status);
 void __attribute__((long_call)) bb29_hit_animation(u8 bufferID);
 void __attribute__((long_call)) bb34_battle_animation(u8 buffID, u8 animID, u16 info);
+
+//functions rewritten in ASM to get rid of long calls
+u32 read_word(const void*);
+u16 rng(void);
 
 #endif /* VANILLA_FUNCTIONS */

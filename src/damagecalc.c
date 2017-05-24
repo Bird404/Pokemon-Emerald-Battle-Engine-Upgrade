@@ -14,6 +14,8 @@ u8 is_of_type(u8 bank, u8 type);
 bool check_ability(u8 bank, u8 ability);
 u8 is_bank_present(u8 bank);
 void move_to_buff1(u16 move);
+u8 get_bank_side(u8 bank);
+void bs_push_current(void* now);
 
 struct natural_gift{
     u8 move_power;
@@ -184,13 +186,13 @@ u16 get_speed(u8 bank)
         }
     }
     //tailwind
-    if (new_battlestruct->side_affecting[is_bank_from_opponent_side(bank)].tailwind)
+    if (new_battlestruct->side_affecting[get_bank_side(bank)].tailwind)
         speed *= 2;
     //unburden
     if (status3[bank].unburden)
         speed *= 2;
     //swamp
-    if (new_battlestruct->side_affecting[is_bank_from_opponent_side(bank)].swamp_spd_reduce)
+    if (new_battlestruct->side_affecting[get_bank_side(bank)].swamp_spd_reduce)
         speed /= 4;
     //paralysis
     if (battle_participants[bank].status.flags.paralysis)
@@ -475,7 +477,7 @@ u16 get_base_power(u16 move, u8 atk_bank, u8 def_bank)
         case MOVE_BEAT_UP:
             {
                 struct pokemon* poke;
-                if (is_bank_from_opponent_side(bank_attacker))
+                if (get_bank_side(bank_attacker))
                     poke = &party_opponent[0];
                 else
                     poke = &party_player[0];
@@ -842,7 +844,7 @@ u16 apply_base_power_modifiers(u16 move, u8 move_type, u8 atk_bank, u8 def_bank,
         }
         break;
     case MOVE_RETALIATE:
-        if (new_battlestruct->side_affecting[is_bank_from_opponent_side(atk_bank)].ally_fainted_last_turn)
+        if (new_battlestruct->side_affecting[get_bank_side(atk_bank)].ally_fainted_last_turn)
         {
             modifier = chain_modifier(modifier, 0x2000);
         }
@@ -1262,7 +1264,7 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u16 chained_e
     u8 move_split = move_table[move].split;
 
     //check reflect/light screen
-    u8 def_side = is_bank_from_opponent_side(def_bank);
+    u8 def_side = get_bank_side(def_bank);
     if ((side_affecting_halfword[def_side].reflect_on && move_split == MOVE_PHYSICAL) ||(side_affecting_halfword[def_side].light_screen_on && move_split == MOVE_SPECIAL))
         final_modifier = calc_reflect_modifier(atk_bank, def_bank, final_modifier);
 
@@ -1341,7 +1343,7 @@ void damage_calc(u16 move, u8 move_type, u8 atk_bank, u8 def_bank, u16 chained_e
 
 u8 get_attacking_move_type(void);
 
-void damage_calc_cmd_05(void)
+void atk05_dmg_calc(void)
 {
     u8 move_type=get_attacking_move_type();
     u16 item = battle_participants[bank_attacker].held_item;
@@ -1351,8 +1353,7 @@ void damage_calc_cmd_05(void)
         last_used_item = item;
         new_battlestruct->various.gem_boost = 1;
         move_to_buff1(current_move);
-        battlescript_push();
-        battlescripts_curr_instruction = BS_GEM_MSG;
+        bs_push_current(BS_GEM_MSG);
         return;
     }
     damage_calc(current_move, move_type, bank_attacker, bank_target, chained_effectiveness);

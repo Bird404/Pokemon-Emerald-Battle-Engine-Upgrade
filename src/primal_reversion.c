@@ -5,6 +5,8 @@
 #define OMEGA_REVERSION 2
 
 u16 get_mega_species(u8 bank, u8 chosen_method);
+u8 get_bank_side(u8 bank);
+void bs_execute(void* bs);
 
 u8 get_reversion_type(u8 bank, u16 target_species)
 {
@@ -34,17 +36,17 @@ bool handle_primal_reversion(u8 bank)
         {
             perform_reversion = true;
             struct battle_participant* bank_struct = &battle_participants[bank];
-            u8 banks_side = is_bank_from_opponent_side(bank);
+            u8 banks_side = get_bank_side(bank);
             u8 objid = new_battlestruct->mega_related.indicator_id_pbs[bank];
             if(reversion_mode==ALPHA_REVERSION)
             {
                 objects[objid].final_oam.attr2+=2;
-                execute_battle_script(BS_ALPHA_PRIMAL);
+                bs_execute(BS_ALPHA_PRIMAL);
             }
             else if(reversion_mode==OMEGA_REVERSION)
             {
                 objects[objid].final_oam.attr2+=1;
-                execute_battle_script(BS_OMEGA_PRIMAL);
+                bs_execute(BS_OMEGA_PRIMAL);
             }
             struct pokemon* poke_address;
             if (banks_side == 1)

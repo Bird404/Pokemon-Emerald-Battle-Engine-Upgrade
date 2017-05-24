@@ -84,16 +84,3 @@ illusion_playcorrectcry_return:
 	ldr r1, =(0x08075DE4 | 1)
 	bx r1
 	
-illusion_special_fdecoder_name:
-	ldrb r0, [r4, #1] @bank
-	bl get_party_ptr
-	mov r2, #0x64
-	ldrb r1, [r4, #2] @pos in party
-	mul r1, r2
-	add r0, r0, r1
-	ldrb r1, [r4, #1] @bank
-	mov r2, r6
-	bl get_poke_nick2
-	ldr r0, =(0x0814F8DE | 1)
-	bx r0
-	

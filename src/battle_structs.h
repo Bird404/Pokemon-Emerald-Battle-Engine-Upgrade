@@ -443,8 +443,8 @@ struct b_resources_secretbaseinfo{
     u8 trainer_name[6];
 };
 
-struct battlescript_stack{
-    u8 stack_data[32];
+struct battle_stack{
+    void* stack_data[8];
     u8 stack_height;
     u8 undefined[3];
 };
@@ -462,8 +462,8 @@ struct lvlup_stats{
 struct b_resources_table{
     struct b_resources_secretbaseinfo *secretbase_opponent;
     struct ability_flags *ability_flags_ptr;
-    struct battlescript_stack *battlescript_stack;
-    void* battle_callback1_stack;
+    struct battle_stack *battlescript_stack;
+    struct battle_stack *callback_stack;
     struct lvlup_stats *before_lvl_up;
     struct tai_state *tai_state;
     struct battle_history *battle_history;

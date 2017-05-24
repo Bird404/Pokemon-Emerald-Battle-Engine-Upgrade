@@ -290,6 +290,7 @@ aux_type_name_table_2:
 .word PointerForTypeNamesSomething
 .word Fairy_NewTypeNames
 
+.global type_names
 type_names:
 Normal_NewTypeNames:
 .byte N_, o_, r_, m_, a_, l_, Termin

@@ -121,3 +121,33 @@ free:
 	ldr r1, =(free_)
 	bx r1
 	.size free, . - free
+	
+	.global read_word
+	.thumb_func
+read_word:
+	movs r2, r0
+	ldrb r0, [r2, #3]
+	lsls r0, r0, #0x18
+	ldrb r1, [r2, #2]
+	lsls r1, r1, #0x10
+	orrs r0, r1
+	ldrb r1, [r2, #1]
+	lsls r1, r1, #8
+	orrs r0, r1
+	ldrb r1, [r2]
+	orrs r0, r1
+	bx lr
+	
+	.global rng
+	.thumb_func
+rng:
+	ldr r2, =(rand_seed)
+	ldr r1, [r2]
+	ldr r0, =(0x41C64E6D)
+	muls r0, r1
+	ldr r1, =(0x6073)
+	adds r0, r0, r1
+	str r0, [r2]
+	lsrs r0, r0, #0x10
+	bx lr
+	
