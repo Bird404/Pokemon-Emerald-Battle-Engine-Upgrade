@@ -29,7 +29,7 @@ void atk07_final_dmg_calc(void)
     battlescripts_curr_instruction++;
 
     if(battle_participants[bank_target].species == POKE_MIMIKKYU && check_ability(bank_target,ABILITY_DISGUISE)
-       && has_ability_effect(bank_target, 1, 1) && MOVE_WORKED && !disable_structs[bank_target].substitute_hp)
+       && has_ability_effect(bank_target, 1, 1) && MOVE_WORKED && !affected_by_substitute(bank_target))
     {
         new_battlestruct->various.bust_mimikyu = 1;
         damage_loc = 0;

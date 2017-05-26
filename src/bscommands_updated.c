@@ -2549,7 +2549,7 @@ void revert_form_change(bool mega_revert, u8 teamID, u8 side, struct pokemon* po
         else
         {
             //change mmikkyu only when it faints and at the end of battle, not on switchout
-            if (species == POKE_MIMIKKYU_BUSTED && get_attributes(poke, ATTR_CURRENT_HP, 0) && !battle_outcome) {return;}
+            if (species != POKE_AEGISLASH_BLADE && get_attributes(poke, ATTR_CURRENT_HP, 0) && !battle_outcome) {return;}
             static const struct revert_form_struct revert_mapping[] =
                             {{POKE_CHERRIM_SUNSHINE, POKE_CHERRIM}, {POKE_AEGISLASH_BLADE, POKE_AEGISLASH_SHIELD},
                             {POKE_ZEN_MODE, POKE_DARMANITAN}, {POKE_MELOETTA_PIROUETTE, POKE_MELOETTA_ARIA},
