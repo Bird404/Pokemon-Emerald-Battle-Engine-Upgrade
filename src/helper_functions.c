@@ -1053,7 +1053,7 @@ void countercalc(void)
 void gastroacid(void)
 {
     u16 targets_ability = battle_participants[bank_target].ability_id;
-    if (findability_in_table(targets_ability, forbidenabilitiestable1))
+    if (findability_in_table(targets_ability, forbidenabilitiestable2))
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
     {
