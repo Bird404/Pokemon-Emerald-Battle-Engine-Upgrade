@@ -1,3 +1,8 @@
+### bs commands
+bs_commands 0803CD94
+bs_commands 0803DE38
+bs_commands 080458D8
+bs_commands 0803E084
 ### ability names repoint
 ability_names_table 080001C0
 ability_names_table 0814F0D4
@@ -6,6 +11,8 @@ ability_names_table 081C3028
 ### ability descriptions repoint
 ability_desc_table 080001C4
 ability_desc_table 081C3078
+### move animations repoint
+move_animations_table 080A3A44
 ### move names repoint
 move_names_table 08000148
 move_names_table 08059B14
@@ -72,15 +79,6 @@ move_table 08033ce8
 move_table 0803a3f0
 move_table 0803a738
 move_table 0803d2a0
-move_table 0803e3f4
-move_table 0803e528
-move_table 0803e678
-move_table 0803e858
-move_table 0803fcf0
-move_table 080400c0
-move_table 08041cf4
-move_table 08041fa0
-move_table 080423d0
 move_table 08045784
 move_table 0804591c
 move_table 08045b20
@@ -88,19 +86,11 @@ move_table 080461d0
 move_table 0804626c
 move_table 0804632c
 move_table 0804648c
-move_table 08046508
-move_table 08046650
-move_table 08046798
-move_table 08046910
-move_table 080469b8
 move_table 08046a98
 move_table 08046ce8
-move_table 08046e70
 move_table 08046f58
 move_table 08046fe0
 move_table 08047020
-move_table 08047100
-move_table 0804728c
 move_table 080472ec
 move_table 08047520
 move_table 080475a4
@@ -114,17 +104,11 @@ move_table 08047cf8
 move_table 08047f90
 move_table 08049a08
 move_table 08049a40
-move_table 0804bd08
-move_table 0804be4c
-move_table 0804c2f8
-move_table 0804c4d0
-move_table 0804c5dc
 move_table 0804c658
 move_table 0804c828
 move_table 0804cad0
 move_table 0804e9f0
 move_table 0804edfc
-move_table 0804fe70
 move_table 0805028c
 move_table 080514c0
 move_table 08051564
@@ -137,10 +121,8 @@ move_table 08052f08
 move_table 08052f78
 move_table 08053004
 move_table 08053a88
-move_table 08053ba0
 move_table 08053bd8
 move_table 08054894
-move_table 08054c58
 move_table 08055478
 move_table 08055ee0
 move_table 08057aa0
@@ -222,3 +204,97 @@ type_names 08016730
 type_names 08059C24
 type_names 0814F740
 type_names 081D2A30
+### after pokemon faints bs
+BS_ATK_FAINTED 08049C04
+BS_DEF_FAINTED 08049C8C
+##### battle animation backgrounds
+battle_anim_bg_table 080A5038
+battle_anim_bg_table 080A5084
+##### battle animation particles
+battle_particle_table 080A3DD0
+battle_particle_table 080A40BC
+shiny_particle_image 08172FB8
+shiny_particle_pallet 08172FBC
+battle_particle_table 080A3D74 -80000
+battle_particle_pallets 080A3D78 -80000
+### move battlescript table
+battlescripts_table 0804E9EC
+battlescripts_table 08050288
+### New Animation Table
+NewPlayAnimationTable 0805DA3C
+### Pursuit mega evolution
+pursuit_megaevo_bs 082DAB3F
+### Contest data table
+contestdatatable 080D85F0
+contestdatatable 080D9B1C
+contestdatatable 080DB318
+contestdatatable 080DB3F0
+contestdatatable 080DB45C
+contestdatatable 080DB4D8
+contestdatatable 080DD10C
+contestdatatable 080DD2D0
+contestdatatable 080DD4D0
+contestdatatable 080DDA18
+contestdatatable 080E59AC
+contestdatatable 080E5BC8
+contestdatatable 080E5E58
+contestdatatable 080E5EB0
+contestdatatable 080E6204
+contestdatatable 080E629C
+contestdatatable 080E67B0
+contestdatatable 080E697C
+contestdatatable 08156F3C
+contestdatatable 08157010
+contestdatatable 0815710C
+contestdatatable 081571E0
+contestdatatable 0815729C
+contestdatatable 08157408
+contestdatatable 08157B30
+contestdatatable 08158104
+contestdatatable 081583B4
+contestdatatable 08161414
+contestdatatable 081C247C
+contestdatatable 081C3E98
+contestdatatable 081C3F2C
+contestdatatable 081C44D0
+contestdatatable 081C4564
+contestdatatable 081D2BC4
+### Contest combos
+contestcombotable 080E546C 
+contestcombotable 080E5BCC
+### Trainer AI
+tai_command_table 08130FF0
+TAI_SCRIPT_0 082DBEF8
+TAI_SCRIPT_1 082DBEFC
+TAI_SCRIPT_2 082DBF00
+TAI_SCRIPT_3 082DBF04
+TAI_SCRIPT_7 082DBF14
+TAI_SCRIPT_1D 082DBF6C
+### learnsets for PGEscript.py
+learnset_table 0806930C
+### exp give
+BS_POKE_FAINTS_EXP_SLIDEIN 08041754
+### trainer throw images
+trainerthrow_imgs 0805DFD4
+trainerthrow_imgs 0818D098
+### trainer throw pals
+trainerthrow_pals 0805CBDC
+trainerthrow_pals 0805DFDC
+trainerthrow_pals 0814DCA0
+trainerthrow_pals 0816AA60
+trainerthrow_pals 0818CBF8
+trainerthrow_pals 081BE1F8
+### trainer throw positions
+trainerhrow_positions 0805B634
+trainerhrow_positions 0805B768
+trainerhrow_positions 0805B9DC
+trainerhrow_positions 080A98CC
+trainerhrow_positions 080A9958
+trainerhrow_positions 0814D0C8
+trainerhrow_positions 081598C4
+trainerhrow_positions 08169F78
+trainerhrow_positions 0816A044
+trainerhrow_positions 0818BEB8
+trainerhrow_positions 081BD3A4
+## hook into bs that asks you if you want to switch poke
+BS_ASK_FOR_SWITCHING 082DA82E

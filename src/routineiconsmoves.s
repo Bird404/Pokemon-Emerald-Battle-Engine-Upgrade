@@ -1,7 +1,8 @@
+.text
 .thumb
 
 @@@@@ Routine loads icons
-.align 2
+.align 1
 Routine_Icon_Moves:
 	add r0, r0, r5
 	lsl r0, r0, #0x03

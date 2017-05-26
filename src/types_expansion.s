@@ -1,6 +1,5 @@
 .text
 .thumb
-.align 2
 
 .include "asm_defines.s"
 .equ PointerForTypeNamesSomething, 0x85E8B25
@@ -253,6 +252,7 @@ aux_type_name_table_1:
 .align 2
 aux_type_name_table_2:
 .word PointerForTypeNamesSomething
+.word PointerForTypeNamesSomething+0x10
 .word PointerForTypeNamesSomething
 .word Normal_NewTypeNames
 .word PointerForTypeNamesSomething
@@ -290,7 +290,7 @@ aux_type_name_table_2:
 .word PointerForTypeNamesSomething
 .word Fairy_NewTypeNames
 
-.align 2 
+.global type_names
 type_names:
 Normal_NewTypeNames:
 .byte N_, o_, r_, m_, a_, l_, Termin

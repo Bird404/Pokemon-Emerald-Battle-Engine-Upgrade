@@ -1,0 +1,256 @@
+Deals damage. No additional effect
+Deals fixed damage based on a formula
+Changes single user stats
+Changes single target stats
+May change single user stat
+May change single target stat
+Changes multiple user stats
+Changes multiple target stats
+May change multiple user stats
+Confuses target
+May confuse target
+May flinch target
+Puts the target to sleep
+Poisons target
+Badly poisons target
+Paralyze target
+Burns target
+Freezes target
+May inflict non volatile status
+Recoil attack
+Crash attack
+Lunar dance effect
+Memento
+Explode
+Deals damage and drains foe's HP
+Restore user's HP
+Restore foe's HP
+Charge
+Transfer condition to target
+Roost
+Gravity
+Identification
+Deals damage and restore foe's status
+Deals damage and breaks protection
+Protection moves
+Deals damage and switch out
+Sucker punch
+Attract
+Captivate
+Recharge needed
+Deals damage and traps foe
+Add third type
+Ability change
+Sets rooms
+Counter target
+Disables foe's ability
+Disables foe's item effect
+Natural Gift
+After You
+Powder
+Change ally stat
+Deals damage and clear foe's stat changes
+Electrify
+Lays entry hazards
+Follow me
+Only works when user and foe share types
+Change user's stat and decreases weight
+Ion deluge
+Camouflage
+Change user's type to foe's type
+Focus move
+Blocks foe's status move use
+Blocks foe's successive move use
+Blocks foe's healing
+Prevent foe from escaping
+Perish Song
+Hits 2-5 times
+Hits 2 times
+Bide
+Pay Day
+KOs target if hits
+Two-Turn move
+Forces target to switch
+Swaps place with ally
+Thrash, Outrage etc.
+Disables foe's move
+Encore
+Mist
+Setup leech seed
+Rage
+Escapes wild battle
+Mimic
+Sets minimize and increase evasiveness
+Curls and increases defense
+Setup physically defensive barrier
+Setup specially defensive barrier
+Eliminates all stat changes
+Metronome
+Mirror Move
+Only damages sleeping foe
+Nightmare
+Transform
+Useless moves
+User goes to sleep and fully heals
+Change user type
+Tri attack
+Creates a user decoy
+Permanently learn foe' move
+Hits 3 times
+Steals foe's item
+Next move always hits
+Decrease foe's PP
+Cuts user HP and maximize attack
+Destiny bond
+Curse
+Multiple turn damaging move
+Increases damage on successive use
+Chooses random moveset move while asleep
+Heals party of status
+Present
+Safeguards team from status
+Equalize HP.
+Bounce status moves back.
+Clear hazards on user's side
+Copies foe's stat changrs
+Deals damage after 2 turns.
+Beat up
+Uproar
+Stockpile
+Deals random damage
+Attack fails if hit
+Nature power
+Boosts ally's damage output
+Swaps item with target
+Heals HP after 2 turns.
+Assist
+Root
+Baton Pass
+Restores consumed item
+Deals damage and only works if asleep
+Deals damage and break screens
+Puts target to asleep after 2 turns 
+Knocks foe's item
+Seals foe's move
+Heals user's status
+Grudge
+Steals move's effect
+Secret power
+Water/Mud Sport
+Destroys/steals foe's berry
+Tailwind
+Sharply raises random single user's stat
+Fling
+Swaps attack and defense
+Protects team from critical hits
+Swaps stat changes
+Me first
+Copies last move used
+Aqua ring
+Magnet rise
+Defog
+Set terrians
+Splits stats
+Makes foe levitate
+Deals damage and smacks foe
+Changes foe's typr
+Reduces defense and raises offense
+Sky drop
+Shift Gear
+Quash
+Flinches and fails if not first move
+Setup sandstorm
+Setup rain
+Setup sunlight
+Setup hail
+Magnetic flux
+Reduces poisned foe's stats
+Raises grass type stats
+Only works if remaining moves used up
+Reverses foe's stat changes
+Give item to foe
+Decrease foe's defenses and switch out
+Increases money gain
+Setup fairy lock
+Only works if berry consumed
+Deals residue damage to foe's ally
+Deals damage and blocks foe's from escape
+Deals damage and forces foe switch
+Faints and deals remaining HP as damage
+Pledge moves
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+Sharply lowers SP. ATK.
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
