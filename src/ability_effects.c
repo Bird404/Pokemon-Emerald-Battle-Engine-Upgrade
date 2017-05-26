@@ -988,11 +988,31 @@ u8 ability_battle_effects(u8 switch_id, u8 bank, u8 ability_to_check, u8 special
                 }
                 break;
             case ABILITY_MUMMY:
-                if (contact && battle_participants[bank_attacker].ability_id != ABILITY_MUMMY && battle_participants[bank_attacker].ability_id != ABILITY_STANCE_CHANGE && battle_participants[bank_attacker].ability_id != ABILITY_MULTITYPE)
                 {
-                    effect = true;
-                    battle_participants[bank_attacker].ability_id = ABILITY_MUMMY;
-                    bs_push_current(BS_MUMMY);
+                    u8 ability = battle_participants[bank_attacker].ability_id;
+
+
+                    if (contact)
+                    {
+                        switch(ability)
+                        {
+                        case ABILITY_MUMMY:
+                        case ABILITY_STANCE_CHANGE:
+                        case ABILITY_MULTITYPE:
+                        case ABILITY_SCHOOLING:
+                        case ABILITY_BATTLE_BOND:
+                        case ABILITY_SHIELDS_DOWN:
+                        case ABILITY_RKS_SYSTEM:
+                            break;
+                        case ABILITY_DISGUISE:
+                            if(battle_participants[bank_attacker].species == POKE_MIMIKKYU)
+                                break;
+                        default:
+                            effect = true;
+                            battle_participants[bank_attacker].ability_id = ABILITY_MUMMY;
+                            bs_push_current(BS_MUMMY);
+                        }
+                    }
                 }
                 break;
             case ABILITY_CURSED_BODY:

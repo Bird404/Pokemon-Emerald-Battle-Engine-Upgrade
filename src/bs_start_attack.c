@@ -15,7 +15,7 @@ u8 weather_abilities_effect();
 bool find_move_in_table(u16 move, const u16* table_ptr);
 void setup_berry_consume_buffers(u8 bank);
 u8 get_attacking_move_type();
-u8 check_ability(u8 bank, u8 ability);
+bool check_ability(u8 bank, u8 ability);
 u16 get_speed(u8 bank);
 u8 has_ability_effect(u8 bank, u8 mold_breaker);
 u8 get_item_effect(u8 bank, u8 check_negating_effects);
@@ -230,8 +230,13 @@ u8 calculate_move_type(u8 bank, u16 move, u8 set_bonus)
                         break;
                     }
                 }
+                break;
             }
-            break;
+        case MOVE_REVELATION_DANCE:
+            {
+                move_type = battle_participants[bank].type1;
+                break;
+            }
         }
         u8 ate=0;
         if(move_type == TYPE_EGG && (DAMAGING_MOVE(move)) && has_ability_effect(bank,0) && move_table[move].type==TYPE_NORMAL)
@@ -554,7 +559,9 @@ void bs_start_attack(void)
         }
         else
             new_battlestruct->bank_affecting[bank_attacker].same_move_used = 0;
-
+        new_battlestruct->various.secondary_dancer =0;
+        new_battlestruct->various.original_dancer = 0;
+        new_battlestruct->various.instruct_phase = 0;
         u8 move_target = move_table[current_move].target;
         if ((battle_flags.double_battle && !is_bank_present(bank_target)) || (bank_attacker == bank_target && move_target != move_target_user && move_target != 12 && move_target != 2)) //fix correct targeting
             bank_target = get_target_of_move(current_move, 0, 0);

@@ -209,6 +209,7 @@ battlescripts_table:
 .word STRENGTHSAP_EFFECT	@184 Strength Sap; arg1 is stat value
 .word LOSETYPE_EFFECT		@185 Burn Up; arg1 is type the user has to be and the type the user loses
 .word CONFUSE_STATCHANGE	@186 Swagger, Flatter; arg1 is stat value
+.word INSTRUCT_EFFECT	@187 Oh Guruuuu!!!
 
 SUNNYDAY_BS:
 	attackcanceler
@@ -2382,3 +2383,11 @@ PLEDGE_EFFECT:
 	printstring 0x21F
 	waitmessage 0x40
 	goto_cmd ENDTURN
+	
+INSTRUCT_EFFECT:
+	attackcanceler
+	callasm_cmd 164
+	accuracycheck MOVE_MISSED 0x0
+	attackstring
+	ppreduce
+	callasm_cmd 165

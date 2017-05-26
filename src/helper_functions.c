@@ -2,6 +2,7 @@
 #include "static_references.h"
 
 bool check_ability(u8 bank, u8 ability);
+void set_attacking_move_type();
 u8 get_airborne_state(u8 bank, u8 mode, u8 check_levitate);
 u8 item_battle_effects(u8 switchid, u8 bank, u8 moveturn);
 u8 affected_by_substitute(u8 substitute_bank);
@@ -844,10 +845,11 @@ void setthirdtype(void)
     }
 }
 
-const u8 forbidenabilitiestable1[] = {ABILITY_WONDER_GUARD, ABILITY_STANCE_CHANGE, ABILITY_ILLUSION, ABILITY_MULTITYPE, 0xFF};
-const u8 forbidenabilitiestable2[] = {ABILITY_MULTITYPE, ABILITY_STANCE_CHANGE, 0xFF}; //
-const u8 forbidenabilitiestable3[] = {ABILITY_WONDER_GUARD, ABILITY_STANCE_CHANGE, ABILITY_ILLUSION, ABILITY_MULTITYPE, ABILITY_FLOWER_GIFT, ABILITY_FORECAST, ABILITY_IMPOSTER, ABILITY_TRACE, ABILITY_ZEN_MODE, 0xFF};
-const u8 forbidenabilitiestable4[] = {ABILITY_MULTITYPE, ABILITY_TRUANT, ABILITY_STANCE_CHANGE, 0xFF};
+const u8 forbidenabilitiestable1[] = {ABILITY_WONDER_GUARD, ABILITY_STANCE_CHANGE, ABILITY_ILLUSION, ABILITY_MULTITYPE, ABILITY_SCHOOLING, ABILITY_COMATOSE, ABILITY_SHIELDS_DOWN,ABILITY_DISGUISE, ABILITY_RKS_SYSTEM, ABILITY_BATTLE_BOND, ABILITY_POWER_CONSTRUCT, 0xFF};
+const u8 forbidenabilitiestable2[] = {ABILITY_MULTITYPE,  ABILITY_STANCE_CHANGE, ABILITY_DISGUISE, ABILITY_BATTLE_BOND, ABILITY_SHIELDS_DOWN, ABILITY_POWER_CONSTRUCT, ABILITY_SCHOOLING, ABILITY_COMATOSE, ABILITY_RKS_SYSTEM, 0xFF}; //
+const u8 forbidenabilitiestable3[] = {ABILITY_WONDER_GUARD, ABILITY_STANCE_CHANGE,  ABILITY_MULTITYPE, ABILITY_ILLUSION, ABILITY_FLOWER_GIFT, ABILITY_FORECAST, ABILITY_IMPOSTER, ABILITY_TRACE, ABILITY_COMATOSE,
+                                    ABILITY_ZEN_MODE, ABILITY_POWER_OF_ALCHEMY, ABILITY_RECEIVER, ABILITY_DISGUISE, ABILITY_SCHOOLING, ABILITY_SHIELDS_DOWN, ABILITY_BATTLE_BOND, ABILITY_RKS_SYSTEM, ABILITY_POWER_CONSTRUCT, 0xFF};
+const u8 forbidenabilitiestable4[] = {ABILITY_MULTITYPE, ABILITY_TRUANT, ABILITY_STANCE_CHANGE, ABILITY_SCHOOLING, ABILITY_COMATOSE, ABILITY_SHIELDS_DOWN, ABILITY_DISGUISE, ABILITY_BATTLE_BOND, ABILITY_RKS_SYSTEM, ABILITY_POWER_CONSTRUCT, 0xFF};
 
 bool findability_in_table(u8 ability, const u8* table)
 {
@@ -898,7 +900,7 @@ void ability_change(void)
         case 3: //target's ability becomes the one in arg2
             {
                 u8 newability = move_table[current_move].arg2;
-                if (*ability_def == newability || findability_in_table(newability, &forbidenabilitiestable4[0]))
+                if (*ability_def == newability || findability_in_table(newability, forbidenabilitiestable4))
                     fail = 1;
                 else
                 {
@@ -1051,7 +1053,7 @@ void countercalc(void)
 void gastroacid(void)
 {
     u16 targets_ability = battle_participants[bank_target].ability_id;
-    if (targets_ability == ABILITY_MULTITYPE || targets_ability == ABILITY_STANCE_CHANGE)
+    if (findability_in_table(targets_ability, forbidenabilitiestable1))
         battlescripts_curr_instruction = (void*) read_word(battlescripts_curr_instruction);
     else
     {
@@ -2907,6 +2909,37 @@ void revert_mega(void) //bank
     revert_mega_to_normalform(bank, get_bank_side(bank));
 }
 
+void instruct_canceler(void)
+{
+    u16 last_target_move = calling_move_used[bank_target];
+    if(last_target_move == 0xFFFF || last_target_move!=current_move_used[bank_target] || battle_participants[bank_target].current_hp==0
+       || move_table[last_target_move].script_id ==39 || find_move_in_table(last_target_move,instruct_banlist) || find_move_in_table(last_target_move,moves_calling_another_move)
+        || find_move_in_table(last_target_move,moves_with_charging_turn))
+    {
+        battlescripts_curr_instruction = (void *) 0x082D9F1A;
+        move_outcome.failed = 1;
+    }
+    else
+    {
+        new_battlestruct->various.var2 = last_target_move;
+    }
+}
+
+void set_instruct(void)
+{
+    new_battlestruct->various.instruct_phase = 1;
+    bank_attacker = bank_target;
+    current_move =new_battlestruct->various.var2;
+    bank_target = get_target_of_move(current_move, 0, 0);
+    set_attacking_move_type();
+    attack_iteration_cleanup();
+    hitmarker &= 0xFDF1D9FF;
+    battle_scripting.cmd49_state_tracker=0;
+    battlescripts_curr_instruction = get_move_battlescript_ptr(current_move);
+    bs_push_current((void*)(0x82DB87D));
+}
+
+
 const command callasm_table[] = {&ability_switchin_effect /*0*/, &jump_if_forcesetflag_set /*1*/, &change_attacker_item /*2*/, &callasm_nop /*3*/, &callasm_nop /*4*/,
 &changestatvar1_atk /*5*/, &changestatvar2_atk /*6*/, &frisk_target_item /*7*/, &callasm_nop /*8*/, &set_type_msg_buffer /*9*/, &callasm_nop /*10*/, &bad_dreams_damage_calc /*11*/,
 &callasm_nop /*12*/, &mentalherb /*13*/, &callasm_nop /*14*/, &hazards_bank_switcher /*15*/, &hazards_bank_return /*16*/, &leechseed_update /*17*/,
@@ -2938,7 +2971,7 @@ const command callasm_table[] = {&ability_switchin_effect /*0*/, &jump_if_forces
 &shiftgear_checkifworks /*147*/, &shiftgear_orr_if_multiple /*148*/, &dont_stat_if_multiple /*149*/, &jumpifalloppositepokemonbehindsubstitute /*150*/,
 &triattackrand /*151*/, &statustoeffect2 /*152*/, &multiplestats_prepare_custom /*153*/, &do_multiple_stats_custom /*154*/, &jumpifnotarg1type /*155*/,
 &set_stats_to_play /*156*/, &receiver_effect /*157*/, &bugbite_get_berry_effect /*158*/, &prepare_switchbank_data /*159*/, &ash_greninja_check /*160*/,
-&zygarde_message_based_on_side/*161*/, &hp_stat_form_change /*162*/, &revert_mega /*163*/};
+&zygarde_message_based_on_side/*161*/, &hp_stat_form_change /*162*/, &revert_mega /*163*/, &instruct_canceler /*164*/, &set_instruct /*165*/};
 
 void atk83_callasm(void)
 {

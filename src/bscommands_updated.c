@@ -2,7 +2,7 @@
 #include "static_references.h"
 
 u8 hp_condition(u8 bank, u8 percent);
-u8 check_ability(u8 bank, u8 ability);
+bool check_ability(u8 bank, u8 ability);
 u32 percent_lose(u32 number, u16 percent);
 u32 percent_boost(u32 number, u16 percent);
 u8 is_of_type(u8 bank, u8 type);
@@ -894,19 +894,23 @@ void atk49_move_end_turn(void)
             break;
         case 11: //choice move update
         {
-            u16 attacker_item = get_item_effect(bank_attacker, 1);
-            u16* choice_move = &battle_stuff_ptr->choiced_move[bank_attacker];
-            if (CHOICE_ITEM(attacker_item) && last_used_move != MOVE_STRUGGLE && (hitmarker & HITMARKER_OBEYS) && (*choice_move == 0 || *choice_move == 0xFFFF))
+            if(!SEPARATE_COURSE)
             {
-                if ((last_used_move == MOVE_BATON_PASS || last_used_move == MOVE_VOLT_SWITCH || last_used_move == MOVE_UTURN) && move_outcome.failed)
+                u16 attacker_item = get_item_effect(bank_attacker, 1);
+                u16* choice_move = &battle_stuff_ptr->choiced_move[bank_attacker];
+                if (CHOICE_ITEM(attacker_item) && last_used_move != MOVE_STRUGGLE && (hitmarker & HITMARKER_OBEYS) && (*choice_move == 0 || *choice_move == 0xFFFF))
                 {
-                    INC_END_EVENTS
-                    break;
+                    if ((last_used_move == MOVE_BATON_PASS || last_used_move == MOVE_VOLT_SWITCH || last_used_move == MOVE_UTURN) && move_outcome.failed)
+                    {
+                        INC_END_EVENTS
+                        break;
+                    }
+                    *choice_move = last_used_move;
                 }
-                *choice_move = last_used_move;
+                if (get_move_position(bank_attacker, *choice_move) == -1)
+                    *choice_move = 0;
+
             }
-            if (get_move_position(bank_attacker, *choice_move) == -1)
-                *choice_move = 0;
             INC_END_EVENTS
             break;
         }
@@ -992,48 +996,54 @@ void atk49_move_end_turn(void)
             new_battlestruct->various.gravity_levitate = 0; //gravity levitate message
             INC_END_EVENTS
         case 19: //setup buffer for conversion, sketch etc.
-            if(hitmarker & HITMARKER_PURSUIT_TRAP)
+            if(!SEPARATE_COURSE)
             {
-                active_bank=bank_attacker;
-                bank_attacker=bank_target;
-                bank_target=active_bank;
-                hitmarker &= 0xFFFFEFFF;
+                if(hitmarker & HITMARKER_PURSUIT_TRAP)
+                {
+                    active_bank=bank_attacker;
+                    bank_attacker=bank_target;
+                    bank_target=active_bank;
+                    hitmarker &= 0xFFFFEFFF;
+                }
+                if(hitmarker & HITMARKER_ATTACKSTRING_PRINTED) //used by sketch
+                    sketchable_move_used[bank_attacker]=last_used_move;
+                if (!(absent_bank_flags & bits_table[bank_attacker] & battle_stuff_ptr->absent_bank_flags_prev_turn) && last_move!=MOVE_BATON_PASS)
+                {
+                    if((hitmarker & HITMARKER_OBEYS))
+                    {
+                        current_move_used[bank_attacker]=current_move;
+                        calling_move_used[bank_attacker]=last_used_move;
+                    }
+                    else
+                    {
+                        current_move_used[bank_attacker]=0xFFFF;
+                        calling_move_used[bank_attacker]=0xFFFF;
+                    }
+                    if(!(hitmarker & HITMARKER_FAINTED(bank_target)))
+                        attacked_by[bank_target]=bank_attacker;
+                    if((hitmarker & HITMARKER_OBEYS) && MOVE_WORKED)
+                    {
+                        move_hit_with_pbs[bank_target]=current_move;
+                        move_type_hit_with_pbs[bank_target]=current_move_type;
+                    }
+                    else
+                        move_hit_with_pbs[bank_target]=0xFFFF;
+                }
+                new_battlestruct->bank_affecting[bank_attacker].lastmove_type = current_move_type + 0x80;
             }
-            if(hitmarker & HITMARKER_ATTACKSTRING_PRINTED) //used by sketch
-                sketchable_move_used[bank_attacker]=last_used_move;
-            if (!(absent_bank_flags & bits_table[bank_attacker] & battle_stuff_ptr->absent_bank_flags_prev_turn) && last_move!=MOVE_BATON_PASS)
-            {
-                if((hitmarker & HITMARKER_OBEYS))
-                {
-                    current_move_used[bank_attacker]=current_move;
-                    calling_move_used[bank_attacker]=last_used_move;
-                }
-                else
-                {
-                    current_move_used[bank_attacker]=0xFFFF;
-                    calling_move_used[bank_attacker]=0xFFFF;
-                }
-                if(!(hitmarker & HITMARKER_FAINTED(bank_target)))
-                    attacked_by[bank_target]=bank_attacker;
-                if((hitmarker & HITMARKER_OBEYS) && MOVE_WORKED)
-                {
-                    move_hit_with_pbs[bank_target]=current_move;
-                    move_type_hit_with_pbs[bank_target]=current_move_type;
-                }
-                else
-                    move_hit_with_pbs[bank_target]=0xFFFF;
-            }
-            new_battlestruct->bank_affecting[bank_attacker].lastmove_type = current_move_type + 0x80;
             INC_END_EVENTS
             break;
         case 20: //setup mirror_move_buffers
-            if (!(absent_bank_flags & bits_table[bank_attacker] & battle_stuff_ptr->absent_bank_flags_prev_turn) &&
+            if(!SEPARATE_COURSE)
+            {
+                if (!(absent_bank_flags & bits_table[bank_attacker] & battle_stuff_ptr->absent_bank_flags_prev_turn) &&
                 move_table[current_move].move_flags.flags.affected_by_mirrormove && (hitmarker & HITMARKER_OBEYS) &&
                 bank_attacker!=bank_target && !(hitmarker&HITMARKER_FAINTED(bank_target)) && MOVE_WORKED)
                 {
                     battle_stuff_ptr->mirror_moves_pbs[bank_target]=last_used_move;
                     battle_stuff_ptr->mirror_move_set_pbs[bank_target].moves_per_target[bank_attacker]=last_used_move;
                 }
+            }
             INC_END_EVENTS
             break;
         case 21: //parental bond
@@ -1213,51 +1223,49 @@ void atk49_move_end_turn(void)
             }
             INC_END_EVENTS
             break;
-        case 34: //in battle end turn form(e) change
-            for (u8 i = 0; i < no_of_all_banks; i++)
-            {
-                u16* species = &battle_participants[i].species;
-                battle_scripting.active_bank = i;
-                if(!battle_participants[i].status2.transformed)
-                {
-                    switch(*species)
-                    {
-                    case POKE_DARMANITAN:
-                        if(hp_condition(i,1) && check_ability(i,ABILITY_ZEN_MODE))
-                        {
-                            effect = 1;
-                            new_battlestruct->various.var1 = POKE_ZEN_MODE;
-                            new_battlestruct->various.var2 = 0x21C;
-                            battle_scripting.active_bank=i;
-                            bs_push_current(&zen_change_bs);
-                        }
-                        break;
-                    case POKE_ZEN_MODE:
-                        if(!hp_condition(i,1) || !check_ability(i,ABILITY_ZEN_MODE))
-                        {
-                            effect = 1;
-                            new_battlestruct->various.var1 = POKE_DARMANITAN;
-                            battle_scripting.active_bank=i;
-                            new_battlestruct->various.var2 = 0x21D;
-                            bs_push_current(&zen_change_bs);
-                        }
-                        break;
-                    }
-                    if(effect)
-                    {
-                        break;
-                    }
-                }
-            }
-            if (!effect)
-            {
-                INC_END_EVENTS
-            }
-        case 35: //clear move effect struct
+        case 34: //clear move effect struct
             memset(&new_battlestruct->move_effect, 0, sizeof(struct move_effects));
             INC_END_EVENTS
             break;
+        case 35: //dancer & instruct
+            {
+                if(new_battlestruct->various.original_dancer != 0 && new_battlestruct->various.original_dancer != 5)
+                {
+                    while(new_battlestruct->various.secondary_dancer < no_of_all_banks && !effect)
+                    {
+                        new_battlestruct->various.secondary_dancer++;
+                        u8 dancer_to_check = new_battlestruct->various.secondary_dancer - 1;
+                        if(battle_participants[dancer_to_check].current_hp && check_ability(dancer_to_check,ABILITY_DANCER) &&
+                            new_battlestruct->various.original_dancer != new_battlestruct->various.secondary_dancer)
+                        {
+                            bank_attacker = dancer_to_check;
+                            bank_target = get_target_of_move(current_move, 0, 0);
+                            set_attacking_move_type();
+                            attack_iteration_cleanup();
+                            hitmarker &= 0xFDF1E1FF;
+                            hitmarker |= HITMARKER_NO_PPDEDUCT;
+                            battle_scripting.cmd49_state_tracker=0;
+                            if(current_move != MOVE_PETAL_DANCE)
+                            {
+                                battlescripts_curr_instruction = get_move_battlescript_ptr(current_move);
+                            }
+                            else
+                            {
+                                battlescripts_curr_instruction = get_move_battlescript_ptr(MOVE_POUND);
+                            }
 
+                            bs_push_current((void*)(0x82DB87D));
+                            effect=1;
+                            break;
+                        }
+                    }
+                }
+                if(!effect)
+                {
+                    INC_END_EVENTS
+                }
+                break;
+            }
         default:
             battle_scripting.cmd49_state_tracker = case_max;
         }
@@ -1397,7 +1405,7 @@ u8 check_if_cannot_attack(void)
             }
             break;
         case 6: //check if attack is disabled
-            if (disable_structs[bank_attacker].disabled_move == current_move && current_move)
+            if (!SEPARATE_COURSE && disable_structs[bank_attacker].disabled_move == current_move && current_move)
             {
                 protect_structs[bank_attacker].flag1_used_disabled_move = 1;
                 battle_scripting.active_bank = bank_attacker;
@@ -1414,7 +1422,7 @@ u8 check_if_cannot_attack(void)
             }
             break;
         case 8: //check imprisioned
-            if (check_if_imprisioned(bank_attacker, current_move))
+            if (!SEPARATE_COURSE && check_if_imprisioned(bank_attacker, current_move))
             {
                 effect = 3;
                 protect_structs[bank_attacker].flag1_used_imprisoned_move = 1;
@@ -1722,6 +1730,7 @@ void atk00_move_canceller(void)
     {
         if (protect_structs[turn_order[i]].flag0_stealmove && move_table[current_move].move_flags.flags.affected_by_snatch)
         {
+            new_battlestruct->various.original_dancer = 5; // dancer cannot activate on a snatched move
             pressure_pp_lose(bank_attacker, bank_target, MOVE_SNATCH);
             protect_structs[turn_order[i]].flag0_stealmove = 0;
             battle_scripting.active_bank = turn_order[i];
@@ -3527,6 +3536,10 @@ void atk09_attackanimation(void)
         if (!((move_trgt == move_target_both || move_trgt == move_target_foes_and_ally || move_trgt == move_target_depends) && battle_scripting.field19))
         {
             //at this point animation plays
+            if(find_move_in_table(current_move, dancing_moves) && new_battlestruct->various.original_dancer == 0)
+            {
+                new_battlestruct->various.original_dancer = (bank_attacker + 1);
+            }
             active_bank = bank_attacker;
             bbF_move_animation(0, current_move, battle_scripting.field18, curr_move_BP, damage_loc, battle_participants[bank_attacker].happiness, &disable_structs[bank_attacker], multihit_counter);
             mark_buffer_bank_for_execution(active_bank);

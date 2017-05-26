@@ -137,6 +137,9 @@ struct various{
     u8 dont_play_move_anim : 1;
     u8 dont_play_stat_anim : 1;
     u8 bust_mimikyu : 1;
+    u8 original_dancer : 3;
+    u8 secondary_dancer : 3;
+    u8 instruct_phase : 1;
 };
 
 #define PBOND_PARENT 2
